@@ -5,6 +5,7 @@ Idee
 # obsidian local
 Vault/.obsidian/workspace*
 # graphify
+graphify-out/
 Vault/graphify-out/
 graphify-pkgs/
 .venv-graphify/
