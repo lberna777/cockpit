@@ -1,6 +1,6 @@
 # Vault Index — 2026-06-17
 
-> Indice compatto generato da `build_index.py`. 120 note. Per il contenuto, apri la nota indicata.
+> Indice compatto generato da `build_index.py`. 121 note. Per il contenuto, apri la nota indicata.
 
 ## (root)  (1)
 - `attivita_oggi.md` — Attività — 2026-06-17
@@ -124,8 +124,9 @@
 - `UniCode/template_appunti_grezzi.md` — Template — Appunti Grezzi
 - `UniCode/troubleshooting_vm.md` — Troubleshooting VM — Soluzioni ai problemi ricorrenti
 
-## claude  (1)
+## claude  (2)
 - `claude/README.md` — claude/ — file curati per Claude
+- `claude/graphify_bakeoff.md` — GATE G3 — graphify vs rg (esito)
 
 ## recap  (1)
 - `recap/2026-06-17.md` — Recap 2026-06-17
