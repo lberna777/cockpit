@@ -1,0 +1,12 @@
+# symlink a repo esterni
+Vault/UniCode
+UniCode
+Idee
+# obsidian local
+Vault/.obsidian/workspace*
+# graphify
+Vault/graphify-out/
+graphify-pkgs/
+.venv-graphify/
+# archivi
+Vault/recap/_archive/
