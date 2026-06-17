@@ -1,6 +1,6 @@
 # Vault Index — 2026-06-17
 
-> Indice compatto generato da `build_index.py`. 119 note. Per il contenuto, apri la nota indicata.
+> Indice compatto generato da `build_index.py`. 120 note. Per il contenuto, apri la nota indicata.
 
 ## (root)  (1)
 - `attivita_oggi.md` — Attività — 2026-06-17
@@ -126,3 +126,6 @@
 
 ## claude  (1)
 - `claude/README.md` — claude/ — file curati per Claude
+
+## recap  (1)
+- `recap/2026-06-17.md` — Recap 2026-06-17
