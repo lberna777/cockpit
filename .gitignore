@@ -10,3 +10,7 @@ graphify-pkgs/
 .venv-graphify/
 # archivi
 Vault/recap/_archive/
+
+# python cache
+__pycache__/
+*.pyc
