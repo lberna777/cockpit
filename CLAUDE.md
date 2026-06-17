@@ -47,3 +47,16 @@ Symlink di navigazione da qui:
   unicode-session-close).
 - **Recap del giorno**: annota le attività in `Vault/attivita_oggi.md` durante la giornata;
   il recap le raccoglie e poi archivia il file.
+
+## graphify
+
+graphify è installato ma **fuori dal layer memoria** per decisione del bake-off G3
+(`Vault/claude/graphify_bakeoff.md`): la ricerca nella memoria si fa con `rg`, non con graphify.
+
+Usalo **solo** dentro un progetto di *codice* che abbia il suo `graphify-out/graph.json`
+(es. `graphify query "<domanda>"`, `graphify update .` dopo modifiche). Se `graphify-out/`
+non esiste nella cartella corrente, ignora graphify e usa `rg`.
+
+Visualizzazione del vault: la fa **Obsidian** (graph view nativa dei `[[wikilink]]`).
+I collegamenti tra le note di studio sono generati da `scripts/link_modules.py`
+(deterministico, rigenerabile; `--strip` per rimuoverli).
