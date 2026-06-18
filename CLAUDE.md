@@ -43,7 +43,7 @@ Symlink di navigazione da qui:
 ## Convenzioni globali
 - **Lingua**: italiano.
 - **Handoff**: a ~75% di contesto usa `/handoff` o `/handoffplan` (vedi `~/Idee/CLAUDE.md`).
-- **Skill custom**: `lorenzo-skills` (audio-dsp-debug, game-scope-guard, unicode-output-gate,
+- **Skill custom**: `lorenzo-skills` (audio-dsp-debug, game-scope-guard, studia, unicode-output-gate,
   unicode-session-close, unicode-link-note).
 - **Recap del giorno**: annota le attività in `Vault/attivita_oggi.md` durante la giornata;
   il recap le raccoglie e poi archivia il file.
