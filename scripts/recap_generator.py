@@ -131,6 +131,17 @@ def generate(day: date, force: bool = False) -> str | None:
         f"## SINTESI <!-- ollama -->\n\n{summary}\n"
     )
     target.write_text(content, encoding="utf-8")
+
+    # Resetta attivita_oggi.md per il giorno successivo
+    if day == date.today() and ATTIVITA.exists():
+        tomorrow = day + timedelta(days=1)
+        ATTIVITA.write_text(
+            f"# Attività — {tomorrow.isoformat()}\n\n"
+            "> Annota qui durante il giorno cosa fai. Il recap notturno legge questo file.\n"
+            "> Una riga per attività. Verrà archiviato dopo la generazione del recap.\n\n",
+            encoding="utf-8",
+        )
+
     return str(target)
 
 
