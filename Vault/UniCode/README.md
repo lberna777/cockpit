@@ -1,0 +1,360 @@
+# UniCode
+
+> An AI-powered active learning system for university students, built on top of [Claude Code](https://claude.ai/code).
+
+UniCode is not just a note-taking setup — it is a **complete study pipeline** that transforms raw lecture slides into structured lessons, guides active practice (on a real VM or through self-testing), elaborates handwritten notes into polished study materials, tracks progress across courses, and prepares you for exams through spaced repetition and simulated tests.
+
+The system is designed around a core belief: **passive reading does not produce lasting knowledge**. Every module requires you to *do* something — run commands on a virtual machine, answer questions out loud, write your own imperfect notes — before Claude helps you consolidate what you learned.
+
+---
+
+## Table of Contents
+
+- [How It Works](#how-it-works)
+- [System Architecture](#system-architecture)
+- [Commands Reference](#commands-reference)
+- [File Structure](#file-structure)
+- [Setup & Requirements](#setup--requirements)
+- [Adapting to Your Courses](#adapting-to-your-courses)
+- [Design Decisions](#design-decisions)
+- [License](#license)
+
+---
+
+## How It Works
+
+Every module follows a fixed cycle. This cycle cannot be shortcut — each step is intentional.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    THE UNICODE CYCLE                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. /lezione <ID>          Claude reads the PDF slides      │
+│     ──────────────   →     and generates a structured       │
+│     Lesson creation        lesson with exercises            │
+│                                                             │
+│  2. Active practice        You execute commands on your     │
+│     ──────────────   →     VM (SysAdmin/Security) or        │
+│     Lorenzo works          answer questions out loud        │
+│     independently          (Diritto)                        │
+│                                                             │
+│  3. Raw notes              You write your own messy notes:  │
+│     ──────────────   →     commands run, errors hit,        │
+│     APPUNTI GREZZI/        things understood, open Qs       │
+│                                                             │
+│  4. /appunti <ID>          Claude reads your raw notes,     │
+│     ──────────────   →     answers every open question      │
+│     Note elaboration       inline, corrects mistakes,       │
+│                            fills gaps                       │
+│                                                             │
+│  5. /chiudi                Progress logged, spaced-         │
+│     ──────────────   →     repetition tracker updated,      │
+│     Session close          git commit auto-fired            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Why raw notes first?** Writing your own notes — including mistakes, gaps, and questions — forces active encoding. Claude's job is not to teach you the material from scratch; it is to close the gap between what you attempted to understand and what you actually need to know.
+
+---
+
+## System Architecture
+
+```
+UniCode/
+│
+├── .claude/                        ← Claude Code configuration
+│   ├── CLAUDE.md →                    (at repo root, see below)
+│   ├── settings.local.json          ← permissions + hooks
+│   └── commands/                    ← 10 slash commands
+│       ├── lezione.md               ← /lezione  — generate lesson from PDF
+│       ├── appunti.md               ← /appunti  — elaborate raw notes
+│       ├── chiudi.md                ← /chiudi   — close session, update state
+│       ├── sessione.md              ← /sessione — open/switch study focus
+│       ├── stato.md                 ← /stato    — module status overview
+│       ├── piano.md                 ← /piano    — today's study plan
+│       ├── ripassa.md               ← /ripassa  — adaptive review session
+│       ├── simula.md                ← /simula   — cross-module exam simulation
+│       ├── lacune.md                ← /lacune   — gap analysis + risk report
+│       ├── verifica.md              ← /verifica — quality check vs source PDF
+│       └── pdf-batch.md             ← /pdf-batch — batch PDF conversion + push
+│
+├── stato/                          ← live system state (read by every command)
+│   ├── corrente.md                  ← module states + progress + next steps (~5KB)
+│   ├── percorso.md                  ← module descriptions + materials + concepts
+│   ├── log_sessioni.md              ← chronological session history
+│   ├── tracker_ripasso.md           ← spaced repetition: when to review what
+│   └── errori_frequenti.md          ← recurring mistake patterns across modules
+│
+├── claudeLezioni/                  ← structured lessons generated by Claude
+│   ├── LEZIONI DIRITTO/             ← one file per law module (D1–D13)
+│   ├── LEZIONI SYSADM/              ← one file per sysadmin module (0A–3F)
+│   └── LEZIONI SECURITY/            ← one file per security module (S1–S12)
+│
+├── claudeAppunti/                  ← polished notes generated by Claude
+│   ├── APPUNTI DIRITTO/
+│   └── APPUNTI SYSADM/
+│
+├── claudeAppunti_PDF/              ← PDF exports of claudeAppunti/ (generated)
+│   ├── APPUNTI DIRITTO/
+│   └── APPUNTI SYSADM/
+│
+├── APPUNTI GREZZI/                 ← raw notes written by the student
+│   ├── Diritto/
+│   ├── Lab - sysAdm/
+│   └── Lab - Security/
+│
+├── SLIDE TEORIA/                   ← lecture PDFs from university (not in repo)
+│   ├── DIRITTO INFORMATICO/
+│   ├── SYSADM/
+│   └── SICINF/
+│
+├── SLIDE LAB/                      ← lab exercise PDFs (not in repo)
+│   └── SYSADM/
+│
+├── SIMULAZIONI ESAMI/              ← past exam papers (not in repo)
+│   └── SYSADM/
+│
+├── esercizi/                       ← scripting exercises, documented step-by-step
+├── concept_maps.md                 ← Mermaid dependency diagrams between modules
+├── glossario_sysadm.md             ← technical glossary, grows each session
+├── glossario_diritto.md            ← legal glossary, grows each session
+├── troubleshooting_vm.md           ← VM fix log (symptom → cause → solution)
+├── cheatsheet_sysadm.html          ← quick reference for shell commands
+├── template_appunti_grezzi.md      ← template Lorenzo uses when writing raw notes
+└── CLAUDE.md                       ← AI behavioral spec (read at every session start)
+```
+
+### Naming conventions
+
+| Pattern | Example | Meaning |
+|---------|---------|---------|
+| `UPPERCASE WITH SPACES/` | `SLIDE TEORIA/` | External materials (PDFs from university) |
+| `camelCase/` | `claudeLezioni/` | Claude-generated content |
+| `lowercase/` | `stato/` | System state files |
+| `lezione_moduloXX_name.md` | `lezione_modulo3A_systemd_servizi.md` | Lesson file |
+| `appunti_moduloXX_name.md` | `appunti_moduloD8_privacy_gdpr.md` | Polished notes |
+| `Appunti_moduloXX.md` | `Appunti_modulo3A.md` | Raw notes (student-written) |
+| `es_NN_name.md` | `es_02_conta_occorrenze.md` | Documented exercise |
+
+---
+
+## Commands Reference
+
+All commands are invoked as Claude Code slash commands: `/lezione 3A`, `/appunti D8`, etc.
+
+### Core cycle commands
+
+| Command | Usage | What it does |
+|---------|-------|--------------|
+| `/lezione <ID>` | `/lezione 3A` `/lezione D8` `/lezione S3` | Reads the source PDF(s) for the module and generates a structured lesson with exercises, command reference, connections to other modules, and self-check questions. Never generates content without reading the actual PDF. |
+| `/appunti <ID>` | `/appunti 3A` `/appunti D8` | Reads your raw notes, the corresponding lesson, and your recurring error patterns. Produces polished notes with inline answers to every open question, corrected bugs (with analysis), and filled gaps. Updates the error tracker. |
+| `/chiudi` | `/chiudi` | Asks what was covered in the session, updates module states, logs the session, updates spaced repetition dates, updates glossaries and troubleshooting if needed. Triggers auto git commit via hook. |
+
+### Session management
+
+| Command | Usage | What it does |
+|---------|-------|--------------|
+| `/sessione [materia]` | `/sessione` `/sessione diritto` | Opens a session or switches focus. Reads current state, shows module status, proposes today's study plan with time blocks, checks PDF availability, flags overdue reviews. |
+| `/stato` | `/stato` | Quick status table for all modules across all courses, progress bars, next step per course, overdue review alerts. |
+| `/piano` | `/piano` | Today's optimized study plan based on current phase, remaining days per exam, module gaps, and pending reviews. Includes risk assessment. |
+
+### Exam preparation
+
+| Command | Usage | What it does |
+|---------|-------|--------------|
+| `/ripassa <ID>` | `/ripassa D3` `/ripassa 2A` | Adaptive review session: 5 new questions (different from the original self-check). At least one targets a known weak point from error tracker. Interrogation format — one question at a time, wait for answer. Updates spaced repetition tracker. |
+| `/simula [materia]` | `/simula diritto` `/simula sysadmin` | Cross-module exam simulation. Diritto: 8 open questions covering all completed modules, mix of definition/comparison/application. SysAdmin: 6 practical tasks or real past exam paper. Evaluates answers and produces risk-ranked study recommendations. |
+| `/lacune` | `/lacune` | Full gap analysis: coverage per exam (with hours budget vs hours available), modules overdue for review, active error patterns, top-5 prioritized action plan. |
+| `/verifica <ID>` | `/verifica D8` | Quality check: reads the generated lesson and/or notes for the module, re-reads the source PDF, and reports on coverage gaps, terminology inaccuracies, and internal consistency issues. |
+
+### Utilities
+
+| Command | Usage | What it does |
+|---------|-------|--------------|
+| `/pdf-batch` | `/pdf-batch` | Finds all markdown files in `claudeAppunti/` that don't have a corresponding PDF in `claudeAppunti_PDF/`, converts them using pandoc + xelatex, then git add/commit/push. |
+
+### Module ID format
+
+| Prefix | Course | Range | Example |
+|--------|--------|-------|---------|
+| `0A`–`3F` (numeric) | SysAdmin | `0A 0B 1A 1B 2A 2B 2C 3A 3B 3C 3D 3E 3F` | `/lezione 3D` |
+| `D` | Diritto dell'Informatica | `D1`–`D13` | `/appunti D9` |
+| `S` | Lab Sicurezza Informatica | `S1`–`S12` | `/ripassa S1` |
+
+---
+
+## File Structure — Key Files Explained
+
+### `CLAUDE.md`
+
+The behavioral specification for Claude. Read at the start of every session. Defines:
+- Who the student is and how they learn
+- What to load when (which files, in which situations)
+- Exam deadlines
+- Inviolable rules (source primacy, active learning requirement, inline Q&A format)
+- Output quality rubric with checklist
+- Anti-patterns to avoid (generating from index instead of PDF, partial fixes, unnecessary questions)
+
+This is the most important file in the system. Every other file is referenced from here.
+
+### `stato/corrente.md`
+
+The session's entry point. Contains only:
+- Current session number and date
+- Compact module state table (⬜ not started / 🔄 in progress / ✅ complete) for all courses
+- Progress bars
+- Next steps per course
+- Exam deadlines
+
+Loaded at every session start (~5KB). All other state files are loaded on demand.
+
+### `stato/percorso.md`
+
+The module reference guide. For each module: source materials (PDF titles), key concepts, exercises, VM setup, connections to other modules. Loaded only when working on a specific module (`/lezione`, `/appunti`). Never used as content source — only as an index pointing to the actual PDFs.
+
+### `stato/log_sessioni.md`
+
+Full chronological session history. Loaded only by `/chiudi` (to append) and `/sessione` (to read recent context). Never loaded as part of routine operations.
+
+### `stato/tracker_ripasso.md`
+
+Spaced repetition tracker. For each completed module: completion date, last review date, next review date, priority. Updated by `/chiudi` when a module is completed or reviewed. Read by `/piano` and `/stato` to surface overdue reviews.
+
+Intervals: 3 days → 7 days → 14 days → 30 days after completion.
+
+### `stato/errori_frequenti.md`
+
+Cross-session error pattern tracker. Updated by `/appunti` whenever bugs or conceptual mistakes are found. Read by `/lezione` (to add targeted warnings), `/ripassa` (to generate questions on weak points), and `/simula`. Tracks recurring patterns across modules — e.g., "syntax space before `!` in bash test" appears in modules 1A, 1B, and 1C.
+
+### `.claude/commands/`
+
+Each `.md` file in this directory becomes a slash command. The filename is the command name. Files contain structured prompts that instruct Claude on exactly what to read, what to produce, in what format, with what quality criteria. Commands use `$ARGUMENTS` to receive the module ID.
+
+### `.claude/settings.local.json`
+
+Project-level Claude Code configuration:
+- **Wildcard PDF permissions**: `Bash(pdftotext /home/lorenzo/UniCode/**)` — no per-file whitelisting needed
+- **Auto-commit hook**: every `Write` tool call triggers `git add -A && git commit` automatically — zero risk of losing work mid-session
+- **Git and pandoc permissions**: allowed tools for the workflow
+
+### `template_appunti_grezzi.md`
+
+The template student fills after practice. Four sections: commands executed, what worked / errors encountered, what I understood (in your own words), open questions (unfiltered — "I don't understand X because Y seems to contradict Z"). The open questions section is the most important — these become the inline answers Claude writes in `/appunti`.
+
+### `concept_maps.md`
+
+Mermaid dependency diagrams showing relationships between modules and between SysAdmin and Security. Renders in Obsidian, VS Code (with extension), or any Mermaid-compatible viewer.
+
+### `glossario_sysadm.md` / `glossario_diritto.md`
+
+Living glossaries updated by `/chiudi` when new terms appear. Separate files by subject area — never merge them.
+
+### `troubleshooting_vm.md`
+
+Accumulated VM fix log from all sessions. Format: symptom → cause → solution. Updated by `/chiudi` for lab sessions when a new technical problem was resolved. Prevents rediscovering the same fixes.
+
+### `cheatsheet_sysadm.html`
+
+Quick reference for shell commands, built up over the course. Includes precise flag descriptions and behaviors discovered during exercises.
+
+---
+
+## Setup & Requirements
+
+### Prerequisites
+
+- [Claude Code](https://claude.ai/code) (CLI or IDE extension)
+- A Claude account with API access
+- `git`
+- `pdftotext` (from `poppler-utils`): `sudo apt install poppler-utils`
+- `pandoc` + `xelatex` (for PDF export): `sudo apt install pandoc texlive-xetex`
+- For SysAdmin labs: [VirtualBox](https://www.virtualbox.org/) + [Vagrant](https://www.vagrantup.com/)
+- For Security labs: Kali Linux or Parrot OS VM
+
+### Installation
+
+```bash
+git clone https://github.com/<your-username>/UniCode.git
+cd UniCode
+```
+
+No package install needed — the system is pure markdown and shell commands.
+
+### First session
+
+1. Open Claude Code in the `UniCode/` directory
+2. Place your lecture PDFs in `SLIDE TEORIA/<COURSE>/`
+3. Run `/sessione` to see the state and get a study plan
+4. Run `/lezione <first-module-ID>` to generate your first lesson
+
+---
+
+## Adapting to Your Courses
+
+UniCode is built for three specific courses but the system generalizes. Here is what to change:
+
+### 1. Define your module IDs
+
+Choose a prefix per course (e.g., `M` for Mathematics, `P` for Physics). Edit `stato/percorso.md` to add your modules with their PDF titles and key concepts.
+
+### 2. Update `CLAUDE.md`
+
+Change the "Who is [student]" section, the exam deadlines, and the per-course rules (e.g., if your course has a written exam instead of oral, adjust the Diritto-style rules).
+
+### 3. Update `stato/corrente.md`
+
+Add your module table with all states set to ⬜.
+
+### 4. Place your PDFs
+
+Create subdirectories in `SLIDE TEORIA/` matching the paths in your percorso.md entries.
+
+### 5. Adjust the lesson template in `/lezione`
+
+The command has three templates (SysAdmin-style lab, Security-style offensive, Diritto-style theory). Add a new template section if your course type doesn't fit any of these.
+
+### 6. Update module ID format hints
+
+In each command file, update the `argument-hint` field and the ID detection logic (`$ARGUMENTS` prefix matching).
+
+---
+
+## Design Decisions
+
+**Why file-based state instead of a database?**
+All state lives in plain markdown files. This means: git tracks every change, any text editor can inspect the state, Claude can read and write it natively without external tools, and the system keeps working if Claude Code changes its behavior.
+
+**Why not automate the whole pipeline end-to-end?**
+The cycle is intentionally broken at the "active practice" step. Between `/lezione` and `/appunti`, the student must work independently — on a VM, or answering questions. Automation would remove the only step that actually creates learning.
+
+**Why separate `stato/corrente.md` from `stato/percorso.md` and `stato/log_sessioni.md`?**
+Context window efficiency. The original single master map file grew to 59KB. Most of that was session history (never needed during active work) and module descriptions (only needed for specific commands). Splitting into three files means routine operations load ~5KB instead of ~59KB.
+
+**Why inline answers with `>` instead of a separate Q&A file?**
+Inline answers appear immediately after the concept they explain. When reviewing, you read the context and the answer together, which is how memory consolidation works.
+
+**Why an error tracker across sessions?**
+The same conceptual mistakes tend to recur. If you misunderstood operator spacing in bash in module 1A, you will likely make the same mistake in 3A. Tracking errors cross-module lets `/lezione` insert targeted warnings and `/ripassa` generate questions specifically on known weak points.
+
+---
+
+## Repository Contents
+
+This repository contains the **system** — the configuration, command prompts, templates, and documentation. It does not contain:
+
+- Lecture slide PDFs (copyrighted university material)
+- Past exam papers (copyrighted)
+- Generated PDFs (derived from copyrighted slides)
+- Personal exam planning files
+
+The `claudeLezioni/`, `claudeAppunti/`, and `APPUNTI GREZZI/` directories are included as examples of what the system produces.
+
+---
+
+## License
+
+MIT — use this system for your own studies, adapt it for other courses, share improvements.
+
+The study notes and lessons in `claudeLezioni/` and `claudeAppunti/` are the student's own work (with AI assistance). The lecture content they derive from belongs to the respective course instructors.

@@ -1,0 +1,26 @@
+# =============================================================
+# UniCode — .gitignore
+# =============================================================
+# Questo repo contiene il SISTEMA (comandi, configurazione,
+# template, documentazione). I contenuti personali e il
+# materiale copyrightato del corso NON sono inclusi.
+# =============================================================
+
+# ─── Materiale universitario (copyright del corso) ───────────
+SLIDE TEORIA/
+SLIDE LAB/
+SIMULAZIONI ESAMI/
+
+# ─── Pianificazione esami personale ──────────────────────────
+ESAMI.md
+ESAMI SCELTI.md
+
+# ─── File legacy (sostituito da stato/) ──────────────────────
+master_map_studio.md
+
+# ─── OS / editor ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/

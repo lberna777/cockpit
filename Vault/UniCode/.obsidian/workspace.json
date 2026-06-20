@@ -1,0 +1,253 @@
+{
+  "main": {
+    "id": "41b51cf8320d36ef",
+    "type": "split",
+    "children": [
+      {
+        "id": "96179d8e25dc63cc",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9ffeab3f526d0057",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "claudeLezioni/LEZIONI SECURITY/lezione_moduloS1_offensive_security_enumerazione.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "lezione_moduloS1_offensive_security_enumerazione"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "0f31c0e5e320d4e5",
+    "type": "split",
+    "children": [
+      {
+        "id": "0a4703c97dcfe788",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "587f0b59a98c1205",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Esplora risorse"
+            }
+          },
+          {
+            "id": "ad86ae98bc3ff2e8",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Ricerca"
+            }
+          },
+          {
+            "id": "8efbcf99f3baebcd",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Segnalibri"
+            }
+          },
+          {
+            "id": "9687dafff539ffd2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "APPUNTI GREZZI/Appunti_moduloS1.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Appunti_moduloS1"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "right": {
+    "id": "7e33827c4cdbc22f",
+    "type": "split",
+    "children": [
+      {
+        "id": "afed3a0c6bdaee46",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7e994adfeb9e29c1",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "master_map_studio.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Riferimenti a master_map_studio"
+            }
+          },
+          {
+            "id": "2cfb0bcef0ce484b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "master_map_studio.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Collegamenti in uscita da master_map_studio"
+            }
+          },
+          {
+            "id": "04b38863980be3b5",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etichette"
+            }
+          },
+          {
+            "id": "dc7062313ae79a0a",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Tutte le proprietà"
+            }
+          },
+          {
+            "id": "1b38a0bb6e2881d6",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "master_map_studio.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Struttura di master_map_studio"
+            }
+          },
+          {
+            "id": "a2977cc751c87008",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "obsidian-git:Open Git source control": false,
+      "switcher:Apri selezione rapida": false,
+      "graph:Apri vista grafo": false,
+      "canvas:Crea nuova lavagna": false,
+      "daily-notes:Apri nota del giorno": false,
+      "templates:Inserisci modello": false,
+      "command-palette:Apri riquadro comandi": false,
+      "bases:Crea nuova Base": false
+    }
+  },
+  "active": "9ffeab3f526d0057",
+  "lastOpenFiles": [
+    "claudeAppunti/APPUNTI SECURITY/appunti_moduloS1_concetti.md",
+    "claudeAppunti/APPUNTI SECURITY/appunti_moduloS1_concetti.md.tmp.319554.10e807b408d0",
+    "claudeLezioni/LEZIONI SECURITY/guida_lab_moduloS1_enumerazione.md",
+    "claudeLezioni/LEZIONI SECURITY/lezione_moduloS1_offensive_security_enumerazione.md",
+    "Senza nome.canvas",
+    "metodo_studio_esami_pratici.md.tmp.9397.cfbd7dc622b9",
+    "CLAUDE.md.tmp.9397.af6920ae320e",
+    "metodo_studio_esami_pratici.md.tmp.9397.f0da687ee1dc",
+    "stato/percorso.md.tmp.9397.e7eb092d7a6d",
+    "metodo_studio_esami_pratici.md.tmp.9397.196c43a80a38",
+    "stato/corrente.md.tmp.9397.38ddd0afd9a9",
+    "metodo_studio_esami_pratici.md.tmp.9397.06419e529082",
+    "stato/percorso.md.tmp.9397.08b08f48a82f",
+    "stato/percorso.md.tmp.9397.f9383e87bd3f",
+    "metodo_studio_esami_pratici.md",
+    "RIPASSO DIRITTO/speedreview_D01_concetti_base.md",
+    "claudeLezioni/LEZIONI DIRITTO/lezione_moduloD13_pacchetto_digitale.md",
+    "APPUNTI GREZZI/Diritto/Appunti_ModuloD13.md",
+    "plans/handoffs/HANDOFF_diritto-d12-d13_2026-06-04.md",
+    "claudeLezioni/LEZIONI DIRITTO/lezione_moduloD12_ai_act.md",
+    "APPUNTI GREZZI/Diritto/Appunti_ModuloD12.md",
+    "APPUNTI GREZZI/Diritto/Appunti_ModuloD11.md",
+    "claudeAppunti/APPUNTI DIRITTO/appunti_moduloD11_reati_informatici.md",
+    "APPUNTI GREZZI/Diritto/Appunti_ModuloD10.md",
+    "claudeAppunti/APPUNTI DIRITTO/appunti_moduloD10_commercio_elettronico.md",
+    "claudeLezioni/LEZIONI DIRITTO/lezione_moduloD10_commercio_elettronico.md",
+    "APPUNTI GREZZI/Diritto/Appunti_moduloD9.md",
+    "claudeAppunti/APPUNTI DIRITTO/appunti_moduloD7_proprieta_industriale.md",
+    "APPUNTI GREZZI/Diritto/appunti_moduloD8.md",
+    "APPUNTI GREZZI/Diritto/appunti_moduloD7.md",
+    "claudeLezioni/LEZIONI DIRITTO/lezione_moduloD7_proprieta_industriale.md",
+    "claudeAppunti/APPUNTI DIRITTO/appunti_moduloD6_contratto_sviluppo_software.md",
+    "APPUNTI GREZZI/Diritto/Appunti_moduloD6.md",
+    "claudeLezioni/LEZIONI DIRITTO/lezione_moduloD6_contratto_sviluppo_software.md",
+    "claudeLezioni/LEZIONI DIRITTO/lezione_moduloD3_diritto_autore.md",
+    "CLAUDE.md",
+    "master_map_studio.md"
+  ]
+}

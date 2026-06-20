@@ -73,7 +73,7 @@ def walk_vault() -> dict[str, list[tuple[str, str]]]:
                 continue
             p = rootp / fn
             relpath = p.relative_to(VAULT).as_posix()
-            group = rel.parts[0] if rel.parts else "(root)"
+            group = rel.as_posix() if rel.parts else "(root)"
             groups.setdefault(group, []).append((relpath, first_title(p)))
             count += 1
             if count >= MAX_ENTRIES:
@@ -95,7 +95,8 @@ def main() -> None:
         entries = sorted(groups[group])
         lines.append(f"## {group}  ({len(entries)})")
         for relpath, title in entries:
-            lines.append(f"- `{relpath}` — {title}")
+            name = Path(relpath).name
+            lines.append(f"- [[{relpath}|{name}]] — {title}")
         lines.append("")
     INDEX.write_text("\n".join(lines), encoding="utf-8")
     size = INDEX.stat().st_size

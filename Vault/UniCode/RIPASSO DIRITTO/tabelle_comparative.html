@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabelle Comparative — Diritto dell'Informatica T</title>
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --muted: #555577;
+    --bg: #f8f9fc;
+    --white: #ffffff;
+    --border: #dde1ef;
+    --row-alt: #f2f4fb;
+    --head-bg: #1a1f35;
+    --head-ink: #ffffff;
+    --hl: #fff3cd;
+    --hl-border: #e6b800;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 14px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* ── header ── */
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 1.45rem; font-weight: 800; color: var(--head-bg); }
+  .page-header p { color: var(--muted); font-size: .9rem; margin-top: 6px; max-width: 680px; }
+
+  /* ── toolbar ── */
+  .toolbar {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 28px; align-items: center;
+  }
+  .btn {
+    padding: 8px 16px; border-radius: 8px; font-size: .85rem;
+    font-weight: 600; cursor: pointer; border: none; transition: .15s;
+  }
+  .btn-cover {
+    background: #1a1f35; color: #fff;
+  }
+  .btn-cover:hover { background: #2c3460; }
+  .btn-cover.active { background: #c8390e; }
+  .btn-print {
+    background: #2d7a2d; color: #fff;
+  }
+  .btn-print:hover { background: #3a9a3a; }
+  .note {
+    font-size: .82rem; color: var(--muted);
+    background: var(--hl); border: 1px solid var(--hl-border);
+    border-radius: 8px; padding: 8px 13px;
+  }
+
+  /* ── section ── */
+  .section { margin-bottom: 30px; }
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .section-header h2 {
+    font-size: .95rem; font-weight: 700; color: var(--head-bg);
+  }
+  .tag-mod {
+    font-size: .72rem; font-weight: 700; letter-spacing: .4px;
+    padding: 3px 9px; border-radius: 99px; color: #fff;
+  }
+  .accent-bar {
+    width: 4px; height: 20px; border-radius: 4px; flex-shrink: 0;
+  }
+
+  /* ── table ── */
+  .tbl-wrap { overflow-x: auto; }
+  table {
+    width: 100%; border-collapse: collapse;
+    background: var(--white);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+  th {
+    background: var(--head-bg); color: var(--head-ink);
+    font-size: .82rem; font-weight: 600; letter-spacing: .3px;
+    padding: 9px 12px; text-align: left;
+  }
+  td {
+    padding: 9px 12px; border-bottom: 1px solid var(--border);
+    vertical-align: top; font-size: .88rem;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--row-alt); }
+  td:first-child { font-weight: 600; color: var(--muted); width: 160px; }
+  td strong, th strong { font-weight: 700; }
+  td b { color: #0a0a30; }
+  code { background: #eef0fa; border-radius: 4px; padding: 1px 5px; font-size: .85em; }
+
+  /* ── cover mode ── */
+  body.cover-mode td:not(:first-child) {
+    color: transparent !important;
+    background: #e8eaf0 !important;
+    user-select: none;
+    border-color: #d0d4e8;
+  }
+  body.cover-mode .reveal-hint { display: block; }
+  .reveal-hint { display: none; font-size: .78rem; color: var(--muted); margin-top: 8px; }
+
+  /* ── auto-test ── */
+  .autotest {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px 24px; margin-top: 40px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  }
+  .autotest h2 { font-size: 1rem; font-weight: 800; margin-bottom: 14px; color: var(--head-bg); }
+  .autotest ol { padding-left: 20px; }
+  .autotest li { margin: 7px 0; font-size: .9rem; }
+  .key-section { margin-top: 30px; }
+  .key-section h3 { font-size: .9rem; font-weight: 700; margin-bottom: 10px; }
+  .key-section p { font-size: .85rem; line-height: 1.7; color: var(--muted); }
+  .key-section p b { color: var(--ink); }
+
+  /* ── colour palette ── */
+  .c1  { background: #3b5bdb; }
+  .c2  { background: #1098ad; }
+  .c3  { background: #2f9e44; }
+  .c4  { background: #e67700; }
+  .c5  { background: #862e9c; }
+  .c6  { background: #c92a2a; }
+  .c7  { background: #2b8a3e; }
+  .c8  { background: #1864ab; }
+  .c9  { background: #5f3dc4; }
+  .c10 { background: #a61e4d; }
+  .c11 { background: #364fc7; }
+  .c12 { background: #0c8599; }
+  .c13 { background: #e67700; }
+  .c14 { background: #c92a2a; }
+  .c15 { background: #5f3dc4; }
+  .c16 { background: #1098ad; }
+
+  /* ── print ── */
+  @media print {
+    body { background: white; font-size: 12px; }
+    .toolbar, .btn { display: none !important; }
+    .wrap { padding: 10px 8px; }
+    .section { margin-bottom: 18px; break-inside: avoid; }
+    table { box-shadow: none; }
+    th { background: #1a1f35 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .accent-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tag-mod { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body.cover-mode td:not(:first-child) { background: #e8eaf0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .autotest { break-before: page; }
+    .key-section { break-before: page; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="page-header">
+    <h1>Tabelle Comparative — Diritto dell'Informatica T</h1>
+    <p><strong>Come usarle:</strong> attiva «Copri risposte», poi leggi ogni riga e ricorda la risposta prima di scoprirla. Le contrapposizioni qui sono quelle che il quiz MC attacca: un termine cambiato, un soggetto invertito, un numero alterato.</p>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-cover" id="btnCover" onclick="toggleCover()">☐ Copri risposte</button>
+    <button class="btn btn-print" onclick="window.print()">Stampa / Salva PDF</button>
+    <span class="note">Suggerimento stampa: se vuoi il foglio «coperto» per esercitarti su carta, attiva «Copri risposte» e poi stampa.</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c1"></div>
+      <h2>1 — Regolamento UE vs Direttiva UE</h2>
+      <span class="tag-mod c1">D1</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Regolamento UE</th><th>Direttiva UE</th></tr>
+      <tr><td>Applicabilità</td><td><b>Direttamente applicabile</b></td><td>Va <b>recepita</b> con atto interno</td></tr>
+      <tr><td>Cosa impone</td><td>Norma completa</td><td><b>Obiettivi vincolanti</b> (lo Stato sceglie il come)</td></tr>
+      <tr><td>Recepimento</td><td>Non serve</td><td>Entro una scadenza; mancato → infrazione</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 2 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c2"></div>
+      <h2>2 — Nullità vs Annullabilità vs Nullità di protezione</h2>
+      <span class="tag-mod c2">D1 D5</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Nullità</th><th>Annullabilità</th><th>Nullità di protezione</th></tr>
+      <tr><td>Causa</td><td>Manca requisito, norma imperativa</td><td>Incapacità, errore/violenza/dolo</td><td>Clausola vessatoria (B2C)</td></tr>
+      <tr><td>Chi la fa valere</td><td><b>Chiunque</b></td><td>Solo la <b>parte protetta</b></td><td>Solo il <b>consumatore</b></td></tr>
+      <tr><td>Rilievo d'ufficio</td><td>Sì</td><td>No</td><td>Sì</td></tr>
+      <tr><td>Prescrizione</td><td><b>Non si prescrive</b></td><td><b>5 anni</b></td><td>(colpisce la clausola, non il contratto)</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c3"></div>
+      <h2>3 — Le 4 responsabilità</h2>
+      <span class="tag-mod c3">D1</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Tipo</th><th>Fonte</th><th>Esempio</th></tr>
+      <tr><td>Contrattuale</td><td>Violazione di un contratto</td><td>Ritardo consegna software</td></tr>
+      <tr><td>Extracontrattuale</td><td>Fatto illecito (art. 2043)</td><td>Rompo un oggetto altrui</td></tr>
+      <tr><td>Indiretta</td><td>Soggetto sotto supervisione</td><td>Genitore per il figlio</td></tr>
+      <tr><td>Oggettiva</td><td>Solo rapporto causale</td><td>Attività pericolose</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c4"></div>
+      <h2>4 — Massima vs Esteso · Storico vs Consolidato</h2>
+      <span class="tag-mod c4">D2</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Massima</th><th>Versione per esteso</th></tr>
+      <tr><td>Cosa</td><td>Riassunto dei principi della sentenza</td><td>Testo integrale</td></tr>
+      <tr><td>Si applica a</td><td colspan="2"><b>Giurisprudenza</b> (non normativa)</td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table>
+      <tr><th>Spunto</th><th>Testo storico</th><th>Testo consolidato</th></tr>
+      <tr><td>Cos'è</td><td>Pubblicato in G.U. all'emanazione</td><td>Versione <b>attuale</b> con tutte le modifiche</td></tr>
+      <tr><td>Dove</td><td><b>G.U.</b> (fa fede)</td><td><b>normattiva.it</b> (NON in G.U.)</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 5 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c5"></div>
+      <h2>5 — Diritto d'autore vs Diritto del costitutore vs Brevetto</h2>
+      <span class="tag-mod c5">D3 D4 D7</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Diritto d'autore</th><th>Diritto del costitutore (sui generis)</th><th>Brevetto</th></tr>
+      <tr><td>Requisito</td><td>Creatività della forma</td><td><b>Investimento rilevante</b></td><td>Novità + att. inventiva + industrialità</td></tr>
+      <tr><td>Oggetto</td><td>Forma espressiva</td><td>Banca dati (estrazione/reimpiego)</td><td>Invenzione tecnica</td></tr>
+      <tr><td>Acquisto</td><td>Creazione (automatico)</td><td>Completamento BD</td><td>Concessione (esame)</td></tr>
+      <tr><td>Durata</td><td><b>70 anni</b> post mortem</td><td><b>15 anni</b></td><td><b>20 anni</b> non rinnovabile</td></tr>
+      <tr><td>Software</td><td>Sì (opera letteraria)</td><td>—</td><td>No «in quanto tale»</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 6 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c6"></div>
+      <h2>6 — BD selettiva/non selettiva · Estrazione/Reimpiego</h2>
+      <span class="tag-mod c6">D4</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>BD selettiva</th><th>BD non selettiva</th></tr>
+      <tr><td>Creatività</td><td>Nella <b>scelta</b> dei contenuti</td><td>Nella <b>struttura</b></td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table>
+      <tr><th>Spunto</th><th>Estrazione</th><th>Reimpiego</th></tr>
+      <tr><td>Cosa</td><td><b>Trasferimento</b> su altro supporto</td><td><b>Messa a disposizione del pubblico</b></td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 7 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c7"></div>
+      <h2>7 — Tipico/Atipico · Appalto/Opera intellettuale</h2>
+      <span class="tag-mod c7">D5 D6</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Contratto tipico</th><th>Contratto atipico</th></tr>
+      <tr><td>Disciplina</td><td>Prevista dal codice</td><td>Generale + clausole delle parti (es. licenza software)</td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table>
+      <tr><th>Spunto</th><th>Appalto</th><th>Opera intellettuale</th></tr>
+      <tr><td>Chi sviluppa</td><td><b>Impresa</b> (software house)</td><td><b>Libero professionista</b></td></tr>
+      <tr><td>Obbligazione</td><td>di <b>risultato</b></td><td>di <b>mezzi</b></td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 8 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c8"></div>
+      <h2>8 — Obbligazione di mezzi vs di risultato</h2>
+      <span class="tag-mod c8">D5 D6</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Di mezzi</th><th>Di risultato</th></tr>
+      <tr><td>Cosa garantisce</td><td>Diligenza/competenza</td><td>Il <b>risultato</b> funzionante</td></tr>
+      <tr><td>Tipo contratto</td><td>Opera intellettuale</td><td>Appalto</td></tr>
+      <tr><td>Responsabilità</td><td>Solo dolo/colpa grave se <b>speciale difficoltà</b></td><td>Inadempiente se non consegna</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 9 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c9"></div>
+      <h2>9 — Le 6 licenze Creative Commons + CC0</h2>
+      <span class="tag-mod c9">D5</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Licenza</th><th>Commerciale?</th><th>Opere derivate?</th><th>Stessa licenza?</th></tr>
+      <tr><td><b>BY</b></td><td>Sì</td><td>Sì</td><td>No</td></tr>
+      <tr><td><b>BY-SA</b></td><td>Sì</td><td>Sì</td><td><b>Sì</b> (copyleft)</td></tr>
+      <tr><td><b>BY-ND</b></td><td>Sì</td><td><b>No</b></td><td>—</td></tr>
+      <tr><td><b>BY-NC</b></td><td><b>No</b></td><td>Sì</td><td>No</td></tr>
+      <tr><td><b>BY-NC-SA</b></td><td>No</td><td>Sì</td><td>Sì</td></tr>
+      <tr><td><b>BY-NC-ND</b></td><td>No</td><td>No</td><td>—</td></tr>
+      <tr><td><b>CC0</b></td><td colspan="3">Rinuncia a <b>tutti</b> i diritti — pubblico dominio, nessuna attribuzione richiesta</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 10 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c10"></div>
+      <h2>10 — Marchio vs Brevetto</h2>
+      <span class="tag-mod c10">D7</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Marchio</th><th>Brevetto</th></tr>
+      <tr><td>Cosa tutela</td><td>Segni distintivi</td><td>Invenzioni tecniche</td></tr>
+      <tr><td>Acquisto</td><td><b>Registrazione</b></td><td><b>Brevettazione</b> (concessione)</td></tr>
+      <tr><td>Durata</td><td><b>10 anni, rinnovabile ∞</b></td><td><b>20 anni, NON rinnovabile</b></td></tr>
+      <tr><td>Requisiti</td><td>Novità + capacità distintiva</td><td>Novità + att. inventiva + industrialità</td></tr>
+      <tr><td>Perdita</td><td>Decade per <b>volgarizzazione</b></td><td>Nullo se non brevettabile</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 11 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c11"></div>
+      <h2>11 — Titolare/Responsabile/DPO · Pseudonimizzazione/Anonimizzazione · 6 basi (D8)</h2>
+      <span class="tag-mod c11">D8</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Titolare</th><th>Responsabile</th><th>DPO</th></tr>
+      <tr><td>Ruolo</td><td>Determina <b>finalità e mezzi</b></td><td>Tratta <b>per conto</b> del titolare</td><td>Controllo <b>indipendente</b></td></tr>
+      <tr><td>Nomina</td><td>—</td><td>Contratto (art. 28)</td><td>Quando obbligatorio (art. 37)</td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table>
+      <tr><th>Spunto</th><th>Pseudonimizzazione</th><th>Anonimizzazione</th></tr>
+      <tr><td>Dato ancora personale?</td><td><b>Sì</b> — GDPR si applica</td><td><b>No</b> — fuori dal GDPR</td></tr>
+    </table></div>
+    <div style="margin-top:10px;font-size:.88rem;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+      <strong>6 basi giuridiche (art. 6):</strong> Consenso · Contratto · Obbligo legale · Interessi vitali · Interesse pubblico · Legittimo interesse
+    </div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 12 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c12"></div>
+      <h2>12 — Firme elettroniche</h2>
+      <span class="tag-mod c12">D9</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Semplice</th><th>Avanzata</th><th>Qualificata</th><th>Digitale</th></tr>
+      <tr><td>Requisito chiave</td><td>Dati per firmare</td><td>Esclusivo controllo + identifica modifiche</td><td>Avanzata + <b>dispositivo qualificato</b> + <b>certificato qualificato</b></td><td>Tipo di qualificata, chiavi crittografiche</td></tr>
+      <tr><td>Valore legale</td><td>Ammissibile come prova</td><td><b>Scrittura privata</b></td><td><b>Firma autografa</b></td><td><b>Firma autografa</b></td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 13 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c13"></div>
+      <h2>13 — CE diretto/indiretto · Intermediari</h2>
+      <span class="tag-mod c13">D10</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>CE diretto</th><th>CE indiretto</th></tr>
+      <tr><td>Distribuzione</td><td><b>Online</b> (beni immateriali)</td><td><b>Tradizionale</b> (beni fisici)</td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table>
+      <tr><th>Spunto</th><th>Mere conduit</th><th>Caching</th><th>Hosting</th></tr>
+      <tr><td>Cosa fa</td><td>Trasporta</td><td>Memorizza temporaneamente</td><td>Memorizza stabilmente</td></tr>
+      <tr><td>Esonero se</td><td>Non origina/seleziona/modifica</td><td>Non modifica, aggiorna, rimuove</td><td><b>Notice &amp; take down</b></td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 14 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c14"></div>
+      <h2>14 — Reati informatici</h2>
+      <span class="tag-mod c14">D11</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>615-ter</th><th>615-quater</th><th>615-quinquies</th></tr>
+      <tr><td>Condotta</td><td>Accesso abusivo (<b>mera condotta</b>)</td><td>Detiene mezzi per <b>accedere</b></td><td>Detiene strumenti per <b>danneggiare</b></td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table>
+      <tr><th>Spunto</th><th>635-bis</th><th>635-ter</th><th>635-quater</th><th>635-quinquies</th></tr>
+      <tr><td>Oggetto</td><td>Dati/programmi</td><td>Dati/programmi</td><td>Sistemi</td><td>Sistemi</td></tr>
+      <tr><td>Soggetto passivo</td><td>Privato</td><td>Stato/pubblico</td><td>Privato</td><td>Pubblica utilità</td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table>
+      <tr><th>Spunto</th><th>Truffa (640)</th><th>Frode informatica (640-ter)</th></tr>
+      <tr><td>Vittima dell'azione</td><td>La <b>persona</b></td><td>Il <b>sistema informatico</b></td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 15 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c15"></div>
+      <h2>15 — AI Act: livelli di rischio e GPAI</h2>
+      <span class="tag-mod c15">D12</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>Inaccettabile</th><th>Alto rischio</th><th>Limitato</th><th>Minimo</th></tr>
+      <tr><td>Regime</td><td><b>Divieto assoluto</b></td><td>Obblighi rigorosi</td><td>Trasparenza</td><td>Nessuna norma</td></tr>
+      <tr><td>Sanzione max</td><td><b>7% / 35M€</b></td><td><b>3% / 15M€</b></td><td><b>1,5% / 7,5M€</b></td><td>—</td></tr>
+      <tr><td>Esempio</td><td>Social scoring, biometria real-time</td><td>CV screening, credit scoring</td><td>Chatbot, deepfake</td><td>Antispam</td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table>
+      <tr><th>Spunto</th><th>Sistema di IA</th><th>Modello GPAI</th></tr>
+      <tr><td>Cos'è</td><td>Incorpora il modello in un contesto specifico</td><td>Modello base (GPT, Claude…)</td></tr>
+      <tr><td>Vigilanza</td><td>Autorità nazionali</td><td><b>Commissione (AI Office)</b> — esclusiva</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- 16 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="accent-bar c16"></div>
+      <h2>16 — DSA vs DMA vs Data Act</h2>
+      <span class="tag-mod c16">D13</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Spunto</th><th>DSA</th><th>DMA</th><th>Data Act</th></tr>
+      <tr><td>Domanda</td><td>Cosa sta online?</td><td>Come si compete?</td><td>Chi controlla i dati IoT?</td></tr>
+      <tr><td>Soggetto</td><td>Intermediari</td><td>Gatekeeper</td><td>Produttori IoT + cloud</td></tr>
+      <tr><td>Criterio chiave</td><td>VLOP = <b>45 mln utenti</b></td><td>Gatekeeper = <b>3 criteri cumulativi</b></td><td>Prodotto connesso</td></tr>
+      <tr><td>Anti-steering</td><td>—</td><td>Protegge l'<b>utente commerciale</b> (non l'utente finale)</td><td>—</td></tr>
+      <tr><td>Sanzione max</td><td><b>6%</b></td><td><b>10% / 20%</b> recidiva</td><td>Nazionale</td></tr>
+    </table></div>
+    <p class="reveal-hint">↑ Copri le colonne destra e prova a completarle a mente.</p>
+  </div>
+
+  <!-- AUTO-TEST -->
+  <div class="autotest">
+    <h2>Auto-test — 20 domande (copri la chiave in fondo)</h2>
+    <ol>
+      <li>Reg. UE o Direttiva: quale è direttamente applicabile senza recepimento?</li>
+      <li>Chi può far valere la <strong>nullità di protezione</strong>?</li>
+      <li>Per quanti anni dura il diritto del <strong>costitutore</strong> di una banca dati?</li>
+      <li>Nel testo <strong>consolidato</strong> di una legge: si trova in G.U. o su normattiva.it?</li>
+      <li>Obbligazione di <strong>mezzi</strong> o di <strong>risultato</strong>: quale caratterizza l'<strong>appalto</strong>?</li>
+      <li>Quale licenza CC è il pubblico dominio senza attribuzione?</li>
+      <li>Durata del <strong>brevetto</strong> e durata del <strong>marchio</strong> (rinnovabilità)?</li>
+      <li>Pseudonimizzazione: il dato è ancora personale (sì/no)?</li>
+      <li>La firma <strong>avanzata</strong> ha valore di scrittura privata o di firma autografa?</li>
+      <li>Firma <strong>qualificata</strong>: quali due elementi la compongono oltre all'essere avanzata?</li>
+      <li>Entro quante ore va notificato un data breach al Garante?</li>
+      <li>Le 3 figure di intermediario del D.Lgs. 70/2003?</li>
+      <li>Diritto di recesso del consumatore: quanti giorni?</li>
+      <li>Nella <strong>frode informatica</strong> (640-ter), chi è la vittima dell'azione?</li>
+      <li>615-quater vs 615-quinquies: quale punisce gli strumenti per <strong>danneggiare</strong>?</li>
+      <li>Pratiche <strong>vietate</strong> dell'AI Act: quale fascia sanzionatoria (%)?</li>
+      <li>VLOP (DSA) e gatekeeper (DMA): quanti criteri ciascuno?</li>
+      <li><strong>Anti-steering</strong> (DMA): protegge l'utente finale o l'utente commerciale?</li>
+      <li>Nel <strong>Data Act</strong>, chi è il «data holder»: l'utente o il produttore?</li>
+      <li>In conflitto tra Data Act/DMA e GDPR, quale prevale?</li>
+    </ol>
+
+    <div class="key-section">
+      <h3>Chiave (leggi solo dopo aver risposto)</h3>
+      <p>
+        1. <b>Regolamento UE.</b> &nbsp;
+        2. Solo il <b>consumatore.</b> &nbsp;
+        3. <b>15 anni.</b> &nbsp;
+        4. <b>normattiva.it</b> (non G.U.). &nbsp;
+        5. Di <b>risultato.</b> &nbsp;
+        6. <b>CC0</b> (BY richiede attribuzione). &nbsp;
+        7. Brevetto <b>20 anni non rinnovabile</b>; marchio <b>10 anni rinnovabile ∞.</b> &nbsp;
+        8. <b>Sì,</b> resta personale. &nbsp;
+        9. <b>Scrittura privata.</b> &nbsp;
+        10. <b>Dispositivo qualificato</b> + <b>certificato qualificato.</b> &nbsp;
+        11. <b>72 ore.</b> &nbsp;
+        12. <b>Mere conduit, caching, hosting.</b> &nbsp;
+        13. <b>14 giorni.</b> &nbsp;
+        14. Il <b>sistema informatico</b> (nella truffa è la persona). &nbsp;
+        15. <b>615-quinquies</b> (il quater è per accedere). &nbsp;
+        16. <b>7% / 35M€.</b> &nbsp;
+        17. VLOP = <b>1 criterio</b> (45 mln utenti); gatekeeper = <b>3 cumulativi.</b> &nbsp;
+        18. L'<b>utente commerciale</b> (sviluppatore). &nbsp;
+        19. Il <b>produttore</b> (data holder). &nbsp;
+        20. Prevale il <b>GDPR.</b>
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleCover() {
+    const btn = document.getElementById('btnCover');
+    document.body.classList.toggle('cover-mode');
+    if (document.body.classList.contains('cover-mode')) {
+      btn.textContent = '☑ Risposte nascoste — clicca per scoprire';
+      btn.classList.add('active');
+    } else {
+      btn.textContent = '☐ Copri risposte';
+      btn.classList.remove('active');
+    }
+  }
+</script>
+</body>
+</html>

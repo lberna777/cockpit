@@ -25,8 +25,8 @@ END = "<!-- AUTO-LINKS:END -->"
 # hub per materia (basename senza .md; Obsidian risolve per basename)
 HUBS = {
     "Diritto": ["master_map_studio", "glossario_diritto", "concept_maps"],
-    "SysAdm": ["master_map_studio", "glossario_sysadm", "concept_maps", "troubleshooting_vm"],
-    "Security": ["master_map_studio", "concept_maps"],
+    "SysAdm": ["master_map_studio", "glossario_sysadm", "concept_maps", "troubleshooting_vm", "metodo_studio_esami_pratici"],
+    "Security": ["master_map_studio", "concept_maps", "metodo_studio_esami_pratici"],
 }
 
 

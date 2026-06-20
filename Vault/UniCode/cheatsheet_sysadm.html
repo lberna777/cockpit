@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SysAdmin Cheatsheet — Lab Amm. di Sistemi T</title>
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --bg2:     #161b22;
+      --bg3:     #21262d;
+      --border:  #30363d;
+      --text:    #c9d1d9;
+      --dim:     #8b949e;
+      --green:   #3fb950;
+      --yellow:  #e3b341;
+      --red:     #f85149;
+      --blue:    #79c0ff;
+      --orange:  #ffa657;
+      --purple:  #d2a8ff;
+      --cyan:    #56d364;
+      --mono: 'Courier New', 'Consolas', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ──────────────────────────────────────────── */
+    #header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    #header h1 {
+      color: var(--green);
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    #header h1 span { color: var(--dim); font-weight: normal; }
+
+    #search {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 5px 12px;
+      width: 240px;
+      transition: border-color .15s;
+    }
+    #search:focus { outline: none; border-color: var(--blue); }
+    #search::placeholder { color: var(--dim); }
+
+    #search-count { color: var(--dim); font-size: 11px; }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .progress-label { color: var(--dim); font-size: 11px; white-space: nowrap; }
+
+    .progress-bar {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+      width: 120px;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, var(--green), #52d468);
+      height: 100%;
+      transition: width .3s;
+    }
+
+    /* ── MAIN LAYOUT ─────────────────────────────────────── */
+    #content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+    /* ── BLOCK SECTIONS ──────────────────────────────────── */
+    .block {
+      margin-bottom: 32px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .block-header {
+      background: var(--bg2);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .block-header:hover { background: var(--bg3); }
+
+    .block-tag {
+      background: var(--green);
+      color: #000;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+    }
+
+    .block-tag.b1 { background: var(--yellow); }
+    .block-tag.b2 { background: var(--orange); }
+    .block-tag.b3 { background: var(--blue); color: #000; }
+
+    .block-title { color: var(--text); font-size: 14px; }
+
+    .block-toggle {
+      margin-left: auto;
+      color: var(--dim);
+      font-size: 16px;
+      transition: transform .2s;
+    }
+
+    .block.collapsed .block-toggle { transform: rotate(-90deg); }
+    .block.collapsed .block-body { display: none; }
+
+    .block-body { padding: 16px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── MODULE GROUPS ───────────────────────────────────── */
+    .mod-label {
+      color: var(--dim);
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      border-left: 3px solid var(--border);
+      padding-left: 8px;
+    }
+
+    /* ── TABLES ──────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead tr {
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+
+    thead th {
+      color: var(--dim);
+      font-weight: normal;
+      font-size: 10px;
+      letter-spacing: 0.8px;
+      padding: 5px 10px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .1s;
+    }
+
+    tbody tr:hover { background: var(--bg3); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr.hidden { display: none; }
+
+    td { padding: 6px 10px; vertical-align: top; }
+
+    td:first-child { width: 28%; }
+    td:nth-child(2) { width: 34%; color: var(--dim); }
+    td:last-child { width: 38%; }
+
+    /* ── CODE ELEMENTS ───────────────────────────────────── */
+    code {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--orange);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 1px 5px;
+      transition: background .1s, border-color .1s;
+      display: inline-block;
+    }
+
+    code:hover { background: #2d333b; border-color: var(--orange); }
+    code.copied { background: #1a3520; border-color: var(--green); color: var(--green); }
+
+    .cmd code { color: var(--cyan); font-size: 13px; font-weight: bold; }
+    .flag { color: var(--purple); }
+    .path { color: var(--blue); }
+    .note { color: var(--dim); font-size: 11px; }
+
+    .tag-sec {
+      background: rgba(248,81,73,.15);
+      border: 1px solid var(--red);
+      border-radius: 3px;
+      color: var(--red);
+      font-size: 10px;
+      padding: 1px 5px;
+      margin-left: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── COPY TOAST ──────────────────────────────────────── */
+    #toast {
+      background: var(--bg3);
+      border: 1px solid var(--green);
+      border-radius: 6px;
+      bottom: 20px;
+      color: var(--green);
+      font-size: 12px;
+      opacity: 0;
+      padding: 8px 16px;
+      pointer-events: none;
+      position: fixed;
+      right: 20px;
+      transition: opacity .2s;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── SHORTCUT BAR ────────────────────────────────────── */
+    #shortcuts {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 24px;
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--dim);
+      flex-wrap: wrap;
+    }
+
+    #shortcuts a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+    #shortcuts a:hover { text-decoration: underline; }
+
+    /* ── PRINT ───────────────────────────────────────────── */
+    @media print {
+      body { background: #fff; color: #000; font-size: 10px; }
+      #header, #shortcuts { position: relative; background: #fff; border-bottom: 2px solid #000; }
+      #header h1 { color: #000; }
+      #search, .progress-wrap, #search-count { display: none; }
+      .block { border: 1px solid #ccc; page-break-inside: avoid; margin-bottom: 16px; }
+      .block-header { background: #f5f5f5; }
+      .block-tag { background: #333 !important; color: #fff !important; }
+      .block-title { color: #000; }
+      .block-toggle { display: none; }
+      code { background: #f5f5f5; border: 1px solid #ccc; color: #c7254e; }
+      thead tr { background: #f5f5f5; }
+      tbody tr:hover { background: transparent; }
+      .tag-sec { display: none; }
+      .note { color: #666; }
+      td { color: #333; }
+      td:nth-child(2) { color: #555; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <h1>SysAdmin Cheatsheet <span>— Lab Amm. di Sistemi T</span></h1>
+  <input type="text" id="search" placeholder="🔍  cerca comando, flag, concetto…" autocomplete="off">
+  <span id="search-count"></span>
+  <div class="progress-wrap">
+    <span class="progress-label">SysAdmin 9/13 ✓</span>
+    <div class="progress-bar"><div class="progress-fill" style="width:69%"></div></div>
+  </div>
+</div>
+
+<div id="shortcuts">
+  <span>Vai a:</span>
+  <a href="#b0">Block 0 — Fondamenta</a>
+  <a href="#b1">Block 1 — Scripting</a>
+  <a href="#b2">Block 2 — Utenti &amp; File</a>
+  <a href="#b3">Block 3 — Servizi &amp; Pacchetti</a>
+  <span style="margin-left:auto">Clicca su <code style="cursor:default">codice</code> per copiare negli appunti</span>
+</div>
+
+<div id="content">
+
+  <!-- ═══════════════════════════════════════════════════════
+       BLOCK 0 — FONDAMENTA LINUX
+  ═══════════════════════════════════════════════════════ -->
+  <div class="block" id="b0">
+    <div class="block-header" onclick="toggleBlock(this)">
+      <span class="block-tag">BLOCK 0</span>
+      <span class="block-title">Fondamenta Linux — Filesystem · Pipe · Filtri</span>
+      <span class="block-toggle">▾</span>
+    </div>
+    <div class="block-body">
+
+      <!-- 0A: VM e Orientamento -->
+      <div>
+        <div class="mod-label">0A — VM Vagrant &amp; Orientamento</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Flags / Argomenti</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>vagrant up</code></td>
+              <td><code>--provider=virtualbox</code></td>
+              <td>Avvia la VM Debian (da <span class="path">~/sysAdmin-lab/</span>)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>vagrant ssh</code></td>
+              <td></td>
+              <td>Entra nella VM via SSH</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>pwd</code></td>
+              <td></td>
+              <td>Mostra directory corrente (<em>print working directory</em>)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>whoami</code></td>
+              <td></td>
+              <td>Nome utente corrente</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>id</code></td>
+              <td><code>id [nome]</code></td>
+              <td>UID, GID primario, tutti i gruppi</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>ls</code></td>
+              <td><code>-l</code> dettagli · <code>-a</code> nascosti · <code>-la</code> entrambi · <code>-R</code> ricorsivo</td>
+              <td>Lista file. <code>ls -la ~</code> mostra la home con permessi. <code>ls -R</code> entra nelle sottodirectory (quando piped: un file per riga)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>cat</code></td>
+              <td><code>file</code></td>
+              <td>Stampa contenuto file. Utile: <code>cat /etc/hostname</code></td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>mkdir</code></td>
+              <td><code>-p /a/b/c</code></td>
+              <td>Crea directory. <code>-p</code> crea intermedie e non dà errore se esiste già</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>touch</code></td>
+              <td><code>file</code></td>
+              <td>Crea file vuoto / aggiorna timestamp</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>file</code></td>
+              <td><code>/path</code></td>
+              <td>Identifica il vero tipo del file (magic number) — ignora estensione</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 0A: Filesystem dirs -->
+      <div>
+        <div class="mod-label">0A — Struttura Filesystem Linux</div>
+        <table>
+          <thead><tr><th>Directory</th><th>Contenuto</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td class="path"><code>/etc</code></td><td>Configurazione di sistema</td><td><code>.conf</code> e frammenti <code>.d/</code></td></tr>
+            <tr><td class="path"><code>/home</code></td><td>Home degli utenti normali</td><td>Ogni utente ha la sua subdir</td></tr>
+            <tr><td class="path"><code>/root</code></td><td>Home esclusiva di root</td><td></td></tr>
+            <tr><td class="path"><code>/var/log</code></td><td>Log di sistema</td><td><code>auth.log</code> · <code>syslog</code> · <code>btmp</code></td></tr>
+            <tr><td class="path"><code>/proc</code></td><td>Info processi (virtuale)</td><td>Interfaccia al kernel, non file reali</td></tr>
+            <tr><td class="path"><code>/tmp</code></td><td>File temporanei</td><td>Svuotato ad ogni riavvio</td></tr>
+            <tr><td class="path"><code>/bin /sbin /usr</code></td><td>Binari ed eseguibili</td><td><code>sbin</code> riservato a root</td></tr>
+            <tr><td class="path"><code>/lib</code></td><td>Librerie condivise (.so)</td><td>Dipendenze dei binari</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 0A: Permessi -->
+      <div>
+        <div class="mod-label">0A — Permessi <code>chmod</code></div>
+        <table>
+          <thead><tr><th>Comando</th><th>Flags / Valori</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>chmod</code></td>
+              <td><code>644</code> <code>755</code> <code>700</code> <code>000</code></td>
+              <td>Notazione ottale: r=4, w=2, x=1. Es: 644 = rw-r--r--</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>chmod</code></td>
+              <td><code>u+x</code> <code>g-w</code> <code>o-r</code> <code>a+r</code></td>
+              <td>Notazione simbolica: u=owner g=group o=others a=all</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>644</code> → rw-r--r--</td>
+              <td>File normale — owner scrive, tutti leggono</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>755</code> → rwxr-xr-x</td>
+              <td>Script / directory — owner tutto, altri legge+esegue</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>700</code> → rwx------</td>
+              <td>Privato — solo owner</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>770</code> → rwxrwx---</td>
+              <td>Condiviso tra owner e gruppo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 0B: Redirect e Pipe -->
+      <div>
+        <div class="mod-label">0B — Redirect e Pipe</div>
+        <table>
+          <thead><tr><th>Operatore</th><th>Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>&gt;</code></td>
+              <td><code>cmd &gt; file</code></td>
+              <td>Redirect stdout → file (<strong>sovrascrive</strong>)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>&gt;&gt;</code></td>
+              <td><code>cmd &gt;&gt; file</code></td>
+              <td>Redirect stdout → file (<strong>append</strong> in coda)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>&lt;</code></td>
+              <td><code>cmd &lt; file</code></td>
+              <td>Prende stdin da file invece che da tastiera</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>2&gt;</code></td>
+              <td><code>cmd 2&gt; errori.txt</code></td>
+              <td>Redirect solo stderr → file</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>2&gt;&amp;1</code></td>
+              <td><code>cmd &gt; out.txt 2&gt;&amp;1</code></td>
+              <td>Manda stderr dove va stdout (stesso file)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>|</code></td>
+              <td><code>cmd1 | cmd2 | cmd3</code></td>
+              <td>Stdout di cmd1 → stdin di cmd2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 0B: Filtri -->
+      <div>
+        <div class="mod-label">0B — Filtri di Testo</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Flags / Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>grep</code></td>
+              <td>
+                <code>-c</code> conta le righe con match (stampa un numero, non le righe) ·
+                <code>-n</code> prefissa ogni riga con il suo numero di riga ·
+                <code>-v</code> inverte — restituisce righe che <em>non</em> corrispondono ·
+                <code>-i</code> case-insensitive ·
+                <code>-o</code> stampa solo la parte corrispondente, una per riga — conta <strong>occorrenze</strong>, non righe
+              </td>
+              <td>Filtra righe che corrispondono al pattern. <strong>Attenzione</strong>: senza <code>-o</code> conta righe; con <code>-o</code> conta occorrenze</td>
+            </tr>
+            <tr>
+              <td colspan="3" style="padding:0">
+                <table style="margin:0">
+                  <thead><tr><th>Pattern regex</th><th>Significato</th><th>Esempio</th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td><code>.</code></td>
+                      <td>Qualsiasi carattere (uno)</td>
+                      <td><code>grep '.'</code> → qualsiasi riga non vuota</td>
+                    </tr>
+                    <tr>
+                      <td><code>\.</code></td>
+                      <td>Punto letterale (<code>\</code> toglie il significato speciale)</td>
+                      <td><code>grep '\.'</code> → righe con un punto nel nome</td>
+                    </tr>
+                    <tr>
+                      <td><code>^</code></td>
+                      <td>Ancora inizio riga</td>
+                      <td><code>grep '^root'</code> → righe che iniziano con "root"</td>
+                    </tr>
+                    <tr>
+                      <td><code>$</code></td>
+                      <td>Ancora fine riga</td>
+                      <td><code>grep ':$'</code> → righe che finiscono con ":"</td>
+                    </tr>
+                    <tr>
+                      <td><code>^$</code></td>
+                      <td>Inizio subito seguito da fine = riga vuota</td>
+                      <td><code>grep -v '^$'</code> → elimina righe vuote</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>sort</code></td>
+              <td><code>-n</code> numerico · <code>-r</code> inverso · <code>-rn</code> num. inverso</td>
+              <td>Ordina righe. Senza flag: alfabetico. Necessario prima di <code>uniq</code> perché <code>uniq</code> conta solo righe <em>consecutive</em> uguali</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>uniq</code></td>
+              <td><code>-c</code> mostra conteggio</td>
+              <td>Rimuove righe duplicate consecutive (usare dopo <code>sort</code>)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>wc</code></td>
+              <td><code>-l</code> righe · <code>-w</code> parole · <code>-c</code> byte</td>
+              <td>Conta. <code>wc -l &lt; file</code> = numero righe</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>rev</code></td>
+              <td></td>
+              <td>Rovescia ogni riga carattere per carattere. Trucco: <code>rev | cut -d'.' -f1 | rev</code> estrae la parte dopo l'<em>ultimo</em> punto (utile per estensioni)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>cut</code></td>
+              <td><code>-d: -f1</code></td>
+              <td>Estrae campo N con delimitatore. Es: <code>cut -d: -f1 /etc/passwd</code> · <code>cut -d'.' -f1</code> prende il primo campo prima del punto</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>tr</code></td>
+              <td>
+                <code>-c</code> complemento (opera su ciò che NON è in SET1) ·
+                <code>-s</code> squeeze (comprime sequenze consecutive del carattere sostituito in uno solo) ·
+                <code>-d</code> elimina i caratteri in SET1 senza sostituirli ·
+                classi POSIX: <code>[:alpha:]</code> lettere · <code>[:upper:]</code> maiuscole · <code>[:lower:]</code> minuscole
+              </td>
+              <td>
+                Sostituisce caratteri: <code>tr 'SET1' 'SET2'</code>. Legge da stdin — usare con <code>&lt;</code> o pipe, non accetta file direttamente.<br>
+                Esempi:<br>
+                <code>tr '[:upper:]' '[:lower:]' &lt; file</code> — lowercase tutto ·
+                <code>tr -cs '[:alpha:]' '\n' &lt; file</code> — una parola per riga (elimina punteggiatura e spazi) ·
+                <code>tr -cd 'a' &lt; file | wc -c</code> — conta occorrenze di 'a'
+              </td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>head</code></td>
+              <td><code>-N file</code></td>
+              <td>Stampa prime N righe</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>tail</code></td>
+              <td><code>-N file</code> · <code>-f file</code></td>
+              <td>Ultime N righe. <code>-f</code> = segue in tempo reale (log!)</td>
+            </tr>
+            <tr>
+              <td class="note" colspan="3">
+                Pipeline classica: <code>cat /etc/passwd | cut -d: -f1 | sort | uniq | wc -l</code>
+                <span class="tag-sec">⚔ SEC</span> — stessa logica per analizzare output Nmap/Suricata
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       BLOCK 1 — BASH SCRIPTING
+  ═══════════════════════════════════════════════════════ -->
+  <div class="block" id="b1">
+    <div class="block-header" onclick="toggleBlock(this)">
+      <span class="block-tag b1">BLOCK 1</span>
+      <span class="block-title">Bash Scripting — Variabili · Condizioni · Loop · Funzioni · Case</span>
+      <span class="block-toggle">▾</span>
+    </div>
+    <div class="block-body">
+
+      <!-- 1A: Script base -->
+      <div>
+        <div class="mod-label">1A — Creare ed Eseguire uno Script</div>
+        <table>
+          <thead><tr><th>Comando / Sintassi</th><th>Flags / Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>#!/bin/bash</code></td>
+              <td>prima riga obbligatoria</td>
+              <td>Shebang — indica al SO di usare Bash come interprete</td>
+            </tr>
+            <tr>
+              <td><code>cat &gt; script.sh &lt;&lt; 'EOF'</code></td>
+              <td>heredoc</td>
+              <td>Crea il file da terminale. Tutto fino alla riga <code>EOF</code> finisce nel file</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>chmod +x script.sh</code></td>
+              <td>oppure <code>chmod 755</code></td>
+              <td>Rende lo script eseguibile</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>./script.sh</code></td>
+              <td></td>
+              <td>Esegue lo script nella directory corrente</td>
+            </tr>
+            <tr>
+              <td><code>$(comando)</code></td>
+              <td>command substitution</td>
+              <td>Esegue e inserisce l'output inline. Es: <code>echo "oggi: $(date)"</code></td>
+            </tr>
+            <tr>
+              <td><code>$((espressione))</code></td>
+              <td>aritmetica intera</td>
+              <td>Calcola espressioni. Es: <code>N=$((N + 1))</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 1A: Variabili -->
+      <div>
+        <div class="mod-label">1A — Variabili</div>
+        <table>
+          <thead><tr><th>Sintassi</th><th>Esempio</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>VAR=valore</code></td>
+              <td><code>NOME="alice"</code></td>
+              <td>Assegna variabile — <strong>senza spazi</strong> intorno a <code>=</code></td>
+            </tr>
+            <tr>
+              <td><code>$VAR</code> / <code>${VAR}</code></td>
+              <td><code>echo $NOME</code></td>
+              <td>Legge variabile. Graffe obbligatorie in contesti ambigui (<code>${NOME}file</code>)</td>
+            </tr>
+            <tr>
+              <td><code>${#VAR}</code></td>
+              <td><code>echo ${#NOME}</code></td>
+              <td>Lunghezza della stringa</td>
+            </tr>
+            <tr>
+              <td><code>$0</code></td>
+              <td></td>
+              <td>Nome del file script</td>
+            </tr>
+            <tr>
+              <td><code>$1 $2 $3</code></td>
+              <td><code>./script.sh arg1 arg2</code></td>
+              <td>Argomenti passati allo script (o alla funzione)</td>
+            </tr>
+            <tr>
+              <td><code>$#</code></td>
+              <td></td>
+              <td>Numero totale di argomenti passati</td>
+            </tr>
+            <tr>
+              <td><code>$@</code></td>
+              <td></td>
+              <td>Tutti gli argomenti come lista</td>
+            </tr>
+            <tr>
+              <td><code>$HOME $USER $SHELL $PATH</code></td>
+              <td></td>
+              <td>Variabili d'ambiente — predefinite dal sistema</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 1A: Condizioni -->
+      <div>
+        <div class="mod-label">1A — Condizioni</div>
+        <table>
+          <thead><tr><th>Sintassi</th><th>Operatori</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>if [ cond ]; then … fi</code></td>
+              <td></td>
+              <td>Spazi dentro <code>[ ]</code> obbligatori. <code>fi</code> chiude il blocco</td>
+            </tr>
+            <tr>
+              <td><strong>Numeri</strong></td>
+              <td><code>-eq -ne -gt -lt -ge -le</code></td>
+              <td>equal · not equal · greater · less · ≥ · ≤</td>
+            </tr>
+            <tr>
+              <td><strong>Stringhe</strong></td>
+              <td><code>-z "$VAR"</code> <code>-n "$VAR"</code></td>
+              <td>Vuota (zero length) · non vuota</td>
+            </tr>
+            <tr>
+              <td><strong>File</strong></td>
+              <td><code>-f -d -e -r -w -x</code></td>
+              <td>file regolare · directory · esiste · leggibile · scrivibile · eseguibile</td>
+            </tr>
+            <tr>
+              <td><code>[ ! cond ]</code></td>
+              <td></td>
+              <td>Negazione — spazio tra <code>!</code> e operatore obbligatorio</td>
+            </tr>
+            <tr>
+              <td><code>exit 0</code> / <code>exit 1</code></td>
+              <td></td>
+              <td>Termina script con successo / errore. Usato in guard clause</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 1A: Loop -->
+      <div>
+        <div class="mod-label">1A — Loop</div>
+        <table>
+          <thead><tr><th>Sintassi</th><th>Esempio</th><th>Quando usarlo</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>for VAR in lista; do … done</code></td>
+              <td><code>for F in mela pera banana</code></td>
+              <td>Lista nota in anticipo</td>
+            </tr>
+            <tr>
+              <td><code>for FILE in /etc/*.conf</code></td>
+              <td>glob espanso dalla shell</td>
+              <td>Iterare su file che corrispondono a un pattern</td>
+            </tr>
+            <tr>
+              <td><code>for I in $(seq 1 5)</code></td>
+              <td></td>
+              <td>Loop numerico da 1 a 5</td>
+            </tr>
+            <tr>
+              <td><code>while [ cond ]; do … done</code></td>
+              <td><code>while [ $C -le 5 ]; do C=$((C+1))</code></td>
+              <td>Condizione da valutare ad ogni iterazione</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 1B: Funzioni e Case -->
+      <div>
+        <div class="mod-label">1B — Funzioni · Case · [[ ]] · Exit code</div>
+        <table>
+          <thead><tr><th>Sintassi</th><th>Uso</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>nome() { … }</code></td>
+              <td>dichiarazione funzione</td>
+              <td>Deve precedere la prima chiamata. Chiamata: <code>nome arg1 arg2</code></td>
+            </tr>
+            <tr>
+              <td><code>local VAR=valore</code></td>
+              <td>dentro la funzione</td>
+              <td>Variabile visibile solo nella funzione — evita di sovrascrivere globali</td>
+            </tr>
+            <tr>
+              <td><code>return N</code></td>
+              <td>dentro la funzione</td>
+              <td>Exit code della funzione (0=ok, altro=errore). NON chiude lo script</td>
+            </tr>
+            <tr>
+              <td><code>$(funzione arg)</code></td>
+              <td>cattura output</td>
+              <td>Per restituire una stringa da funzione: <code>echo val</code> + command substitution</td>
+            </tr>
+            <tr>
+              <td><code>case $VAR in p) ;; esac</code></td>
+              <td>switch su pattern</td>
+              <td><code>;;</code> chiude branch · <code>p1|p2)</code> OR · <code>*)</code> default</td>
+            </tr>
+            <tr>
+              <td><code>[ c1 ] &amp;&amp; [ c2 ]</code></td>
+              <td>AND (parentesi singole)</td>
+              <td><code>&amp;&amp;</code> e <code>||</code> stanno FUORI dalle parentesi</td>
+            </tr>
+            <tr>
+              <td><code>[[ c1 &amp;&amp; c2 ]]</code></td>
+              <td>AND (doppie parentesi)</td>
+              <td>Doppie parentesi: <code>&amp;&amp;</code> <code>||</code> dentro. Pattern: <code>[[ "$VAR" == *pat* ]]</code></td>
+            </tr>
+            <tr>
+              <td><code>$?</code></td>
+              <td>dopo ogni comando</td>
+              <td>Exit code dell'ultimo comando. 0=ok, altro=errore. Si sovrascrive subito</td>
+            </tr>
+            <tr>
+              <td><code>if systemctl is-active --quiet ssh</code></td>
+              <td>exit code diretto</td>
+              <td><code>if</code> valuta l'exit code di qualsiasi comando, non solo <code>[ ]</code></td>
+            </tr>
+            <tr>
+              <td class="note" colspan="3">
+                <span class="tag-sec">⚔ SEC</span> — Struttura portante degli script di enumerazione: <code>for IP in lista; do scansiona "$IP"; done</code> · <code>case $porta in 22) ssh_exploit;; 80) web_exploit;; esac</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       BLOCK 2 — UTENTI, PERMESSI E FILE
+  ═══════════════════════════════════════════════════════ -->
+  <div class="block" id="b2">
+    <div class="block-header" onclick="toggleBlock(this)">
+      <span class="block-tag b2">BLOCK 2</span>
+      <span class="block-title">Utenti · Permessi · File — useradd · chmod · find · tar · rsync</span>
+      <span class="block-toggle">▾</span>
+    </div>
+    <div class="block-body">
+
+      <!-- 2A: Utenti -->
+      <div>
+        <div class="mod-label">2A — Struttura Utenti</div>
+        <table>
+          <thead><tr><th>Comando / File</th><th>Flags / Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>id</code></td>
+              <td><code>id [nome]</code></td>
+              <td>UID, GID primario, tutti i gruppi dell'utente</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>groups</code></td>
+              <td><code>groups [nome]</code></td>
+              <td>Lista gruppi dell'utente</td>
+            </tr>
+            <tr>
+              <td class="path"><code>/etc/passwd</code></td>
+              <td><code>cat /etc/passwd</code></td>
+              <td>Database utenti: nome:x:UID:GID:GECOS:home:shell</td>
+            </tr>
+            <tr>
+              <td class="path"><code>/etc/shadow</code></td>
+              <td><code>sudo cat /etc/shadow</code></td>
+              <td>Hash password (solo root). Leggibile da altri = vulnerabilità critica <span class="tag-sec">⚔ SEC</span></td>
+            </tr>
+            <tr>
+              <td><code>awk -F: '$3&gt;=1000 {print $1}' /etc/passwd</code></td>
+              <td></td>
+              <td>Lista solo utenti fisici (UID ≥ 1000)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2A: Gestione utenti -->
+      <div>
+        <div class="mod-label">2A — Gestione Utenti e Gruppi</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Flags / Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>useradd</code></td>
+              <td><code>-m -s /bin/bash nome</code></td>
+              <td>Crea utente. <code>-m</code>=home · <code>-s</code>=shell. Poi: <code>passwd nome</code></td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>passwd</code></td>
+              <td><code>nome</code></td>
+              <td>Imposta/cambia password utente</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>usermod</code></td>
+              <td><code>-aG gruppo nome</code></td>
+              <td>Aggiunge a gruppo. <code>-a</code>=append (senza rimuovere dagli altri!)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>usermod</code></td>
+              <td><code>-s /bin/zsh</code> · <code>-L</code> · <code>-U</code></td>
+              <td>Cambia shell · Blocca account · Sblocca account</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>userdel</code></td>
+              <td><code>-r nome</code></td>
+              <td>Elimina utente. <code>-r</code> rimuove anche la home directory</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>groupadd</code></td>
+              <td><code>nome</code></td>
+              <td>Crea nuovo gruppo</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>su - nome</code></td>
+              <td>con trattino</td>
+              <td>Cambia utente caricando il suo ambiente completo ($HOME, $PATH)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2A: sudo -->
+      <div>
+        <div class="mod-label">2A — Privilegi Elevati: sudo</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>sudo comando</code></td>
+              <td></td>
+              <td>Esegue come root</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>sudo -i</code></td>
+              <td></td>
+              <td>Apre shell root completa</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>sudo -u alice cmd</code></td>
+              <td></td>
+              <td>Esegue come utente alice (se <code>(ALL)</code> in sudoers)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>sudo -l</code></td>
+              <td></td>
+              <td>Lista comandi eseguibili con sudo + se serve password <span class="tag-sec">⚔ SEC prima mossa</span></td>
+            </tr>
+            <tr>
+              <td class="path"><code>/etc/sudoers</code></td>
+              <td>modifica con <code>visudo</code></td>
+              <td>Configurazione sudo. <code>/etc/sudoers.d/</code> per regole aggiuntive</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2A: Permessi avanzati -->
+      <div>
+        <div class="mod-label">2A/2B — Permessi Avanzati e Bit Speciali</div>
+        <table>
+          <thead><tr><th>Comando / Bit</th><th>Notazione</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>chown</code></td>
+              <td><code>sudo chown utente:gruppo file</code></td>
+              <td>Cambia owner e gruppo di un file</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>chgrp</code></td>
+              <td><code>sudo chgrp gruppo file</code></td>
+              <td>Cambia solo il gruppo</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>umask</code></td>
+              <td><code>umask 0002</code></td>
+              <td>Permessi tolti ai nuovi file. 0002 → file 664 · dir 775 (gruppo scrive)</td>
+            </tr>
+            <tr>
+              <td><strong>SUID</strong> <code>4xxx</code></td>
+              <td><code>chmod 4755</code> · <code>u+s</code></td>
+              <td>Processo gira con UID del <em>proprietario</em>. Es: <code>passwd</code> → root <span class="tag-sec">⚔ SEC</span></td>
+            </tr>
+            <tr>
+              <td><strong>SGID</strong> <code>2xxx</code></td>
+              <td><code>chmod 2770</code> · <code>g+s</code></td>
+              <td>Su dir: file creati dentro ereditano il <em>gruppo della dir</em> (collaborazione)</td>
+            </tr>
+            <tr>
+              <td><strong>Sticky</strong> <code>1xxx</code></td>
+              <td><code>chmod 1777</code> · <code>+t</code></td>
+              <td>Su dir world-writable: solo il proprietario può cancellare i propri file. Es: <code>/tmp</code></td>
+            </tr>
+            <tr>
+              <td class="note" colspan="3">
+                Nella stringa permessi: SUID → <code>rws</code> al posto di <code>rwx</code> per owner · SGID → <code>s</code> per group · Sticky → <code>t</code> alla fine
+              </td>
+            </tr>
+            <tr>
+              <td class="note" colspan="3">
+                <span class="tag-sec">⚔ SEC</span> — <code>find / -perm -4000</code> enumera tutti i SUID del sistema = potenziali vettori di escalation
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2B: Config utenti -->
+      <div>
+        <div class="mod-label">2B — File di Configurazione Utenti</div>
+        <table>
+          <thead><tr><th>File</th><th>Contenuto</th><th>Quando toccarlo</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="path"><code>/etc/skel</code></td>
+              <td>Scheletro home</td>
+              <td>File qui vengono copiati in ogni nuova home. Aggiungi <code>.bashrc</code> preconfigurato</td>
+            </tr>
+            <tr>
+              <td class="path"><code>/etc/default/useradd</code></td>
+              <td>Default di <code>useradd</code></td>
+              <td>Shell di default (ecco perché serve sempre <code>-s /bin/bash</code>)</td>
+            </tr>
+            <tr>
+              <td class="path"><code>/etc/login.defs</code></td>
+              <td>Policy globali</td>
+              <td>Scadenza password, range UID (1000–60000), umask di default</td>
+            </tr>
+            <tr>
+              <td><code>echo "umask 0002" | sudo tee -a /home/nome/.bashrc</code></td>
+              <td></td>
+              <td>Aggiunge umask al .bashrc di un utente (tee con sudo = scrive come root)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2C: find -->
+      <div>
+        <div class="mod-label">2C — <code>find</code> — Ricerca nel Filesystem</div>
+        <table>
+          <thead><tr><th>Criterio / Azione</th><th>Esempio</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>struttura base</td>
+              <td><code>find /dove -criteri -azione</code></td>
+              <td>Esplora filesystem in tempo reale</td>
+            </tr>
+            <tr>
+              <td><code>-name</code></td>
+              <td><code>-name '*.log'</code></td>
+              <td>Nome del file (wildcard tra apici)</td>
+            </tr>
+            <tr>
+              <td><code>-type</code></td>
+              <td><code>-type f</code> / <code>-type d</code></td>
+              <td>f=file · d=directory · l=link simbolico</td>
+            </tr>
+            <tr>
+              <td><code>-mtime</code></td>
+              <td><code>-mtime -2</code></td>
+              <td>Modificato negli ultimi 2 giorni (<code>-</code>=entro · <code>+</code>=più di)</td>
+            </tr>
+            <tr>
+              <td><code>-size</code></td>
+              <td><code>-size +100k</code></td>
+              <td>Dimensione maggiore di 100KB</td>
+            </tr>
+            <tr>
+              <td><code>-perm</code></td>
+              <td><code>-perm -4000</code></td>
+              <td>File con SUID attivo <span class="tag-sec">⚔ SEC</span></td>
+            </tr>
+            <tr>
+              <td><code>-maxdepth N</code></td>
+              <td><code>-maxdepth 1</code></td>
+              <td>Non scendere nelle subdir oltre N livelli</td>
+            </tr>
+            <tr>
+              <td><code>-exec cmd {} \;</code></td>
+              <td><code>-exec cp {} /dst \;</code></td>
+              <td>Esegue comando su ogni file trovato. <code>{}</code>=path trovato · <code>\;</code>=fine cmd</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2C: tar -->
+      <div>
+        <div class="mod-label">2C — <code>tar</code> — Archiviazione</div>
+        <table>
+          <thead><tr><th>Combinazione</th><th>Comando</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Crea archivio</td>
+              <td><code>tar cvpf archivio.tar /path</code></td>
+              <td>c=crea · v=verboso · p=preserva permessi · f=file (deve essere ultima)</td>
+            </tr>
+            <tr>
+              <td>Estrai</td>
+              <td><code>tar xf archivio.tar</code></td>
+              <td>x=extract. Rileva compressione automaticamente</td>
+            </tr>
+            <tr>
+              <td>Estrai in dir</td>
+              <td><code>tar -C /newdisk -xvpf archivio.tar</code></td>
+              <td>-C cambia directory prima di estrarre</td>
+            </tr>
+            <tr>
+              <td>Crea + gzip</td>
+              <td><code>tar czf archivio.tar.gz /path</code></td>
+              <td>z=gzip · j=bzip2 · J=xz</td>
+            </tr>
+            <tr>
+              <td>Lista contenuto</td>
+              <td><code>tar tvzf archivio.tar.gz</code></td>
+              <td>t=table of contents — mostra senza estrarre</td>
+            </tr>
+            <tr>
+              <td>Pipeline senza file intermedio</td>
+              <td><code>tar cvpf - /home/* | tar -C /newdisk -xvpf -</code></td>
+              <td><code>-</code> al posto del nome = stdin/stdout. Utile quando manca spazio</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2C: rsync, dd, fuser/lsof -->
+      <div>
+        <div class="mod-label">2C — <code>rsync</code> · <code>dd</code> · <code>fuser</code> · <code>lsof</code></div>
+        <table>
+          <thead><tr><th>Comando</th><th>Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>rsync</code></td>
+              <td><code>-av /src/ /dst/</code></td>
+              <td>Sincronizza copiando solo le differenze. <code>-a</code>=archive (ricorsivo + permessi)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>rsync</code></td>
+              <td><code>-av /src/ user@host:/dst/</code></td>
+              <td>Sincronizzazione remota via SSH</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>dd</code></td>
+              <td><code>if=/dev/zero of=file bs=4k count=16k</code></td>
+              <td>Crea file da 64MB di zeri → riserva spazio su disco</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>fuser</code></td>
+              <td><code>fuser file</code></td>
+              <td>PID dei processi che hanno quel file aperto</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>lsof</code></td>
+              <td><code>lsof file</code> · <code>lsof -p PID</code></td>
+              <td>File aperti da un processo. Utile per: "perché non riesco a smontare?"</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       BLOCK 3 — SERVIZI E PACCHETTI
+  ═══════════════════════════════════════════════════════ -->
+  <div class="block" id="b3">
+    <div class="block-header" onclick="toggleBlock(this)">
+      <span class="block-tag b3">BLOCK 3</span>
+      <span class="block-title">Servizi · Pacchetti · Processi — systemd · apt · dpkg · cron</span>
+      <span class="block-toggle">▾</span>
+    </div>
+    <div class="block-body">
+
+      <!-- 3A: systemctl runtime -->
+      <div>
+        <div class="mod-label">3A — <code>systemctl</code> — Controllo Servizi (runtime)</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Flags / Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>systemctl start</code></td>
+              <td><code>nomeservizio</code></td>
+              <td>Avvia il servizio ora (non persistente)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl stop</code></td>
+              <td></td>
+              <td>Ferma il servizio</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl restart</code></td>
+              <td></td>
+              <td>Stop + start</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl reload</code></td>
+              <td></td>
+              <td>Ricarica configurazione senza fermare il processo</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl status</code></td>
+              <td></td>
+              <td>Stato corrente, PID, log recenti da journald</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3A: systemctl persistente -->
+      <div>
+        <div class="mod-label">3A — <code>systemctl</code> — Configurazione Persistente &amp; Ispezione</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Flags / Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>systemctl enable</code></td>
+              <td><code>nomeservizio</code></td>
+              <td>Avvio automatico al boot (effetto al prossimo reboot)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl disable</code></td>
+              <td></td>
+              <td>Disabilita avvio automatico (ma avvio manuale rimane possibile)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl mask</code></td>
+              <td></td>
+              <td>Neutralizza completamente — impossibile avviare anche manualmente</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl list-units</code></td>
+              <td><code>-t service</code></td>
+              <td>Lista servizi attivi. Senza filtro: tutte le unit</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl list-unit-files</code></td>
+              <td><code>-t service --state=enabled</code></td>
+              <td>Lista servizi installati (anche inattivi) — utile per inventario</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl --state=failed</code></td>
+              <td></td>
+              <td>Mostra unit in stato failed — diagnostica crash</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl get-default</code></td>
+              <td></td>
+              <td>Target di avvio corrente (es. <code>multi-user.target</code>)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>systemctl isolate</code></td>
+              <td><code>multi-user.target</code></td>
+              <td>Passa a quel target <strong>subito</strong> senza reboot</td>
+            </tr>
+            <tr>
+              <td class="note" colspan="3">
+                <span class="tag-sec">⚔ SEC</span> — <code>systemctl list-units -t service</code> elenca la <em>superficie d'attacco</em>: stessi servizi che Nmap trova sulle porte aperte
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3A: journalctl -->
+      <div>
+        <div class="mod-label">3A — <code>journalctl</code> — Log di Systemd</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Flags / Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>journalctl</code></td>
+              <td><code>-u ssh</code></td>
+              <td>Log di un servizio specifico</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>-u ssh --since "1 hour ago"</code></td>
+              <td>Log dell'ultima ora</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>-f</code></td>
+              <td>Segue il log in tempo reale (come <code>tail -f</code>)</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>-p err</code></td>
+              <td>Solo messaggi di livello error o superiore</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>-b</code></td>
+              <td>Solo log del boot corrente</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3A: at e cron -->
+      <div>
+        <div class="mod-label">3A — Pianificazione: <code>at</code> e <code>cron</code></div>
+        <table>
+          <thead><tr><th>Comando</th><th>Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>at</code></td>
+              <td><code>echo "cmd" | at now + 30 minutes</code></td>
+              <td>Pianifica esecuzione una-tantum in futuro</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><code>echo "cmd" | at 14:30</code></td>
+              <td>Esecuzione a ora precisa</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>atq</code></td>
+              <td></td>
+              <td>Lista job in coda</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>atrm</code></td>
+              <td><code>atrm &lt;job_id&gt;</code></td>
+              <td>Rimuove job dalla coda</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>crontab -l</code></td>
+              <td></td>
+              <td>Mostra il crontab dell'utente corrente</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>crontab -e</code></td>
+              <td></td>
+              <td>Edita il crontab</td>
+            </tr>
+            <tr>
+              <td>sintassi crontab</td>
+              <td><code>MIN ORA G.MESE MESE G.SETT cmd</code></td>
+              <td>Ex: <code>*/10 8-18 * * 1-5 /cmd</code> → ogni 10min, ore 8-18, lun-ven</td>
+            </tr>
+            <tr>
+              <td class="note" colspan="3">
+                <span class="tag-sec">⚔ SEC</span> — cron è usato per <strong>persistenza</strong> post-exploit: backdoor pianificata che si riavvia ogni N minuti
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3B: apt -->
+      <div>
+        <div class="mod-label">3B — <code>apt</code> — Package Manager Alto Livello</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Uso</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>apt update</code></td>
+              <td></td>
+              <td>Aggiorna l'indice dei repo (non installa nulla). Da fare sempre prima</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt install</code></td>
+              <td><code>apt install nome</code></td>
+              <td>Installa pacchetto e dipendenze</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt remove</code></td>
+              <td><code>apt remove nome</code></td>
+              <td>Rimuove binari, <strong>mantiene</strong> i file di configurazione</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt purge</code></td>
+              <td><code>apt purge nome</code></td>
+              <td>Rimuove tutto inclusa configurazione. Usa per reinstallare da zero</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt upgrade</code></td>
+              <td></td>
+              <td>Aggiorna tutti i pacchetti installati</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt autoremove</code></td>
+              <td></td>
+              <td>Rimuove dipendenze diventate orfane</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt search</code></td>
+              <td><code>apt search keyword</code></td>
+              <td>Cerca pacchetti per nome/descrizione</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt show</code></td>
+              <td><code>apt show nome</code></td>
+              <td>Info dettagliate su un pacchetto (dipendenze, versione, descrizione)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt list</code></td>
+              <td><code>--installed</code> · <code>--upgradable</code></td>
+              <td>Lista pacchetti installati / aggiornabili</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3B: dpkg -->
+      <div>
+        <div class="mod-label">3B — <code>dpkg</code> — Package Manager Basso Livello</div>
+        <table>
+          <thead><tr><th>Comando</th><th>Flag</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cmd"><code>dpkg -i</code></td>
+              <td><code>dpkg -i file.deb</code></td>
+              <td>Installa da file .deb locale (no dipendenze automatiche)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>dpkg -r</code></td>
+              <td><code>dpkg -r nome</code></td>
+              <td>Rimuove pacchetto (mantiene config)</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>dpkg -P</code></td>
+              <td><code>dpkg -P nome</code></td>
+              <td>Purge completo inclusa configurazione</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>dpkg -l</code></td>
+              <td></td>
+              <td>Lista tutti i pacchetti installati</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>dpkg -L</code></td>
+              <td><code>dpkg -L nome</code></td>
+              <td>Lista file installati dal pacchetto</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>dpkg -S</code></td>
+              <td><code>dpkg -S /path/file</code></td>
+              <td>A quale pacchetto appartiene questo file?</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>dpkg -s</code></td>
+              <td><code>dpkg -s nome</code></td>
+              <td>Stato e info del pacchetto installato</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>apt-cache showpkg</code></td>
+              <td><code>apt-cache showpkg nome</code></td>
+              <td>Versioni disponibili, repo di provenienza, dipendenze inverse</td>
+            </tr>
+            <tr>
+              <td class="cmd"><code>ldd</code></td>
+              <td><code>ldd /usr/sbin/sshd</code></td>
+              <td>Mostra librerie dinamiche .so richieste dal binario</td>
+            </tr>
+            <tr>
+              <td class="note" colspan="3">
+                <span class="tag-sec">⚔ SEC</span> — Supply chain: aggiungere repo non fidati = rischio di pacchetti compromessi. Chiavi in <code>/etc/apt/trusted.gpg.d/</code> verificano ogni download
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- #content -->
+
+<div id="toast">copiato negli appunti</div>
+
+<script>
+  /* ── COPY ON CLICK ──────────────────────────────────────── */
+  document.querySelectorAll('code').forEach(el => {
+    el.title = 'clicca per copiare';
+    el.addEventListener('click', () => {
+      const txt = el.textContent;
+      navigator.clipboard.writeText(txt).then(() => {
+        el.classList.add('copied');
+        setTimeout(() => el.classList.remove('copied'), 900);
+        showToast(txt);
+      }).catch(() => {
+        // fallback per ambienti senza clipboard API
+        const ta = document.createElement('textarea');
+        ta.value = txt;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        el.classList.add('copied');
+        setTimeout(() => el.classList.remove('copied'), 900);
+        showToast(txt);
+      });
+    });
+  });
+
+  const toast = document.getElementById('toast');
+  let toastTimer;
+  function showToast(txt) {
+    const short = txt.length > 30 ? txt.slice(0, 30) + '…' : txt;
+    toast.textContent = '✓  ' + short;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+  }
+
+  /* ── SEARCH / FILTER ────────────────────────────────────── */
+  const searchInput = document.getElementById('search');
+  const countEl     = document.getElementById('search-count');
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    let visible = 0, total = 0;
+
+    document.querySelectorAll('tbody tr').forEach(row => {
+      if (row.cells.length < 2) return; // skip note rows solo testo
+      total++;
+      const match = !q || row.textContent.toLowerCase().includes(q);
+      row.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+
+    // espandi tutti i blocchi se si sta cercando
+    if (q) {
+      document.querySelectorAll('.block').forEach(b => b.classList.remove('collapsed'));
+      countEl.textContent = `${visible} / ${total}`;
+    } else {
+      countEl.textContent = '';
+    }
+  });
+
+  /* Shortcut: / per mettere focus sulla ricerca */
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      searchInput.dispatchEvent(new Event('input'));
+      searchInput.blur();
+    }
+  });
+
+  /* ── COLLAPSIBLE BLOCKS ─────────────────────────────────── */
+  function toggleBlock(header) {
+    // non fare collapse se si sta cercando
+    if (searchInput.value.trim()) return;
+    header.closest('.block').classList.toggle('collapsed');
+  }
+</script>
+
+</body>
+</html>
