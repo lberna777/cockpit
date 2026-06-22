@@ -14,6 +14,12 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 **atime** — access time. Timestamp dell'ultimo accesso al contenuto di un file. Uno dei tre timestamp di ogni file (vedi anche mtime, ctime).
 
+## B
+
+**banner grabbing** — tecnica di enumeration che consiste nel connettersi raw a un servizio testuale (SMTP, FTP, HTTP, ecc.) con `nc` o `telnet` e leggere il banner che il server invia automaticamente prima di qualsiasi autenticazione. Rivela nome software, versione, hostname. Spesso è l'unica azione necessaria per raccogliere info senza autenticarsi.
+
+**brute force** — attacco che prova sistematicamente tutte le combinazioni possibili di una password finché non trova quella corretta. Efficace su spazi piccoli (es. PIN 4 cifre = 10.000 combinazioni). Tool: Hydra (online, su servizi di rete), John the Ripper (offline, su hash locali).
+
 ## C
 
 **core dump** — copia dello stato di memoria di un processo scritta su disco al momento della terminazione anomala (es. SIGSEGV, SIGQUIT). Usata per debugging post-mortem con `gdb ./programma core`. Non tutti i segnali producono core dump; dipende dalla signal disposition e dal limite `ulimit -c`.
@@ -60,6 +66,12 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 **gruppo supplementare** — gruppi aggiuntivi a cui un utente appartiene oltre al primario. Aggiunti con `usermod -aG`. Visibili con `groups nomeutente`.
 
+## H
+
+**host-only network (VirtualBox)** — tipo di rete virtuale isolata tra l'host fisico e le VM. Non c'è accesso a internet né alla LAN fisica. Le VM si vedono tra loro e con l'host tramite l'interfaccia `vboxnet0`. Tipicamente `192.168.56.x`. Contrapposta alla scheda NAT (`enp0s3`, `10.0.2.x`) che dà solo internet uscente. Usata nei lab Security per ambiente isolato attacco/difesa.
+
+**Hydra** — tool di brute force multi-protocollo (SSH, HTTP, FTP, SMTP, ecc.). Prova combinazioni username/password in parallelo su servizi di rete. Flag: `-l user` (username fisso), `-P wordlist.txt` (wordlist), `-x 4:4:1` (genera PIN a 4 cifre numeriche al volo), `ssh://ip:porta` (target).
+
 ## I
 
 **init** — processo con PID=1, il primo avviato dal kernel. È responsabile (direttamente o indirettamente) di tutti gli altri processi del sistema. Implementazioni storiche: SysVinit → Upstart → Systemd (attuale standard).
@@ -69,6 +81,8 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 **inode** — struttura dati del filesystem che contiene i metadati di un file (permessi, owner, timestamp, puntatori ai blocchi dati). Il nome del file è separato dall'inode — un file può avere più nomi (hard link) che puntano allo stesso inode.
 
 ## J
+
+**John the Ripper** — tool di password cracking offline. Prova candidati da wordlist o genera combinazioni contro hash locali (da `/etc/shadow` o file `.bak`). Nessun lockout: lavora su file, non su servizi di rete. `unshadow passwd shadow > combined.txt` prepara l'input; `john --wordlist=file.txt combined.txt` lancia il cracking; `john --show combined.txt` mostra le password trovate.
 
 **job (job control)** — astrazione della shell per gestire i processi che ha lanciato direttamente. Identificato da un Job ID locale (prefisso `%`). Distinto dal PID: un job può comprendere più processi in pipeline. Quando la shell chiude, i job vengono notificati con SIGHUP; i processi senza job (disowned o nohup) no.
 
@@ -88,6 +102,8 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 ## M
 
+**misconfiguration** — configurazione errata di un servizio che espone informazioni o accesso non intenzionali. Esempi: SMTP con VRFY abilitato rivela username; DB esposto sulla rete senza filtro firewall; password in chiaro nel DB invece di hash; banner che rivela versione software vulnerabile. È la causa più comune di violazioni evitabili.
+
 **logger** — comando che invia messaggi a rsyslog dalla riga di comando. Usato per testare la configurazione e negli script cron. Sintassi: `logger -p facility.priority "messaggio"`. Es: `logger -p local4.info "test"`.
 
 **magic number** — sequenza di byte all'inizio di un file che identifica il formato. Es: i file JPEG iniziano sempre con `FF D8 FF`, gli eseguibili Linux con `7F 45 4C 46`. Usati dal comando `file` per identificare il tipo di contenuto indipendentemente dall'estensione.
@@ -97,6 +113,8 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 **mtime** — modification time. Timestamp dell'ultima modifica al *contenuto* del file. Il più usato dei tre timestamp (vedi anche atime, ctime).
 
 ## N
+
+**nmap** — scanner di rete per host discovery e port scanning. Flag principali: `-sn` (ping scan, solo host discovery, usa ARP su LAN con sudo), `-sT` (TCP connect scan, non richiede root), `-sS` (SYN scan, più veloce e stealth, richiede root), `-sV` (version detection: legge i banner), `-p-` (tutte le 65535 porte), `-p 22,80,443` (porte specifiche). Senza `-p-` scansiona solo ~1000 porte popolari.
 
 **nohup** — comando che rende un processo immune al segnale SIGHUP (hangup inviato alla chiusura della shell). Redirige anche stdout su `nohup.out` se non diversamente specificato. Si usa all'avvio: `nohup cmd &`. Differenza con `disown`: `nohup` si specifica prima che il processo parta; `disown` agisce su processi già in background.
 

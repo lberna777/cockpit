@@ -42,7 +42,7 @@
 ### Security
 | Modulo | Completato | Ultimo ripasso | Prossimo ripasso | Priorità |
 |--------|-----------|----------------|-----------------|----------|
-| — | — | — | — | (reset 20/06) |
+| S1 | 2026-06-22 | mai | 2026-06-25 | 🟢 |
 
 ---
 

@@ -218,6 +218,22 @@ ssh -p <porta> root@<ip> "cat /root/shadow.bak" > shadow.bak
 
 ---
 
+## VM Security — IP target cambia dopo riavvio
+
+**Problema**: dopo il riavvio di una VM target, `nmap -sn` mostra un IP diverso da prima (es. era `.100`, ora è `.102`). Il vecchio IP potrebbe ancora comparire nella scansione.
+**Causa**: il DHCP di vboxnet0 assegna un nuovo lease ad ogni boot se quello precedente è scaduto. Il vecchio IP resta visibile brevemente come **ARP ghost** nella cache del gateway `.1`, poi sparisce.
+**Soluzione**: rilanciare `nmap -sn` dopo qualche minuto per confermare gli IP aggiornati. Verificare in VirtualBox quante VM sono "Running" per escludere duplicati. Il conteggio definitivo dei target: numero di MAC con vendor Oracle/VirtualBox, escluso il proprio IP (nessun MAC) e il gateway `.1`.
+
+---
+
+## VM Security — CUPP non installabile per DNS failure
+
+**Problema**: `sudo apt install cupp` → `Temporary failure resolving 'deb.parrot.sh'`
+**Causa**: la VM Parrot non riesce a risolvere i nomi DNS — può succedere se la scheda NAT ha problemi o il resolver è mal configurato.
+**Soluzione rapida**: creare la wordlist manualmente con `nano shannon.txt` inserendo varianti del target (nome, cognome, anno di nascita, username). Alternativa: usare `crunch` se disponibile (`which crunch`). Per ripristinare DNS: `ping 8.8.8.8` (testa connettività), poi `cat /etc/resolv.conf` (verifica nameserver configurato).
+
+---
+
 ## VM Security — nmap su rete host-only
 
 **Problema**: `nmap -sn <rete>/24` mostra un host in più rispetto alle VM avviate (es. 5 invece di 4)

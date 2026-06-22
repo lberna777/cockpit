@@ -8,6 +8,69 @@
 
 ---
 
+### Sessione 37 — 2026-06-22 (completata)
+**Focus**: Security — S1 LAB Enumerazione (esecuzione su VM)
+
+**Coperto in sessione**:
+- Es 1: host discovery (`nmap -sn`) → identificati 3 target reali: `.101` (t-2), `.102` (t-3), `.104` (t-1)
+- Es 2a: port scan TCP completo (`nmap -sT -p-`) su tutti e 3 i target
+- Es 2b: version detection (`nmap -sV`) → mappa servizi completa (OpenSSH, Postfix, Dovecot, MariaDB, PostgreSQL, Samba, BIND, Werkzeug/Flask)
+- Es 3a: banner grabbing SMTP (inferred dal port map)
+- Es 3b: PostgreSQL enumeration → `accounts_db` → credenziali in chiaro: lovelace/babbage/turing
+- Es 4a: credential reuse SSH → lovelace/babbage/turing funzionano su `.104:22`; `.101/.102:22` solo publickey
+- Es 4b: Hydra brute force PIN su `.101:1337` → `root/0153`
+- Es 5a: file transfer con ssh+cat (scp non funziona su porta 1337 senza SFTP subsystem)
+- Es 5b/5c: wordlist manuale (CUPP non installabile per DNS failure); john carica hash ma non cracca (wordlist troppo piccola)
+- `guida_lab_moduloS1_enumerazione_nmap.md` completata con output reali inline + risposte ai dubbi
+- `corrente.md` aggiornato: S1 ✅, Security ~7%, sessione 37
+
+**Non coperto / da riprendere**:
+- john con rockyou.txt (wordlist manuale insufficiente, DNS Parrot non funzionante)
+- SysAdmin 3D Es. 2-6 — invariato
+
+**Prossima sessione — da dove partire**:
+→ Security S2 Autenticazione: `/lezione S2` → `/lab S2` → esecuzione VM
+→ SysAdmin 3D Es. 2-6 (VM vagrant, ping + ss -tlnp + /etc/hosts + dig + tcpdump)
+
+---
+
+### Sessione 36 — 2026-06-22 (completata)
+**Focus**: Security — S1 /appunti (teoria → appunti definitivi)
+
+**Coperto in sessione**:
+- `/appunti S1` eseguito: `Appunti_grezzi_lezione_S1.md` → `appunti_moduloS1_offensive_security_enumerazione.md`
+- 8 lacune esplicite risolte inline (Kill Chain, NIST CSF, tabella Google Dork, DNS records, subdomain/CT abuse, NMAP con esempi e output)
+- 6 sezioni assenti integrate (metodologie, MITRE ATT&CK, casi concreti, evasione scan, vuln scanners, postura interna)
+- 4 punti di forza segnalati; autoverifica 6/6 corrette confermata
+- `corrente.md` aggiornato: S1 🔄 con nota "appunti definitivi ✅ (22/06)"
+- ⚠️ Nota: log sessione 34 contiene dati inaccurati (descriveva lab + appunti mai eseguiti — i file non esistevano, corrente.md non era stato aggiornato di conseguenza)
+
+**Non coperto / da riprendere**:
+- S1 LAB su VM (esercizi 1-5) — da eseguire nella stessa sessione pomeridiana
+
+**Prossima azione**:
+→ Avvia VM Parrot + 3 target (guida: `guida_lab_moduloS1_enumerazione_nmap.md`)
+
+---
+
+### Sessione 35 — 2026-06-22 (completata)
+**Focus**: Security — S1 produzione guida-lab operativa
+
+**Coperto in sessione**:
+- Letti PDF teoria (53 slide) + HTML LAB (~6 sezioni) integralmente
+- Prodotta nuova guida-lab: `guida_lab_moduloS1_enumerazione_nmap.md` (5 esercizi, anatomia comandi, ⚠️ errori integrati)
+- `link_modules.py --apply` → S1: lezione ↔ guida-lab collegati
+- `corrente.md` aggiornato: nota guida-lab ✅ (22/06)
+
+**Non coperto / da riprendere**:
+- `/appunti S1` — rimandato alla sessione successiva (completato in sessione 36)
+- S1 LAB su VM — da eseguire
+
+**Prossima sessione — da dove partire**:
+→ `/appunti S1` → poi S1 LAB su VM
+
+---
+
 ### Sessione 34 — 2026-06-18 (completata)
 **Focus**: Security — S1 LAB Enumerazione (esecuzione completa)
 

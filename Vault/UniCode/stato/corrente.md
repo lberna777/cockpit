@@ -1,5 +1,5 @@
 # Stato Corrente — Studio Attivo
-**Sessione**: 34 | **Aggiornato**: 2026-06-18
+**Sessione**: 37 | **Aggiornato**: 2026-06-22
 
 > **Istruzione per Claude**: questo file va letto ALL'INIZIO di ogni sessione. È l'unico file obbligatorio per avere contesto.
 > Per dettagli sui moduli (materiali, concetti, esercizi): `stato/percorso.md`
@@ -44,7 +44,7 @@
 
 | Cod | Modulo | ⭐ Tipo esame | Locale | Stato |
 |---|---|---|---|---|
-| S1 | Principi offensive + LAB Enumerazione | base (feed tutte) | ✓ | 🔄 |
+| S1 | Principi offensive + LAB Enumerazione | base (feed tutte) | ✓ | ✅ Sessione 37 |
 | S2 | Autenticazione | — | ✓ | ⬜ |
 | S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | ⬜ |
 | S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | ⬜ |
@@ -87,7 +87,7 @@ Iptables/NFTables (S5) · Binary exploitation (S4) · Web vulnerabilities (S3).
 
 ```
 SysAdmin  ██████░░░░  ~63%  (10/16 moduli ✅ — il 77% precedente ignorava 3E/3F/4A/4B/4C)
-Security  ░░░░░░░░░░    0%  (0/15 moduli ✅ — reset 20/06, si riparte da S1)
+Security  █░░░░░░░░░  ~7%  (1/15 moduli ✅ — S1 completato 22/06)
 Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode (16/06)
 ```
 
@@ -102,7 +102,7 @@ Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode
 
 > ✅ **Diritto chiuso** (16/06, **30 e lode**). 🚨 **Focus 18/06 → 17/07**: chiudere **Security da 0%** + **SysAdmin residuo** per la coppia **Sistemi 15/07** + **Security 17/07**. Ritmo ~5h/gg costanti (~4h Security + ~1.5h SysAdmin). Security è il collo di bottiglia: i LAB su VM vanno eseguiti giorno per giorno, non accumulati.
 
-**Security** (carico dominante) → S1 🔄: lezione ✅ · appunti grezzi ✅ · guida-lab ✅ (22/06) — **prossimo: eseguire lab S1 su VM** (avvia 3 target, segui `guida_lab_moduloS1_enumerazione_nmap.md`). Poi S2 → S3 → S4 (Binary Exploits entro fine giugno).
+**Security** (carico dominante) → S1 ✅ completato (22/06). **Prossimo: S2 Autenticazione** → lezione + guida-lab + esecuzione VM. Poi S3 → S4 (Binary Exploits entro fine giugno).
 **SysAdmin** (in parallelo, ritmo basso) → 3D Es. 2-6: avviare VM, eseguire ping, ss -tlnp, /etc/hosts, dig, tcpdump → poi `/appunti 3D`. Poi 3E, 3F, catene scripting. **Rifinitura + simulazione concentrate 11–14/07** prima dell'esame del 15.
 
 ---
