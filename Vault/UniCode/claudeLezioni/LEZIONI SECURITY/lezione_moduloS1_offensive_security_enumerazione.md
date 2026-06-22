@@ -204,6 +204,7 @@ Reconnaissance ed enumeration si fanno tipicamente dall'esterno — postura fede
 <!-- AUTO-LINKS:START -->
 ## 🔗 Collegati
 
+- [[guida_lab_moduloS1_enumerazione_nmap]]
 
 **Hub:** [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]
 <!-- AUTO-LINKS:END -->

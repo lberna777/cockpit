@@ -102,7 +102,7 @@ Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode
 
 > ✅ **Diritto chiuso** (16/06, **30 e lode**). 🚨 **Focus 18/06 → 17/07**: chiudere **Security da 0%** + **SysAdmin residuo** per la coppia **Sistemi 15/07** + **Security 17/07**. Ritmo ~5h/gg costanti (~4h Security + ~1.5h SysAdmin). Security è il collo di bottiglia: i LAB su VM vanno eseguiti giorno per giorno, non accumulati.
 
-**Security** (carico dominante) → reset 20/06, si riparte da S1. Prossimo: S1 → S2 Autenticazione → S3 Web Security → S4 (Binary Exploits, il più tosto: entro fine giugno).
+**Security** (carico dominante) → S1 🔄: lezione ✅ · appunti grezzi ✅ · guida-lab ✅ (22/06) — **prossimo: eseguire lab S1 su VM** (avvia 3 target, segui `guida_lab_moduloS1_enumerazione_nmap.md`). Poi S2 → S3 → S4 (Binary Exploits entro fine giugno).
 **SysAdmin** (in parallelo, ritmo basso) → 3D Es. 2-6: avviare VM, eseguire ping, ss -tlnp, /etc/hosts, dig, tcpdump → poi `/appunti 3D`. Poi 3E, 3F, catene scripting. **Rifinitura + simulazione concentrate 11–14/07** prima dell'esame del 15.
 
 ---
