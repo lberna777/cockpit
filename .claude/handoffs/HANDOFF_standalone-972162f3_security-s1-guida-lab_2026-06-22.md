@@ -204,3 +204,10 @@ VBoxManage startvm "LabSicurezzaInformatica"
 Sai dire la differenza tra nmap -sT e nmap -sV?
 (Risposta: -sT = TCP connect, dice solo aperta/chiusa; -sV = legge il banner, identifica versione)
 ```
+
+---
+
+## Session Closed
+**Closed at:** 2026-06-22 ~14:00
+**Commit:** c06cba5
+**Session status:** Handed off to next session
