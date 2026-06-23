@@ -10,6 +10,9 @@ RECAP_DIR="$VAULT/recap"
 N_RECAPS=3
 INDEX_MAX_LINES=200
 
+# Genera i recap mancanti degli ultimi 7 giorni prima di iniettare
+python3 "$HOME/cockpit/scripts/recap_generator.py" --backfill 7 >/dev/null 2>&1 || true
+
 echo "=== MEMORIA PERSISTENTE (cockpit) ==="
 echo "Vault: $VAULT — ricerca con 'rg' nel vault. Note curate in claude/."
 echo ""
