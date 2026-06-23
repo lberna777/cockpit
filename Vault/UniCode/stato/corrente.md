@@ -45,7 +45,7 @@
 | Cod | Modulo | ⭐ Tipo esame | Locale | Stato |
 |---|---|---|---|---|
 | S1 | Principi offensive + LAB Enumerazione | base (feed tutte) | ✓ | ✅ Sessione 37 |
-| S2 | Autenticazione | — | ✓ | ⬜ |
+| S2 | Autenticazione | — | ✓ | 🔄 lezione ✅ |
 | S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | ⬜ |
 | S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | ⬜ |
 | S5 | Firewall + packet filter + LAB | ⭐ **Iptables/NFTables** | ✓ | ⬜ |
