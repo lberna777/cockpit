@@ -8,6 +8,26 @@
 
 ---
 
+### Sessione 38 — 2026-06-23 (in corso)
+**Focus**: Security — S2 Autenticazione (appunti definitivi)
+
+**Coperto in sessione**:
+- Appunti modulo S2 elaborati → `claudeAppunti/APPUNTI SECURITY/appunti_moduloS2_autenticazione.md`
+- Risolte 3 domande aperte inline: HSM (cos'è nel pratico), entropia password (formula + ragionamento), autenticazione attiva + S-KEY OTP (confusione con 2FA chiarita)
+- Integrata tabella PAM completa (module-type + control-flag + moduli comuni)
+- Corretta imprecisione: FIDO descritto come "autorizzazione" → aggiunto a errori_frequenti.md
+- Autoverifica: 4/6 ✅ al primo tentativo; Q4+Q5 chiarite negli appunti
+- `corrente.md` aggiornato: S2 → ✅ Sessione 38; Security 13% (2/15)
+
+**Non coperto / da riprendere**:
+- SysAdmin 3D Es. 2-6 — invariato
+
+**Prossima sessione — da dove partire**:
+→ Security S3 Web Security: `/lezione S3` (PDF: `Web_security_6_mar.pdf`) → `/lab S3` (pentestlab.sh VM Parrot)
+→ SysAdmin 3D Es. 2-6 (VM vagrant: ping + ss -tlnp + /etc/hosts + dig + tcpdump)
+
+---
+
 ### Sessione 37 — 2026-06-22 (completata)
 **Focus**: Security — S1 LAB Enumerazione (esecuzione su VM)
 

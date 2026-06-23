@@ -73,9 +73,15 @@
 | `scp` lanciato da dentro una sessione SSH | S1 | Aprire un nuovo terminale locale, lanciare scp da Parrot verso il target |
 | `scp` su server con subsystem SFTP disabilitato | S1 | Usare `ssh -p <porta> user@ip "cat /path/file" > file` — non richiede il subsystem |
 
+### Terminologia Security
+| Errore | Modulo | Correzione |
+|--------|--------|------------|
+| FIDO descritto come "autorizzazione a doppia chiave" | S2 | FIDO riguarda l'**autenticazione** (chi sei), non l'autorizzazione (cosa puoi fare). "Doppia chiave" è impreciso: FIDO usa crittografia asimmetrica per autenticazione forte. |
+
 ### Pattern Ricorrenti Security
 - **Narrativa vs comandi**: tendenza a perdere il filo (cosa sto facendo e perché). Costruire sempre la catena: *che informazione ho → cosa cerco → quale comando la trova*.
 - **Assumere che gli IP degli esempi siano i propri**: gli IP nei PDF del corso (.32/.33/.34) sono esempi — verificare sempre con `ip a` + `nmap -sn`.
+- **Autenticazione vs autorizzazione**: la distinzione AAA viene formulata correttamente in teoria, ma scivola in pratica quando si descrivono sistemi concreti (FIDO, S2). Verificare ogni volta che si parla di un protocollo: *sta stabilendo chi sei (auth) o cosa puoi fare (authz)?*
 
 ---
 

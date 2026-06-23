@@ -1,5 +1,5 @@
 # Stato Corrente — Studio Attivo
-**Sessione**: 37 | **Aggiornato**: 2026-06-22
+**Sessione**: 38 | **Aggiornato**: 2026-06-23
 
 > **Istruzione per Claude**: questo file va letto ALL'INIZIO di ogni sessione. È l'unico file obbligatorio per avere contesto.
 > Per dettagli sui moduli (materiali, concetti, esercizi): `stato/percorso.md`
@@ -45,7 +45,7 @@
 | Cod | Modulo | ⭐ Tipo esame | Locale | Stato |
 |---|---|---|---|---|
 | S1 | Principi offensive + LAB Enumerazione | base (feed tutte) | ✓ | ✅ Sessione 37 |
-| S2 | Autenticazione | — | ✓ | 🔄 lezione ✅ |
+| S2 | Autenticazione | — | ✓ | ✅ Sessione 38 |
 | S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | ⬜ |
 | S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | ⬜ |
 | S5 | Firewall + packet filter + LAB | ⭐ **Iptables/NFTables** | ✓ | ⬜ |
@@ -87,7 +87,7 @@ Iptables/NFTables (S5) · Binary exploitation (S4) · Web vulnerabilities (S3).
 
 ```
 SysAdmin  ██████░░░░  ~63%  (10/16 moduli ✅ — il 77% precedente ignorava 3E/3F/4A/4B/4C)
-Security  █░░░░░░░░░  ~7%  (1/15 moduli ✅ — S1 completato 22/06)
+Security  ██░░░░░░░░  ~13%  (2/15 moduli ✅ — S1 22/06, S2 23/06)
 Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode (16/06)
 ```
 
@@ -102,7 +102,7 @@ Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode
 
 > ✅ **Diritto chiuso** (16/06, **30 e lode**). 🚨 **Focus 18/06 → 17/07**: chiudere **Security da 0%** + **SysAdmin residuo** per la coppia **Sistemi 15/07** + **Security 17/07**. Ritmo ~5h/gg costanti (~4h Security + ~1.5h SysAdmin). Security è il collo di bottiglia: i LAB su VM vanno eseguiti giorno per giorno, non accumulati.
 
-**Security** (carico dominante) → S1 ✅ completato (22/06). **Prossimo: S2 Autenticazione** → lezione + guida-lab + esecuzione VM. Poi S3 → S4 (Binary Exploits entro fine giugno).
+**Security** (carico dominante) → S1 ✅ (22/06), S2 ✅ (23/06 — teorico puro, appunti definitivi). **Prossimo: S3 Web Security** → `/lezione S3` (PDF: `Web_security_6_mar.pdf`) → `/lab S3` (pentestlab.sh su VM Parrot). S4 Binary Exploits entro fine giugno.
 **SysAdmin** (in parallelo, ritmo basso) → 3D Es. 2-6: avviare VM, eseguire ping, ss -tlnp, /etc/hosts, dig, tcpdump → poi `/appunti 3D`. Poi 3E, 3F, catene scripting. **Rifinitura + simulazione concentrate 11–14/07** prima dell'esame del 15.
 
 ---
