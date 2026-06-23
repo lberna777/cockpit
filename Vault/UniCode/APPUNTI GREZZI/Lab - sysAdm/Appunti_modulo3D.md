@@ -131,6 +131,14 @@ non riesco a riconoscere le altre informazioni però
 
 gli esercizi successivi credo richiedano delle chiarificazioni e avere ben chiaro di cosa stiamo parlando prima di affrontarli
 
+---
+
+> **⚠️ NOTA 2026-06-23**: appunti grezzi parziali (teoria + Es.1 ip a/ip r). Es. 2-6 da eseguire. La guida-lab completa Es.1–6 è in `guida_lab_modulo3D_networking_base.md`. Dopo aver eseguito tutti gli esercizi, aggiungere qui gli output e le osservazioni, poi `/appunti 3D`.
+
+## Es. 2–6 (da completare dopo il lab)
+
+<!-- Dopo aver eseguito ping, ss, /etc/hosts, dig, tracepath, tcpdump: aggiungi qui i tuoi output e le domande che emergono -->
+
 <!-- AUTO-LINKS:START -->
 ## 🔗 Collegati
 

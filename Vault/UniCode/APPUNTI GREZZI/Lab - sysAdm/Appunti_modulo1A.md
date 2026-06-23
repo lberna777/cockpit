@@ -166,7 +166,7 @@ vagrant@bookworm:~/Lab1A\$ cat > cerca_file.sh << 'EOF'
 ## 🔗 Collegati
 
 - [[appunti_modulo1A_bash_scripting]]
-- [[lezione_modulo1A_bash_scripting]]
+- [[guida_lab_modulo1A_bash_scripting]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]
 <!-- AUTO-LINKS:END -->

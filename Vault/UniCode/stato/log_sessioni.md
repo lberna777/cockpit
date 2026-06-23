@@ -8,7 +8,31 @@
 
 ---
 
-### Sessione 38 — 2026-06-23 (in corso)
+### Sessione 39 — 2026-06-23 (completata)
+**Focus**: SysAdmin — Audit qualità materiali + riorganizzazione sistema di studio
+
+**Coperto in sessione**:
+- Audit qualità di tutti i file SysAdmin (lezioni + appunti): scoperto che 0A–2B erano walkthrough mascherati da lezioni, prodotti col sistema embrionale
+- Knowledge check 0A–2B: Lorenzo non ricorda niente di teorico → confermato che il sistema embrionale non ha fissato i concetti
+- Decisione: esame SysAdmin è solo pratico → ripasso 0A–2B a bassa priorità; focus su 3D–4C
+- Rinominate lezioni 0B/1A/1B/2A/2B → `guida_lab_*` (erano walkthrough, non lezioni)
+- `corrente.md` aggiornato: 0A–2B → ⚠️, 3D → ⬜ restart, percentuale corretta ~25%
+- Chiarito il metodo di studio definitivo: lezione → grezzi → `/appunti`; guida_lab → annotata inline (stesso metodo Security)
+- Creata `guida_lab_modulo3D_networking_base.md` (Es. 1–6 completi, ancorata al lab HTML)
+- Aggiornata memoria persistente sul flusso di studio pratico
+
+**Non coperto / da riprendere**:
+- 3D lab sulla VM (Es. 1–6) — guida_lab pronta, da eseguire
+- S3 Web Security — non iniziato
+- Guida_lab 0A–2B da rifare con le nuove direttive (bassa priorità, quando c'è tempo)
+
+**Prossima sessione — da dove partire**:
+→ SysAdmin 3D: `cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh` → segui `guida_lab_modulo3D_networking_base.md` Es. 1–6, annota inline → poi `/appunti 3D`
+→ Security S3: `/lezione S3` (PDF: `Web_security_6_mar.pdf`) → `/lab S3`
+
+---
+
+### Sessione 38 — 2026-06-23 (completata)
 **Focus**: Security — S2 Autenticazione (appunti definitivi)
 
 **Coperto in sessione**:

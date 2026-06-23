@@ -386,7 +386,7 @@ sono conscio che non funzioni, ma l'errore è strettamente legato alla negazione
 ## 🔗 Collegati
 
 - [[appunti_modulo1B_funzioni_case_test]]
-- [[lezione_modulo1B_funzioni_case_test]]
+- [[guida_lab_modulo1B_funzioni_case_test]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]
 <!-- AUTO-LINKS:END -->

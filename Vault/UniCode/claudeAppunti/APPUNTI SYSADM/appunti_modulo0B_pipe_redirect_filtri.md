@@ -146,7 +146,7 @@ sudo tail -5 /var/log/auth.log
 <!-- AUTO-LINKS:START -->
 ## 🔗 Collegati
 
-- [[lezione_modulo0B_pipe_redirect_filtri]]
+- [[guida_lab_modulo0B_pipe_redirect_filtri]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]
 <!-- AUTO-LINKS:END -->

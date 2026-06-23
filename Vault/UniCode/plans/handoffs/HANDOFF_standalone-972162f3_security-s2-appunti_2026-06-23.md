@@ -162,3 +162,8 @@ cd ~/sysAdmin-lab && vagrant up --provider=virtualbox && vagrant ssh
 # Verifica: git commit + push a fine sessione
 # (file da committare: appunti S2, corrente.md, errori_frequenti.md, log_sessioni.md)
 ```
+
+## Session Closed
+**Closed at:** 2026-06-23 ~17:15
+**Commit:** 320d0f8
+**Session status:** Handed off to next session

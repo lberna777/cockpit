@@ -534,7 +534,7 @@ Gli script Bash sono la base di quasi tutti i tool di automazione offensiva e di
 ## 🔗 Collegati
 
 - [[Appunti_modulo1A]]
-- [[lezione_modulo1A_bash_scripting]]
+- [[guida_lab_modulo1A_bash_scripting]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]
 <!-- AUTO-LINKS:END -->

@@ -197,7 +197,7 @@ logout
 ## 🔗 Collegati
 
 - [[appunti_modulo2A_utenti_permessi]]
-- [[lezione_modulo2A_utenti_permessi]]
+- [[guida_lab_modulo2A_utenti_permessi]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]
 <!-- AUTO-LINKS:END -->

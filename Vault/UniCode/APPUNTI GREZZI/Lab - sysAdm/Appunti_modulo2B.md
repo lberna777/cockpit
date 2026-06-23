@@ -79,7 +79,7 @@ Ora attraverso i due utenti programmatori posso accedere a questa cartella esclu
 ## 🔗 Collegati
 
 - [[appunti_modulo2B_lab_utenti_permessi_file]]
-- [[lezione_modulo2B_lab_utenti_permessi_file]]
+- [[guida_lab_modulo2B_lab_utenti_permessi_file]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]
 <!-- AUTO-LINKS:END -->
