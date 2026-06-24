@@ -49,7 +49,7 @@
 |---|---|---|---|---|
 | S1 | Principi offensive + LAB Enumerazione | base (feed tutte) | ✓ | ✅ Sessione 37 |
 | S2 | Autenticazione | — | ✓ | ✅ Sessione 38 |
-| S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | ⬜ |
+| S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | 🔄 lezione scritta |
 | S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | ⬜ |
 | S5 | Firewall + packet filter + LAB | ⭐ **Iptables/NFTables** | ✓ | ⬜ |
 | S6 | Sicurezza fisica e cloud | — | ✓ | ⬜ |
