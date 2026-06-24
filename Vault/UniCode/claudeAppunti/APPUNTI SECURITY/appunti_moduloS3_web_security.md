@@ -324,3 +324,12 @@ Non è una vulnerabilità di attacco diretto, ma l'assenza di logging adeguato t
 - [[lezione_moduloS3_web_security]] — lezione sorgente di questi appunti
 - [[appunti_moduloS1_offensive_security_enumerazione]] — prerequisito: enumeration surface
 - [[appunti_moduloS2_autenticazione]] — prerequisito: session management, token
+
+<!-- AUTO-LINKS:START -->
+## 🔗 Collegati
+
+- [[guida_lab_moduloS3_web_security]]
+- [[lezione_moduloS3_web_security]]
+
+**Hub:** [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]
+<!-- AUTO-LINKS:END -->

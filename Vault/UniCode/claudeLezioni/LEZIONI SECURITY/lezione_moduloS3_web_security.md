@@ -313,3 +313,12 @@ I dieci item OWASP sono manifestazioni dello stesso problema di fiducia mal gest
 - [[lezione_moduloS1_offensive_security_enumerazione]] — prerequisito: nmap, enumeration, superficie d'attacco
 - [[lezione_moduloS2_autenticazione]] — prerequisito: sessioni, token, autenticazione vs autorizzazione
 - [[guida_lab_moduloS1_enumerazione_nmap]] — tecnica di enumeration usata come primo step del lab S3
+
+<!-- AUTO-LINKS:START -->
+## 🔗 Collegati
+
+- [[appunti_moduloS3_web_security]]
+- [[guida_lab_moduloS3_web_security]]
+
+**Hub:** [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]
+<!-- AUTO-LINKS:END -->
