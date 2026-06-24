@@ -8,6 +8,17 @@
 
 ---
 
+### Sessione 40 — 2026-06-24 (in corso)
+**Focus**: Security S3 — Web Security OWASP Top Ten
+
+**Coperto in sessione**:
+- Letti integralmente Web_security_6_marzo.pdf (45 pp.) e LAB_web_security_11_marzo.pdf (42 pp.)
+- Scritta lezione S3 completa (A1-A10, threat model, SQLi Union Based, XSS 3 tipi, CSRF, XXE, SSRF)
+- Appunti modulo S3 elaborati → `appunti_moduloS3_web_security.md`
+- Risolte 16 domande aperte dagli appunti grezzi
+
+---
+
 ### Sessione 39 — 2026-06-23 (completata)
 **Focus**: SysAdmin — Audit qualità materiali + riorganizzazione sistema di studio
 
