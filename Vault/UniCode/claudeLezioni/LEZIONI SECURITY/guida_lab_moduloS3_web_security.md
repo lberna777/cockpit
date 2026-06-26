@@ -17,29 +17,6 @@
 sudo ss -tulpn
 ```
 
-	┌─[lorenzo@parrot]─[~]  
-	└──╼ $sudo ss -tulpn  
-	Netid   State    Recv-Q    Send-Q                                Local Address:Port       Peer Address:Port     
-Process  
-	udp     UNCONN   0         0                                    192.168.56.103:123             0.0.0.0:*        
-	users:(("ntpd",pid=1042,fd=22))  
-	udp     UNCONN   0         0                                         10.0.2.15:123             0.0.0.0:*        
-	users:(("ntpd",pid=1042,fd=21))  
-	udp     UNCONN   0         0                                         127.0.0.1:123             0.0.0.0:*        
-	users:(("ntpd",pid=1042,fd=18))  
-	udp     UNCONN   0         0                                           0.0.0.0:123             0.0.0.0:*        
-	users:(("ntpd",pid=1042,fd=17))  
-	udp     UNCONN   0         0                [fe80::85fe:6b94:5216:2954]%enp0s8:123                [::]:*        
-	users:(("ntpd",pid=1042,fd=25))  
-	udp     UNCONN   0         0                [fe80::5e81:84f8:56ea:a4fa]%enp0s3:123                [::]:*        
-	users:(("ntpd",pid=1042,fd=24))  
-	udp     UNCONN   0         0            [fd17:625c:f037:2:db52:2b05:5624:7801]:123                [::]:*        
-	users:(("ntpd",pid=1042,fd=23))  
-	udp     UNCONN   0         0                                             [::1]:123                [::]:*        
-	users:(("ntpd",pid=1042,fd=19))  
-	udp     UNCONN   0         0                                              [::]:123                [::]:*        
-	users:(("ntpd",pid=1042,fd=16))
-
 > ✅ Solo `udp/123` (ntpd) — nessun TCP in ascolto, porta 80 libera. Si può procedere.
 > `ss -tulpn`: `-t` TCP, `-u` UDP, `-l` listening, `-p` processo, `-n` numerico. Ogni riga mostra indirizzo:porta e processo responsabile.
 
@@ -161,41 +138,6 @@ nmap -sT -p- IP_DVWA
 nmap -sV -p 80,8080 IP_DVWA
 ```
 
-┌─[lorenzo@parrot]─[~/pentestlab]
-└──╼ $ip a
-1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWNgroup default qlen 1000
-link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-inet 127.0.0.1/8 scope host lo
-valid_lft forever preferred_lft forever
-inet6 ::1/128 scope host noprefixroute
-valid_lft forever preferred_lft forever
-2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-link/ether 08:00:27:16:e5:88 brd ff:ff:ff:ff:ff:ff
-altname enx08002716e588
-inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
-valid_lft 84848sec preferred_lft 84848sec
-inet6 fd17:625c:f037:2:db52:2b05:5624:7801/64 scope global dynamic noprefixroute
-valid_lft 86030sec preferred_lft 14030sec
-inet6 fe80::5e81:84f8:56ea:a4fa/64 scope link noprefixroute
-valid_lft forever preferred_lft forever
-3: enp0s8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-link/ether 08:00:27:35:91:30 brd ff:ff:ff:ff:ff:ff
-altname enx080027359130
-inet 192.168.56.103/24 brd 192.168.56.255 scope global dynamic noprefixroute enp0s8
-valid_lft 549sec preferred_lft 549sec
-inet6 fe80::85fe:6b94:5216:2954/64 scope link noprefixroute
-valid_lft forever preferred_lft forever
-4: podman0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-link/ether ca:be:85:dc:4b:4c brd ff:ff:ff:ff:ff:ff
-inet 10.88.0.1/16 brd 10.88.255.255 scope global podman0
-valid_lft forever preferred_lft forever
-inet6 fe80::c8be:85ff:fedc:4b4c/64 scope link proto kernel_ll
-valid_lft forever preferred_lft forever
-5: veth0@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master podman0 state UP group default qlen 1000
-link/ether 22:22:b7:b4:4c:b3 brd ff:ff:ff:ff:ff:ff link-netns netns-54ca2fb9-6d2d-3d35-7fa6-944dfd4eddef
-inet6 fe80::2022:b7ff:feb4:4cb3/64 scope link proto kernel_ll
-valid_lft forever preferred_lft forever
-
 > **`ip a` — interfacce attive:**
 > - `enp0s3 · 10.0.2.15/24` — NAT VirtualBox (uscita internet)
 > - `enp0s8 · 192.168.56.103/24` — host-only (rete condivisa con l'host fisico)
@@ -228,13 +170,6 @@ valid_lft forever preferred_lft forever
 - `nmap -sV -p 80,8080 IP` — service/version detection: legge i banner dei servizi per identificare nome e versione. `-sV` fa "parlare" il servizio. Senza `-sV` sai solo che la porta è aperta.
 
 ⚠️ **Errore frequente**: `-sT` vs `-sV` hanno funzioni diverse. `-sT` = stato porta (open/closed); `-sV` = servizio e versione. Per sapere "cosa gira sulla 80" serve `-sV`.
-
-**Output atteso**:
-```
-Host: 192.168.56.X  Status: Up
-PORT   STATE SERVICE VERSION
-80/tcp open  http    Apache httpd 2.4.x
-```
 
 **Cosa verificare**: porta 80 aperta sul container; `http://IP_DVWA` nel browser mostra la login di DVWA.
 
@@ -424,15 +359,6 @@ python3 -m http.server 8081
 - `echo '<?php ... ?>' > test.php` — crea un file PHP minimale come proof-of-concept. Se DVWA mostra "Hello World", ha scaricato e *eseguito* il PHP remoto (RFI con esecuzione). Se mostra il sorgente PHP, l'esecuzione remota è disabilitata.
 
 ⚠️ **RFI è disabilitato di default su DVWA** (`allow_url_include = Off` in PHP). Il lab mostra il vettore teorico. In un sistema reale con PHP mal configurato, l'RFI permetterebbe RCE completo.
-
-**Output atteso** (LFI):
-```
-# La pagina mostra il contenuto di /etc/passwd:
-root:x:0:0:root:/root:/bin/bash
-daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
-...
-dvwa:x:1000:1000:dvwa,,,:/home/dvwa:/bin/bash
-```
 
 **Cosa verificare**: il contenuto di `/etc/passwd` appare nella pagina DVWA — hai letto un file di sistema tramite il solo parametro URL. A1 (Broken Access Control / File Disclosure) confermato.
 

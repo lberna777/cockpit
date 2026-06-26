@@ -8,8 +8,34 @@
 
 ---
 
-### Sessione 40 — 2026-06-24 (in corso)
-**Focus**: Security S3 — Web Security OWASP Top Ten
+### Sessione 41 — 2026-06-26 (completata)
+**Focus**: Security — S2 ripasso + S3 lab VM (DVWA)
+
+**Coperto in sessione**:
+- Ripasso S2 Autenticazione: 1/5 corrette, 2/5 parziali, 2/5 errate — debolezze su PAM control-flag e autenticazione vs autorizzazione
+- Lab S3 Web Security su VM Parrot: tutti 9 esercizi completati
+  - Es.1 Service Enumeration (nmap) ✅
+  - Es.2 Directory Discovery (gobuster) ✅
+  - Es.3 Brute Force Login (Burp + Hydra) ✅ — fix sintassi Hydra 9.5 (condition string last)
+  - Es.4 LFI Path Traversal ✅ — fix: 5 livelli `../` non 4
+  - Es.5 Command Injection ✅
+  - Es.6 SQL Injection semplice ✅
+  - Es.7 SQL Injection Union Based ✅
+  - Es.8 XSS Reflected ✅
+  - Es.9 XSS Stored ✅
+- Guida lab aggiornata con output reali, fix e spiegazioni inline
+
+**Non coperto / da riprendere**:
+- SysAdmin 3D: lab sulla VM ancora da eseguire
+
+**Prossima sessione — da dove partire**:
+→ Security S4 Binary Exploits: `/lezione S4` (PDF: cercare in `SLIDE LAB/SICINF/`) → `/lab S4`
+→ SysAdmin 3D: `cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh` → segui guida_lab_modulo3D
+
+---
+
+### Sessione 40 — 2026-06-24 (completata)
+**Focus**: Security S3 — Web Security OWASP Top Ten (teoria)
 
 **Coperto in sessione**:
 - Letti integralmente Web_security_6_marzo.pdf (45 pp.) e LAB_web_security_11_marzo.pdf (42 pp.)

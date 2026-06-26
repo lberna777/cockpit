@@ -1,5 +1,5 @@
 # Stato Corrente — Studio Attivo
-**Sessione**: 39 | **Aggiornato**: 2026-06-23
+**Sessione**: 41 | **Aggiornato**: 2026-06-26
 
 > **Istruzione per Claude**: questo file va letto ALL'INIZIO di ogni sessione. È l'unico file obbligatorio per avere contesto.
 > Per dettagli sui moduli (materiali, concetti, esercizi): `stato/percorso.md`
@@ -49,7 +49,7 @@
 |---|---|---|---|---|
 | S1 | Principi offensive + LAB Enumerazione | base (feed tutte) | ✓ | ✅ Sessione 37 |
 | S2 | Autenticazione | — | ✓ | ✅ Sessione 38 |
-| S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | 🔄 lezione + guida_lab scritte — lab VM mancante |
+| S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | ✅ Sessione 41 |
 | S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | ⬜ |
 | S5 | Firewall + packet filter + LAB | ⭐ **Iptables/NFTables** | ✓ | ⬜ |
 | S6 | Sicurezza fisica e cloud | — | ✓ | ⬜ |
@@ -90,7 +90,7 @@ Iptables/NFTables (S5) · Binary exploitation (S4) · Web vulnerabilities (S3).
 
 ```
 SysAdmin  ████░░░░░░  ~25%  (4/16 moduli ✅ solidi: 2C, 3A, 3B, 3C — 0A–2B lab fatti ma materiali da rifare, 3D–4C da fare)
-Security  ██░░░░░░░░  ~13%  (2/15 moduli ✅ — S1 22/06, S2 23/06)
+Security  ███░░░░░░░  ~20%  (3/15 moduli ✅ — S1 22/06, S2 23/06, S3 26/06)
 Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode (16/06)
 ```
 
@@ -105,7 +105,7 @@ Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode
 
 > ✅ **Diritto chiuso** (16/06, **30 e lode**). 🚨 **Focus 18/06 → 17/07**: chiudere **Security da 0%** + **SysAdmin residuo** per la coppia **Sistemi 15/07** + **Security 17/07**. Ritmo ~5h/gg costanti (~4h Security + ~1.5h SysAdmin). Security è il collo di bottiglia: i LAB su VM vanno eseguiti giorno per giorno, non accumulati.
 
-**Security** (carico dominante) → S1 ✅, S2 ✅. **Prossimo: S3 Web Security** → `/lezione S3` (PDF: `Web_security_6_mar.pdf`) → `/lab S3` (pentestlab.sh su VM Parrot). S4 Binary Exploits entro fine giugno.
+**Security** (carico dominante) → S1 ✅, S2 ✅, S3 ✅. **Prossimo: S4 Binary Exploits** → `/lezione S4` → `/lab S4`. Completare entro fine giugno.
 **SysAdmin** (in parallelo) → **3D**: lezione ✅, guida_lab ✅ (appena creata). Prossimo passo: avvia VM (`cd ~/Progetti/sysAdmin-lab && vagrant up --provider=virtualbox && vagrant ssh`), segui `guida_lab_modulo3D_networking_base.md` Es. 1–6, annota inline, poi `/appunti 3D` per la parte teorica dai grezzi. Poi: 3E → 3F → 4B → 4C. Guida_lab 0A–2B da rifare a bassa priorità.
 
 ---

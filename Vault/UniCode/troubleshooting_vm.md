@@ -246,6 +246,24 @@ ssh -p <porta> root@<ip> "cat /root/shadow.bak" > shadow.bak
 
 ---
 
+## VM Security — Hydra http-get-form (Hydra 9.5)
+
+**Problema**: `hydra ... http-get-form "path:params:condition:H=Cookie: value"` → `[ERROR] optional parameters must have the format X=value: <condition_string>`
+**Causa**: In Hydra 9.5 il parser di http-get-form richiede che la **condition string sia l'ultimo campo**, dopo tutti gli optional (`H=`, `C=`, ecc.). Il PDF del prof usa la sintassi Hydra 8.x (condition prima dell'header) che non funziona più.
+**Soluzione**: spostare la condition string in ultima posizione e usare `\:` per il due punti nell'header Cookie:
+```bash
+hydra IP \
+  -L users.txt -P passwords.txt \
+  http-get-form \
+  "/path:user=^USER^&pass=^PASS^:H=Cookie\: PHPSESSID=<id>; security=low:Username and/or password incorrect."
+```
+Formato corretto: `"path:params:H=header\: value:condition_string"`
+
+**Problema**: wordlist `xato-net-10-million-passwords-100.txt` non trovata su Parrot
+**Soluzione**: usare `/usr/share/wordlists/fasttrack.txt` (222 password comuni, contiene "password")
+
+---
+
 ## Checklist pre-snapshot "baseline-pulita" (VM Security)
 
 Prima di congelare la baseline, verificare che i tool delle 5 famiglie d'esame ci siano già:
