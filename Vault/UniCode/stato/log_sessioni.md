@@ -8,6 +8,25 @@
 
 ---
 
+### Sessione 42 — 2026-06-29 (completata)
+**Focus**: Security — S4 Binary Exploits (lezione)
+
+**Coperto in sessione**:
+- Lettura integrale PDF teoria "Binary exploits" (64pp) + PDF lab "LAB bruteforcing e buffer overflows" (55pp)
+- Creazione `lezione_moduloS4_binary_exploits.md`: stack frame IA32, __cdecl, buffer overflow, GDB, little endian, shellcode + NOP sled, ret2libc, ROP, contromisure (canarini/NX/ASLR/PIE/CFI)
+- Threat model attaccante+difensore, 5 domande autoverifica stile quiz 40%
+- Stato S4 aggiornato a 🔄
+
+**Non coperto / da riprendere**:
+- Appunti grezzi S4: Lorenzo studia la lezione e li scrive in autonomia
+- VM non toccata — `/lab S4` da fare dopo gli appunti grezzi
+
+**Prossima sessione — da dove partire**:
+→ Security S4: `/appunti S4` (appunti grezzi già pronti) → `/lab S4`
+→ SysAdmin 3D: `cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh` → segui guida_lab_modulo3D
+
+---
+
 ### Sessione 41 — 2026-06-26 (completata)
 **Focus**: Security — S2 ripasso + S3 lab VM (DVWA)
 

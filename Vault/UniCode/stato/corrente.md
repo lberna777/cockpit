@@ -1,5 +1,5 @@
 # Stato Corrente — Studio Attivo
-**Sessione**: 41 | **Aggiornato**: 2026-06-26
+**Sessione**: 42 | **Aggiornato**: 2026-06-29
 
 > **Istruzione per Claude**: questo file va letto ALL'INIZIO di ogni sessione. È l'unico file obbligatorio per avere contesto.
 > Per dettagli sui moduli (materiali, concetti, esercizi): `stato/percorso.md`
@@ -105,7 +105,7 @@ Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode
 
 > ✅ **Diritto chiuso** (16/06, **30 e lode**). 🚨 **Focus 18/06 → 17/07**: chiudere **Security da 0%** + **SysAdmin residuo** per la coppia **Sistemi 15/07** + **Security 17/07**. Ritmo ~5h/gg costanti (~4h Security + ~1.5h SysAdmin). Security è il collo di bottiglia: i LAB su VM vanno eseguiti giorno per giorno, non accumulati.
 
-**Security** (carico dominante) → S1 ✅, S2 ✅, S3 ✅. **Prossimo: S4 Binary Exploits** → `/lezione S4` → `/lab S4`. Completare entro fine giugno.
+**Security** (carico dominante) → S1 ✅, S2 ✅, S3 ✅, S4 🔄. **Prossimo: S4** → `/appunti S4` (appena pronti i grezzi) → `/lab S4`. Poi S5.
 **SysAdmin** (in parallelo) → **3D**: lezione ✅, guida_lab ✅ (appena creata). Prossimo passo: avvia VM (`cd ~/Progetti/sysAdmin-lab && vagrant up --provider=virtualbox && vagrant ssh`), segui `guida_lab_modulo3D_networking_base.md` Es. 1–6, annota inline, poi `/appunti 3D` per la parte teorica dai grezzi. Poi: 3E → 3F → 4B → 4C. Guida_lab 0A–2B da rifare a bassa priorità.
 
 ---

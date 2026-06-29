@@ -6,6 +6,8 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 ## A
 
+**ASLR (Address Space Layout Randomization)** — contromisura OS che randomizza a ogni avvio gli indirizzi base di stack, heap e librerie di un processo. Impedisce all'attaccante di conoscere l'indirizzo di funzioni di libreria (es. `system()`) o dello stack. Nota critica: **non randomizza `.text`** in configurazioni di base (solo con PIE). Disabilitato con `echo 0 > /proc/sys/kernel/randomize_va_space`.
+
 **apt** — Advanced Package Tool. Tool di gestione dei pacchetti di alto livello su Debian/Ubuntu. Si appoggia a `dpkg` per le operazioni sui singoli file `.deb` e aggiunge la risoluzione automatica delle dipendenze, il reperimento dai repository e la gestione degli aggiornamenti. Comandi principali: `apt update`, `apt install`, `apt remove`, `apt purge`, `apt upgrade`, `apt autoremove`.
 
 **apt-cache** — tool di interrogazione del database locale di apt. `apt-cache showpkg <nome>` mostra versioni disponibili, repo di provenienza e dipendenze inverse (chi dipende dal pacchetto). Non modifica il sistema.
@@ -18,9 +20,15 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 **banner grabbing** — tecnica di enumeration che consiste nel connettersi raw a un servizio testuale (SMTP, FTP, HTTP, ecc.) con `nc` o `telnet` e leggere il banner che il server invia automaticamente prima di qualsiasi autenticazione. Rivela nome software, versione, hostname. Spesso è l'unica azione necessaria per raccogliere info senza autenticarsi.
 
+**buffer overflow** — vulnerabilità che si verifica quando un programma scrive dati oltre i limiti di un buffer allocato in memoria, sovrascrivendo dati adiacenti. In IA32 su stack: la scrittura oltre i limiti può raggiungere l'EBP salvato del chiamante e poi il **return address**, consentendo all'attaccante di redirigere il flusso di esecuzione. Causa tipica: uso di `gets()` o `strcpy()` senza bounds check.
+
 **brute force** — attacco che prova sistematicamente tutte le combinazioni possibili di una password finché non trova quella corretta. Efficace su spazi piccoli (es. PIN 4 cifre = 10.000 combinazioni). Tool: Hydra (online, su servizi di rete), John the Ripper (offline, su hash locali).
 
 ## C
+
+**canary (stack canary)** — valore casuale a 4 byte inserito dal compilatore GCC tra le variabili locali e l'EBP salvato in ogni stack frame. Prima di eseguire `RET`, il codice verifica che il valore sia intatto; se un buffer overflow lo ha sovrascritto, il processo viene terminato. Si abilita con `-fstack-protector` / `-fstack-protector-all`, si disabilita con `-fno-stack-protector`. Bypass: brute force su processi che forkano (il canarino è identico nel figlio).
+
+**CFI (Control Flow Integrity)** — famiglia di tecniche di difesa che impedisce all'attaccante di controllare EIP/RIP. Variante hardware moderna: **puntatori cifrati** — la CPU cifra/decifra trasparentemente tutti gli indirizzi di ingresso/uscita da funzioni usando una chiave scelta all'avvio del processo. Esempio reale: Pointer Authentication Codes (PAC) sui processori Apple ≥ A12. Un programma vulnerabile può essere fatto crashare ma non dirottato.
 
 **core dump** — copia dello stato di memoria di un processo scritta su disco al momento della terminazione anomala (es. SIGSEGV, SIGQUIT). Usata per debugging post-mortem con `gdb ./programma core`. Non tutti i segnali producono core dump; dipende dalla signal disposition e dal limite `ulimit -c`.
 
@@ -114,6 +122,10 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 ## N
 
+**NOP sled (slitta di NOP)** — sequenza di istruzioni `NOP` (`\x90`) iniettata prima dello shellcode in un attacco buffer overflow. La CPU esegue le NOP senza effetti avanzando di un byte alla volta finché non raggiunge lo shellcode. Permette all'attaccante di puntare il return address a qualsiasi punto della slitta invece che all'esatto inizio dello shellcode, aumentando la probabilità di successo.
+
+**NX stack (No-eXecute)** — contromisura hardware/OS che marca le pagine di stack come non eseguibili. Tentare di eseguire codice iniettato sullo stack causa un'eccezione di protezione della memoria. Implementato con il bit XD (eXecution Disable) di Intel, disponibile solo su architetture a 64 bit (non sui 32 bit nativi). Bypass: ret2libc, ROP. In gcc, si forza lo stack eseguibile con `-z execstack`.
+
 **nmap** — scanner di rete per host discovery e port scanning. Flag principali: `-sn` (ping scan, solo host discovery, usa ARP su LAN con sudo), `-sT` (TCP connect scan, non richiede root), `-sS` (SYN scan, più veloce e stealth, richiede root), `-sV` (version detection: legge i banner), `-p-` (tutte le 65535 porte), `-p 22,80,443` (porte specifiche). Senza `-p-` scansiona solo ~1000 porte popolari.
 
 **nohup** — comando che rende un processo immune al segnale SIGHUP (hangup inviato alla chiusura della shell). Redirige anche stdout su `nohup.out` se non diversamente specificato. Si usa all'avvio: `nohup cmd &`. Differenza con `disown`: `nohup` si specifica prima che il processo parta; `disown` agisce su processi già in background.
@@ -126,6 +138,10 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 **PID** — Process ID. Numero che identifica univocamente un processo in esecuzione. Assegnato dal kernel all'avvio del processo, liberato alla sua terminazione. Visibile con `ps`, `top`, `pgrep`.
 
+**payload (exploit)** — stringa di byte costruita dall'attaccante per sfruttare una vulnerabilità. In un buffer overflow: il payload contiene il padding fino all'offset del return address, l'indirizzo di destinazione (little endian), e opzionalmente shellcode o indirizzi di funzioni. Non va confuso con il payload di rete (dati trasportati da un pacchetto).
+
+**PIE (Position Independent Executable)** — modalità di compilazione che estende ASLR anche al segmento `.text` del binario. Senza PIE, `.text` ha indirizzi fissi — i gadget ROP sono prevedibili. Con PIE, anche il codice del programma viene randomizzato. Usa le tabelle PLT e GOT per l'indirizzamento; il GOT è potenzialmente sovrascrivibile (hardening aggiuntivo: RelRO).
+
 **pacchetto (`.deb`)** — file singolo che contiene software precompilato + metadati (dipendenze, architettura, versione) + script di pre/post-installazione. Formato Debian: `nome-versione_arch.deb`. Gestito da `dpkg` a basso livello, da `apt` ad alto livello.
 
 **pipe** (`|`) — meccanismo che collega lo stdout di un comando allo stdin del successivo. Es: `ls | grep .txt` — l'output di `ls` diventa l'input di `grep`.
@@ -133,6 +149,10 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 **repository (repo)** — raccolta indicizzata di pacchetti software, distribuita online o su filesystem locale. Il package manager legge l'indice del repo per conoscere versioni disponibili e dipendenze. Su Debian, i repo abilitati sono elencati in `/etc/apt/sources.list` e `/etc/apt/sources.list.d/`.
 
 ## R
+
+**RET2LIBC (return-to-libc)** — tecnica di exploit che bypassa la protezione NX stack: invece di iniettare shellcode, si sovrascrive il return address con l'indirizzo di una funzione di libreria già caricata in memoria (tipicamente `system()`). Lo stack viene riempito con `[addr_system][addr_exit][addr_"/bin/sh"]` — quando il processo esegue `RET`, salta a `system("/bin/sh")`. Non richiede stack eseguibile. Bypass di ASLR richiede trovare gli indirizzi a runtime con GDB.
+
+**ROP (Return-Oriented Programming)** — tecnica di exploit avanzata che bypassa sia NX che ASLR di base. Costruisce il codice da eseguire concatenando **gadget** — brevi sequenze di istruzioni già presenti nel segmento `.text` del binario che terminano con `RET`. Ogni gadget esegue un'operazione atomica (es. `POP EAX; RET`), poi `RET` salta al gadget successivo via stack. Il segmento `.text` non è soggetto ad ASLR senza PIE, quindi gli indirizzi dei gadget sono prevedibili.
 
 **race condition** — situazione in cui due o più processi accedono a una risorsa condivisa contemporaneamente producendo risultati imprevedibili. Esempio classico: due processi creano un file con lo stesso nome in `/tmp` allo stesso momento — uno sovrascrive l'altro. Soluzione: `mktemp` garantisce nomi univoci atomicamente.
 
@@ -145,6 +165,10 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 **redirect** — meccanismo per redirigere stdin/stdout/stderr verso file invece che verso il terminale. `>` sovrascrive, `>>` aggiunge, `<` legge da file, `2>` redirige stderr.
 
 ## S
+
+**shellcode** — sequenza di byte che rappresenta istruzioni assembly eseguibili direttamente dal processore, progettata per essere iniettata in un processo vulnerabile tramite buffer overflow. Vincolo fondamentale: non può contenere byte nulli (`\x00`) perché `strcpy`/`gets` lo usano come terminatore di stringa (operazione di **zeros cut-off**). Esempio tipico: invoca `execve("/bin/sh")` via `int 0x80` per aprire una shell con i privilegi del processo vittima.
+
+**stack frame** — porzione dello stack allocata a ogni chiamata di funzione in IA32. Contiene (dall'alto verso il basso in memoria): parametri della funzione chiamante → return address → EBP salvato → variabili locali e buffer. La dimensione è determinata dall'istruzione `SUB ESP, N` nel function prologue. Il buffer overflow sfrutta il fatto che i buffer crescono verso indirizzi alti, verso il return address.
 
 **segnale** — evento asincrono inviato dal kernel a un processo per notificargli una condizione. Asincrono = può arrivare in qualsiasi momento, indipendentemente da cosa stia facendo il processo. Un processo può terminare, ignorare, sospendersi o riprendersi in risposta a un segnale. `SIGKILL` e `SIGSTOP` sono gli unici non intercettabili né ignorabili.
 
