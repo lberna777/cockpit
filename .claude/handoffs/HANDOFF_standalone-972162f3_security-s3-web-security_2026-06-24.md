@@ -191,3 +191,8 @@ S1 ✅ (ripasso SCADUTO — fare prima) | S2 ✅ (ripasso 26/06) | S3 🔄 (lab 
 Senza guardare gli appunti: spiega la catena Union Based in 4 passi
 (NULL progressivi → schema → tabelle → dati). Se non riesci, rileggi la sezione prima della VM.
 ```
+
+## Session Closed
+**Closed at:** 2026-06-24
+**Commit:** bcf5355
+**Session status:** Handed off to next session
