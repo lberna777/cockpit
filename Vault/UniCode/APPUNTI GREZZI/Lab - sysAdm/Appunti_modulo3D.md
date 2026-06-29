@@ -143,6 +143,7 @@ gli esercizi successivi credo richiedano delle chiarificazioni e avere ben chiar
 ## 🔗 Collegati
 
 - [[appunti_modulo3D_networking_base]]
+- [[guida_lab_modulo3D_networking_base]]
 - [[lezione_modulo3D_networking_base]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]

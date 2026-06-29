@@ -309,6 +309,7 @@ cat /etc/resolv.conf
 ## 🔗 Collegati
 
 - [[Appunti_modulo3D]]
+- [[guida_lab_modulo3D_networking_base]]
 - [[lezione_modulo3D_networking_base]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]

@@ -349,8 +349,9 @@ Scrivi i tuoi output negli appunti grezzi (`APPUNTI GREZZI/Lab - sysAdm/Appunti_
 <!-- AUTO-LINKS:START -->
 ## 🔗 Collegati
 
-- [[lezione_modulo3D_networking_base]]
+- [[Appunti_modulo3D]]
 - [[appunti_modulo3D_networking_base]]
+- [[lezione_modulo3D_networking_base]]
 
 **Hub:** [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]
 <!-- AUTO-LINKS:END -->

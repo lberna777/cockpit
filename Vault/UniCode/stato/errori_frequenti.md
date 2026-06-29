@@ -77,6 +77,7 @@
 | Errore | Modulo | Correzione |
 |--------|--------|------------|
 | FIDO descritto come "autorizzazione a doppia chiave" | S2 | FIDO riguarda l'**autenticazione** (chi sei), non l'autorizzazione (cosa puoi fare). "Doppia chiave" è impreciso: FIDO usa crittografia asimmetrica per autenticazione forte. |
+| AXFR zone transfer: "espone solo il sottodominio richiesto" | S1 | AXFR restituisce l'**intera zona DNS** in una sola query — tutti i record A, MX, NS, CNAME, PTR, SOA. Non è un lookup puntuale. |
 
 ### Pattern Ricorrenti Security
 - **Narrativa vs comandi**: tendenza a perdere il filo (cosa sto facendo e perché). Costruire sempre la catena: *che informazione ho → cosa cerco → quale comando la trova*.
