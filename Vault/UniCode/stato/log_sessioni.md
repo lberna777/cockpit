@@ -8,6 +8,25 @@
 
 ---
 
+### Sessione 43 — 2026-06-30 (completata)
+**Focus**: Security — S4 Binary Exploits (appunti + guida-lab + esecuzione lab)
+
+**Coperto in sessione**:
+- `/appunti S4` → `appunti_moduloS4_binary_exploits.md`: risolta domanda aperta ASLR (indirizzi `.text` non randomizzato), colmata lacuna shellcode+NOP sled, chiarimento "cima/basso" stack. Nessun bug → errori_frequenti invariato.
+- `/lab S4` → `guida_lab_moduloS4_binary_exploits.md` dal LAB PDF (55pp): setup, threat model, 4 gradini con anatomia comandi.
+- **Esecuzione lab sulla VM Parrot**:
+  - **Es1 `write_var` ✅ COMPLETATO**: bisezione manuale → control pieno a 108 → padding **104**; payload `"A"x104,"EDCB"` → flag `SEC{thisistherightflagidiot!}`. Capito little-endian dal vivo (fill byte-per-byte + test `EDBC` vs `EDCB`). Risultati annotati inline nella guida-lab (blocco ✍️ Esecuzione es1).
+  - **Es2 `secret_function` 🔄 a metà**: capita la struct (buffer[16]+puntatore `process`); con 20 A → crash `0x41414141` in gdb (controllo il flusso); trovato indirizzo `secret` = **`0x565561ad`** con `info functions secret`. **Manca il lancio del payload** `"A"x16,"\xad\x61\x55\x56"`.
+
+**Non coperto / da riprendere**:
+- Es2 dal lancio del payload; poi es2-remote, es3 (shellcode/root shell), es4 (ret2libc).
+- DRILL `SIMULAZIONI ESAMI/SICINF/Binary_exploitation.html` a lab finito.
+
+**Prossima sessione — da dove partire**:
+→ Security S4: VM Parrot, `cd ~/lab_S4/lab_exercises/secret_function`, `gdb ./es`, `run $(perl -e 'print "A"x16,"\xad\x61\x55\x56"')` → flag; poi fuori da gdb con `./es`. Avanti coi gradini 2b→4.
+
+---
+
 ### Sessione 42 — 2026-06-29 (completata)
 **Focus**: Security — S4 Binary Exploits (lezione)
 
@@ -21,10 +40,8 @@
 - Appunti grezzi S4: Lorenzo studia la lezione e li scrive in autonomia
 - VM non toccata — `/lab S4` da fare dopo gli appunti grezzi
 
-**Aggiornamento sessione 42 (cont.)**: Appunti modulo `S4` elaborati → `appunti_moduloS4_binary_exploits.md`. Risolta 1 domanda aperta (ASLR: come si conoscono gli indirizzi in `.text` non randomizzato), colmata 1 lacuna (shellcode + NOP sled, riferiti ma non sviluppati nei grezzi), aggiunto chiarimento "cima/basso" dello stack. Nessun bug → errori_frequenti.md invariato. Poi `/lab S4` → creata `guida_lab_moduloS4_binary_exploits.md` dal LAB PDF (55pp): setup, threat model, 4 gradini (write_var, secret_function +variante remote, shellcode injection/root shell, ret2libc) con anatomia comandi + offset per bisezione + gdb. Avvertenza forte: gli indirizzi del PDF non sono i propri (binari PIE). S4 → 🔄 (lezione ✅ + appunti ✅ + guida_lab ✅, manca solo esecuzione VM).
-
 **Prossima sessione — da dove partire**:
-→ Security S4: eseguire `guida_lab_moduloS4_binary_exploits.md` sulla VM Parrot (snapshot prima del gradino 3/SUID), annotare inline, poi DRILL `SIMULAZIONI ESAMI/SICINF/Binary_exploitation.html`. Serve `pwn_lab.tar.gz` estratto (sorgenti es.c) se si vuole il flusso completo di ricompilazione.
+→ (vedi sessione 43 sopra)
 → SysAdmin 3D: `cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh` → segui guida_lab_modulo3D
 
 ---

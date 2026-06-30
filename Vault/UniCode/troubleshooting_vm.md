@@ -264,6 +264,25 @@ Formato corretto: `"path:params:H=header\: value:condition_string"`
 
 ---
 
+## VM Security — Lab binary exploit (S4): compilare ed eseguire
+
+**Problema**: `./es.c` → `bash: ./es.c: Permission denied`, poi (dopo `chmod +x es.c`) `./es.c: line 5: char: command not found` / `syntax error near unexpected token '('`
+**Causa**: si sta tentando di eseguire il **sorgente** `es.c` (testo C), non il programma. La shell prova a interpretarlo come script bash.
+**Soluzione**: si **compila** `es.c` e si **esegue** `es` (senza `.c`):
+```bash
+gcc -o es -fno-stack-protector -m32 -z execstack es.c
+./es ciao
+```
+Regola: in ogni cartella esercizio, prima `gcc -o es … es.c`, poi si lavora su `es`.
+
+**Problema**: `./es` → `Permission denied` (sul binario, non sul sorgente)
+**Causa**: di solito **non è stato (ri)compilato** — l'`es` presente è quello fornito nell'archivio `pwn_lab.tar.gz`, senza bit di esecuzione (e con flag di compilazione ignoti). Nelle cartelle ci sono `es.c` (sorgente), `es_1` (binario precompilato dei docenti) ed eventualmente un `es` dell'archivio.
+**Soluzione**: ricompilare il proprio `es` (lo crea eseguibile e coi flag noti): `gcc -o es … es.c`. In alternativa `chmod +x es`, ma meglio ricompilare per controllare i flag (canary/execstack contano nei gradini 3–4).
+
+**Nota PIE / indirizzi**: i binari del lab sono **PIE**; con ASLR off (`echo 0 > /proc/sys/kernel/randomize_va_space`) gli indirizzi sono fissi per-run ma **diversi da quelli del PDF**. Ogni indirizzo (`secret`, `system`, ritorno) va trovato sul proprio binario con gdb (`info functions`, `p system`, `x/200xw $esp`), mai copiato dalle slide.
+
+---
+
 ## Checklist pre-snapshot "baseline-pulita" (VM Security)
 
 Prima di congelare la baseline, verificare che i tool delle 5 famiglie d'esame ci siano già:
