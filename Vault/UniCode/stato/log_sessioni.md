@@ -21,8 +21,10 @@
 - Appunti grezzi S4: Lorenzo studia la lezione e li scrive in autonomia
 - VM non toccata — `/lab S4` da fare dopo gli appunti grezzi
 
+**Aggiornamento sessione 42 (cont.)**: Appunti modulo `S4` elaborati → `appunti_moduloS4_binary_exploits.md`. Risolta 1 domanda aperta (ASLR: come si conoscono gli indirizzi in `.text` non randomizzato), colmata 1 lacuna (shellcode + NOP sled, riferiti ma non sviluppati nei grezzi), aggiunto chiarimento "cima/basso" dello stack. Nessun bug → errori_frequenti.md invariato. Poi `/lab S4` → creata `guida_lab_moduloS4_binary_exploits.md` dal LAB PDF (55pp): setup, threat model, 4 gradini (write_var, secret_function +variante remote, shellcode injection/root shell, ret2libc) con anatomia comandi + offset per bisezione + gdb. Avvertenza forte: gli indirizzi del PDF non sono i propri (binari PIE). S4 → 🔄 (lezione ✅ + appunti ✅ + guida_lab ✅, manca solo esecuzione VM).
+
 **Prossima sessione — da dove partire**:
-→ Security S4: `/appunti S4` (appunti grezzi già pronti) → `/lab S4`
+→ Security S4: eseguire `guida_lab_moduloS4_binary_exploits.md` sulla VM Parrot (snapshot prima del gradino 3/SUID), annotare inline, poi DRILL `SIMULAZIONI ESAMI/SICINF/Binary_exploitation.html`. Serve `pwn_lab.tar.gz` estratto (sorgenti es.c) se si vuole il flusso completo di ricompilazione.
 → SysAdmin 3D: `cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh` → segui guida_lab_modulo3D
 
 ---

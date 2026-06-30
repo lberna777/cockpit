@@ -50,7 +50,7 @@
 | S1 | Principi offensive + LAB Enumerazione | base (feed tutte) | ✓ | ✅ Sessione 37 |
 | S2 | Autenticazione | — | ✓ | ✅ Sessione 38 |
 | S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | ✅ Sessione 41 |
-| S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | 🔄 lezione ✅ |
+| S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | 🔄 lezione ✅ + appunti ✅ + guida_lab ✅ — eseguire sulla VM |
 | S5 | Firewall + packet filter + LAB | ⭐ **Iptables/NFTables** | ✓ | ⬜ |
 | S6 | Sicurezza fisica e cloud | — | ✓ | ⬜ |
 | S7 | LAB Backdoor injection | (privesc) | ✓ | ⬜ |
@@ -105,7 +105,7 @@ Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode
 
 > ✅ **Diritto chiuso** (16/06, **30 e lode**). 🚨 **Focus 18/06 → 17/07**: chiudere **Security da 0%** + **SysAdmin residuo** per la coppia **Sistemi 15/07** + **Security 17/07**. Ritmo ~5h/gg costanti (~4h Security + ~1.5h SysAdmin). Security è il collo di bottiglia: i LAB su VM vanno eseguiti giorno per giorno, non accumulati.
 
-**Security** (carico dominante) → S1 ✅, S2 ✅, S3 ✅, S4 🔄. **Prossimo: S4** → `/appunti S4` (appena pronti i grezzi) → `/lab S4`. Poi S5.
+**Security** (carico dominante) → S1 ✅, S2 ✅, S3 ✅, S4 🔄 (lezione ✅, appunti ✅, guida_lab ✅). **Prossimo: eseguire la guida_lab S4 sulla VM** (`guida_lab_moduloS4_binary_exploits.md`): setup (gcc-multilib + ASLR off) → write_var → secret_function (+remote) → shellcode/root shell → ret2libc. Annotare inline, poi DRILL `SIMULAZIONI ESAMI/SICINF/Binary_exploitation.html`. Poi S5.
 **SysAdmin** (in parallelo) → **3D**: lezione ✅, guida_lab ✅ (appena creata). Prossimo passo: avvia VM (`cd ~/Progetti/sysAdmin-lab && vagrant up --provider=virtualbox && vagrant ssh`), segui `guida_lab_modulo3D_networking_base.md` Es. 1–6, annota inline, poi `/appunti 3D` per la parte teorica dai grezzi. Poi: 3E → 3F → 4B → 4C. Guida_lab 0A–2B da rifare a bassa priorità.
 
 ---
