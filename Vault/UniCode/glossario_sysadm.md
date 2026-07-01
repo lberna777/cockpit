@@ -18,6 +18,8 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 ## B
 
+**bad character** — byte che, in un payload di buffer overflow, viene alterato o interpretato in modo speciale da chi lo trasporta (shell, funzione di parsing, protocollo) invece di arrivare intatto al programma bersaglio. Esempi classici: `0x00` (terminatore di stringa C, tronca sempre), `0x20`/`0x09`/`0x0a` (spazio/tab/newline: se il payload passa per una sostituzione di comando non quotata come `$(perl -e '...')`, la shell fa *word splitting* su questi byte e spezza l'argomento). Prima di scegliere un indirizzo o un byte di payload, va sempre controllato che non contenga bad character per il canale usato.
+
 **banner grabbing** — tecnica di enumeration che consiste nel connettersi raw a un servizio testuale (SMTP, FTP, HTTP, ecc.) con `nc` o `telnet` e leggere il banner che il server invia automaticamente prima di qualsiasi autenticazione. Rivela nome software, versione, hostname. Spesso è l'unica azione necessaria per raccogliere info senza autenticarsi.
 
 **buffer overflow** — vulnerabilità che si verifica quando un programma scrive dati oltre i limiti di un buffer allocato in memoria, sovrascrivendo dati adiacenti. In IA32 su stack: la scrittura oltre i limiti può raggiungere l'EBP salvato del chiamante e poi il **return address**, consentendo all'attaccante di redirigere il flusso di esecuzione. Causa tipica: uso di `gets()` o `strcpy()` senza bounds check.

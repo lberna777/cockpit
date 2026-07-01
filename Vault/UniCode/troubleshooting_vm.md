@@ -281,6 +281,18 @@ Regola: in ogni cartella esercizio, prima `gcc -o es … es.c`, poi si lavora su
 
 **Nota PIE / indirizzi**: i binari del lab sono **PIE**; con ASLR off (`echo 0 > /proc/sys/kernel/randomize_va_space`) gli indirizzi sono fissi per-run ma **diversi da quelli del PDF**. Ogni indirizzo (`secret`, `system`, ritorno) va trovato sul proprio binario con gdb (`info functions`, `p system`, `x/200xw $esp`), mai copiato dalle slide.
 
+**Problema**: l'exploit funziona **dentro** gdb (`run $(perl -e ...)`) ma fuori, con lo stesso comando su `./es` da shell, va subito in segfault senza stampare la flag.
+**Causa**: `gdb` disattiva l'ASLR per il processo debuggato **per default**, indipendentemente dal settaggio di sistema. Se nel frattempo la VM è stata riavviata (reboot, spegnimento accidentale, sospensione/ripristino), `randomize_va_space` torna al default (`2`) perché la scrittura in `/proc/sys/...` **non sopravvive al reboot** — l'indirizzo hardcoded trovato con gdb non è più valido fuori da gdb.
+**Soluzione**: verificare `cat /proc/sys/kernel/randomize_va_space` prima di ogni sessione post-riavvio; se ≠ `0`, ridisattivare con `sudo su && echo 0 > /proc/sys/kernel/randomize_va_space && exit`, poi ripetere il comando standalone.
+
+**Problema**: un indirizzo di ritorno/atterraggio composto a mano (little-endian) fa fallire l'exploit in modo "strano" — il crash torna `in <funzione>` invece di `?? ()`, come se l'indirizzo non fosse mai arrivato intatto.
+**Causa**: uno dei 4 byte dell'indirizzo è un **"bad character"**: `0x20` (spazio), `0x09` (tab), `0x0a` (newline) o `0x00` (terminatore). Se il payload passa per `$(perl -e '...')` **senza virgolette**, bash fa *word splitting* su spazio/tab/newline e tronca l'argomento esattamente lì; `0x00` invece termina qualunque stringa C, indipendentemente da come viaggia.
+**Soluzione**: prima di scegliere un indirizzo di atterraggio, controllare i suoi 4 byte little-endian e scartare quelli con `0x20`/`0x09`/`0x0a`/`0x00` — nella stessa fascia di memoria (es. dentro un NOP sled) ce ne sono quasi sempre altri validi vicini.
+
+**Problema**: un indirizzo di atterraggio sullo stack (non di codice) funziona dentro gdb ma dà `Segmentation fault` fuori, anche con ASLR disattivata.
+**Causa**: a differenza degli indirizzi di **codice** (`.text`, fissi con ASLR off), gli indirizzi **sullo stack** dipendono anche da `argv`/ambiente all'avvio. gdb lancia l'eseguibile con il **percorso assoluto** come `argv[0]`; da shell si usa spesso `./es` (più corto) — la differenza di lunghezza (più eventuali differenze nell'ambiente ereditato) sposta la posizione reale del buffer sullo stack, anche di centinaia di byte.
+**Soluzione**: non fidarsi del dump (`x/200xw $esp`) preso sotto gdb per un exploit che punta allo stack. Far generare un core dump dalla vera esecuzione standalone e analizzare quello: se il binario è **SUID**, il dump non si salva di default (`fs.suid_dumpable=0`) → `sudo sysctl -w fs.suid_dumpable=1`, rigenerare il crash, poi `coredumpctl list` + `sudo coredumpctl gdb <PID>` (il core appartiene a root, serve sudo). Nel dump si riconosce anche `argv[0]` come stringa ASCII sullo stack (utile per orientarsi).
+
 ---
 
 ## Checklist pre-snapshot "baseline-pulita" (VM Security)

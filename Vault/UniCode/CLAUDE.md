@@ -47,10 +47,10 @@ Questa separazione esiste per risparmiare context window. Rispettarla.
 | Esame | Data |
 |---|---|
 | Diritto dell'Informatica T | ✅ 16/06/2026 — superato (30 e lode) |
-| Lab Amministrazione di Sistemi T | **15/07/2026** ore 14:00 |
+| Lab Amministrazione di Sistemi T | ~~15/07/2026~~ → **08/09/2026** (rimandato, vedi `ESAMI SCELTI.md`) |
 | Lab Sicurezza Informatica T | **17/07/2026** ore 14:00 |
 
-Piano orario per fasi: `ESAMI SCELTI.md`
+Dal 01/07: focus esclusivo su Security fino al 17/07, SysAdmin sospeso. Piano orario per fasi: `ESAMI SCELTI.md`
 
 ---
 

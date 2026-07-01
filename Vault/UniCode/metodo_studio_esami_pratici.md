@@ -1,7 +1,7 @@
 # Metodo di Studio — Esami Pratici (Sicurezza + Amministrazione di Sistemi)
 
 > Definito il 2026-06-18 dopo l'analisi dei due corsi su Virtuale.
-> Vale per **Lab Sicurezza Informatica T** (17/07) e **Lab Amministrazione di Sistemi T** (15/07).
+> Vale per **Lab Sicurezza Informatica T** (17/07) e **Lab Amministrazione di Sistemi T** (rimandato a 08/09).
 > Per Diritto (chiuso, 30L) vale il metodo separato (lettura → autoverifica → appunti → quiz MC).
 
 ---

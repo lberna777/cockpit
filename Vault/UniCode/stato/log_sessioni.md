@@ -8,6 +8,26 @@
 
 ---
 
+### Sessione 44 — 2026-07-01 (completata)
+**Focus**: Security — S4 Binary Exploits (esecuzione lab, es2 → es3)
+
+**Coperto in sessione**:
+- Sessione ripresa dopo spegnimento accidentale del PC; deciso in `/sessione` precedente: **Sistemi rimandato a settembre (08/09)**, focus esclusivo su Security fino al 17/07.
+- **Es2 `secret_function` ✅ completato**: lanciato il payload (`"A"x16,"\xad\x61\x55\x56"`) in gdb → flag presa, poi confermato fuori da gdb dopo aver scoperto e risolto il gotcha ASLR/reboot (annotato in `troubleshooting_vm.md`).
+- **Es2b `secret_function_remote` ✅ completato**: `es.c` usa `gets()` non più dichiarata dalle glibc moderne → fix `extern char *gets(char *s);`; stesso offset 16; esposizione in rete con `ncat` (il `nc` di Parrot è variante OpenBSD senza `-e`, installato `ncat` ad-hoc); shell remota ottenuta con il trucco del `cat` per tenere aperto lo stdin — privilegi utente normale (nessun SUID qui).
+- **Es3 `returnlib` (shellcode injection + SUID) ✅ completato — root shell ottenuta**: setup SUID, bisezione offset (112, con stadio intermedio "EBP corrotto" prima del controllo pieno di EIP), NOP sled + shellcode, due gotcha nuovi risolti — **bad character** (byte `0x20` in un indirizzo troncava il payload via shell non quotata) e **differenza stack gdb vs standalone** (argv[0] diverso sposta il buffer di centinaia di byte, risolto analizzando un core dump della vera esecuzione standalone con `fs.suid_dumpable=1` + `sudo coredumpctl gdb`).
+- Tutto annotato inline in `guida_lab_moduloS4_binary_exploits.md` (blocchi "✍️ Esecuzione — risultati reali" per es2, es2b parte 1+2, es3 + una sezione "Metodo generale" per orientarsi quando un indirizzo non torna).
+- Aggiornati `troubleshooting_vm.md` (5 nuovi problema/causa/soluzione) e `glossario_sysadm.md` (voce "bad character").
+
+**Non coperto / da riprendere**:
+- Es4 (`returnlib`, variante ret2libc — aggirare NX riusando `system("/bin/sh")` della libc).
+- DRILL finale `SIMULAZIONI ESAMI/SICINF/Binary_exploitation.html` (dopo es4).
+
+**Prossima sessione — da dove partire**:
+→ Security S4: VM Parrot, cartella `~/lab_S4/lab_exercises/returnlib` (stesso binario di es3, stack ancora eseguibile per compatibilità — verificare flag di compilazione in `guida_lab_moduloS4_binary_exploits.md` sezione Esercizio 4). Obiettivo dichiarato per la prossima sessione: **chiudere es4**. Poi drill finale S4, quindi S5 (Iptables/NFTables).
+
+---
+
 ### Sessione 43 — 2026-06-30 (completata)
 **Focus**: Security — S4 Binary Exploits (appunti + guida-lab + esecuzione lab)
 

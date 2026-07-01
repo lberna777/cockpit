@@ -1,5 +1,5 @@
 # Stato Corrente — Studio Attivo
-**Sessione**: 43 | **Aggiornato**: 2026-06-30
+**Sessione**: 44 | **Aggiornato**: 2026-07-01
 
 > **Istruzione per Claude**: questo file va letto ALL'INIZIO di ogni sessione. È l'unico file obbligatorio per avere contesto.
 > Per dettagli sui moduli (materiali, concetti, esercizi): `stato/percorso.md`
@@ -50,7 +50,7 @@
 | S1 | Principi offensive + LAB Enumerazione | base (feed tutte) | ✓ | ✅ Sessione 37 |
 | S2 | Autenticazione | — | ✓ | ✅ Sessione 38 |
 | S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | ✅ Sessione 41 |
-| S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | 🔄 lez+app+guida ✅; LAB: es1 `write_var` ✅, es2 `secret_function` in corso |
+| S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | 🔄 lez+app+guida ✅; LAB: es1 `write_var` ✅, es2 `secret_function` ✅, es2b `secret_function_remote` ✅ (shell remota, no root), es3 `returnlib` shellcode+SUID ✅ (root shell), es4 ret2libc da fare |
 | S5 | Firewall + packet filter + LAB | ⭐ **Iptables/NFTables** | ✓ | ⬜ |
 | S6 | Sicurezza fisica e cloud | — | ✓ | ⬜ |
 | S7 | LAB Backdoor injection | (privesc) | ✓ | ⬜ |
@@ -103,10 +103,10 @@ Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode
 
 ## Prossimi Passi
 
-> ✅ **Diritto chiuso** (16/06, **30 e lode**). 🚨 **Focus 18/06 → 17/07**: chiudere **Security da 0%** + **SysAdmin residuo** per la coppia **Sistemi 15/07** + **Security 17/07**. Ritmo ~5h/gg costanti (~4h Security + ~1.5h SysAdmin). Security è il collo di bottiglia: i LAB su VM vanno eseguiti giorno per giorno, non accumulati.
+> ✅ **Diritto chiuso** (16/06, **30 e lode**). 🚨 **Aggiornamento 01/07**: obiettivo di questa sessione ridotto a **un solo esame — Security (17/07)**. **Sistemi rimandato a settembre (08/09/2026)**: a 16 giorni dall'esame con Security solo al ~20%, portare avanti entrambi in parallelo non era più sostenibile (vedi `ESAMI SCELTI.md`, Rischi #4). **SysAdmin è sospeso** fino a dopo il 17/07 — nessuna azione su 3D–4C o scripting fino a esame Security superato. Ritmo Security: ~5.5h/gg costanti, senza carico parallelo. I LAB su VM vanno eseguiti giorno per giorno, non accumulati.
 
-**Security** (carico dominante) → S1 ✅, S2 ✅, S3 ✅, S4 🔄 LAB in corso sulla VM. **Es1 `write_var` ✅** fatto (padding 104, payload `"A"x104,"EDCB"`, flag presa). **Riprendere dall'es2 `secret_function`**: ho già trovato offset 16 + indirizzo `secret` = `0x565561ad` con `info functions secret`; manca **lanciare il payload** dentro gdb: `run $(perl -e 'print "A"x16,"\xad\x61\x55\x56"')` → deve uscire la flag; poi riprovare **fuori** da gdb con `./es`. Quindi es2-variante remote → es3 shellcode/root shell → es4 ret2libc. Annotare inline nella guida. DRILL finale: `SIMULAZIONI ESAMI/SICINF/Binary_exploitation.html`. Poi S5.
-**SysAdmin** (in parallelo) → **3D**: lezione ✅, guida_lab ✅ (appena creata). Prossimo passo: avvia VM (`cd ~/Progetti/sysAdmin-lab && vagrant up --provider=virtualbox && vagrant ssh`), segui `guida_lab_modulo3D_networking_base.md` Es. 1–6, annota inline, poi `/appunti 3D` per la parte teorica dai grezzi. Poi: 3E → 3F → 4B → 4C. Guida_lab 0A–2B da rifare a bassa priorità.
+**Security** (focus esclusivo) → S1 ✅, S2 ✅, S3 ✅, S4 🔄 LAB in corso sulla VM. **Es1 `write_var` ✅**, **es2 `secret_function` ✅** (offset 16, ASLR/reboot gotcha in `troubleshooting_vm.md`), **es2b `secret_function_remote` ✅** (fix `gets()` non dichiarata dalle glibc moderne, esposizione in rete con `ncat` installato ad-hoc, shell remota senza root). **Es3 `returnlib` (shellcode + SUID) ✅ chiuso — root shell ottenuta**: offset 112 (bisezione con stadio intermedio "EBP corrotto" a 110-111, `SIGSEGV in main()`, poi `SIGILL` a 112 = ret riuscito ma atterraggio storto, poi `BBBB` → `0x42424242 in ?? ()` = offset confermato). Due gotcha nuovi e importanti: **bad character** (`0x20` spazio nell'indirizzo scelto tronca il payload via `$(...)` non quotato — mai usare byte `0x20`/`0x09`/`0x0a`/`0x00` in un indirizzo passato da shell) e **stack sotto gdb ≠ stack standalone anche con ASLR off** (argv[0] più corto `./es` vs percorso assoluto di gdb sposta il buffer di centinaia di byte — soluzione: analizzare un core dump della vera esecuzione con `sudo sysctl -w fs.suid_dumpable=1` + `sudo coredumpctl gdb <PID>`, dato che il binario è SUID). Tutto annotato in `guida_lab_moduloS4_binary_exploits.md` (sezioni "✍️ Esecuzione — risultati reali") e in `troubleshooting_vm.md`. **Riprendere da es4 (`returnlib`, variante ret2libc)**: stesso overflow ma con stack NON eseguibile (NX) — invece di iniettare shellcode si riusa `system("/bin/sh")` della libc (vedi guida sezione Esercizio 4). DRILL finale: `SIMULAZIONI ESAMI/SICINF/Binary_exploitation.html`. Poi S5 → S6 → S7 → S8 → S9 → S10 → S11 → S12 → S13 → S14 → S15.
+**SysAdmin** (sospeso fino al 17/07) → **3D**: lezione ✅, guida_lab ✅ (pronta, lab su VM non ancora eseguito). Ripresa post-Security: avvia VM (`cd ~/Progetti/sysAdmin-lab && vagrant up --provider=virtualbox && vagrant ssh`), segui `guida_lab_modulo3D_networking_base.md` Es. 1–6, annota inline, poi `/appunti 3D`. Poi: 3E → 3F → 4B → 4C. Guida_lab 0A–2B da rifare a bassa priorità. Piano dettagliato per la sessione settembre da definire dopo il 17/07.
 
 ---
 
@@ -115,7 +115,7 @@ Diritto   ██████████  100%  ✅ ESAME SUPERATO — 30 e lode
 | Esame | Data | Ora |
 |-------|------|-----|
 | ~~Diritto dell'Informatica T~~ | ✅ 16/06/2026 — **30 e lode** | — |
-| Lab Amministrazione di Sistemi T | **15/07/2026** | 14:00 |
+| Lab Amministrazione di Sistemi T | ~~15/07/2026~~ → **08/09/2026** (rimandato) | — |
 | Lab Sicurezza Informatica T | **17/07/2026** | 14:00 |
 
 Piano fasi e stime ore dettagliate: `ESAMI SCELTI.md`
