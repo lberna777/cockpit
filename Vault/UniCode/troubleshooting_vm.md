@@ -293,6 +293,22 @@ Regola: in ogni cartella esercizio, prima `gcc -o es … es.c`, poi si lavora su
 **Causa**: a differenza degli indirizzi di **codice** (`.text`, fissi con ASLR off), gli indirizzi **sullo stack** dipendono anche da `argv`/ambiente all'avvio. gdb lancia l'eseguibile con il **percorso assoluto** come `argv[0]`; da shell si usa spesso `./es` (più corto) — la differenza di lunghezza (più eventuali differenze nell'ambiente ereditato) sposta la posizione reale del buffer sullo stack, anche di centinaia di byte.
 **Soluzione**: non fidarsi del dump (`x/200xw $esp`) preso sotto gdb per un exploit che punta allo stack. Far generare un core dump dalla vera esecuzione standalone e analizzare quello: se il binario è **SUID**, il dump non si salva di default (`fs.suid_dumpable=0`) → `sudo sysctl -w fs.suid_dumpable=1`, rigenerare il crash, poi `coredumpctl list` + `sudo coredumpctl gdb <PID>` (il core appartiene a root, serve sudo). Nel dump si riconosce anche `argv[0]` come stringa ASCII sullo stack (utile per orientarsi).
 
+**Problema**: `find $esp, $esp+20000, "pattern"` → `Invalid search space, end precedes start.`
+**Causa**: aritmetica indirizzi su target **32 bit**. `$esp` vicino alla cima dello stack (es. `0xffffcadc`) ha poco margine prima del limite `0xffffffff`; sommare un valore troppo grande sfora quel limite e "avvolge" (wrap-around) l'indirizzo risultante, che dopo il troncamento a 32 bit diventa numericamente più piccolo di `$esp` — gdb rifiuta l'intervallo perché sembra invertito.
+**Soluzione**: usare un incremento che stia dentro il margine reale rimasto sotto `0xffffffff` (es. `find $esp, +0x3000, "SHELL="`); se non trova nulla, allargare di poco (`+0x3500`), mai a salti larghi come `+20000` vicino alla cima dello stack.
+
+**Problema**: `x/500s $esp` (o conteggi simili) si esaurisce prima di raggiungere la zona `argv`/`envp` in cima allo stack, mostrando solo byte grezzi/garbage.
+**Causa**: appena dopo `main`, `$esp` è ancora dentro il frame locale, pieno di byte `\x00` che gdb legge come tante mini-stringhe vuote — il conteggio si esaurisce senza coprire la distanza (spesso migliaia di byte) fino a `argv`/`envp`.
+**Soluzione**: preferire `find $esp, +lunghezza, "pattern"` (es. `"SHELL="`) invece di scorrere a occhio con `x/Ns`; è mirato e non soffre del problema del conteggio.
+
+**Problema**: dopo un `continue` (`c`) il programma va in `SIGSEGV ... in ?? () from /lib32/libc.so.6` e i comandi successivi (`find`, `p`, ecc.) rispondono `No registers.` / `The program is not being run.`
+**Causa**: comportamento atteso, non un bug — si era fermati su un breakpoint (es. `b *main`) dopo un `run` **senza payload/argomenti**; proseguendo, il programma raggiunge la `strcpy`/`gets` che si aspetta un argomento, trova `NULL` e crasha nella libc. Una volta morto il processo, i registri non esistono più finché non si fa un nuovo `run`.
+**Soluzione**: usare il breakpoint solo per leggere la memoria (indirizzi di libreria, stack) subito dopo `run`, senza proseguire con `c` se non si è passato un payload valido; per il tentativo vero, rilanciare con `run <payload>` (eventualmente `delete <N>` prima per togliere il breakpoint che non serve più).
+
+**Problema**: un indirizzo di una **funzione di libreria** (es. `system`) contiene un bad character (`0x20`/`0x09`/`0x0a`), ma a differenza di un indirizzo di stack non si può "spostare di qualche byte" per evitarlo — la funzione ha un solo punto d'ingresso valido.
+**Causa**: stesso meccanismo del bad character su indirizzi di stack (`$(...)` non quotato → word splitting della shell), ma qui il rimedio "scegli un indirizzo vicino" non è applicabile.
+**Soluzione**: quotare l'intera sostituzione di comando: `run "$(perl -e '...')"` invece di `run $(perl -e '...')`. Le doppie apici esterne impediscono lo split sui caratteri IFS (spazio/tab/newline) preservandoli come byte letterali del payload; le eventuali apici singole interne (lo script perl) restano un contesto di parsing separato e non ne risentono.
+
 ---
 
 ## Checklist pre-snapshot "baseline-pulita" (VM Security)

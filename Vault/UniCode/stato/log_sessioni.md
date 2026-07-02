@@ -8,6 +8,26 @@
 
 ---
 
+### Sessione 45 — 2026-07-02 (completata)
+**Focus**: Security — S4 Binary Exploits (chiusura: es4 ret2libc + drill mancante rimandato)
+
+**Coperto in sessione**:
+- **Es4 `returnlib` (ret2libc) ✅ completato — S4 chiuso, tutti e 4 gli esercizi fatti.** Ricompilato senza `-z execstack` (`es_nostack`), niente SUID (non serviva root, solo dimostrare il bypass di NX).
+- Prima volta con breakpoint gdb nel modulo (`b *main`): fermarsi con libc già caricata per leggere `p system` (`0xf7db1220`) e `p exit` (`0xf7d9daf0`) prima che il programma crashasse per `argv[1]` nullo.
+- `x/500s $esp` insufficiente per raggiungere `envp` (troppi terminatori intermedi consumano il conteggio di 500 stringhe) → risolto con `find $esp, +0x3000, "SHELL="` (trovato `SHELL=/bin/bash` a `0xffffcdfe`, valore a +6 byte). Prima versione di `find` con `$esp+20000` falliva per overflow dell'aritmetica a 32 bit (`Invalid search space, end precedes start`).
+- **Nuovo bad character**: `system` aveva byte basso `0x20` (spazio) → `$(...)` non quotato troncava il payload esattamente come `"A"x112` senza marcatore in es3 (stesso crash `SIGILL, 0x56556201 in main ()`). A differenza di es3 (indirizzo di stack, libertà di scegliere un bersaglio vicino), qui il fix è **quotare la sostituzione**: `run "$(perl -e '...')"`.
+- Payload finale: `"\x90"x112 + system + exit + /bin/bash` → `[Detaching after vfork from child process ...]` (conferma `system()` eseguito) → shell ottenuta, `id` → `uid=1000` (nessun SUID, atteso).
+- Tutto annotato in `guida_lab_moduloS4_binary_exploits.md` (sezione "✍️ Esecuzione — risultati reali (es 4)").
+- Teoria/appunti S4 già completi da sessioni precedenti — nessun nuovo grezzo da elaborare con `/appunti`.
+
+**Non coperto / da riprendere**:
+- DRILL finale S4: `SIMULAZIONI ESAMI/SICINF/Binary_exploitation.html` (rimandato, non bloccante per iniziare S5).
+
+**Prossima sessione — da dove partire**:
+→ Security **S5** (Firewall e packet filter — ⭐ Iptables/NFTables), modulo nuovo: `/lezione S5` dai PDF Virtuale prima di toccare la VM. Il DRILL di S4 può essere fatto prima o incastrato più avanti nel ripasso.
+
+---
+
 ### Sessione 44 — 2026-07-01 (completata)
 **Focus**: Security — S4 Binary Exploits (esecuzione lab, es2 → es3)
 
