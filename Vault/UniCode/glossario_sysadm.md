@@ -226,13 +226,27 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 ## Security — Termini Chiave
 
+**ALG** (Application-Level Gateway) — tipo di firewall che comprende il protocollo applicativo (HTTP, FTP...) e può quindi filtrare/permettere comandi specifici, non solo header. Anche detto proxy server. Più pesante di un packet filter, ma capisce cosa sta passando.
+
 **banner grabbing** — tecnica di enumerazione passiva che consiste nell'aprire una connessione TCP a un servizio e leggere la stringa che invia all'apertura (il "banner"). Rivela versione del software, sistema operativo, e talvolta informazioni di configurazione. Eseguito con `nc <ip> <porta>` o da nmap con `-sV`. Misconfiguration classica: banner SMTP personalizzato con informazioni sull'infrastruttura interna.
 
+**Bastion Host (BH)** — sistema dedicato a far girare il software firewall (tipicamente un ALG o CLG). Nella topologia "screened dual-homed" separa fisicamente due segmenti di rete, creando la DMZ.
+
 **bruteforce** — attacco che prova sistematicamente tutte le combinazioni di un keyspace finito per trovare una credenziale. Efficace quando il keyspace è piccolo (es. PIN a 4 cifre = 10.000 combinazioni). Strumento standard: `hydra`. Mitigazioni: fail2ban (blocca IP dopo N tentativi), account lockout, password lunghe (keyspace esponenzialmente più grande).
+
+**CLG** (Circuit-Level Gateway) — tipo di firewall che spezza la connessione a livello di trasporto, diventando esso stesso l'endpoint del traffico, ma inoltra i payload senza esaminarli (meno intelligente di un ALG, più leggero).
+
+**conntrack** — componente di netfilter che riconosce quando una sequenza di pacchetti appartiene alla stessa connessione (tupla protocollo/IP sorgente/IP destinazione/porte), a prescindere dal protocollo sottostante. Rende possibile il filtraggio *stateful* (`ct state established,related accept` in nftables, `-m state --state ESTABLISHED` in iptables) invece di dover scrivere regole simmetriche per andata e ritorno di ogni servizio.
 
 **credential reuse** — riuso della stessa password su sistemi diversi. Vulnerabilità frequente nel mondo reale: credenziali esfiltrate da un DB (es. password applicativa) funzionano anche per autenticazione SSH o altri servizi, perché l'utente ha usato la stessa password ovunque.
 
 **CUPP** (Common User Passwords Profiler) — tool che genera wordlist personalizzate basandosi su dati personali del target (nome, cognome, data di nascita, animali domestici, ecc.). Efficace perché le persone costruiscono password derivate dalla propria vita. Uso: `python3 cupp.py -i` (modalità interattiva).
+
+**DMZ** (Demilitarized Zone) — sottorete "cuscinetto" tra Internet e la rete privata, dove si collocano i server che devono essere raggiungibili dall'esterno, isolati dal resto della rete interna. Nasce nella topologia firewall "screened dual-homed BH" o "screened subnet".
+
+**DNAT / SNAT / MASQUERADE / REDIRECT** — target NAT di iptables/nftables. `DNAT` cambia la destinazione di un pacchetto (port forwarding verso un server interno); `SNAT` cambia la sorgente (una rete privata che esce con un solo IP pubblico); `REDIRECT` è un caso particolare di DNAT che dirotta alla macchina locale (proxy trasparente); `MASQUERADE` è un caso particolare di SNAT, solo in POSTROUTING, che assegna automaticamente l'indirizzo dell'interfaccia di uscita (utile con IP dinamico).
+
+**hook di netfilter** — punto di aggancio nello stack di rete del kernel dove netfilter permette di registrare regole. Cinque hook: `PREROUTING` (pacchetto appena entrato, prima del routing), `INPUT` (destinato al sistema locale), `FORWARD` (da inoltrare altrove), `OUTPUT` (generato localmente), `POSTROUTING` (in uscita dal sistema). Le catene builtin di iptables corrispondono uno a uno a questi hook; in nftables vanno dichiarati esplicitamente (`type filter hook input priority 0`).
 
 **hydra** — tool per bruteforce su protocolli di rete (SSH, FTP, HTTP, SMTP, ecc.). Sintassi: `hydra -l <user> -P <wordlist> <proto>://<host>:<porta>`. Per generazione automatica: `-x min:max:charset` (es. `-x 4:4:1` = PIN numerici a 4 cifre).
 
@@ -247,6 +261,8 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 **penetration test (PT)** — verifica pratica che una vulnerabilità sia effettivamente sfruttabile, spingendo l'attacco fino alla compromissione dimostrata. Più mirato e profondo del VA. Richiede autorizzazione esplicita. Output: catena di compromissione dimostrata.
 
 **shadow** (`/etc/shadow`) — file che contiene gli hash delle password degli utenti Linux. Leggibile solo da root. Formato di ogni riga: `$<algoritmo>$<salt>$<hash>`. `$6$` = SHA-512 (sicuro), `$1$` = MD5 (obsoleto). Il salt impedisce rainbow table precompilate.
+
+**TTL** (Time To Live) — contatore nell'header IP che ogni router attraversato decrementa di 1; se arriva a 0 il pacchetto viene scartato. Serve a evitare che un pacchetto giri all'infinito in un loop di routing. Utile in diagnosi: confrontando il TTL osservato con quello di partenza (default 64 su Linux) si conta quanti router ha attraversato un pacchetto (es. `ttl=62` osservato da un mittente con default 64 = 2 hop).
 
 **unshadow** — tool che combina `/etc/passwd` e `/etc/shadow` nel formato richiesto da John the Ripper per il cracking. Uso: `unshadow passwd.bak shadow.bak > combined.txt`.
 

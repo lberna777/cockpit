@@ -200,6 +200,68 @@ ridimensionamento finestra, clipboard e cartelle condivise.
 **Soluzione**: ignorabile. Se servono quelle funzioni, reinstallare le Guest Additions dalla ISO
 aggiornata oppure avviare un kernel precedente dal menu GRUB.
 
+**Soluzione che ha funzionato (2026-07-07)**: invece dell'ISO, reinstallare i pacchetti Debian/Parrot
+(ricompilano via DKMS contro il kernel corrente) — usare le varianti **`-hwe`** (Hardware Enablement,
+pensate per kernel più recenti di quelli stabili), non quelle base:
+```bash
+sudo apt install --reinstall virtualbox-guest-utils-hwe virtualbox-guest-x11-hwe
+sudo reboot
+```
+Nota: il pacchetto `virtualbox-guest-dkms` non esiste su Parrot come pacchetto a sé — la parte DKMS
+è già inclusa in `-utils`/`-x11`. Dopo il riavvio, il clipboard torna a funzionare.
+⚠️ Un `apt upgrade` successivo che aggiorna il kernel può far ripresentare lo stesso problema
+(i moduli DKMS restano legati alla versione di kernel per cui sono stati compilati) — se il
+clipboard smette di funzionare di nuovo dopo un upgrade, ripetere questi due comandi.
+
+---
+
+## VM Security — Modulo S5 (nftlab.sh / Docker / Podman)
+
+**Problema**: `./nftlab.sh` sembra bloccarsi senza output dopo aver stampato poco o nulla.
+**Causa**: nessuna — se Docker sta scaricando/caricando le immagini dei container la prima volta,
+può volerci più di un minuto senza stampare progresso visibile. Non interrompere con Ctrl+C troppo presto.
+**Soluzione**: aspettare; verificare in un secondo terminale con `docker images`/`podman images` se
+sono in corso operazioni.
+
+**Problema**: `Cannot connect to the Docker daemon at unix:///run/user/1000/podman/podman.sock`
+**Causa**: la variabile d'ambiente `DOCKER_HOST` è impostata (non nei file di shell standard —
+`.bashrc`/`.zshrc`/`.profile` risultavano puliti; probabile hook di un tema/plugin zsh che la
+reimposta ad ogni nuova shell) e punta a un socket Podman che non esiste, anche quando Docker vero
+(`docker.io`/`dockerd`) è installato e attivo (`systemctl status docker` → `active (running)`).
+**Soluzione**: `unset DOCKER_HOST` prima di ogni comando `docker`/alias container in un terminale
+nuovo — va ripetuto a ogni nuovo terminale aperto, non è persistente. Causa radice non identificata
+con certezza (da approfondire con calma se serve fastidio ricorrente, non urgente).
+
+**Problema**: `validating compose.yaml: ... Additional property interface_name is not allowed`,
+poi (dopo aver aggiornato Docker Compose alla v5.3.0 via `~/.docker/cli-plugins/`) l'errore cambia in
+`interface_name requires Docker Engine v28.1 or later`.
+**Causa**: la proprietà Compose `interface_name` (fissa il nome dell'interfaccia dentro il container,
+usata da `nftlab.sh` per garantire `eth1`/`eth2`/`eth3` coerenti col diagramma) richiede un **Docker
+Engine** v28.1+, non solo un client/Compose recente. Il pacchetto distro Parrot (`docker.io`,
+versione `26.1.5+dfsg1-9+b13`) è troppo vecchio — le istruzioni ufficiali del corso
+(`Istruzioni per la configurazione delle VM`) dicono di installare `docker-compose` via apt, senza
+specificare una versione dell'Engine, quindi il gap tra script e pacchetto distro è plausibilmente
+un limite delle istruzioni stesse, non un errore di setup.
+**Soluzione adottata**: rimuovere `interface_name` (rendendo i nomi delle interfacce quelli di
+default assegnati da Docker, es. `eth0` invece di `eth1`) **direttamente dallo script**, non dal
+`compose.yaml` generato — `nftlab.sh` rigenera `compose.yaml` da zero a ogni lancio con un heredoc
+(`cat > compose.yaml <<ENDOFCOMPOSEYAML` — vedi riga con `grep -n "compose.yaml" nftlab.sh`), quindi
+modificare il file generato non serve, si perde al lancio successivo:
+```bash
+sed -i.bak '/interface_name:/d' nftlab.sh
+```
+Verificare poi con `ip a` dentro ogni container quale nome (`eth0`, `eth1`, ...) corrisponde a quale
+rete, invece di fidarsi del diagramma originale.
+
+**Problema**: `nft add rule filter FORWARD ...` → `Error: Could not process rule: No such file or directory`
+**Causa**: nftables è case-sensitive — la catena era stata creata come `forward` (minuscolo, dallo
+scheletro dell'esercizio "packet filter su endpoint"), mentre il comando la referenziava come
+`FORWARD` (maiuscolo, convenzione iptables-style usata nel testo dell'esercizio "packet filter in
+instradamento"). Sono due nomi diversi per nft.
+**Soluzione**: `nft list ruleset` per vedere il nome esatto (case) di tabelle/catene effettivamente
+create, prima di scrivere `add rule` — non fidarsi della convenzione di maiuscole/minuscole del testo
+dell'esercizio.
+
 ---
 
 ## VM Security — Trasferimento file da target compromesso

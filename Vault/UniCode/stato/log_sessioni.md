@@ -8,6 +8,29 @@
 
 ---
 
+### Sessione 46 — 2026-07-07 (completata)
+**Focus**: Security — S5 Firewall/iptables/nftables (lezione + appunti + guida-lab + esecuzione lab Es1-2). Tentativo di drill esame S4 abbandonato a favore del ritorno al percorso sequenziale.
+
+**Coperto in sessione**:
+- Discussione iniziale su strategia: aggredire gli esercizi tipo esame (drill `Binary_exploitation.html` su S4) vs proseguire sequenzialmente. Scaricato `secret.gz` (esercizio 12/02/2026, il più recente) in `esercizi/SICINF/sim_binary_2026-02-12/`, ma non eseguito — Lorenzo ha deciso di tornare al percorso sequenziale (S5 prima, drill/simulazioni riservati alla finestra 14-16/07).
+- `/lezione S5` → `lezione_moduloS5_firewall_iptables.md`: architettura firewall (default deny, topologie/DMZ/BH/ALG/CLG), iptables (sintassi, tabelle, catene custom, trabocchetto RETURN custom-vs-builtin), nftables (stessa logica, zero default), NAT (DNAT/SNAT/MASQUERADE/REDIRECT), conntrack/stateful, 5 hook di netfilter.
+- `/appunti S5` → `appunti_moduloS5_firewall_iptables.md`: 5 domande risolte (sintassi posizionale iptables, struttura comando nft scomposta in 3 passi, hook di netfilter, sezione Topologie riscritta con glossario BH/PF/DMZ/ALG/CLG), 1 precisazione concettuale (PF non è "proprietà" del firewall ma uno dei 3 tipi fondamentali) → aggiunta a `errori_frequenti.md`.
+- `/lab S5` → `guida_lab_moduloS5_firewall_iptables.md`: 9 esercizi dal LAB PDF (endpoint, instradamento, gestione regole/handle, stateful, multi-macchina, logging, NAT, catene custom, contatori). Estratto e salvato il diagramma di rete embedded nell'HTML (`diagramma_moduloS5_architettura.png`): Client-R1-R2-{S1,S2}, 4 subnet.
+- **Troubleshooting ambiente esteso** (dettagli completi in `troubleshooting_vm.md`): Guest Additions/clipboard rotto di nuovo dopo un upgrade kernel (fix: `virtualbox-guest-utils-hwe`/`virtualbox-guest-x11-hwe` + reboot); conflitto `DOCKER_HOST` che punta a un socket Podman inesistente nonostante Docker vero sia installato e attivo (workaround: `unset DOCKER_HOST` a ogni nuovo terminale, causa radice non identificata); `nftlab.sh` falliva con `interface_name requires Docker Engine v28.1 or later` — il pacchetto distro Parrot (`docker.io` 26.1.5) è troppo vecchio per una proprietà Compose recente, e le istruzioni ufficiali del corso non specificano una versione minima dell'Engine. Risolto rimuovendo `interface_name` **dallo script stesso** (non dal `compose.yaml` generato, che viene rigenerato a ogni lancio via heredoc) — i container ora usano nomi di interfaccia di default (`eth0` invece di `eth1`), da verificare con `ip a` invece di fidarsi del diagramma.
+- **Esecuzione lab su VM**: Es1 (packet filter su endpoint, container Client, INPUT/OUTPUT default-drop + eccezione ICMP) ✅ — verificato con ping prima/dopo (0% loss → 100% loss → 0% loss dopo la regola mirata). Es2 (packet filter in instradamento, container R1, FORWARD ristretto a Client↔S1 e Client↔S2) ✅ — stesso pattern di verifica, più un gotcha di case-sensitivity nftables (`forward` minuscolo ≠ `FORWARD` maiuscolo) risolto con `nft list ruleset`.
+- Lorenzo ha corretto da solo un'incomprensione sulla topologia (pensava S1↔S2 comunicassero direttamente; in realtà è Client a raggiungere entrambi, via R1→R2) — buon segnale di comprensione concettuale nonostante la sessione fosse pesante di troubleshooting.
+
+**Non coperto / da riprendere**:
+- Es3-9 di S5 (handle, stateful SSH selettivo, multi-macchina, logging, NAT, catene custom, contatori).
+- Drill S4 (`Binary_exploitation.html`) — rimandato alla finestra 14-16/07.
+
+**Decisione di Lorenzo per le prossime sessioni**: eseguire sulla VM solo gli esercizi guida-lab effettivamente utili e collegati alle modalità d'esame, non tutti per principio — vedi nota in `stato/corrente.md`.
+
+**Prossima sessione — da dove partire**:
+→ Security **S5**: VM Parrot, `cd ~/lab_S5 && unset DOCKER_HOST && ./nftlab.sh` (ambiente già patchato, dovrebbe partire liscio). Riprendere da **Esercizio 3** della guida-lab, applicando il filtro di rilevanza d'esame nella scelta di quali esercizi completare fino in fondo.
+
+---
+
 ### Sessione 45 — 2026-07-02 (completata)
 **Focus**: Security — S4 Binary Exploits (chiusura: es4 ret2libc + drill mancante rimandato)
 
