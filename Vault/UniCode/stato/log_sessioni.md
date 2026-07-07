@@ -26,6 +26,8 @@
 **Prossima sessione — da dove partire**:
 → Security **S5** (Firewall e packet filter — ⭐ Iptables/NFTables), modulo nuovo: `/lezione S5` dai PDF Virtuale prima di toccare la VM. Il DRILL di S4 può essere fatto prima o incastrato più avanti nel ripasso.
 
+**Aggiornamento 2026-07-07**: `/lezione S5` fatta → `lezione_moduloS5_firewall_iptables.md`. Appunti modulo S5 elaborati → `appunti_moduloS5_firewall_iptables.md` (5 domande risolte, 1 precisazione concettuale su PF vs tipi di firewall, sezione Topologie riscritta con glossario BH/PF/DMZ/ALG/CLG). LAB su VM non ancora eseguito — S5 resta 🔄.
+
 ---
 
 ### Sessione 44 — 2026-07-01 (completata)

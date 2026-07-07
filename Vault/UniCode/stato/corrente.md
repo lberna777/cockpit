@@ -51,7 +51,7 @@
 | S2 | Autenticazione | — | ✓ | ✅ Sessione 38 |
 | S3 | Web security + LAB (OWASP 2025) | ⭐ **Web vulnerabilities** | ✓ | ✅ Sessione 41 |
 | S4 | Binary exploits + LAB buffer overflow | ⭐ **Binary exploitation** | ✓ | ✅ Sessione 45 — LAB completo: es1 `write_var` ✅, es2 `secret_function` ✅, es2b `secret_function_remote` ✅ (shell remota, no root), es3 `returnlib` shellcode+SUID ✅ (root shell), es4 `returnlib` ret2libc ✅ (NX bypassato via `system()`, no root — non serviva) |
-| S5 | Firewall + packet filter + LAB | ⭐ **Iptables/NFTables** | ✓ | ⬜ |
+| S5 | Firewall + packet filter + LAB | ⭐ **Iptables/NFTables** | ✓ | 🔄 lezione ✅, appunti ✅, guida-lab ✅ (9 esercizi da `**LAB**Firewall[1apr]`); LAB su VM non ancora eseguito |
 | S6 | Sicurezza fisica e cloud | — | ✓ | ⬜ |
 | S7 | LAB Backdoor injection | (privesc) | ✓ | ⬜ |
 | S8 | LAB Individuare e filtrare attacchi | (NIDS/privesc) | ✓ | ⬜ |
