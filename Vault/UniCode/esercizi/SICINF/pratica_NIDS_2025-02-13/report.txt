@@ -1,0 +1,80 @@
+ANALISI DEL TRACCIATO traffic-2025-02-13.pcap (dump-20250213.pcap)
+(catturato su router che connette 3 host su subnet diverse: 172.21.1.0/24, 172.22.2.0/24, 172.23.3.0/24)
+
+METODO:
+Analisi in Wireshark: ordinamento per indirizzo sorgente (colonna Source),
+poi Statistics -> Protocol Hierarchy per la vista d'insieme dei protocolli
+presenti, poi Statistics -> Conversations (tab TCP) per isolare i singoli
+flussi, e Follow -> TCP Stream per ispezionare il contenuto applicativo di
+ciascun gruppo di conversazioni.
+
+TRAFFICO INDIVIDUATO:
+
+1. SMTP LEGITTIMO
+   - Host coinvolti: 172.21.1.0/24 <-> 172.22.2.0/24, porta 25
+                      172.23.3.0/24 <-> 172.22.2.0/24, porta 25
+   - Descrizione: due sessioni di posta regolari verso il server SMTP
+     (172.22.2.81), una da ciascuno degli altri due host. Pattern coerente
+     con un uso normale del protocollo (28 pacchetti riconosciuti come SMTP
+     dal dissector, più i pacchetti TCP di puro controllo delle stesse
+     sessioni, non taggati singolarmente come SMTP). Nessuna anomalia di
+     volume, frequenza o contenuto.
+
+2. HTTP HEALTH-CHECK LEGITTIMO
+   - Host coinvolti: 172.21.1.0/24 -> 172.23.3.0/24, porta 80
+   - Descrizione: richieste GET / identiche verso la pagina di default di
+     nginx, distanziate di alcuni secondi l'una dall'altra (verificato sui
+     timestamp dei singoli stream). Il volume di questo gruppo è nettamente
+     inferiore a quello del traffico malevolo del punto 4. Contenuto della
+     richiesta regolare (User-Agent curl/7.74.0, path "/", nessun parametro
+     sospetto). Pattern coerente con un probe di monitoraggio/uptime, non
+     con un attacco.
+
+3. ICMP
+   - Host coinvolti: 172.21.1.166 <-> 172.23.3.76 (scambio bidirezionale)
+   - Descrizione: scambio di ICMP Echo Request/Reply (ping) tra i due host,
+     verificato con il filtro "icmp" in Wireshark. Ogni richiesta ha la sua
+     risposta (comportamento simmetrico atteso), nessun payload anomalo nei
+     pacchetti: traffico standard di verifica di raggiungibilità di rete,
+     non collegato all'attacco del punto 4.
+
+4. ATTACCO INDIVIDUATO: HTTP flood / buffer overflow probe
+   - Sorgente: 172.22.2.0/24 (host 172.22.2.81)  ->  Vittima: 172.23.3.0/24
+     (host 172.23.3.76), porta 80
+   - Come l'ho riconosciuto:
+     a) Contenuto: la query string della richiesta HTTP contiene il pattern
+        "/?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBB" — una sequenza di riempimento
+        ("A" ripetute) seguita da un marcatore distintivo ("BBBB"), la
+        stessa tecnica di individuazione dell'offset usata negli esercizi
+        di buffer overflow (S4): è un tentativo automatizzato di individuare
+        un buffer overflow lato server tramite il parametro della query
+        string.
+     b) Frequenza/volume: richieste identiche ripetute a distanza di pochi
+        millisecondi l'una dall'altra (verificato sui timestamp), per un
+        totale di 31 tentativi osservati — a differenza del traffico
+        legittimo del punto 2, questo volume/frequenza è incompatibile con
+        un utilizzo umano o con un health-check, ed è coerente con un tool
+        automatico che combina ricerca dell'offset e pressione volumetrica
+        (DoS) sul server.
+
+REGOLA SURICATA SCRITTA (exam.rules):
+alert http 172.22.2.0/24 any -> 172.23.3.0/24 80 (msg:"Buffer overflow probe su query string"; content:"BBBB"; http_uri; sid:1000001; rev:1;)
+
+VERIFICA — LA REGOLA FUNZIONA:
+Comando eseguito:
+  suricata -r traffic-2025-02-13.pcap -S exam.rules -l /tmp/suricata-out
+
+Numero di alert generati: 31
+  (verificato con: grep -c "1000001" /tmp/suricata-out/eve.json)
+
+Esempio di alert (da eve.json):
+  src_ip 172.22.2.81:49014 -> dest_ip 172.23.3.76:80
+  http.url: "/?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBB"
+  http_user_agent: curl/7.74.0
+  signature_id 1000001, signature "Buffer overflow probe su query string"
+  timestamp 2025-01-26T12:06:19
+
+NOTA SU suricata.yaml:
+Consegnato invariato: la regola specifica esplicitamente le reti coinvolte
+(172.22.2.0/24 -> 172.23.3.0/24) senza fare uso della variabile $HOME_NET,
+quindi non è necessario modificare la configurazione di default.

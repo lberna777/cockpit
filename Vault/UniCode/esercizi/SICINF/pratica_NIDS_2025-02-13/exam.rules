@@ -1,0 +1,1 @@
+alert http 172.22.2.0/24 any -> 172.23.3.0/24 80 (msg:"Buffer overflow probe su query string"; content:"BBBB"; http_uri; sid:1000001; rev:1;)

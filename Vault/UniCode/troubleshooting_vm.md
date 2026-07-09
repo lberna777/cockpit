@@ -373,6 +373,18 @@ Regola: in ogni cartella esercizio, prima `gcc -o es … es.c`, poi si lavora su
 
 ---
 
+## VM Security — Suricata (modulo S10)
+
+**Problema**: `suricata -r <pcap> -S exam.rules -l <dir>` fallisce con `Error: ... The logging directory "<dir>" supplied at the command-line ... doesn't exist. Shutting down the engine.`
+**Causa**: Suricata non crea da solo la cartella di output passata a `-l` — deve già esistere.
+**Soluzione**: `mkdir -p <dir>` prima di lanciare il comando.
+
+**Problema**: warning `unix-manager: Unix socket: UNIX socket bind(/var/run/suricata-command.socket) error: Address already in use` all'avvio
+**Causa**: un'altra istanza di Suricata (o un socket residuo) è già presente. Innocuo in modalità offline (`-r` su un pcap): non impedisce l'analisi né la scrittura dei log/alert.
+**Soluzione**: ignorabile per l'uso da esame (analisi offline di un pcap già dato); verificare solo se si lavora in modalità live su interfaccia.
+
+---
+
 ## Checklist pre-snapshot "baseline-pulita" (VM Security)
 
 Prima di congelare la baseline, verificare che i tool delle 5 famiglie d'esame ci siano già:

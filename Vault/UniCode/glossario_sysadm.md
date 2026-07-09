@@ -246,7 +246,11 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 
 **DNAT / SNAT / MASQUERADE / REDIRECT** — target NAT di iptables/nftables. `DNAT` cambia la destinazione di un pacchetto (port forwarding verso un server interno); `SNAT` cambia la sorgente (una rete privata che esce con un solo IP pubblico); `REDIRECT` è un caso particolare di DNAT che dirotta alla macchina locale (proxy trasparente); `MASQUERADE` è un caso particolare di SNAT, solo in POSTROUTING, che assegna automaticamente l'indirizzo dell'interfaccia di uscita (utile con IP dinamico).
 
+**eve.json** — file di log di Suricata (formato JSON, una riga per evento) dove finiscono gli alert generati dalle regole. Ogni riga con `"event_type":"alert"` contiene i campi rilevanti per il resoconto d'esame: `src_ip`/`dest_ip`, `signature_id`, `signature` (il `msg` della regola), e se il traffico è HTTP anche `http.url`/`http_user_agent`. Si genera passando `-l <dir>` a Suricata; si consulta con `grep "<sid>" eve.json` o `jq`.
+
 **hook di netfilter** — punto di aggancio nello stack di rete del kernel dove netfilter permette di registrare regole. Cinque hook: `PREROUTING` (pacchetto appena entrato, prima del routing), `INPUT` (destinato al sistema locale), `FORWARD` (da inoltrare altrove), `OUTPUT` (generato localmente), `POSTROUTING` (in uscita dal sistema). Le catene builtin di iptables corrispondono uno a uno a questi hook; in nftables vanno dichiarati esplicitamente (`type filter hook input priority 0`).
+
+**HTTP flood** — attacco DoS volumetrico che invia moltissime richieste HTTP sintatticamente valide verso un server, a frequenza molto più alta di un uso umano/legittimo (nel tracciato analizzato in S10, richieste identiche a distanza di millisecondi contro un'analoga richiesta legittima distanziata di secondi). A differenza di un flood TCP/SYN generico, le richieste possono essere perfettamente valide: la firma dell'attacco è nel **volume/frequenza**, non necessariamente nel contenuto — anche se spesso il contenuto rivela anche l'intento (es. query string usata per fuzzing/ricerca di offset di buffer overflow).
 
 **hydra** — tool per bruteforce su protocolli di rete (SSH, FTP, HTTP, SMTP, ecc.). Sintassi: `hydra -l <user> -P <wordlist> <proto>://<host>:<porta>`. Per generazione automatica: `-x min:max:charset` (es. `-x 4:4:1` = PIN numerici a 4 cifre).
 
@@ -259,6 +263,10 @@ Aggiornato a ogni sessione. Ordine alfabetico.
 **nmap** — network mapper, strumento principale per enumerazione di rete. Flag chiave: `-sn` (ping scan, solo host discovery), `-sT` (TCP connect scan, porte aperte), `-sV` (version detection, banner grabbing), `-p-` (tutte le 65535 porte), `-O` (OS detection). Senza `-p-` scansiona solo ~1000 porte comuni.
 
 **penetration test (PT)** — verifica pratica che una vulnerabilità sia effettivamente sfruttabile, spingendo l'attacco fino alla compromissione dimostrata. Più mirato e profondo del VA. Richiede autorizzazione esplicita. Output: catena di compromissione dimostrata.
+
+**Protocol Hierarchy** (Wireshark, `Statistics → Protocol Hierarchy`) — vista ad albero che mostra tutti i protocolli presenti in un tracciato con percentuale/conteggio pacchetti, annidati per livello (Ethernet → IPv4 → TCP → HTTP...). Va **espansa completamente** (tasto destro → Expand All) per vedere i protocolli applicativi. Utile come primo passo di analisi: se la somma dei protocolli applicativi etichettati non copre il totale di TCP/UDP, la differenza è spesso dove si nasconde traffico anomalo (non riconosciuto dai dissector standard).
+
+**regola Suricata (anatomia)** — `alert <proto> <src> <src_port> -> <dst> <dst_port> (msg:"..."; content:"..."; <sticky buffer>; sid:<N>; rev:1;)`. `alert` è l'azione (genera un evento, non blocca); `content` cerca una stringa nel payload; una **sticky buffer** come `http_uri` (nessun valore, va subito dopo il `content` a cui si riferisce) restringe la ricerca a un campo specifico invece che a tutto il pacchetto; `sid` è un ID univoco (convenzione: ≥1000000 per regole locali, per non confliggere con ruleset ufficiali); `rev` è la versione della regola. Si esegue su un pcap con `suricata -r <file>.pcap -S <regole.rules> -l <dir_output>` (modalità offline/replay).
 
 **shadow** (`/etc/shadow`) — file che contiene gli hash delle password degli utenti Linux. Leggibile solo da root. Formato di ogni riga: `$<algoritmo>$<salt>$<hash>`. `$6$` = SHA-512 (sicuro), `$1$` = MD5 (obsoleto). Il salt impedisce rainbow table precompilate.
 

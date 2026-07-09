@@ -8,6 +8,32 @@
 
 ---
 
+### Sessione 47 — 2026-07-08 (completata)
+**Focus**: Security — S10 Network Intrusion Detection. Nuovo binario di lavoro "esercizi prima, teoria dopo" per le tipologie d'esame ancora a 0%, in parallelo al percorso sequenziale (S5 non toccato in questa sessione).
+
+**Coperto in sessione**:
+- Chiarite le modalità d'esame: prova doppia (quiz teorico 40% + pratica 60%, 3 esercizi su 5 tipologie).
+- Estratto testo e screenshot dai 5 file `SIMULAZIONI ESAMI/SICINF/*.html` (export Virtuale) per individuare, per ciascuna delle 5 tipologie d'esame, un esercizio reale con soluzione recuperabile.
+- Creati 5 **modelli risolti** in `SIMULAZIONI ESAMI/SICINF/modelli_risolti/`: Binary exploitation (25/06/2021, screenshot reali), Integrity check/privesc (09/01/2023, screenshot reale), Network Intrusion Detection (11/01/2024, soluzione testuale reale), Web vulnerabilities (13/06/2024 XSS, screenshot reale), Iptables/NFTables (13/09/2023 — soluzione ufficiale non recuperabile, risolto da Claude sullo stesso esercizio reale, segnalato esplicitamente come non ufficiale).
+- Per NIDS: creati anche `template_report_NIDS.md` (struttura report.txt con indicazione di dove/come recuperare ogni dato) e `procedura_operativa_NIDS.md` (sequenza fissa di comandi Wireshark/Suricata).
+- **Prima volta con Suricata**: installato su Kali/Parrot (`apt install suricata`, v7.0.10 già presente).
+- **Eseguito da zero l'esercizio reale 13/02/2025** (S10): scaricato `traffic-2025-02-13.pcap` da Virtuale, analisi in Wireshark (Protocol Hierarchy → Conversations → Follow Stream) guidata passo-passo. Individuati 4 tipi di traffico: SMTP legittimo (172.21.1.166/172.23.3.76 ↔ 172.22.2.81:25), HTTP health-check legittimo (172.21.1.166→172.23.3.76:80, richieste distanziate di secondi), ICMP (ping 172.21.1.166↔172.23.3.76), e attacco HTTP flood/buffer-overflow-probe (172.22.2.81→172.23.3.76:80, richieste a millisecondi, query string `/?AAAA...BBBB`).
+- Momento di correzione utile: Lorenzo ha giustamente contestato l'euristica iniziale di Claude ("ripetizione identica = traffico sicuro") — corretto in "conta la frequenza/volume relativo, non la ripetizione in sé", che ha poi portato a distinguere correttamente health-check (secondi) da flood (millisecondi).
+- Scritta e verificata una regola Suricata (`alert http 172.22.2.0/24 any -> 172.23.3.0/24 80 (msg:"..."; content:"BBBB"; http_uri; sid:1000001; rev:1;)`) — 31 alert generati su `eve.json`.
+- Consegna completa in `esercizi/SICINF/pratica_NIDS_2025-02-13/`: `report.txt` (rivisto da Claude per coerenza reti /24, sezione ICMP completata da Lorenzo), `exam.rules`, `suricata.yaml`, `eve.json`.
+- Scoperta pratica: Claude ha accesso screenshot diretto al desktop host (Hyprland, `grim`) — usato più volte per leggere Wireshark/terminale direttamente invece di copia-incolla manuale.
+
+**Non coperto / da riprendere**:
+- Nessuna lezione/appunti teorici formali per S10 — resta da fare, deliberatamente rimandato.
+- Template + procedura operativa mancanti per le altre 4 tipologie (Web, Binary, Iptables, Integrity) — i modelli risolti ci sono già, mancano solo i due livelli "forma" e "algoritmo".
+- S11 (Integrity check/privesc) ancora completamente a 0%, stesso approccio da applicare.
+- S5 Es3-9 non toccati in questa sessione (nessun avanzamento sul percorso sequenziale).
+
+**Prossima sessione — da dove partire**:
+→ Security: scegliere se consolidare S10 con un secondo esercizio pratico, passare a S11 con lo stesso approccio "esercizi prima, teoria dopo", oppure tornare al percorso sequenziale S5 Es3. Se si prosegue sulla pratica esame, riusare `modelli_risolti/` + creare template/procedura per la tipologia scelta.
+
+---
+
 ### Sessione 46 — 2026-07-07 (completata)
 **Focus**: Security — S5 Firewall/iptables/nftables (lezione + appunti + guida-lab + esecuzione lab Es1-2). Tentativo di drill esame S4 abbandonato a favore del ritorno al percorso sequenziale.
 
