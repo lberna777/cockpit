@@ -8,6 +8,21 @@
 
 ---
 
+### Sessione 50 — 2026-07-13 (completata)
+**Focus**: Security — S11 Integrity check/privesc, consolidamento materiale di riferimento (nessun lavoro hands-on nuovo sulla VM).
+
+**Coperto in sessione**:
+- Verificato l'output dell'agente in background lanciato in sessione 49: pool completo 9/9 esercizi reali catalogati in `modello_integrity_privesc.md` (7 aggiunti: 15/06/2023, 11/01/2024, 08/02/2024, 13/06/2024, febbraio 2025, 10/07/2025, 30/10/2025 — 6 con soluzione ufficiale completa, 1 ricostruito per analisi statica e segnalato come tale), più due nuovi file `procedura_operativa_privesc.md` e `guida_esame_privesc.md` sul modello dei tre file NIDS.
+
+**Non coperto / da riprendere**:
+- Nessun secondo esercizio S11 ancora praticato hands-on — solo il materiale di riferimento è pronto.
+- S5 Es3-9 ancora non toccati.
+
+**Prossima sessione — da dove partire**:
+→ Ripristinare snapshot pulito della VM Security, poi scegliere tra: seconda variante S11 (usando `procedura_operativa_privesc.md`/`guida_esame_privesc.md` come riferimento) o S5 Es3-9. Con 3 giorni all'esame, priorità a coprire più tipologie ⭐ possibile piuttosto che approfondire una singola famiglia.
+
+---
+
 ### Sessione 49 — 2026-07-13 (completata)
 **Focus**: Security — S11 Integrity check/privilege escalation, primo esercizio pratico dal pool reale d'esame. Cambio di binario di lavoro deciso a inizio sessione: da NIDS a Integrity/privesc (tipologia ⭐ ancora a 0%, priorità più alta con 4 giorni all'esame).
 
