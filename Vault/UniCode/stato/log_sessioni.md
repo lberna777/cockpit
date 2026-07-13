@@ -8,6 +8,46 @@
 
 ---
 
+### Sessione 49 — 2026-07-13 (completata)
+**Focus**: Security — S11 Integrity check/privilege escalation, primo esercizio pratico dal pool reale d'esame. Cambio di binario di lavoro deciso a inizio sessione: da NIDS a Integrity/privesc (tipologia ⭐ ancora a 0%, priorità più alta con 4 giorni all'esame).
+
+**Coperto in sessione**:
+- Spiegazione generale delle 5 tipologie d'esame (Web vulnerabilities, Binary exploitation, Iptables/NFTables, NIDS, Integrity/privesc), ricostruita leggendo i PDF/HTML reali già scaricati localmente in `SLIDE TEORIA/SICINF` e `SLIDE LAB/SICINF` (non da `percorso.md`, che è solo indice) — inclusi i due lab specifici di S11 mai praticati (`LAB_Esempi_di_misconfiguration_22apr.html`: sudoers/suid/acl/capabilities; `LAB_Misconfiguration_attacks_e_HIDS_22apr.html`: AIDE + 4 vettori di privesc).
+- **Esercizio S11 #1 — 9 gennaio 2023** (`modello_integrity_privesc.md`, con `change1`): risolto **hands-on sulla VM con guida socratica** (Lorenzo ha scritto tutti i comandi, scoperto da solo il meccanismo SUID dopo un paio di correzioni concettuali). Fase 1: configurazione AIDE (scoperto che `/usr/bin` non è coperto di default, serve regola esplicita `/usr/bin f Full` **prima** di `aideinit`) → identificata la modifica (`/usr/bin/cp` ha acquisito il bit SUID). Fase 2: privilege escalation — copia di `passwd`/`shadow` via `cp` SUID, resa editabile con `cat > file_editable` (i copiati diretti restano root-owned, non scrivibili), riga `toor:x:0:0:toor:/root:/bin/bash` + `toor::<data>:0:99999:7:::` (campo password vuoto), riscrittura dei file di sistema via `cp` SUID, `su toor` → `id` conferma `uid=0(root)`. **Soluzione verificata contro la pagina ufficiale Virtuale** (già aperta nel browser di Lorenzo) — strategia identica a quella del docente.
+- Deliverable prodotti sulla VM: `integrity.txt` (documentazione Fase 1, scritta da Lorenzo con bozza + 5 correzioni puntuali: ordine config/aideinit invertito, passo `cat`→editable mancante, refuso comando ripetuto, interpretazione errata del flag `f` di AIDE, slash mancante in `/bin/bash`), `privesc.png` (screenshot Fase 2 con `scrot`).
+- **Momento di frizione gestito**: a metà Fase 1, Lorenzo ha segnalato che il ritmo di scoperta guidata (grep esplorativi su `aide.conf.d/`) stava diventando dispersivo dato che Claude conosceva già la soluzione — corretto passando a indicazioni dirette e standardizzate per i passaggi puramente meccanici (sintassi/config tool), riservando le domande socratiche al ragionamento specifico dell'esercizio (identificazione vettore, meccanismo dello sfruttamento). Vedi feedback salvato in memoria.
+
+**Non coperto / da riprendere**:
+- S11 ancora aperto: solo 1 esercizio su più varianti note nel pool (`change2...change9` citati in `modello_integrity_privesc.md`, più il caso "12 gennaio 2026" con capabilities già documentato ma non ancora praticato hands-on).
+- S5 Es3-9 non toccati in questa sessione.
+- Lab `LAB_Esempi_di_misconfiguration` (sudoers/acl/capabilities) e `Soluzione_pentesting_target` (capstone) letti ma non ancora praticati hands-on.
+
+**Prossima sessione — da dove partire**:
+→ Lanciato un agente (Opus, background) per esplorare su Virtuale tutte le varianti d'esame di Integrity check/privesc oltre a quelle già in `modello_integrity_privesc.md`, e produrre una guida operativa analoga a `guida_esame_NIDS.md`/`procedura_operativa_NIDS.md` (metodo generale AIDE + catalogo dei vettori di privesc con come riconoscerli e sfruttarli). Verificare il risultato dell'agente a inizio prossima sessione, poi continuare la pratica hands-on S11 con un secondo esercizio della famiglia, oppure completare S5 (Es3-9) se S11 risulta sufficientemente coperto. Prima della VM: ripristinare snapshot pulito (utente `toor` e SUID su `cp` sono residui di questa sessione).
+
+---
+
+### Sessione 48 — 2026-07-13 (completata)
+**Focus**: Security — S10 Network Intrusion Detection, secondo e terzo esercizio pratico dal pool reale d'esame + revisione strutturale della guida operativa. Sessione estesa su più giorni (10-13/07).
+
+**Coperto in sessione**:
+- **Esercizio S10 #2 — 11 gennaio 2024** (`dump.pcap`, pool reale con soluzione ufficiale): analisi completa in Wireshark. 4 tipi di interazione verso `10.10.10.10`: port scan TCP-connect da `10.10.3.1` (porte 22 e 80 trovate aperte, confermato via decodifica flag TCP `tcp.flags`/`tcp.len`), **SSH legittima sulla stessa porta 22** dello scan (2 sessioni con payload reale — lezione chiave: stessa porta/coppia host non implica stesso tipo di traffico, va sempre verificato coi flag grezzi, non per analogia), Telnet con flag `FLAG{this_port_is_dangerous}` da due sorgenti (10.10.5.21, 10.10.31.2), DDoS con 151 sorgenti distinte su porta 80 (conteggio IP unici via tshark). Regola Suricata scritta, 2 alert verificati in `eve.json`, flag estratta (fallback Python per `jq` mancante sulla VM). Report scritto e **confrontato con la soluzione ufficiale**: ottimo allineamento, in più punti più rigoroso del testo ufficiale (che ha fraseggio ambiguo sulla direzione di scan/SSH).
+- **Momento critico**: attacco di panico a metà esercizio per troppi comandi tecnici tshark/Wireshark concatenati senza spiegazione del perché. Gestito con pausa esplicita, poi ripreso con ritmo diverso — spiegare il meccanismo prima di ogni comando, un pezzo alla volta. Feedback salvato in memoria (`feedback_nids_pacing_narration`), da applicare sempre nei lab tecnici di questo tipo.
+- **Esercizio S10 #3 — 10 luglio 2025** (`trace-2025-07-10.pcapng`): topologia a 3 host/3 subnet confermata analizzando la scheda **Ethernet** di Conversations (i MAC vengono riscritti a ogni salto di router, gli IP no — usato per dedurre la topologia prima ancora di guardare il traffico applicativo). Trovato **buffer-overflow via SMTP** con padding incrementale di 0/1 (non `AAAA...`) e marcatore fisso `ABCD`, stessa tecnica di ricerca dell'offset vista in S4. Tutti gli altri gruppi (HTTP, DNS, ICMP, ARP) verificati esplicitamente e classificati legittimi — il DNS in particolare (query PTR/A ripetute) si è rivelato spiegato dai tentativi SMTP ripetuti, non un fenomeno separato. Regola scritta ed eseguita con successo (confermato da Lorenzo). Correzione concettuale data a Lorenzo: Suricata in modalità `alert`/offline (`-r` su pcap) logga soltanto, non blocca nulla.
+- **Revisione strutturale di `guida_esame_NIDS.md`**, con le lezioni pratiche di entrambi gli esercizi: nuova §2.1 (mappatura Protocol Hierarchy↔Conversations: le schede Ethernet/IPv4/TCP/UDP non condividono i nomi della gerarchia, si naviga per porta; perché IPv4 aggrega diversamente da TCP/UDP; ICMP senza scheda propria, isolabile con `icmp` + "Limit to display filter"), nuova §3.8 (criteri concreti per giudicare ICMP — pairing richiesta/risposta — e DNS — leggibilità dei nomi, segnali di tunneling), nuova §4.7 (verifica con flag TCP grezzi via `tcp.flags`+`tcp.len`, tabella di decodifica esadecimale), fallback `jq`→Python in §3.5, promosso il richiamo "alert non blocca" nel checklist. In una rilettura a mente fredda finale corretti anche 2 bug preesistenti (riferimento §4.5→§4.6 sbagliato nel checklist, nome file spezzato da un a-capo).
+
+**Non coperto / da riprendere**:
+- Nessuna lezione/appunti teorici formali per S10 — ancora deliberatamente rimandato.
+- ARP (2 varianti nel pool reale: 12/01/2026 spoofing, 30/10/2025 scan combinato) non ancora praticato hands-on da Lorenzo — solo documentato via `modello_network_intrusion_detection.md`. Scelta consapevole di consolidare prima il territorio TCP/applicativo.
+- S11 (Integrity check/privesc) ancora a 0%.
+- S5 Es3-9 non toccati in questa sessione.
+- Restano nel pool reale 2 esercizi con soluzione disponibile per confronto non ancora praticati (10 febbraio 2023, 8 febbraio 2024).
+
+**Prossima sessione — da dove partire**:
+→ Con 4 giorni all'esame (17/07), decidere tra: **S11** (Integrity check/privesc, ⭐ tipologia d'esame ancora a 0% — rischio più alto) o completare **S5** (⭐ già parziale, Es3-9 mancanti, materiali già pronti). Priorità consigliata: S11, per copertura del rischio di zero pratica su una tipologia d'esame. Nei lab tecnici, applicare da subito il ritmo con spiegazione-prima-del-comando (vedi feedback sopra), non aspettare un sovraccarico per correggersi.
+
+---
+
 ### Sessione 47 — 2026-07-08 (completata)
 **Focus**: Security — S10 Network Intrusion Detection. Nuovo binario di lavoro "esercizi prima, teoria dopo" per le tipologie d'esame ancora a 0%, in parallelo al percorso sequenziale (S5 non toccato in questa sessione).
 

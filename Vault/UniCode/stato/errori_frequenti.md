@@ -80,10 +80,20 @@
 | AXFR zone transfer: "espone solo il sottodominio richiesto" | S1 | AXFR restituisce l'**intera zona DNS** in una sola query — tutti i record A, MX, NS, CNAME, PTR, SOA. Non è un lookup puntuale. |
 | Packet Filter descritto come "proprietà/filtro del firewall" | S5 | Il PF è uno dei **tre tipi fondamentali** di firewall (con ALG e CLG), non una proprietà interna di un firewall generico — è un'implementazione concreta del concetto architetturale "firewall", non un suo attributo. |
 
+### NIDS / Suricata (S10)
+| Errore | Sessione | Correzione |
+|--------|----------|------------|
+| Saltata la verifica del traffico legittimo (Conversations/Follow Stream) prima di scrivere la regola, avendo già trovato il sospetto | 47, 48 | Va fatta **sempre**, anche se l'anomalia è già chiara — vedi Gate B in `guida_esame_NIDS.md`. Ripetuto due volte su due esercizi. |
+| Variabile custom in `suricata.yaml` lasciata commentata (`#GOOD_NET: ...`), copiando lo stile delle alternative `#HOME_NET` già nel file | 48 | Le alternative `#HOME_NET` sono varianti disattivate tra cui scegliere; una variabile nuova senza `#` è l'unica definizione — se resta commentata non esiste per Suricata |
+| Virgolette non chiuse / `;` estraneo nelle variabili YAML aggiunte a mano | 48 | Checklist completa in `guida_esame_NIDS.md` § 4.5 |
+| `grep -c '"sid":<N>' eve.json` restituisce sempre 0 anche se la regola funziona | 48 | Il campo nel JSON si chiama `signature_id`, annidato in `"alert":{...}` — `sid` è solo il nome nella sintassi della regola |
+| Caratteri persi digitando comandi lunghi (`any`→`an`, spazio mancante in un flag) — sembra un errore di sintassi, è perdita di input | 48 | `cat -A <file>` prima di eseguire qualunque file scritto a mano, per verificare che contenga davvero quello che si pensa di aver scritto |
+
 ### Pattern Ricorrenti Security
 - **Narrativa vs comandi**: tendenza a perdere il filo (cosa sto facendo e perché). Costruire sempre la catena: *che informazione ho → cosa cerco → quale comando la trova*.
 - **Assumere che gli IP degli esempi siano i propri**: gli IP nei PDF del corso (.32/.33/.34) sono esempi — verificare sempre con `ip a` + `nmap -sn`.
 - **Autenticazione vs autorizzazione**: la distinzione AAA viene formulata correttamente in teoria, ma scivola in pratica quando si descrivono sistemi concreti (FIDO, S2). Verificare ogni volta che si parla di un protocollo: *sta stabilendo chi sei (auth) o cosa puoi fare (authz)?*
+- **Fermarsi al primo indizio trovato**: in NIDS, capitato due volte di considerare "risolto" un esercizio dopo aver trovato un pattern sospetto, senza verificare che spiegasse *tutto* il traffico segnalato da Protocol Hierarchy o senza controllare il resto del traffico legittimo. Sempre far quadrare i numeri prima di concludere.
 
 ---
 

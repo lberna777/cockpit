@@ -383,19 +383,49 @@ Regola: in ogni cartella esercizio, prima `gcc -o es … es.c`, poi si lavora su
 **Causa**: un'altra istanza di Suricata (o un socket residuo) è già presente. Innocuo in modalità offline (`-r` su un pcap): non impedisce l'analisi né la scrittura dei log/alert.
 **Soluzione**: ignorabile per l'uso da esame (analisi offline di un pcap già dato); verificare solo se si lavora in modalità live su interfaccia.
 
+**Problema**: `jq: command not found` quando si prova a estrarre `payload_printable` da `eve.json` (esercizi flag-extraction, § 3.5 di `guida_esame_NIDS.md`).
+**Causa**: `jq` non è installato di default su questa VM (non era nella checklist pre-snapshot originale).
+**Soluzione**: `sudo apt install -y jq` se c'è rete; altrimenti fallback senza installare nulla, con Python (già presente):
+```
+python3 -c "
+import json
+with open('<dir_output>/eve.json') as f:
+    for line in f:
+        e = json.loads(line)
+        if e.get('event_type') == 'alert':
+            print(e.get('payload_printable'))
+"
+```
+Aggiunto `jq` alla checklist pre-snapshot qui sotto, per non ritrovarselo mancante il giorno dell'esame.
+
+---
+
+## VM Security — AIDE (modulo S11)
+
+**Problema**: `sudo nano /etc/aide/aide.conf` → `cd: /etc/aide: No such file or directory`, `which aide` e `dpkg -l | grep aide` non restituiscono nulla.
+**Causa**: AIDE **non è preinstallato di default** su questa VM (il materiale del lab assume "già installato sulla Kali del laboratorio", non è vero su Parrot in questa configurazione).
+**Soluzione**: `sudo apt install aide`. Dopo l'installazione compare `/etc/aide/aide.conf`. Aggiunto alla checklist pre-snapshot qui sotto.
+
+**Nota operativa**: `/etc/aide/aide.conf` di default **non copre `/usr/bin`** con una regola di monitoraggio reale (solo `aide.conf.d/` con centinaia di regole per-pacchetto generiche, nessuna delle quali su `/usr/bin`). Per rilevare modifiche lì, commentare la riga `@@x_include /etc/aide/aide.conf.d ...` e aggiungere esplicitamente:
+```
+/bin f Full
+/usr/bin f Full
+```
+**PRIMA** di lanciare `sudo aideinit` (l'ordine conta: la baseline deve essere creata con le regole già in vigore, altrimenti non cattura il dettaglio necessario). Vedi `[[glossario_sysadm]]` voce AIDE per il meccanismo completo.
+
 ---
 
 ## Checklist pre-snapshot "baseline-pulita" (VM Security)
 
 Prima di congelare la baseline, verificare che i tool delle 5 famiglie d'esame ci siano già:
 ```bash
-which nmap suricata nikto sqlmap iptables nft tcpdump   # enum/web/NIDS/firewall
+which nmap suricata jq nikto sqlmap iptables nft tcpdump aide  # enum/web/NIDS/firewall/integrity
 which gcc gdb objdump                                    # binary exploitation
 dpkg -l | grep -E 'libc6-i386|gcc-multilib'             # supporto 32-bit (binari x86_32 del corso)
 ```
-Tool mancanti tipici su Parrot di default: **`suricata`** (NIDS, famiglia d'esame!) e **`gcc-multilib`**.
-Installarli PRIMA dello snapshot così restano nella baseline:
+Tool mancanti tipici su Parrot di default: **`suricata`** (NIDS, famiglia d'esame!), **`jq`** (estrazione
+flag da `eve.json`, NIDS), **`aide`** (integrity check, famiglia d'esame!) e **`gcc-multilib`**. Installarli PRIMA dello snapshot così restano nella baseline:
 ```bash
-sudo apt install -y suricata gcc-multilib
+sudo apt install -y suricata jq aide gcc-multilib
 ```
 Snapshot: `VBoxManage snapshot "LabSicurezzaInformatica" take "baseline-pulita"`.
