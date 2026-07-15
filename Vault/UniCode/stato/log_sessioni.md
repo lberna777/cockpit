@@ -8,6 +8,50 @@
 
 ---
 
+### Sessione 52 — 2026-07-15 (completata)
+**Focus**: Security — verifica esito pendente da sessione 51 (audit privesc), poi apertura della terza tipologia d'esame rimasta, Iptables/NFTables (S5), con lo stesso schema "pool esami + template" già usato per NIDS/privesc.
+
+**Coperto in sessione**:
+- Verificato l'esito dell'agente Opus lanciato in sessione 51 per l'audit di `guida_esame_privesc.md`: confermato completo, tutti e 5 i gap presenti e corretti nel file (sintassi regola AIDE, §4.6 pipe-vs-redirect, bug formato passwd, prerequisito AIDE non preinstallato, nota rockyou.txt).
+- Contata come fatta la variante `change5` di S11 (11/01/2024), eseguita autonomamente da Lorenzo senza assistenza diretta — portando a 3 gli esercizi hands-on completati per la famiglia Integrity/privesc.
+- Lanciato un agente in background per catalogare il pool completo di Iptables/NFTables (7 esercizi reali, un conteggio iniziale di 8 corretto a 7 dopo aver scoperto che una delle date era la data di stampa della pagina Virtuale, non un esercizio) — tutti e 7 ora con soluzione ufficiale del docente (nascoste come allegati base64 nell'HTML), creati `procedura_operativa_iptables.md` e `guida_esame_iptables.md`.
+- Sessione di tutoring pratico da zero assoluto sui concetti di topologia di rete per questa tipologia: ruoli Client/Router/Server, interfacce come nomi locali a ogni macchina (non condivisi tra host), `-i`/`-o` (interfaccia) vs `-s`/`-d` (indirizzo IP), `--dport`/`--sport`, il test decisivo FORWARD (attraversamento verso un terzo host) vs INPUT/OUTPUT (traffico che nasce/muore sull'host stesso) — con un errore concettuale reale intercettato e corretto (una regola scritta in FORWARD per traffico che in realtà terminava sul router).
+- Risolto e verificato contro la soluzione ufficiale l'esercizio del pool **13 giugno 2024** (Router+Server, con NAT): scritti `ipt-router.sh` e `ipt-server.sh`, inclusa la scoperta di un requisito NAT/SNAT non individuato al primo passaggio (segnale "rete privata verso segmento senza instradamento di ritorno", non solo la parola "indiretto" nel testo — ora generalizzato in `procedura_operativa_iptables.md` §2) e la spiegazione del meccanismo SNAT+conntrack pacchetto-per-pacchetto.
+- Creati due template riusabili per l'esame, `template_ipt-router.md` e `template_ipt-endpoint.md` (quest'ultimo copre sia Client che Server), poi affinati con una sezione "Chiarimenti prima di iniziare" che raccoglie tutti i dubbi emersi.
+- Lanciato un secondo agente Opus in background a fine sessione per consolidare tutti i chiarimenti emersi nei 5 file di riferimento della tipologia Iptables/NFTables, in modo che siano autosufficienti "a mente spenta" il giorno dell'esame.
+
+**Non coperto / da riprendere**:
+- Esito del secondo agente Opus (consolidamento materiali Iptables/NFTables) da verificare a inizio prossima sessione.
+- Restano da praticare altre varianti del pool S5 (11/06/2021, 8/02/2024, 30/10/2025, e i due casi già in `modello_iptables_nftables.md` con soluzione elaborata/parziale) e del pool S11 (`change2,3,6,7,8,9`).
+- Piccolo dettaglio tecnico rimasto: `ipt-router.sh` di oggi non include `iptables -t nat -F` nel flush iniziale (non blocca la correttezza di un singolo run, ma lo script non sarebbe idempotente se rilanciato).
+- Sessione lunga e faticosa — Lorenzo ha segnalato stanchezza a fine sessione.
+
+**Prossima sessione — da dove partire**:
+→ Verificare l'esito del secondo agente Opus (materiali Iptables/NFTables). Con 2 giorni all'esame, valutare un ritmo più leggero (ripasso/verifica materiali esistenti delle 5 tipologie) piuttosto che nuovo materiale pesante, vista la stanchezza accumulata.
+
+---
+
+### Sessione 51 — 2026-07-14 (completata)
+**Focus**: Security — S11 Integrity check/privesc, secondo esercizio pratico dal pool reale ("provo a seguire guida esame privesc"). Fix di processo importante su gestione VM/deliverable. Audit di autosufficienza di `guida_esame_privesc.md` con agente Opus in background.
+
+**Coperto in sessione**:
+- Ripristinata la VM da snapshot pulito ("VM pulita") per rimuovere i residui di `change1` (sessione 49) — GUI VirtualBox poco chiara per il restore (pulsanti grigi), risolto usando `VBoxManage snapshot ... restore` da riga di comando sull'host.
+- Reinstallato `aide` (perso al revert perché installato dopo lo snapshot in sessione 49) e preso un nuovo snapshot pulito che lo include.
+- Esercizio reale **`change4` (11 gennaio 2024)** completato hands-on end-to-end: Fase 1 — config AIDE (corretto un errore di sintassi proprio, `/usr/bin -f Full` con trattino invece di `/usr/bin f Full`), baseline, diff con 4 file segnalati, triage completo file-per-file con `getcap`/`ls -l` (`grep` falso positivo, `vim.tiny` vicolo cieco — privilegio tolto non dato —, `/etc/sudoers` rumore, `/usr/bin/tee` vettore reale con `cap_dac_override`). Fase 2 — creato utente `hack` (password `hack`, UID/GID 0) scrivendo `/etc/passwd` via `tee` (spiegato a fondo il meccanismo pipe-vs-redirect: la capability si attiva solo se è il binario privilegiato ad aprire il file, non con un redirect di shell), verificato `su hack` → `id` → `uid=0(root)`. Confrontato con soluzione ufficiale in `modello_integrity_privesc.md`, combacia.
+- **Scoperta di processo**: i deliverable (`integrity.txt`, `privesc.png`) di esercizi con revert a snapshot si perdevano ad ogni ripristino (successo così con `change1` — mai trovati nel repo). Adottato nuovo workflow: screenshot catturati da Claude sull'host con `grim` durante l'esercizio, `integrity.txt` scritto in tempo reale nel repo via via che Lorenzo incolla l'output dei comandi — mai più lasciato solo dentro la VM. Salvato come memoria auto-persistente (`feedback_deliverable_vm_revert`) e in `troubleshooting_vm.md`.
+- Aggiornato `glossario_sysadm.md` con voce "capability (Linux capability)".
+- Lanciato un agente Opus in background per un audit di autosufficienza di `guida_esame_privesc.md` (domanda: "uno studente risolverebbe qualunque variante della famiglia usando solo questo file?"). Esito arrivato a fine sessione: 5 gap trovati e corretti (avviso sintassi regola AIDE, nuova sezione §4.6 sul meccanismo pipe-vs-redirect, bug formato passwd a 6→7 campi in §4.3 — anche corretto in `modello_integrity_privesc.md` sul caso 11/01/2024 senza alterare la trascrizione ufficiale —, prerequisito "AIDE non preinstallato" mancante, nota su `rockyou.txt` compressa). Valutazione finale: sì con alta confidenza per tutti i vettori già catalogati; limite intrinseco dichiarato per vettori mai visti (mitigato da criterio generale §4.5 + comandi di scoperta a tappeto).
+
+**Non coperto / da riprendere**:
+- Non ancora verificato a mano il diff effettivo applicato dall'agente ai 3 file (`guida_esame_privesc.md`, `procedura_operativa_privesc.md`, `modello_integrity_privesc.md`) — da rileggere a inizio prossima sessione prima di fidarsene in sede d'esame.
+- Restano 7 varianti del pool non ancora praticate hands-on (`change2,3,5,6,7,8,9` — nomi indicativi, vedi `modello_integrity_privesc.md` per le date reali) e i due lab dedicati (misconfiguration, HIDS/AIDE) letti ma mai eseguiti sulla VM.
+- S5 Es3-9 ancora non toccati.
+
+**Prossima sessione — da dove partire**:
+→ Con 3 giorni all'esame (17/07): rileggere il diff dell'agente su `guida_esame_privesc.md` (verifica veloce, non un audit completo), poi scegliere tra un'altra variante S11 dal pool (capability `cap_fowner`/ACL/sudoers — vettori diversi da SUID e da `cap_dac_override` già coperti) o iniziare la finestra di rifinitura/simulazioni pianificata per il 14-16/07 in `ESAMI SCELTI.md`.
+
+---
+
 ### Sessione 50 — 2026-07-13 (completata)
 **Focus**: Security — S11 Integrity check/privesc, consolidamento materiale di riferimento (nessun lavoro hands-on nuovo sulla VM).
 

