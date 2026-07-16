@@ -9,7 +9,18 @@
 # ─── Materiale universitario (copyright del corso) ───────────
 SLIDE TEORIA/
 SLIDE LAB/
-SIMULAZIONI ESAMI/
+
+# SIMULAZIONI ESAMI/: si ignorano solo i file grezzi di Virtuale (per
+# estensione, non l'intera cartella — un'esclusione a livello di directory
+# impedirebbe a git di "vedere" qualunque file dentro, anche i nostri .md
+# originali in modelli_risolti/). Il testo/soluzioni ufficiali restano fuori,
+# la sintesi originale (guida_esame_*, procedura_operativa_*, template_*,
+# modello_*) in modelli_risolti/ viene tracciata normalmente.
+SIMULAZIONI ESAMI/**/*.pdf
+SIMULAZIONI ESAMI/**/*.html
+SIMULAZIONI ESAMI/**/*.mp4
+SIMULAZIONI ESAMI/**/*.gz
+SIMULAZIONI ESAMI/**/*.zip
 
 # ─── Pianificazione esami personale ──────────────────────────
 ESAMI.md
