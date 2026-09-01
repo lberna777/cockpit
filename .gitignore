@@ -17,3 +17,6 @@ Vault/recap/_archive/
 # python cache
 __pycache__/
 *.pyc
+
+# repo git indipendente con remote proprio (github.com/lberna777/Unibo_Diritto_Informatico)
+Vault/UniCode/ARCHIVIO/Unibo_Diritto_Informatico/
