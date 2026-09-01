@@ -41,7 +41,7 @@ def git_repos(base: Path) -> list[Path]:
 
 
 def collect_git(day: date) -> list[str]:
-    """Commit del giorno su tutti i repo in ~/Idee."""
+    """Commit del giorno su tutti i repo in ~/Sviluppo."""
     since = day.isoformat()
     until = (day + timedelta(days=1)).isoformat()
     out: list[str] = []

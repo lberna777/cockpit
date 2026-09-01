@@ -61,7 +61,7 @@ Sottocartelle:
 # Guida Lab — Modulo $ARGUMENTS: <Nome Completo>
 **Corso**: Lab Amministrazione di Sistemi T
 **Materiale**: <titoli PDF usati>
-**VM**: Vagrant + Debian 12 (`cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh`)
+**VM**: Vagrant + Debian 12 (`cd ~/cockpit/Vault/UniCode/ARCHIVIO/sysAdmin-lab-vagrant && vagrant up && vagrant ssh`)
 **Prerequisiti**: <moduli precedenti rilevanti — verificare ✅ in corrente.md>
 
 ---

@@ -31,18 +31,24 @@ in contesto. L'hook inietta un artefatto compatto: l'indice del vault + gli ulti
 
 ## Mappa del territorio
 
-Symlink di navigazione da qui:
-- `Idee/` → `~/Idee` — progetti personali: app, plugin, giochi, esperimenti musicali/creativi.
-  - `agenticdash/` — questa app (dashboard + memoria, Tauri). Vedi il suo CLAUDE.md.
-  - `diritto-quiz-app/`, `unicode-ui/`, `NEMO/`, ecc.
-- `UniCode/` → `~/UniCode` — studio universitario (Diritto, SysAdmin, Security). Ha il suo
-  CLAUDE.md con workflow `/lezione`, `/appunti`, `/chiudi`, ecc.
+Riordinata il 2026-09-01. I symlink di navigazione ridondanti sono stati rimossi: il Vault
+si raggiunge da `Vault/UniCode` qui dentro, oppure da `~/UniCode` (usato dalle skill).
+
+- `~/cockpit/Vault/UniCode` — studio universitario (Diritto, SysAdmin, Security). Ha il suo
+  CLAUDE.md con workflow `/lezione`, `/appunti`, `/chiudi`, ecc. `ARCHIVIO/` contiene il
+  materiale degli esami chiusi.
+- `~/Sviluppo` — tutto il codice, diviso per tipo di lavoro:
+  - `app/` — accountability-app, agenticdash (dashboard + memoria, Tauri), diritto-quiz-app, bibiciclo
+  - `audio/` — StereoCompressor, FreakFM, acidmoog-synth, NEMO, JUCE-shared
+  - `giochi/` — Monopoly
+  - `tools/` — AgenticOS, claude-code-quest, unicode-ui, UniCode-template, platform-master, cupp
+  - `appunti/` — note e piani di sviluppo, non progetti
 
 ---
 
 ## Convenzioni globali
 - **Lingua**: italiano.
-- **Handoff**: a ~75% di contesto usa `/handoff` o `/handoffplan` (vedi `~/Idee/CLAUDE.md`).
+- **Handoff**: a ~75% di contesto usa `/handoff` o `/handoffplan` (vedi `~/Sviluppo/CLAUDE.md`).
 - **Skill custom**: `lorenzo-skills` (audio-dsp-debug, game-scope-guard, studia, unicode-output-gate,
   unicode-session-close, unicode-link-note).
 - **Recap del giorno**: annota le attività in `Vault/attivita_oggi.md` durante la giornata;

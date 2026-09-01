@@ -232,7 +232,7 @@
 
 **Prossima sessione — da dove partire**:
 → (vedi sessione 43 sopra)
-→ SysAdmin 3D: `cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh` → segui guida_lab_modulo3D
+→ SysAdmin 3D: `cd ~/cockpit/Vault/UniCode/ARCHIVIO/sysAdmin-lab-vagrant && vagrant up && vagrant ssh` → segui guida_lab_modulo3D
 
 ---
 
@@ -258,7 +258,7 @@
 
 **Prossima sessione — da dove partire**:
 → Security S4 Binary Exploits: `/lezione S4` (PDF: cercare in `SLIDE LAB/SICINF/`) → `/lab S4`
-→ SysAdmin 3D: `cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh` → segui guida_lab_modulo3D
+→ SysAdmin 3D: `cd ~/cockpit/Vault/UniCode/ARCHIVIO/sysAdmin-lab-vagrant && vagrant up && vagrant ssh` → segui guida_lab_modulo3D
 
 ---
 
@@ -292,7 +292,7 @@
 - Guida_lab 0A–2B da rifare con le nuove direttive (bassa priorità, quando c'è tempo)
 
 **Prossima sessione — da dove partire**:
-→ SysAdmin 3D: `cd ~/Progetti/sysAdmin-lab && vagrant up && vagrant ssh` → segui `guida_lab_modulo3D_networking_base.md` Es. 1–6, annota inline → poi `/appunti 3D`
+→ SysAdmin 3D: `cd ~/cockpit/Vault/UniCode/ARCHIVIO/sysAdmin-lab-vagrant && vagrant up && vagrant ssh` → segui `guida_lab_modulo3D_networking_base.md` Es. 1–6, annota inline → poi `/appunti 3D`
 → Security S3: `/lezione S3` (PDF: `Web_security_6_mar.pdf`) → `/lab S3`
 
 ---

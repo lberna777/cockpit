@@ -11,7 +11,7 @@
 ## Setup
 
 ```bash
-cd ~/Progetti/sysAdmin-lab
+cd ~/cockpit/Vault/UniCode/ARCHIVIO/sysAdmin-lab-vagrant
 vagrant up --provider=virtualbox
 vagrant ssh
 ```
