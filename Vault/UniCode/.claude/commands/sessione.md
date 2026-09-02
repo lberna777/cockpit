@@ -1,93 +1,101 @@
 ---
-description: "Avvia o cambia il focus della sessione di studio. Uso: /sessione [materia]  (es. /sessione, /sessione diritto, /sessione sysadmin, /sessione security)"
-argument-hint: "materia opzionale — sysadmin | diritto | security | (vuoto = panoramica generale)"
+description: "Avvia la sessione di studio o cambia il corso in focus. Uso: /sessione [CODICE]"
+argument-hint: "<CODICE> opzionale — vuoto = corso attivo dal briefing"
 ---
 
 Il parametro passato è: "$ARGUMENTS"
 
-**Rileva il focus richiesto:**
-- `$ARGUMENTS` vuoto → modalità **generale** (tutte le materie)
-- contiene "dir" → focus **Diritto**
-- contiene "sys" → focus **SysAdmin**
-- contiene "sec" → focus **Security**
-- altro → avvisa parametro non riconosciuto, mostra opzioni valide, fermati
+---
 
-**Rileva se la sessione è già in corso:**
-Controlla se `stato/corrente.md` è già stato letto in questa conversazione. Se sì, usa i dati già in contesto e segnala a Lorenzo che stai cambiando focus senza ricaricare.
+**0. Risolvi il focus**
+
+- Vuoto → il **corso attivo**, dal briefing già in contesto.
+- Un codice valido in `piano/codici.txt` → quel corso.
+- Un codice non riconosciuto → mostra i codici dal file e fermati.
+
+Se il codice richiesto è diverso dal corso attivo, avvisa Lorenzo: **un solo esame per volta in
+fase attiva** (`profilo/studente.md`). Cambiare focus è legittimo per un ripasso o per aprire
+un corso nuovo, ma non per studiarne due in parallelo. Chiedi quale delle due cose sta facendo.
 
 ---
 
-**1. Leggi lo stato** *(solo se non già letto)*
-Leggi `stato/corrente.md` integralmente.
+**1. Non rileggere ciò che è già in contesto**
+
+Il briefing d'avvio contiene già profilo, errori ricorrenti, esame attivo, ripassi dovuti e le
+ultime giornate. Leggi in più **solo** ciò che serve al focus richiesto:
+- `corsi/<COD>/percorso.md` — se il focus è un corso non attivo
+- `corsi/<COD>/fonti.md` — se si sta aprendo il corso adesso
+- `piano/piano_laurea.md` — per la collocazione nella sessione d'esame
 
 ---
 
 **2. Mostra lo stato dei moduli**
 
-*Focus generale* — tabella raggruppata per corso (SysAdmin, Security, Diritto) con stato ✅/🔄/⬜.
-
-*Focus specifico* — mostra solo i moduli di quella materia, con più dettaglio: se un modulo è 🔄, elenca lo stato interno degli esercizi.
-
----
-
-**3. Identifica il punto di ripresa**
-
-Dalla sezione "Prossimi Passi" di corrente.md.
-
-*Focus generale*: una riga per materia.
-*Focus specifico*: solo la materia richiesta, in evidenza.
+Solo i moduli del corso in focus, con lo stato. Per quelli in corso, il dettaglio dello stato
+interno degli esercizi.
 
 ---
 
-**4. Proponi il piano per questa sessione**
+**3. Punto di ripresa**
 
-Sulla base del focus e del punto di ripresa:
+Dal briefing se il focus è il corso attivo, altrimenti da `corsi/<COD>/percorso.md`.
+Il punto esatto, non una generica indicazione di continuare.
+
+---
+
+**4. Piano per questa sessione**
+
 - Modulo da affrontare (ID, nome)
 - Obiettivo concreto
 
-*Per SysAdmin/Security*:
-- Sequenza esercizi/comandi
-- Se modulo nuovo: ricorda `/lezione <ID>` prima della VM
-
-*Per Diritto*:
-- Concetti da consolidare
-- Se modulo nuovo: ricorda `/lezione <ID>` + autoverifica
-- Se modulo in corso: da quale concetto riprendere
+*Corsi con laboratorio*: la sequenza di esercizi; se il modulo è nuovo, ricorda `/lezione <COD>
+<ID>` prima dell'ambiente, e `/lab <COD> <ID>` per l'esecuzione.
+*Corsi con esercizi formali*: quali esercizi e in che ordine; se il modulo è nuovo, `/lezione`
+prima.
+*Corsi discorsivi*: i concetti da consolidare; se il modulo è nuovo, `/lezione` più
+autoverifica; se è in corso, da quale concetto riprendere.
 
 ---
 
-**5. Verifica PDF** *(solo per il modulo da affrontare oggi)*
+**5. Verifica la fonte** *(solo per il modulo di oggi)*
 
-Controlla che il PDF necessario sia presente nella cartella corretta. Se manca, fermati e comunicane il titolo.
+Controlla che il materiale del modulo esista in `corsi/<COD>/materiali/`. Se manca, **fermati e
+dichiara il titolo esatto** da procurare: senza fonte non si genera niente.
 
 ---
 
 **6. Prossima cosa da fare**
 
-Leggi `ESAMI SCELTI.md` e `stato/tracker_ripasso.md`. Calcola i giorni mancanti a ciascun esame.
-
-Identifica la **prossima singola cosa da fare** secondo questa priorità:
-1. Ripasso scaduto (da tracker_ripasso.md) — se presente, va per primo (15-20 min)
-2. In focus specifico: prossimo passo di quella materia
-3. In focus generale: materia più a rischio (moduli rimasti / giorni rimasti)
-
-Mostra:
+Priorità:
+1. **Ripasso scaduto** dal tracker — se c'è, va per primo, 15-20 minuti
+2. Il prossimo passo del corso in focus
 
 ```
 **Prossima cosa — [DATA]**
 
-[Materia] · ~Xh
-[Modulo ID] — [azione concreta]
+[Corso] · [blocco di programma]
+[ID modulo] — [azione concreta]
 
 (Solo se presente: un segnale di rischio in una riga)
 ```
 
-**Segnali di rischio** (solo se presenti, in una riga):
-- Scadenza vicina con troppi moduli aperti
-- Ripasso scaduto
+Segnali di rischio: appello vicino con troppi moduli aperti; ripasso scaduto; **checkpoint
+delle sei settimane** in arrivo, che impone di decidere se la sessione resta a quattro esami o
+scende a tre.
 
 ---
 
-**7. Esclusione moduli già fatti oggi**
+**7. Registra l'apertura**
 
-Se la sessione è già in corso e Lorenzo sta cambiando focus, non riproporre moduli/esercizi già completati in questa conversazione.
+Appendi a `stato/giornata.md`:
+
+```
+HH:MM · <COD> · sessione aperta su <ID modulo>.
+```
+
+---
+
+**8. Non riproporre ciò che è già stato fatto**
+
+Se la sessione è già in corso e Lorenzo sta cambiando focus, escludi i moduli e gli esercizi già
+completati in questa conversazione.

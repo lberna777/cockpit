@@ -1,58 +1,60 @@
 ---
-description: "Mostra il riepilogo rapido dello stato di tutti i moduli e il prossimo step per ciascun corso."
+description: "Riepilogo rapido: stato dei moduli del corso attivo, avanzamento e prossimo passo."
 ---
 
-Leggi `stato/corrente.md` e produci esclusivamente:
+Leggi `stato/corrente.md`, `stato/tracker.md` e `piano/piano_laurea.md`. Per i corsi non
+attivi che hanno un `corsi/<COD>/percorso.md`, leggi quello.
+
+Produci esclusivamente:
 
 ---
 
-**1. Tabelle di stato per corso**
-
-Una tabella per corso nell'ordine: SysAdmin → Security → Diritto.
+**1. Corso attivo**
 
 ```
-### SysAdmin — Lab Amministrazione di Sistemi T
+### <COD> — <nome esteso da piano/codici.txt>
 | Modulo | Nome | Stato |
 |--------|------|-------|
-
-### Security — Lab Sicurezza Informatica T
-| Modulo | Nome | Stato |
-
-### Diritto — Diritto dell'Informatica T
-| Modulo | Nome | Stato |
 ```
 
-Per i moduli 🔄: stato interno tra parentesi.
+Per i moduli in corso, indica lo stato interno fra parentesi.
 
 ---
 
-**2. Avanzamento per corso**
+**2. Avanzamento**
+
+Una riga per ogni corso aperto, nell'ordine della sessione d'esame in
+`piano/piano_laurea.md`:
 
 ```
-SysAdmin  ████████░░ 77%  (10/13 moduli ✅)
-Security  ░░░░░░░░░░  0%  (0/12 moduli ✅)
-Diritto   ██████░░░░ 62%  (8/13 moduli ✅)
+<COD>  ████████░░ 77%  (10/13 moduli chiusi)
 ```
 
-Calcola percentuali dal file.
+Calcola le percentuali dai file. Non inventarle.
 
 ---
 
-**3. Prossimo step per corso**
+**3. Prossimo passo per corso aperto**
 
 ```
-SysAdmin  → [ID] — [azione concreta]
-Security  → [ID] — [azione concreta]
-Diritto   → [ID] — [azione concreta]
+<COD>  → [ID] — [azione concreta]
 ```
 
 ---
 
-**4. Alert ripasso** *(solo se presenti)*
+**4. Sessione d'esame**
 
-Leggi `stato/tracker_ripasso.md`. Se ci sono moduli con ripasso scaduto:
+Una riga: sessione corrente, esami che vi appartengono, settimane al primo appello, e se il
+**checkpoint delle sei settimane** è passato o è imminente.
+
+---
+
+**5. Alert ripasso** *(solo se presenti)*
+
+Dal tracker, i moduli con la data "Prossimo" già passata:
+
 ```
-⚠️ Ripasso scaduto: [lista moduli con data scadenza]
+⚠️ Ripasso scaduto: [modulo — scaduto da N giorni]
 ```
 
 ---

@@ -1,12 +1,14 @@
 ---
-description: "Analisi gap: identifica moduli a rischio, ripasso scaduto, errori ricorrenti e produce un piano d'azione prioritizzato."
+description: "Analisi gap: moduli a rischio, ripasso scaduto, errori ricorrenti, e un piano d'azione prioritizzato."
 ---
 
-**Carica tutto il contesto di analisi — in parallelo:**
-- `stato/corrente.md`
-- `stato/tracker_ripasso.md`
-- `stato/errori_frequenti.md`
-- `ESAMI SCELTI.md`
+**Carica il contesto — in parallelo**
+
+Il briefing è già in contesto. Leggi in più:
+- `piano/piano_laurea.md` — sessione corrente, catene di dipendenza, regole di carico
+- `corsi/<COD>/percorso.md` di ogni corso aperto
+- `corsi/<COD>/fonti.md` di ogni corso aperto — le fonti mancanti sono lacune a tutti gli
+  effetti, spesso le più bloccanti
 
 ---
 
@@ -18,52 +20,65 @@ Produci esclusivamente questo report:
 
 ## Analisi Lacune — [DATA]
 
-### 1. Copertura per esame
+### 1. Copertura per esame della sessione corrente
 
-Per ogni esame, calcola:
+Per ogni esame:
 ```
-[Materia] — Esame: [data] (tra X giorni)
-Moduli completati: X/Y (Z%)
-Moduli in corso (🔄): [lista con stato interno]
-Moduli non iniziati (⬜): [lista]
-Ore stimate rimanenti: [da ESAMI SCELTI.md]
-Ore disponibili: [giorni rimasti × ore/giorno dalla fase corrente]
-Bilancio: [surplus/deficit ore]
-```
-
-### 2. Moduli a rischio critico
-
-Lista ordinata per urgenza — moduli dove:
-- L'esame è vicino E il modulo è ⬜
-- Il modulo è 🔄 da più di 7 giorni senza progresso
-- Il bilancio ore è in deficit
-
-Per ciascuno: **azione concreta** per sbloccarlo.
-
-### 3. Ripasso scaduto
-
-Da tracker_ripasso.md, lista tutti i moduli con ripasso scaduto:
-```
-| Modulo | Completato | Ultimo ripasso | Scaduto da |
+<COD> — appello: [data da piano_laurea.md] (fra N settimane)
+Moduli chiusi: X/Y (Z%)
+Moduli in corso: [lista con stato interno]
+Moduli non iniziati: [lista]
+Programma rimanente: [in blocchi di moduli, non in ore]
+Ritmo necessario: [moduli a settimana per arrivare all'appello]
+Ritmo osservato: [moduli a settimana nelle ultime 4 settimane, da log/giornate.md]
+Bilancio: [sostenibile / in ritardo di N moduli]
 ```
 
-Suggerimento: "Dedica 15-20 min a inizio giornata a `/ripassa [modulo più urgente]`"
+> Il bilancio si calcola su **blocchi settimanali di programma coperto, mai su ore giornaliere**
+> (`profilo/studente.md`): la disponibilità di Lorenzo è troppo variabile perché una stima
+> oraria dica qualcosa. Il ritmo osservato viene dai fatti registrati, non da una stima.
 
-### 4. Pattern di errore attivi
+### 2. Fonti mancanti
 
-Da errori_frequenti.md, i pattern che appaiono in 2+ moduli:
+Da `fonti.md` di ogni corso aperto: cosa manca, e quali moduli blocca. Una fonte mancante su un
+modulo in testa a una catena è il rischio più grave che ci sia.
+
+### 3. Moduli a rischio critico
+
+In ordine di urgenza — moduli dove:
+- l'appello è vicino e il modulo non è iniziato
+- il modulo è aperto da più di due settimane senza progresso
+- il ritmo osservato è sotto quello necessario
+- il modulo è in testa a una catena di `piano_laurea.md`: un ritardo qui si propaga
+
+Per ciascuno: **l'azione concreta** che lo sblocca.
+
+### 4. Ripasso scaduto
+
+Dal tracker:
 ```
-| Pattern | Moduli coinvolti | Rischio esame |
+| Corso | Modulo | Chiuso | Ultimo ripasso | Scaduto da |
+```
+Suggerimento: "Dedica 15-20 minuti a inizio giornata a `/ripassa <COD> <ID>`".
+
+### 5. Pattern di errore attivi
+
+Da `profilo/errori.md`, quelli che compaiono in **2+ moduli**, e tutti i **trasversali**:
+```
+| Pattern | Moduli o corsi coinvolti | Rischio all'esame |
 ```
 
-### 5. Piano d'azione prioritizzato
+### 6. Decisione di carico
 
-Top 5 azioni in ordine di impatto, con tempo stimato:
-1. [azione] — [tempo] — [perché è prioritaria]
-2. ...
-3. ...
-4. ...
-5. ...
+Se mancano **sei settimane o meno** al primo appello della sessione, il checkpoint di
+`piano_laurea.md` è dovuto: dichiara se la sessione regge a quattro esami o va portata a tre.
+Se va ridotta, indica **quale esame si taglia** applicando le regole: si taglia dal fondo, mai
+un esame in testa a una catena, e il tagliato ha già una destinazione.
+
+### 7. Piano d'azione
+
+Le cinque azioni a maggior impatto, in ordine:
+1. [azione] — [blocco di programma] — [perché è prioritaria]
 
 ---
 

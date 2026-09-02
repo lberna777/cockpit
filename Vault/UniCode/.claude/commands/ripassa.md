@@ -1,82 +1,106 @@
 ---
-description: "Sessione di ripasso adattivo su un modulo completato. Genera domande nuove (non le stesse dell'autoverifica). Uso: /ripassa <ID>"
-argument-hint: "ID modulo — SysAdmin: 0A-3F | Security: S1-S12 | Diritto: D1-D13"
+description: "Sessione di ripasso adattivo su un modulo completato. Genera domande nuove, non quelle dell'autoverifica. Uso: /ripassa <CODICE> <ID>"
+argument-hint: "<CODICE> <ID modulo> — es. FI2 3A, LAS 2B"
 ---
 
-Il modulo da ripassare è: $ARGUMENTS
+Il parametro passato è: "$ARGUMENTS"
 
 ---
 
-**1. Verifica che il modulo sia completato**
+**0. Risolvi corso e modulo**
 
-Leggi `stato/corrente.md`. Il modulo deve essere ✅. Se è ⬜ o 🔄, comunicalo e suggerisci `/lezione` o `/appunti` invece.
+Due token: `<CODICE> <ID modulo>`, il codice validato contro `piano/codici.txt`. Se manca un
+token o il codice non è valido, mostra i codici dal file e fermati.
+
+---
+
+**1. Verifica che il modulo sia chiuso**
+
+Cerca il modulo in `stato/tracker.md`. Se non c'è, controlla `corsi/<COD>/percorso.md`: se il
+modulo non è mai stato chiuso, comunicalo e suggerisci `/lezione` o `/appunti` invece.
 
 ---
 
 **2. Carica il contesto — in parallelo**
 
-- **Appunti definitivi** del modulo (glob ricorsivo — stanno nelle sottocartelle per-materia `APPUNTI <MATERIA>/`): `claudeAppunti/**/appunti_modulo$ARGUMENTS_*.md`
-- **Errori frequenti**: `stato/errori_frequenti.md` — per generare domande mirate sui punti deboli
-- **Tracker ripasso**: `stato/tracker_ripasso.md` — per sapere quanto tempo è passato dall'ultimo ripasso
+- **Appunti definitivi**: `corsi/<COD>/appunti/appunti_<ID>_*.md`
+- **Lezione**: `corsi/<COD>/lezioni/lezione_<ID>_*.md` — per sapere quali erano le domande di
+  autoverifica, così da **non ripeterle**
+- **Errori ricorrenti**: `profilo/errori.md` — per domande mirate sui punti deboli
+- **Tracker**: `stato/tracker.md` — da quanto tempo il modulo non viene ripassato e a che
+  gradino sta
 
 ---
 
-**3. Genera domande di ripasso**
+**3. Genera le domande**
 
-Genera **5 domande nuove** — diverse dalle domande di autoverifica della lezione originale.
+**5 domande nuove**, diverse da quelle di autoverifica della lezione.
 
-Criteri di generazione:
-- Almeno 1 domanda deve testare un **errore ricorrente** di Lorenzo (da errori_frequenti.md)
-- Almeno 1 domanda deve richiedere un **collegamento tra moduli** (es. "Come si collega X di questo modulo con Y del modulo Z?")
-- Le domande devono essere del tipo che il professore farebbe all'esame
-- Livello di difficoltà crescente: 2 base, 2 intermedio, 1 avanzato
+Criteri di composizione, tutti obbligatori:
+- Almeno **1 domanda su un errore ricorrente** di Lorenzo (da `profilo/errori.md`), scegliendo
+  di preferenza un pattern **trasversale**: quelli tornano su ogni corso.
+- Almeno **1 domanda di collegamento fra moduli** — meglio se attraversa i corsi in catena di
+  `piano/piano_laurea.md` (es. da `FI2` verso `IDS`, da `CALC` verso `SO`).
+- Difficoltà crescente: **2 base, 2 intermedio, 1 avanzato**.
+- Devono essere del tipo che il docente farebbe all'esame.
 
-**Per SysAdmin/Security:**
-- Almeno 2 domande devono richiedere di scrivere/prevedere l'output di un comando
-- "Cosa succede se esegui...?", "Scrivi il comando per...", "Quale output ti aspetti da...?"
-
-**Per Diritto:**
-- Almeno 2 domande devono richiedere la citazione dell'articolo/norma specifica
-- "Qual è la base giuridica per...?", "Come distingui X da Y?", "Quale norma disciplina...?"
+Adatta la forma al tipo di verifica del corso:
+- **Corsi con laboratorio**: almeno 2 domande devono chiedere di scrivere un comando o
+  prevederne l'output — "cosa succede se esegui…?", "scrivi il comando per…", "quale output ti
+  aspetti da…?"
+- **Corsi con esercizi formali**: almeno 2 domande devono richiedere un procedimento svolto o
+  la verifica di un caso limite — "quale ipotesi ti serve per applicare X?", "cosa succede al
+  risultato se…?"
+- **Corsi discorsivi**: almeno 2 domande devono richiedere la citazione del riferimento esatto
+  e una distinzione fra concetti vicini.
 
 ---
 
 **4. Modalità interrogazione**
 
-Presenta le domande **una alla volta**. Aspetta la risposta di Lorenzo prima di passare alla successiva.
+Presenta le domande **una alla volta**. Aspetta la risposta di Lorenzo prima di passare alla
+successiva.
 
 Per ogni risposta:
-- Se corretta: conferma brevemente e passa alla successiva
-- Se parziale: segnala cosa manca, mostra la risposta completa con riferimento agli appunti
-- Se errata: correggi con spiegazione dettagliata, cita la sezione degli appunti/lezione pertinente
+- **Corretta**: conferma brevemente e passa oltre.
+- **Parziale**: segnala cosa manca, poi mostra la risposta completa con il riferimento alla
+  sezione degli appunti.
+- **Errata**: correggi con spiegazione distesa, citando la sezione di appunti o lezione
+  pertinente.
 
 ---
 
 **5. Valutazione finale**
 
-Dopo le 5 domande, mostra:
-
 ```
-## Risultato ripasso — Modulo $ARGUMENTS
+## Risultato ripasso — <COD> <ID>
 
-Corrette: X/5
-Parziali: X/5
-Errate: X/5
+Corrette: X/5   Parziali: X/5   Errate: X/5
 
 **Punti solidi**: [concetti dimostrati]
-**Da rivedere**: [concetti deboli — con riferimento alla sezione degli appunti]
+**Da rivedere**: [concetti deboli, con il riferimento alla sezione degli appunti]
 ```
 
-Se sono emerse nuove debolezze non presenti in errori_frequenti.md, aggiornarlo.
+L'esito complessivo è **`ok`** se le corrette sono almeno 3 e nessun concetto centrale è
+risultato errato; **`debole`** altrimenti.
+
+Se sono emerse debolezze non presenti in `profilo/errori.md`, aggiungile lì — promuovendole a
+**trasversale** se sono modi di ragionare e non errori di materia.
 
 ---
 
-**6. Aggiorna tracker_ripasso.md**
+**6. Registra l'evento**
 
-- "Ultimo ripasso" = data odierna
-- Calcola "Prossimo ripasso" con intervallo crescente:
-  - Prima volta: +3 giorni
-  - Seconda volta: +7 giorni
-  - Terza volta: +14 giorni
-  - Quarta volta+: +30 giorni
-- Aggiorna "Priorità" in base alla nuova data
+Appendi a `stato/giornata.md`:
+
+```
+HH:MM · <COD> · ripasso <ID>: X/5 corrette. RIPASSO <COD> <ID> ok|debole
+```
+
+> **Il tracker non va toccato da questo comando.** `scripts/giornata.py` lo fa avanzare alle 23
+> a partire da questo marcatore: `ok` sale di un gradino (3 → 7 → 14 → 30 → 90 giorni),
+> `debole` scende di uno. Scrivere anche qui significherebbe avanzare due volte e allontanare
+> il ripasso senza accorgersene.
+
+Comunica a Lorenzo l'esito registrato e che la nuova scadenza comparirà nel tracker dopo il
+consolidamento serale.

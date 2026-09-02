@@ -1,80 +1,114 @@
 ---
-description: "Crea la lezione strutturata per un modulo dai PDF Virtuale. Uso: /lezione <ID>  (es. /lezione 3A, /lezione D1, /lezione S4)"
-argument-hint: "ID modulo — SysAdmin: 0A-4C | Security: S1-S15 | Diritto: D1-D13"
+description: "Crea la lezione strutturata per un modulo dai materiali del corso. Uso: /lezione <CODICE> <ID>  (es. /lezione FI2 3A)"
+argument-hint: "<CODICE> <ID modulo> — es. FI2 3A, SO 2B, CA 4"
 ---
 
-Il modulo richiesto è: $ARGUMENTS
+Il parametro passato è: "$ARGUMENTS"
 
-**Rileva il tipo di modulo dal prefisso dell'ID:**
-- ID inizia con `D` → modulo **Diritto** (teoria, nessuna VM)
-- ID inizia con `S` → modulo **Security** (lab Kali Linux)
-- ID inizia con cifra → modulo **SysAdmin** (lab Vagrant/Debian)
-- ID vuoto o non riconosciuto → mostra i formati validi e fermati
+---
+
+**0. Risolvi corso e modulo**
+
+`$ARGUMENTS` va letto come **due token**: `<CODICE> <ID modulo>`.
+
+- Primo token → codice corso. Validalo contro `piano/codici.txt`, che è la fonte unica.
+- Secondo token → identificativo del modulo dentro quel corso.
+- Se manca un token, o il codice non è in `codici.txt`: mostra i codici validi presi dal file
+  (non da una lista cablata qui) e fermati.
+
+Da qui in avanti, nel testo: `<COD>` = codice corso, `<ID>` = identificativo modulo.
+La radice del corso è `corsi/<COD>/`.
 
 ---
 
 **1. Carica il contesto necessario**
 
 Leggi questi file in parallelo:
-- `stato/corrente.md` — verifica che il modulo esista e il suo stato attuale
-- `stato/percorso.md` — recupera: nome completo, corso, materiale Virtuale richiesto, concetti chiave, esercizio attivo, connessioni
-- `stato/errori_frequenti.md` — identifica pattern di errore ricorrenti di Lorenzo rilevanti per questo modulo (es. se sta facendo un modulo bash e ha pattern di errori di sintassi, enfatizzare quei punti)
+- `corsi/<COD>/percorso.md` — nome completo del modulo, materiale richiesto, concetti chiave,
+  esercizio attivo, connessioni. Se il corso non ha ancora un `percorso.md`, comunicalo e
+  fermati: il corso non è aperto.
+- `corsi/<COD>/fonti.md` — gerarchia delle fonti e, soprattutto, **cosa manca**.
+- `profilo/errori.md` — pattern di errore ricorrenti rilevanti per questo modulo. La sezione
+  **trasversale** vale su ogni corso, anche uno mai aperto prima.
+Lo stato dell'esame attivo è già nel briefing: non rileggerlo.
 
 Se il modulo non esiste nel percorso, comunicalo e fermati.
 
 ---
 
-**2. Verifica i PDF**
+**2. Verifica i materiali**
 
-Cerca i PDF in base al tipo di modulo:
-- SysAdmin: `SLIDE TEORIA/SYSADM/` e `SLIDE LAB/SYSADM/`
-- Security: `SLIDE TEORIA/SICINF/` e `SLIDE LAB/SICINF/` (se esistono)
-- Diritto: `SLIDE TEORIA/DIRITTO INFORMATICO/`
+Da `percorso.md` recupera i nomi esatti dei materiali assegnati al modulo e verificali in
+`corsi/<COD>/materiali/`.
 
-Usa **solo i PDF assegnati al modulo in `percorso.md`** — non riclassificare i materiali di tua iniziativa, non attingere a PDF di altri moduli. Se uno o più PDF richiesti mancano: **fermati**, elenca i nomi esatti da caricare e chiedi a Lorenzo. Non creare contenuto senza il PDF corrispondente.
+Usa **solo i materiali assegnati al modulo nel percorso** — non riclassificare di tua
+iniziativa, non attingere ai materiali di altri moduli. Se uno o più mancano: **fermati**,
+elenca i titoli esatti da procurare e chiedi a Lorenzo. Non creare contenuto senza la fonte.
 
----
-
-**3. Leggi i PDF**
-
-Leggi integralmente tutti i PDF rilevanti. Per PDF molto lunghi (>50 pagine), leggi per sezioni e identifica le parti pertinenti al modulo.
-
-> **REGOLA CRITICA**: il contenuto della lezione deve venire SOLO dai PDF letti in questo passo. I "concetti chiave" in percorso.md sono un indice per sapere quali PDF cercare — NON sono una fonte da cui generare contenuto. Se non hai letto il PDF, non puoi creare la lezione. Contenuto generato senza leggere il PDF è superficiale e inaccettabile. Non inventare comandi/strumenti che non sono nei PDF.
+> **Esami arretrati**: se `fonti.md` segnala che il materiale disponibile è di un'annata
+> diversa da quella in cui il corso era in piano, dichiaralo in testa alla lezione e segnala
+> ogni punto in cui il programma risulta cambiato.
 
 ---
 
-**FORMATO della lezione (Security e SysAdmin)** — vincolante, da feedback di Lorenzo:
+**3. Leggi le fonti**
 
-La lezione è **prosa discorsiva ancorata ai comandi/file concreti** dell'argomento, NON un walkthrough.
-- **Prosa scorrevole**, non tabelle/elenchi a raffica. Si legge la sera prima.
-- **Organizzata attorno ai comandi/file concreti** dell'argomento, usati come ganci per spiegare la teoria.
-- Per ogni comando/file, **due livelli**: *cosa c'è dietro in piccolo* (il meccanismo) + *la visione d'insieme in grande* (dove si inserisce, perché esiste, superficie d'attacco/difesa).
-- **NON è un walkthrough**: niente sequenza "passo 1 → passo 2 → output atteso", niente anatomia parametro-per-parametro. Quella è la **guida-lab** (`/lab`). La lezione spiega *perché*; la guida-lab dice *come, passo passo*.
+Leggi integralmente i materiali rilevanti. Per documenti molto lunghi (>50 pagine), leggi per
+sezioni e individua le parti pertinenti al modulo.
 
-> Confine col walkthrough: se stai scrivendo "esegui questo, poi quello, output X" → è materia di `/lab`, non della lezione.
-
----
-
-**4. Crea il file lezione**
-
-Path: `/home/lorenzo/UniCode/claudeLezioni/<SOTTOCARTELLA>/lezione_modulo$ARGUMENTS_<nome_breve>.md`
-
-Sottocartelle:
-- SysAdmin → `LEZIONI SYSADM/`
-- Security → `LEZIONI SECURITY/`
-- Diritto → `LEZIONI DIRITTO/`
-
-`<nome_breve>` = identificatore conciso del contenuto (es. `systemd_servizi`, `diritto_autore`).
+> **REGOLA CRITICA**: il contenuto della lezione deve venire SOLO dalle fonti lette in questo
+> passo. I "concetti chiave" in `percorso.md` sono un indice per sapere quali fonti cercare —
+> NON sono una fonte da cui generare contenuto. Se non hai letto la fonte, non puoi creare la
+> lezione. Contenuto generato senza leggere la fonte è superficiale e inaccettabile. Non
+> inventare comandi, strumenti, formule o norme che non siano nel materiale.
 
 ---
 
-### Template SysAdmin (ID numerico)
+**4. Scegli il registro in base al tipo di verifica**
+
+Da `percorso.md` (o da `piano/piano_laurea.md`) ricava il tipo d'esame del corso e applica il
+template corrispondente. I tre registri sono in `CLAUDE.md` §7.2.
+
+**FORMATO per i corsi con laboratorio pratico** — vincolante, da feedback di Lorenzo:
+
+La lezione è **prosa discorsiva ancorata ai comandi/file concreti**, NON un walkthrough.
+- **Prosa scorrevole**, non tabelle o elenchi a raffica. Si legge la sera prima.
+- **Organizzata attorno ai comandi/file concreti**, usati come ganci per spiegare la teoria.
+- Per ciascuno, **due livelli**: *cosa c'è dietro in piccolo* (il meccanismo) + *la visione
+  d'insieme in grande* (dove si inserisce, perché esiste, quale superficie apre).
+- **NON è un walkthrough**: niente sequenza "passo 1 → passo 2 → output atteso", niente
+  anatomia parametro-per-parametro. Quella è la **guida-lab** (`/lab`). La lezione spiega
+  *perché*; la guida-lab dice *come, passo passo*.
+
+> Confine col walkthrough: se stai scrivendo "esegui questo, poi quello, output X" → è materia
+> di `/lab`, non della lezione.
+
+**Per i corsi con esercizi formali** (calcolo, dimostrazioni, progetto): la prosa si ancora ai
+**procedimenti** invece che ai comandi. Per ciascuno, gli stessi due livelli: il meccanismo che
+lo fa funzionare, e il posto che occupa nella teoria. Gli esercizi svolti passo-passo sono
+materia di `/lab`.
+
+**Per i corsi discorsivi con un docente di riferimento** (giuridici, e ogni corso dove conta la
+formulazione): la terminologia della fonte va **riprodotta, non parafrasata**. Nessuna
+integrazione da fonti esterne. `[fonte: <fonte>]` su ogni affermazione ripresa alla lettera.
+
+---
+
+**5. Crea il file lezione**
+
+Path: `corsi/<COD>/lezioni/lezione_<ID>_<nome_breve>.md`
+
+`<nome_breve>` = identificatore conciso del contenuto (es. `ricorsione`, `systemd_servizi`).
+
+---
+
+### Template — corso con laboratorio pratico
 
 ```
-# Lezione — Modulo $ARGUMENTS: <Nome Completo>
-**Corso**: Lab Amministrazione di Sistemi T
-**Materiale**: <titoli PDF usati>
-**Prerequisiti**: <moduli precedenti rilevanti — verificare che siano ✅ in corrente.md>
+# Lezione — <COD> <ID>: <Nome Completo>
+**Corso**: <nome esteso da piano/codici.txt>
+**Materiale**: <titoli delle fonti usate>
+**Prerequisiti**: <moduli precedenti rilevanti — verificarne lo stato nel percorso>
 
 ---
 
@@ -83,18 +117,19 @@ Una frase: cosa Lorenzo deve saper fare al termine.
 
 ## [Sezioni ancorate ai comandi/file chiave] — in prosa
 
-Una sezione per ogni comando o file concreto centrale del modulo (es. `systemctl`, `/etc/fstab`).
+Una sezione per ogni comando o file concreto centrale del modulo.
 Per ciascuno, in prosa discorsiva:
 - **cosa fa** (il gesto pratico)
 - **cosa c'è dietro** (il meccanismo, in piccolo)
-- **la visione** (dove si inserisce, perché esiste, e quale superficie verso Security introduce)
-*(Se Lorenzo ha errori ricorrenti su questo da errori_frequenti.md: ⚠️ con il pattern specifico.)*
+- **la visione** (dove si inserisce, perché esiste, quale superficie introduce)
+*(Se Lorenzo ha errori ricorrenti su questo da profilo/errori.md: ⚠️ con il pattern specifico.)*
 
-> NON mettere qui la sequenza di esecuzione passo-passo né l'anatomia parametro-per-parametro: quella è la guida-lab (`/lab`).
+> NON mettere qui la sequenza di esecuzione passo-passo né l'anatomia parametro-per-parametro:
+> quella è la guida-lab (`/lab`).
 
 ## Connessioni
 - Con il modulo precedente: [connessione SPECIFICA, non generica]
-- Con Security: [quale superficie d'attacco introduce — essere precisi]
+- Con altri corsi in catena: [quale dipendenza da piano/piano_laurea.md — essere precisi]
 
 ## Riepilogo
 3 concetti chiave in forma di domanda-risposta (non lista passiva)
@@ -102,121 +137,134 @@ Per ciascuno, in prosa discorsiva:
 
 ---
 
-### Template Security (prefisso S)
+### Template — corso con esercizi formali
 
 ```
-# Lezione — Modulo $ARGUMENTS: <Nome Completo>
-**Corso**: Lab Sicurezza Informatica T
-**Materiale**: <titoli PDF usati>
-**Prerequisiti**: <moduli SysAdmin e Security rilevanti — verificare che siano ✅>
-**Nota esame**: conta per il **quiz teorico (40%)** (oltre alla pratica 60%); c'è penalità per risposta sbagliata — segnalalo dove serve.
-
----
-
-## Come leggere questa lezione
-1-2 frasi: l'argomento ridotto ai pochi posti concreti (file/comandi) che faranno da gancio.
-
-## La visione d'insieme / threat model
-In prosa: il quadro grande, con **prospettiva attaccante** (perché l'attacco funziona, cosa cerca) e **difensore** (come si rileva, come si mitiga). Scenario reale se presente nel PDF.
-
-## [Sezioni ancorate ai comandi/file chiave] — in prosa
-
-Una sezione per ogni comando o file concreto centrale (es. `nmap`, `/etc/shadow`, `/etc/pam.d/`).
-Per ciascuno, in prosa discorsiva:
-- **cosa fa** (il gesto)
-- **cosa c'è dietro** (il meccanismo, in piccolo)
-- **la visione** (dove si inserisce, perché esiste, superficie d'attacco/difesa, gancio col tema d'esame)
-*(⚠️ errori ricorrenti da errori_frequenti.md dove rilevante.)*
-
-> NON la sequenza eseguibile né l'anatomia parametro-per-parametro: quella è la guida-lab (`/lab`).
-
-## Connessioni
-- Con SysAdmin: [quale configurazione errata viene sfruttata — SPECIFICO]
-- Con moduli Security precedenti/successivi: [catena logica]
-
-## Domande di autoverifica (stile quiz teorico)
-3-5 domande vero/falso o a scelta multipla, come all'esame. Avvisa: se non sei sicuro, all'esame non rispondere (penalità).
-```
-
----
-
-### Template Diritto (prefisso D)
-
-> **Regola vincolante**: l'esame verte sugli argomenti e spiegazioni del PDF della professoressa. Le definizioni devono rispecchiare il linguaggio del PDF — non riformulare, non parafrasare, non integrare con fonti esterne. Segnalare con `[fonte: PDF]` ogni affermazione tratta dalle slide. Registro accademico-giuridico. Usare paragrafi discorsivi dove il PDF lo fa.
-
-```
-# Lezione — Modulo $ARGUMENTS: <Nome Completo>
-**Corso**: Diritto dell'Informatica T
-**Materiale**: <titolo PDF usato>
-**Normative di riferimento**: <leggi e decreti citati nel PDF, con estremi completi>
+# Lezione — <COD> <ID>: <Nome Completo>
+**Corso**: <nome esteso>
+**Materiale**: <titoli delle fonti usate>
+**Prerequisiti**: <moduli e corsi in catena>
 
 ---
 
 ## Obiettivo
-Una frase: quale istituto giuridico Lorenzo deve saper spiegare, nelle parole della professoressa.
+Una frase: quale classe di problemi Lorenzo deve saper risolvere al termine.
 
-## Quadro Normativo
-Norme di riferimento con estremi completi. Solo quelle presenti nel materiale.
+## [Sezioni ancorate ai procedimenti chiave] — in prosa
 
-## Concetti Chiave
-Per ogni concetto:
-- Definizione ripresa fedelmente dal PDF [fonte: PDF]
-- Ratio legis se spiegata dalla professoressa
-- Esempi usati nelle slide
-- Se Lorenzo ha pattern di errore su questo tipo di concetto (da errori_frequenti.md): aggiungere nota esplicita "⚠️ Attenzione: in passato hai confuso X con Y"
+Una sezione per ogni procedimento centrale del modulo.
+Per ciascuno, in prosa discorsiva:
+- **cosa produce** (il risultato che dà)
+- **cosa c'è dietro** (perché funziona: il teorema, l'invariante, la proprietà che lo regge)
+- **la visione** (quando si applica e quando no, e quale ipotesi lo rompe)
+*(⚠️ errori ricorrenti da profilo/errori.md dove rilevanti.)*
 
-## Riferimenti Normativi
-| Articolo / Norma | Contenuto (come descritto nel PDF) | Rilevanza per il corso |
-|------------------|------------------------------------|------------------------|
+> Gli esercizi svolti passo-passo sono materia di `/lab`, non della lezione.
 
-## Casi e Scenari
-Situazioni concrete dalla professoressa. Se non presenti nel PDF, omettere.
+## Casi limite
+I casi in cui il procedimento non si applica, e come li si riconosce.
 
-## Domande di Autoverifica
-Cinque domande aperte del tipo che la professoressa potrebbe fare all'esame.
-Almeno una domanda deve testare le distinzioni che Lorenzo tende a fondere (pattern da errori_frequenti.md).
-1. ...
-2. ...
-3. ...
-4. ...
-5. ...
+## Connessioni
+- Con il modulo precedente e con i corsi in catena: [specifiche]
 
 ## Riepilogo
-Tre concetti normativi centrali, formulati come nel PDF.
+3 concetti chiave in forma di domanda-risposta
 ```
 
 ---
 
-**5. Verifica qualità (checklist interna)**
+### Template — corso discorsivo con docente di riferimento
 
-Prima di comunicare il risultato, verifica:
-- [ ] Ogni concetto nel PDF è stato coperto nella lezione
-- [ ] Security/SysAdmin: **prosa discorsiva ancorata ai comandi/file**, ogni comando spiegato a due livelli (meccanismo + visione) — NON un walkthrough, niente sequenza passo-passo né anatomia parametri (quella è `/lab`)
-- [ ] Security: threat model chiaro (attaccante E difensore); domande di autoverifica in stile quiz
-- [ ] Diritto: ogni definizione usa la terminologia esatta del PDF, `[fonte: PDF]` dove serve
-- [ ] Le connessioni sono specifiche (citano moduli e concetti precisi)
-- [ ] Pattern di errore di Lorenzo integrati come avvertimenti ⚠️
-- [ ] Nessun comando/strumento inventato fuori dai PDF
+> **Regola vincolante**: l'esame verte sugli argomenti e le spiegazioni della fonte del
+> docente. Le definizioni devono rispecchiarne il linguaggio — non riformulare, non
+> parafrasare, non integrare con fonti esterne. Segnalare con `[fonte: <fonte>]` ogni
+> affermazione tratta dal materiale. Registro accademico. Usare paragrafi discorsivi dove la
+> fonte lo fa.
 
-Se una checklist non è soddisfatta, correggi prima di procedere. Poi invoca `lorenzo-skills:unicode-output-gate` per la verifica finale.
-
----
-
-**6. Collega la nota al grafo**
-
-Invoca la skill `lorenzo-skills:unicode-link-note` per scrivere il blocco AUTO-LINKS (fratelli + hub) della nuova lezione.
+```
+# Lezione — <COD> <ID>: <Nome Completo>
+**Corso**: <nome esteso>
+**Materiale**: <titolo della fonte usata>
+**Riferimenti**: <norme, teoremi o testi citati, con estremi completi>
 
 ---
 
-**7. Aggiorna lo stato**
+## Obiettivo
+Una frase: cosa Lorenzo deve saper esporre, nelle parole del docente.
 
-In `stato/corrente.md`: segna il modulo come 🔄 se era ⬜.
+## Quadro di riferimento
+Le fonti normative o teoriche con estremi completi. Solo quelle presenti nel materiale.
+
+## Concetti Chiave
+Per ogni concetto:
+- Definizione ripresa fedelmente dalla fonte [fonte: <fonte>]
+- La ratio, se il docente la spiega
+- Gli esempi usati nel materiale
+- Se Lorenzo ha pattern di errore su questo tipo di concetto: "⚠️ Attenzione: in passato hai
+  confuso X con Y"
+
+## Tabella dei riferimenti
+| Riferimento | Contenuto (come descritto nella fonte) | Rilevanza per il corso |
+|---|---|---|
+
+## Casi e Scenari
+Situazioni concrete portate dal docente. Se non presenti nella fonte, omettere.
+
+## Domande di Autoverifica
+Cinque domande aperte del tipo che il docente potrebbe fare all'esame.
+Almeno una deve testare le distinzioni che Lorenzo tende a fondere (da profilo/errori.md).
+
+## Riepilogo
+Tre concetti centrali, formulati come nella fonte.
+```
 
 ---
 
-**8. Comunica il risultato**
+**Se il corso ha un quiz a punteggio negativo**: aggiungi in testa la nota sul peso della prova
+e chiudi le autoverifiche con l'avvertenza — *se non sei sicuro, all'esame non rispondere*.
+
+---
+
+**6. Verifica qualità (checklist interna)**
+
+- [ ] Ogni concetto della fonte è stato coperto
+- [ ] Corsi pratici: **prosa ancorata ai comandi/file**, ogni comando a due livelli (meccanismo
+      + visione) — NON un walkthrough, niente sequenza passo-passo né anatomia parametri
+- [ ] Corsi formali: ogni procedimento ha il perché funziona e i casi limite
+- [ ] Corsi discorsivi: terminologia esatta della fonte, `[fonte: ...]` dove serve
+- [ ] Le connessioni sono specifiche (citano moduli, corsi e concetti precisi)
+- [ ] Pattern di errore di Lorenzo integrati come ⚠️
+- [ ] Nessun comando, formula o norma inventata fuori dalle fonti
+
+Se una voce non è soddisfatta, correggi prima di procedere. Poi invoca
+`lorenzo-skills:unicode-output-gate` per la verifica finale.
+
+---
+
+**7. Collega la nota al grafo**
+
+Invoca `lorenzo-skills:unicode-link-note` per scrivere il blocco AUTO-LINKS della nuova lezione.
+
+---
+
+**8. Registra l'evento**
+
+Appendi a `stato/giornata.md`:
+
+```
+HH:MM · <COD> · lezione <ID> creata da <n> fonti.
+```
+
+Se `<COD>` è il corso attivo, aggiorna anche lo stato del modulo in `stato/corrente.md`
+(da "non iniziato" a "in corso").
+
+---
+
+**9. Comunica il risultato**
 
 - Path del file creato
-- Per Security/SysAdmin: indica di leggere la lezione; l'esecuzione sulla VM è la **guida-lab** (`/lab <ID>`), passo separato del flusso
-- Per Diritto: indica di leggere la lezione e rispondere alle domande di autoverifica prima di scrivere gli appunti grezzi
-- Se sono stati integrati avvertimenti da errori_frequenti.md, menzionarlo brevemente
+- Per i corsi con laboratorio: ricorda che l'esecuzione è la guida-lab (`/lab <COD> <ID>`),
+  passo separato del flusso
+- Per i corsi discorsivi: ricorda di rispondere alle domande di autoverifica prima di scrivere
+  gli appunti grezzi
+- Se sono stati integrati avvertimenti da `profilo/errori.md`, menzionalo brevemente

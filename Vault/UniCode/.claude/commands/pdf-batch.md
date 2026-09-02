@@ -1,40 +1,53 @@
 ---
-description: "Converte in PDF tutti gli appunti e le lezioni markdown che non hanno ancora un PDF corrispondente. Poi git add + commit + push."
+description: "Converte in PDF le lezioni e gli appunti markdown che non hanno ancora un PDF. Poi git add + commit + push."
+argument-hint: "<CODICE> opzionale — vuoto = tutti i corsi aperti"
 ---
 
-**1. Trova file senza PDF**
+Il parametro passato è: "$ARGUMENTS"
 
-Scansiona queste due coppie di cartelle ricorsivamente. Per ogni `.md` sorgente, verifica se esiste il corrispondente `.pdf` nella cartella destinazione con la stessa struttura.
+Se è un codice valido in `piano/codici.txt`, lavora solo su quel corso. Se è vuoto, su tutti i
+corsi che hanno una cartella in `corsi/`.
+
+---
+
+**1. Trova i file senza PDF**
+
+Per ogni corso, i PDF stanno in una cartella separata dai sorgenti, che rispecchia la struttura:
 
 | Sorgente | Destinazione |
 |---|---|
-| `claudeAppunti/` | `claudeAppunti_PDF/` |
-| `claudeLezioni/` | `claudeLezioni_PDF/` |
+| `corsi/<COD>/lezioni/` | `corsi/<COD>/pdf/lezioni/` |
+| `corsi/<COD>/appunti/` | `corsi/<COD>/pdf/appunti/` |
 
-Esempio:
-- `claudeAppunti/APPUNTI DIRITTO/appunti_moduloD8_privacy_gdpr.md` → `claudeAppunti_PDF/APPUNTI DIRITTO/appunti_moduloD8_privacy_gdpr.pdf`
-- `claudeLezioni/LEZIONI SECURITY/lezione_moduloS1_enumerazione.md` → `claudeLezioni_PDF/LEZIONI SECURITY/lezione_moduloS1_enumerazione.pdf`
+Esempio: `corsi/FI2/lezioni/lezione_3A_ricorsione.md` →
+`corsi/FI2/pdf/lezioni/lezione_3A_ricorsione.pdf`
 
-Lista tutti i file mancanti.
+Un file va convertito se il PDF manca **oppure** se il `.md` è più recente del `.pdf`. Elenca
+i file da convertire prima di iniziare.
 
 ---
 
 **2. Converti**
 
-Per ogni file mancante, esegui:
+Crea le cartelle di destinazione se non esistono, poi per ogni file:
+
 ```bash
-pandoc '<path_md>' -o '<path_pdf>' --pdf-engine=xelatex -V geometry:margin=2.5cm -V fontsize=11pt -V lang=it
+pandoc '<path_md>' -o '<path_pdf>' --pdf-engine=xelatex \
+  -V geometry:margin=2.5cm -V fontsize=11pt -V lang=it
 ```
 
-Se pandoc fallisce su un file, segnalalo ma continua con gli altri.
+Se xelatex fallisce per sequenze di escape nel sorgente (tipicamente `\x` dentro blocchi di
+codice), fai il pre-processing su una copia temporanea invece di modificare il sorgente.
+
+Se un file fallisce comunque, **segnalalo e continua con gli altri**: un errore non deve
+fermare il batch.
 
 ---
 
-**3. Git push**
+**3. Commit e push**
 
 ```bash
-cd /home/lorenzo/UniCode
-git add claudeAppunti_PDF/ claudeLezioni_PDF/
+git add 'corsi/*/pdf/'
 git commit -m "pdf: batch convert $(date +%Y-%m-%d)"
 git push
 ```
@@ -43,7 +56,16 @@ git push
 
 **4. Report**
 
-Mostra:
-- File convertiti (con path)
-- File falliti (con errore)
-- File già aggiornati (nessuna azione)
+- File convertiti, con il path
+- File falliti, con l'errore
+- File già aggiornati, nessuna azione
+
+---
+
+**5. Registra l'evento**
+
+Appendi a `stato/giornata.md`:
+
+```
+HH:MM · — · pdf batch: <n> convertiti, <n> falliti.
+```

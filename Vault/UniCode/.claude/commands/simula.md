@@ -1,91 +1,114 @@
 ---
-description: "Simulazione d'esame. Genera domande cross-modulo per una materia o usa simulazioni passate. Uso: /simula [materia]"
-argument-hint: "materia — sysadmin | diritto | security"
+description: "Simulazione d'esame: usa una prova passata se esiste, altrimenti genera domande cross-modulo. Uso: /simula <CODICE>"
+argument-hint: "<CODICE> corso — es. FI2, SO, CA"
 ---
 
-La materia richiesta è: $ARGUMENTS
-
-**Rileva la materia:**
-- contiene "dir" → **Diritto**
-- contiene "sys" → **SysAdmin**
-- contiene "sec" → **Security**
-- vuoto o non riconosciuto → mostra opzioni valide, fermati
+Il parametro passato è: "$ARGUMENTS"
 
 ---
 
-**1. Carica il contesto**
+**0. Risolvi il corso**
 
-Leggi in parallelo:
-- `stato/corrente.md` — per sapere quali moduli sono ✅
-- `stato/errori_frequenti.md` — per domande mirate
-- `stato/tracker_ripasso.md` — per identificare moduli meno freschi
+`$ARGUMENTS` è il **codice del corso**, validato contro `piano/codici.txt`. Se è vuoto o non
+riconosciuto, mostra i codici dal file e fermati. Se è vuoto ma il briefing indica un
+esame attivo, proponi quello e chiedi conferma.
 
-Solo per SysAdmin: cerca anche `SIMULAZIONI ESAMI/SYSADM/` per esami passati.
+---
+
+**1. Carica il contesto — in parallelo**
+
+- `corsi/<COD>/percorso.md` — quali moduli sono chiusi
+- `corsi/<COD>/fonti.md` — quali prove passate sono state reperite e quali mancano
+- `profilo/errori.md` — per le domande mirate
+- `stato/tracker.md` — per individuare i moduli meno freschi, da coprire per primi
+- Il contenuto di `corsi/<COD>/prove/`
 
 ---
 
 **2. Verifica fattibilità**
 
-Servono almeno 3 moduli ✅ nella materia per una simulazione significativa. Se non ci sono abbastanza moduli, comunicalo e suggerisci `/ripassa` sui singoli moduli.
+Servono almeno **3 moduli chiusi** perché una simulazione sia significativa. Se non ci sono,
+comunicalo e suggerisci `/ripassa` sui singoli moduli.
 
 ---
 
-**3. Genera la simulazione**
+**3. Scegli la modalità**
 
-### Modalità Diritto
+**Se in `corsi/<COD>/prove/` esiste una prova passata non ancora svolta**, usa quella: è
+sempre preferibile a domande generate. Presentala come all'esame, con il tempo previsto, e
+tieni la soluzione ufficiale per il confronto successivo. Non anticiparla.
 
-Genera **8 domande aperte** che coprono trasversalmente tutti i moduli completati:
-- 3 domande di definizione/classificazione (es. "Definisci X e classificane le tipologie")
-- 2 domande di confronto (es. "Distingui X da Y, indicando la base normativa di ciascuno")
-- 2 domande applicative (es. "In questo scenario, quale disciplina si applica?")
-- 1 domanda avanzata di sintesi (es. "Come interagiscono X, Y e Z nel contesto di...?")
+**Altrimenti genera la prova**, nella forma che il corso usa davvero — la dice
+`corsi/<COD>/percorso.md`, non va indovinata:
 
-Ogni domanda deve richiedere la citazione della norma specifica. Almeno 2 domande devono testare errori ricorrenti da errori_frequenti.md.
+*Prova scritta discorsiva* — 8 domande aperte trasversali ai moduli chiusi: 3 di
+definizione o classificazione, 2 di confronto fra concetti vicini, 2 applicative su uno
+scenario, 1 di sintesi. Ogni domanda richiede il riferimento esatto.
 
-### Modalità SysAdmin
+*Prova con esercizi formali* — 6 esercizi che coprono moduli diversi, con la distribuzione di
+difficoltà della prova reale e i criteri di valutazione espliciti per ciascuno.
 
-Se esiste un PDF di simulazione esame in `SIMULAZIONI ESAMI/SYSADM/`:
-- Leggilo e presentalo a Lorenzo come esercizio
-- Fornisci le istruzioni per la VM
+*Prova pratica di laboratorio* — 6 task su moduli diversi, ciascuno con criteri di valutazione
+espliciti e l'elenco dei deliverable richiesti. Lorenzo esegue sull'ambiente e riporta l'output.
 
-Se non esiste (o Lorenzo preferisce domande nuove):
-- Genera **6 task pratici** che coprono moduli diversi:
-  - 2 task di scripting bash (variabili, loop, funzioni, pipe)
-  - 2 task di amministrazione (utenti, permessi, servizi, pacchetti)
-  - 1 task di networking
-  - 1 task combinato (es. "scrivi uno script che monitora X e invia log a Y")
-- Ogni task ha criteri di valutazione espliciti
+*Quiz a risposta chiusa* — il numero di domande della prova reale, con il **punteggio negativo
+per risposta errata** se il corso lo prevede: dichiaralo prima di iniziare.
 
-### Modalità Security
-
-Genera **5 scenari** progressivi:
-- Scenario 1: enumerazione di un target (cosa cerchi? con quali tool?)
-- Scenario 2: analisi di una vulnerabilità trovata (come la sfrutti? come la mitighi?)
-- Scenario 3-5: basati sui moduli completati
+In tutti i casi: almeno **2 domande devono testare errori ricorrenti** da `profilo/errori.md`,
+e la copertura deve privilegiare i moduli con il ripasso più vecchio.
 
 ---
 
 **4. Esecuzione**
 
-Presenta gli esercizi/domande uno alla volta. Per ogni risposta:
-- Valuta la completezza (0-3 punti: incompleta/parziale/corretta/eccellente)
-- Segnala elementi mancanti con riferimento al materiale
-- Per SysAdmin: se il task richiede VM, chiedi a Lorenzo di eseguirlo e riportare l'output
+Presenta gli item **uno alla volta**. Per ciascuna risposta:
+- Valuta su **0-3 punti**: incompleta / parziale / corretta / eccellente
+- Segnala gli elementi mancanti con il riferimento al materiale
+- Per i task pratici: chiedi a Lorenzo di eseguirli e riportare l'output, non eseguirli tu
 
 ---
 
 **5. Valutazione finale**
 
 ```
-## Risultato simulazione — [Materia]
-Data: [data odierna]
+## Risultato simulazione — <COD>
+Data: [oggi]
 Moduli coperti: [lista]
 
 Punteggio: X/Y punti (Z%)
 
 **Aree solide**: [concetti dimostrati con sicurezza]
-**Aree critiche**: [concetti deboli — con modulo e sezione appunti di riferimento]
+**Aree critiche**: [concetti deboli, con modulo e sezione di riferimento]
 **Consiglio**: [cosa ripassare prima dell'esame, in ordine di priorità]
 ```
 
-Se il punteggio è < 60%: suggerire un piano di ripasso mirato con i moduli da rivedere.
+**Sotto il 60%**: non fermarti al punteggio, proponi un piano di ripasso mirato con i moduli da
+rivedere nell'ordine in cui vanno ripresi.
+
+---
+
+**6. Registra l'evento**
+
+Appendi a `stato/giornata.md`:
+
+```
+HH:MM · <COD> · simulazione: X/Y punti (Z%), moduli <lista>.
+```
+
+Per ogni modulo che la simulazione ha mostrato debole, aggiungi anche il marcatore di ripasso,
+così il tracker lo riporta indietro di un gradino:
+
+```
+RIPASSO <COD> <ID> debole
+```
+
+E per quelli risultati solidi, se erano in scadenza:
+
+```
+RIPASSO <COD> <ID> ok
+```
+
+> Il tracker non va modificato a mano: lo aggiorna `scripts/giornata.py` alle 23 da questi
+> marcatori.
+
+Se sono emerse debolezze nuove, aggiornale in `profilo/errori.md`.
