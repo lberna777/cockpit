@@ -1,0 +1,18 @@
+# Codici corso — fonte unica per script e convenzioni di naming.
+# Formato:  CODICE<tab o spazi>Nome esteso  ·  CFU  ·  sessione pianificata
+# Aggiungere o rinominare qui, non dentro gli script.
+
+FI2     Fondamenti di Informatica T-2                 12  S1
+CALC    Calcolatori Elettronici T                      6  S1
+MATAP   Matematica Applicata T                         6  S1
+LAS     Laboratorio di Amministrazione di Sistemi T    6  S1
+
+SO      Sistemi Operativi T                            9  S2
+IDS     Ingegneria del Software T                      9  S2
+TLC     Fondamenti di Telecomunicazioni T              9  S2
+ELT     Elettrotecnica T                               6  S2
+
+CA      Controlli Automatici T                         9  S3
+RETI    Reti di Calcolatori T                          9  S3
+WEB     Tecnologie Web T                               9  S3
+ELN     Elettronica T                                  6  S3

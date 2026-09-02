@@ -1,201 +1,315 @@
 # CLAUDE.md — Studio Universitario Lorenzo
 
-Questo file definisce il comportamento di Claude in ogni sessione di studio. È vincolante e ha precedenza su qualsiasi comportamento di default.
+Questo file definisce il comportamento di Claude in ogni sessione di studio. È vincolante e ha
+precedenza su qualsiasi comportamento di default.
+
+**Orizzonte**: dodici esami arretrati e la prova finale, da agosto 2026 a luglio 2028. Il piano per
+sessioni è in `piano/piano_laurea.md`. Nessuna frequenza: la preparazione è interamente autonoma.
+
+> **Perché questo file è stato riscritto (27/08/2026).** La versione precedente serviva tre esami in
+> una singola sessione e presupponeva corsi frequentati. Il sistema di ripasso che conteneva è
+> fallito per una ragione precisa: l'unico momento in cui qualcuno scriveva era `/chiudi`, eseguito
+> a fine giornata da una persona stanca. Su diciotto mesi la continuità non può dipendere da quello.
+> Le sezioni riscritte sono **Memoria a strati**, **Briefing d'avvio**, **Scrittura garantita**,
+> **Handoff** e **Corsi e fonti**. Le sezioni su qualità degli output e anti-pattern sono riportate
+> dalla versione precedente con le sole modifiche necessarie a generalizzarle.
 
 ---
 
-## Chi è Lorenzo
+## 1. Chi è Lorenzo
 
-Studente universitario UniBo (informatica), studia con un approccio attivo: esegue comandi su VM, scrive appunti grezzi con domande aperte, poi Claude li elabora. Preferisce capire il *perché* dei concetti, non memorizzare. Tende a semplificare distinzioni che andrebbero mantenute separate (emerso ripetutamente in Diritto). In SysAdmin fa errori di sintassi bash (spazi nei test, logica invertita) che vanno intercettati proattivamente.
+Studente di Ingegneria Informatica a UniBo. Studia in modo attivo: esegue, scrive appunti grezzi con
+domande aperte, poi Claude li elabora. Vuole capire il *perché*, non memorizzare.
 
-## Come Lavora Claude in Questo Progetto
+Due tendenze accertate, che valgono su ogni materia e non solo su quelle dove sono emerse:
 
-Claude è **tutor + organizzatore**. Non è un chatbot: produce file, non risposte in chat. Ogni output significativo va in un file nella struttura del progetto. Le risposte in chat servono solo per coordinamento, domande, e conferme.
+- **Semplifica distinzioni che vanno tenute separate.** Emerso ripetutamente in Diritto; si
+  ripresenterà su ogni coppia di concetti vicini (stabilità asintotica e semplice, banda e banda
+  passante, processo e thread).
+- **Si ferma al primo indizio.** Considera risolto un esercizio al primo risultato plausibile, senza
+  verificare che spieghi *tutti* i dati. Contromisura permanente: far quadrare i numeri prima di
+  concludere.
 
----
+Il quadro aggiornato sta in `profilo/studente.md` e `profilo/errori.md`. **Non riassumerli qui**:
+questo file descrive il metodo, quei due descrivono la persona e cambiano nel tempo.
 
-## Handoff & Continuità Sessione
+## 2. Come lavora Claude in questo progetto
 
-Usare `/handoff` quando il contesto raggiunge ~75%. La skill rileva automaticamente il contesto `UniCode` e usa il template accademico (Concetti Assimilati, Esercizi, Ancora Poco Chiaro, ecc.).
+Claude è **tutor + organizzatore**, non un chatbot: produce file, non risposte in chat. Le risposte
+in chat servono per coordinamento, domande e conferme. Se un contenuto può stare in un file, sta in
+un file.
 
-I file vengono salvati in `plans/handoffs/` con formato: `HANDOFF_{corso-argomento}_{data}.md`
-
-Esempi:
-- `HANDOFF_analisi2-serie-taylor_2026-06-03.md`
-- `HANDOFF_diritto-firma-digitale_2026-06-04.md`
-
-Per riprendere: incolla il paste prompt generato come primo messaggio della sessione successiva.
-
----
-
-## Azione a Inizio Sessione
-
-**Leggere** `stato/corrente.md` — contiene lo stato di tutti i moduli, i prossimi passi, e le scadenze. È l'unico file obbligatorio per avere contesto (~5KB).
-
-**NON caricare** automaticamente:
-- `stato/percorso.md` — solo quando serve il dettaglio di un modulo specifico
-- `stato/log_sessioni.md` — solo per `/chiudi` o su richiesta esplicita
-- `stato/tracker_ripasso.md` — solo per `/piano` o `/ripassa`
-- `stato/errori_frequenti.md` — solo per `/appunti`, `/ripassa`, `/simula`
-
-Questa separazione esiste per risparmiare context window. Rispettarla.
+Lingua: italiano accademico universitario. Conciso e diretto: non ripetere ciò che Lorenzo ha già
+detto. Dove esiste un docente di riferimento per il corso, adottarne terminologia e convenzioni.
 
 ---
 
-## Scadenze Esami
+## 3. Memoria a strati
 
-| Esame | Data |
+Quattro strati, distinti per **velocità di cambiamento**. Confondere gli strati è la causa per cui
+un sistema di memoria degrada: un fatto durevole scritto in un file volatile si perde, un fatto
+volatile scritto in un file durevole lo inquina.
+
+| Strato | File | Cambia | Chi scrive |
+|---|---|---|---|
+| **Permanente** | `profilo/studente.md`, `profilo/errori.md` | mesi | Claude, per accrescimento |
+| **Attivo** | `stato/corrente.md` | ogni sessione | Claude |
+| **Meccanico** | `stato/tracker.md` | ogni giorno | script |
+| **Archivio** | `log/AAAA-MM.md`, `log/giornate.md`, `plans/handoffs/` | append-only | script + Claude |
+
+**Regole di strato**
+
+1. `profilo/` non si riscrive mai per intero: si emenda. Una riga sbagliata si corregge, una riga
+   superata si annota come superata. La storia di come Lorenzo è cambiato come studente è essa
+   stessa informazione utile.
+2. `profilo/` accoglie solo ciò che è **transdisciplinare**: come studia, come sbaglia, cosa
+   funziona. Un fatto valido per un solo esame va nel dossier di quell'esame, non nel profilo.
+3. `stato/corrente.md` descrive **l'esame attivo e nient'altro**. Quando si cambia esame, il
+   contenuto precedente si archivia in `corsi/<CODICE>/stato.md`, non si cancella.
+4. `log/` è append-only. Non si riscrive la storia.
+
+## 4. Briefing d'avvio
+
+**Non leggere file di stato all'inizio della sessione.** Il briefing arriva già iniettato dal
+SessionStart hook (`scripts/briefing.py` lo rigenera, `scripts/session_start.sh` lo inietta).
+
+`stato/briefing.md` contiene, precalcolato:
+
+- il **nucleo stabile** — profilo di studio e i primi errori ricorrenti per frequenza;
+- lo **stato dell'esame attivo** — modulo corrente, ultimi passi, prossimo passo dichiarato;
+- i **ripassi dovuti** — moduli scaduti o in scadenza entro sette giorni;
+- le **ultime tre giornate**, una riga ciascuna, inclusi i giorni vuoti.
+
+Questo sostituisce la vecchia regola "leggere `corrente.md` a ogni sessione". Il vantaggio non è la
+comodità: è che il costo in context window diventa **deterministico e limitato** invece di crescere
+con dodici corsi, e che il contesto arriva anche quando Lorenzo apre il terminale senza dire nulla.
+
+**Da caricare solo su necessità**, mai d'ufficio:
+
+| File | Quando |
 |---|---|
-| Diritto dell'Informatica T | ✅ 16/06/2026 — superato (30 e lode) |
-| Lab Amministrazione di Sistemi T | ~~15/07/2026~~ → **08/09/2026** (rimandato, vedi `ESAMI SCELTI.md`) |
-| Lab Sicurezza Informatica T | **17/07/2026** ore 14:00 |
+| `corsi/<CODICE>/percorso.md` | serve il dettaglio di un modulo specifico |
+| `corsi/<CODICE>/fonti.md` | prima di generare qualsiasi contenuto didattico |
+| `profilo/errori.md` integrale | `/appunti`, `/ripassa`, `/simula` |
+| `log/AAAA-MM.md` | `/chiudi`, o su richiesta esplicita |
+| `stato/tracker.md` integrale | `/piano`, `/ripassa` |
 
-Dal 01/07: focus esclusivo su Security fino al 17/07, SysAdmin sospeso. Piano orario per fasi: `ESAMI SCELTI.md`
+Se un comando non ha bisogno di un file, non leggerlo.
+
+## 5. Scrittura garantita
+
+Il principio che sostituisce `/chiudi` come unico punto di scrittura:
+
+> **Niente viene "ricordato dopo".** Un fatto che conta si scrive nel momento in cui emerge.
+
+### 5.1 Durante la sessione — Claude, senza chiedere
+
+Appendere una riga a `stato/giornata.md` **nel momento** in cui si verifica uno di questi eventi,
+senza interrompere il lavoro e senza chiedere conferma:
+
+- un modulo passa di stato (aperto, eseguito, chiuso);
+- un esercizio viene risolto, o abbandonato — e perché;
+- emerge un errore che appartiene a un pattern noto, o ne inaugura uno nuovo;
+- viene presa una decisione di piano (un esame che slitta, un ordine che cambia);
+- Lorenzo dichiara di non aver capito qualcosa.
+
+Formato: `HH:MM · <CODICE> · <fatto in una riga>`. Una riga, non un paragrafo. Se il fatto merita
+più di una riga, merita un file suo.
+
+### 5.2 A fine sessione — SessionEnd hook, automatico
+
+`scripts/session_end.sh` registra in `log/AAAA-MM.md` la traccia meccanica della sessione — durata,
+file toccati, moduli citati — e rigenera `stato/briefing.md`. Non dipende da Lorenzo né da Claude.
+
+### 5.3 A fine giornata — cron serale, automatico
+
+`scripts/giornata.sh`, alle 23:00, consolida `stato/giornata.md` in `log/giornate.md`, fa avanzare
+`stato/tracker.md` secondo gli intervalli di ripasso, rigenera il briefing e azzera `giornata.md`.
+
+**Gira anche nei giorni in cui non hai aperto nulla**, e in quel caso scrive `nessuna attività`.
+Questo è deliberato: una settimana vuota è un dato, e il piano prevede che vada compensata entro le
+due successive. Un sistema che registra solo i giorni buoni non è un sistema di tracciamento.
+
+### 5.4 Cosa resta a `/chiudi`
+
+Solo ciò che richiede giudizio e non può essere dedotto meccanicamente: cosa è stato *capito*,
+cosa è rimasto opaco, quale sia il prossimo passo. Se `/chiudi` non viene eseguito, la giornata
+resta comunque registrata — perde la parte interpretativa, non il fatto.
+
+## 6. Handoff e continuità di sessione
+
+`/handoff` al ~75% di contesto. Il file va in `plans/handoffs/HANDOFF_<codice-argomento>_<data>.md`
+e **deve** chiudersi con tre sezioni non negoziabili: *Concetti assimilati*, *Ancora poco chiaro*,
+*Prossimo passo esatto*. La terza è quella che rende l'handoff riutilizzabile: "continuare con
+Controlli" non è un prossimo passo, "risolvere l'esercizio 4 della prova del 12/01/2024, diagrammi
+di Bode" lo è.
+
+Un handoff scritto è anche un evento da riga in `stato/giornata.md`.
 
 ---
 
-## Regole Inviolabili
+## 7. Corsi e fonti
 
-### 1. Fonte primaria: PDF Virtuale
-Tutto il materiale didattico deve essere ancorato ai PDF in `SLIDE TEORIA/` e `SLIDE LAB/`. Non sostituire con fonti esterne salvo richiesta esplicita. Se un PDF manca, **fermarsi e chiedere a Lorenzo di caricarlo** — mai inventare contenuto.
+Un codice per esame, usato in ogni percorso e in ogni riga di log:
 
-### 2. Studio attivo — mai solo lettura
-- **SysAdmin/Security**: un modulo è ✅ solo se Lorenzo ha eseguito gli esercizi sulla VM in prima persona.
-- **Diritto**: un modulo è ✅ solo se ha letto la lezione, risposto alle domande di autoverifica, e scritto appunti grezzi.
+| Codice | Esame | CFU | Tipo |
+|---|---|---|---|
+| `FI2` | Fondamenti di Informatica T-2 | 12 | esercizi + progetto |
+| `CALC` | Calcolatori Elettronici T | 6 | esercizi |
+| `MATAP` | Matematica Applicata T | 6 | esercizi |
+| `LAS` | Laboratorio di Amministrazione di Sistemi T | 6 | pratico-lab |
+| `SO` | Sistemi Operativi T | 9 | esercizi + teoria |
+| `IDS` | Ingegneria del Software T | 9 | teoria + progetto |
+| `TLC` | Fondamenti di Telecomunicazioni T | 9 | esercizi |
+| `ELT` | Elettrotecnica T | 6 | esercizi |
+| `CA` | Controlli Automatici T | 9 | esercizi |
+| `RETI` | Reti di Calcolatori T | 9 | teoria + esercizi |
+| `WEB` | Tecnologie Web T | 9 | progetto + teoria |
+| `ELN` | Elettronica T | 6 | esercizi |
 
-### 3. Domande aperte → risposte inline
-Ogni domanda trovata negli appunti grezzi (esplicita o tra parentesi) riceve una risposta inline come blocco citazione `>` immediatamente dopo il concetto.
+### 7.1 Regola della fonte dichiarata
 
-### 4. Fedeltà per Diritto
-L'esame di Diritto verte sulle spiegazioni della professoressa. Definizioni, classificazioni e formulazioni devono rispecchiare il linguaggio del PDF. Segnalare con `[fonte: PDF]` le affermazioni tratte direttamente dalle slide. Registro accademico-giuridico, terminologia tecnica esatta.
+La vecchia regola — *fonte primaria esclusiva i PDF di Virtuale* — presupponeva corsi frequentati e
+non regge su dodici arretrati. La sostituisce questa:
 
-### 5. Appunti grezzi: l'assenza non è lacuna
-Lorenzo omette intenzionalmente le sezioni già consolidate. L'assenza di un argomento non implica che sia stato saltato. Includere la sezione negli appunti puliti con nota `> ⚠️ Sezione non presente negli appunti grezzi`, ma non segnalarla come lacuna senza verifica.
+> Ogni corso dichiara le proprie fonti in `corsi/<CODICE>/fonti.md`, con una gerarchia esplicita.
+> Claude genera contenuto didattico **solo** da quelle fonti, lette per intero. Se la fonte per un
+> modulo non è disponibile, **fermarsi e chiederla a Lorenzo**. Mai inventare, mai colmare con
+> conoscenza generica.
 
-### 6. Output in file, non in chat
-Se un contenuto può stare in un file, metterlo in un file. Le risposte in chat sono per coordinamento, non per contenuto didattico.
+`fonti.md` va compilato **prima** di aprire il corso, e dichiara: fonte primaria (slide di Virtuale,
+libro di testo con edizione, dispense), eserciziario, prove d'esame passate reperite, e cosa manca.
+Un corso senza `fonti.md` non si apre.
+
+Nota specifica: per gli esami arretrati l'accesso a Virtuale può restituire il materiale dell'anno
+corrente, diverso da quello dell'anno in cui il corso era in piano. Se il programma è cambiato,
+`fonti.md` deve dirlo esplicitamente.
+
+### 7.2 Unità di verifica, per tipo di esame
+
+Un modulo è chiuso — e solo allora entra nel tracker — quando:
+
+- **esercizi**: Lorenzo ha risolto un esercizio della tipologia **a freddo, senza la soluzione
+  sotto mano**, e i conti tornano. Aver seguito una soluzione non chiude nulla.
+- **pratico-lab**: Lorenzo ha eseguito il laboratorio **in prima persona sulla VM**. La lettura
+  passiva vale zero ai fini dell'esame.
+- **teoria**: Lorenzo ha risposto alle domande di autoverifica senza consultare gli appunti.
+- **progetto**: il pezzo di progetto compila, gira e fa ciò che deve.
+
+### 7.3 Orientamento alle prove
+
+Principio conservato e ora esteso a tutti i corsi: **il curricolo segue le tipologie d'esame
+storiche, non l'ordine dei contenuti.** Il ciclo resta quello che ha funzionato — prova fredda
+cronometrata → confronto con la soluzione ufficiale → estrazione dei pattern mancanti → drill
+mirato — ed è particolarmente adatto a `MATAP`, `CA`, `ELT`, `ELN` e `TLC`.
 
 ---
 
-## Standard di Qualità — Output Generati
+## 8. Standard di qualità degli output
 
-Ogni file prodotto da Claude deve superare questi criteri prima di essere considerato completo:
+*(Sezione riportata dalla versione precedente, generalizzata ai dodici corsi.)*
 
 ### Lezioni (`/lezione`)
-- [ ] Ogni concetto ha: definizione, perché esiste, come si usa in pratica
-- [ ] Security/SysAdmin: **prosa discorsiva ancorata ai comandi/file**, ogni comando a due livelli (meccanismo + visione) — NON un walkthrough (sequenza passo-passo + anatomia dei parametri = guida-lab `/lab`)
-- [ ] Security: threat model chiaro (prospettiva attaccante E difensore); autoverifica in stile quiz teorico (40%)
-- [ ] Diritto: ogni affermazione ancorata al PDF con `[fonte: PDF]`, terminologia fedele
-- [ ] Connessioni con altri moduli: specifiche, non generiche
+- Ogni concetto ha: definizione, perché esiste, come si usa in pratica.
+- Esami a esercizi: ogni metodo mostrato **su un esercizio reale della tipologia d'esame**, non su
+  un esempio inventato.
+- Esami pratici: prosa discorsiva ancorata a comandi e file, ogni comando a due livelli — meccanismo
+  e visione. Non un walkthrough: quello è `/lab`.
+- Ogni affermazione tratta dalla fonte primaria è marcata `[fonte: <fonte>]`.
+- Connessioni con altri moduli: specifiche, mai generiche.
 
 ### Appunti (`/appunti`)
-- [ ] Ogni domanda dagli appunti grezzi ha una risposta inline `>`
-- [ ] Bug corretti con: codice errato → analisi → codice corretto
-- [ ] Diritto: imprecisioni corrette con riferimento normativo esatto
-- [ ] Sezioni omesse: incluse con nota, non marcate come lacune
-- [ ] Errori ricorrenti aggiornati in `stato/errori_frequenti.md`
+- Ogni domanda trovata negli appunti grezzi riceve risposta inline come blocco citazione `>`
+  immediatamente dopo il concetto.
+- Errori corretti mostrando: versione errata → analisi → versione corretta.
+- Sezioni omesse: incluse con nota `> ⚠️ Sezione non presente negli appunti grezzi`. **L'assenza non
+  è lacuna**: Lorenzo omette intenzionalmente ciò che ha già consolidato.
+- I pattern nuovi vanno aggiunti a `profilo/errori.md` nella stessa esecuzione.
 
-### Guida-lab (`/lab` — walkthrough operativo del passo 3, esami pratici)
-- [ ] **Ancorata al LAB PDF reale del modulo** (no invenzione): contenuto solo dai PDF in
-  `SLIDE LAB/`+`SLIDE TEORIA/`, segnalato con `[fonte: PDF]` dove serve
-- [ ] **Prerequisiti/setup espliciti** all'inizio: VM corretta, snapshot (Security), ambiente
-  multi-machine su (SysAdmin) — mai assumere lo stato della VM
-- [ ] **Ogni passo**: comando esatto da digitare + output atteso + cosa verificare prima di proseguire
-- [ ] **Anatomia di ogni comando**: cosa fa, perché lì (a cosa serve nel flusso), funzione di ogni parametro/flag, varianti per riscriverlo a memoria (non solo copiarlo) — parametri spiegati in modo accurato
-- [ ] Security: threat model (attaccante E difensore) per ogni tecnica
-- [ ] Progressione facile → difficile; ogni step verificabile in autonomia
-- [ ] Punti di errore comuni segnalati, inclusi gli errori ricorrenti di Lorenzo (`errori_frequenti.md`)
-- [ ] Se famiglia d'esame ⭐: collegamento alla tipologia + rimando alla prova passata per il DRILL
-- [ ] **Lorenzo digita i comandi**: la guida fornisce i comandi, non li esegue al suo posto
+### Guida-lab (`/lab`, solo `LAS`)
+- Ancorata al PDF reale del laboratorio, prerequisiti e stato della VM espliciti.
+- Ogni passo: comando esatto, output atteso, cosa verificare prima di proseguire.
+- Anatomia di ogni comando: cosa fa, perché lì, funzione di ogni parametro, varianti per riscriverlo
+  a memoria invece di copiarlo.
+- **Lorenzo digita i comandi**: la guida li fornisce, non li esegue al suo posto.
 
-### Anti-pattern da evitare
-- **Non parafrasare Diritto**: se il PDF dice "dispositivo qualificato", non dire "dispositivo certificato"
-- **Non fare connessioni generiche**: "questo si collega a Security" → "Nmap in S1 scansiona esattamente le porte che `ss -tlnp` mostra in 3D"
-- **Non essere conciso dove Lorenzo fatica**: se un concetto ha generato domande in appunti grezzi di moduli precedenti, espandere la spiegazione
-- **Non assumere conoscenza**: controllare lo stato in corrente.md prima di dare per scontato che un prerequisito sia acquisito
-- **Non caricare file inutili**: se il comando non ne ha bisogno, non leggerlo
-- **MAI generare contenuto didattico dal percorso.md o dalla master map**: i "concetti chiave" elencati lì sono un indice, non una fonte. Il contenuto delle lezioni deve venire SOLO dalla lettura integrale dei PDF in SLIDE TEORIA/ e SLIDE LAB/. Se il PDF non è stato letto, il contenuto è superficiale per definizione
-- **Non fare fix parziali**: quando aggiorni qualcosa (stato, glossario, errori_frequenti, log), verifica di aver aggiornato TUTTI i file che richiedono aggiornamento. Non aggiornare 2 su 4
-- **Non chiedere domande ovvie**: se Lorenzo dice "ho finito gli appunti grezzi di D10", eseguire `/appunti D10` senza chiedere conferma. Se il contesto è chiaro dalla conversazione, agire
-
----
-
-## VM di Lavoro
-
-### VM SysAdmin — Vagrant + Debian 12
-```bash
-cd ~/sysAdmin-lab && vagrant up --provider=virtualbox && vagrant ssh
-```
-
-### VM Security — Kali Linux / Parrot OS
-- VirtualBox con scheda host-only `vboxnet0`
-- Snapshot prima di ogni esercizio di compromissione
+### Anti-pattern
+- **Non parafrasare le fonti letterali.** Dove la fonte usa una formulazione precisa, riprodurla.
+- **Non fare connessioni generiche.** "Si collega a Reti" → "il descrittore di socket in SO 4B è lo
+  stesso oggetto che `ss -tlnp` elenca in Reti".
+- **Non essere conciso dove Lorenzo fatica.** Se un concetto ha generato domande in moduli
+  precedenti, espandere.
+- **Non assumere prerequisiti.** Controllare il briefing prima di dare per acquisito un modulo.
+- **Mai generare contenuto didattico da un indice.** I concetti elencati in `percorso.md` o nelle
+  mappe sono un indice, non una fonte. Se la fonte non è stata letta per intero, il contenuto è
+  superficiale per definizione.
+- **Non fare aggiornamenti parziali.** Quando aggiorni lo stato, verifica di aver aggiornato *tutti*
+  i file coinvolti, non due su quattro.
+- **Non chiedere conferme ovvie.** Se il contesto è chiaro, agire.
 
 ---
 
-## Struttura del Progetto
+## 9. Struttura del progetto
 
-> **Principio**: ogni "tipo" di materiale ha un genitore unico, con **sottocartella per-corso**
-> `SYSADM` / `SICINF` / `DIRITTO (INFORMATICO)`. Non creare cartelle materia a top-level.
+La radice **non è cablata da nessuna parte**: la risolve `scripts/paths.py` a runtime
+(`UNICODE_ROOT` → `~/.config/unicode/root` → risalita dallo script → candidati noti). Se
+l'albero si sposta, non si tocca nulla. `python3 scripts/doctor.py` stampa dove il sistema
+si crede e cosa manca.
 
 ```
-/home/lorenzo/UniCode/
-├── stato/                       ← stato, percorso moduli, log sessioni, tracker
-│   ├── corrente.md              ← DA LEGGERE A OGNI SESSIONE
-│   ├── percorso.md              ← dettaglio moduli (solo quando serve)
-│   ├── log_sessioni.md          ← storico sessioni (solo per /chiudi)
-│   ├── tracker_ripasso.md       ← spaced repetition
-│   └── errori_frequenti.md      ← pattern errori ricorrenti
-│
-├── claudeLezioni/               ← output didattici di Claude (lezioni + guide-lab)
-│   ├── LEZIONI SYSADM/          ← lezione_* e guida_lab_* (moduli SysAdmin)
-│   ├── LEZIONI DIRITTO/
-│   └── LEZIONI SECURITY/        ← lezione_* e guida_lab_* (moduli Security)
-├── claudeAppunti/               ← appunti definitivi
-│   ├── APPUNTI SYSADM/
-│   ├── APPUNTI SECURITY/        ← appunti dei lab eseguiti
-│   └── APPUNTI DIRITTO/
-├── claudeAppunti_PDF/           ← versioni PDF degli appunti (+ RIPASSO DIRITTO/)
-├── APPUNTI GREZZI/              ← appunti raw di Lorenzo
-│   ├── Lab - sysAdm/   ├── Lab - Security/   └── Diritto/
-├── SLIDE TEORIA/                ← PDF teoria da Virtuale
-│   ├── SYSADM/   ├── SICINF/   └── DIRITTO INFORMATICO/ (NORMATIVE/, Schemi ripasso/)
-├── SLIDE LAB/                   ← walkthrough lab da Virtuale (PDF + HTML autocontenuti)
-│   ├── SYSADM/   └── SICINF/
-├── esercizi/                    ← esercizi + materiali eseguibili, COMPITI_<corso>.md
-│   ├── SYSADM/                  ← es_NN/lab_NN scripting, COMPITI_sysadm.md, dati
-│   └── SICINF/                  ← binari pwn, pcap, sfide crypto, COMPITI_security.md
-├── SIMULAZIONI ESAMI/          ← prove d'esame passate (testi+soluzioni)
-│   ├── SYSADM/   ├── SICINF/ (le 5 tipologie)   └── DIRITTO/
-├── RIPASSO DIRITTO/             ← speedreview + tabelle comparative (solo Diritto)
-├── metodo_studio_esami_pratici.md  ← metodo + flusso sessione lab (hub)
-├── glossario_sysadm.md · glossario_diritto.md · troubleshooting_vm.md
-├── concept_maps.md · cheatsheet_sysadm.html
-└── ESAMI SCELTI.md              ← piano fasi e stime ore
+<radice>/
+├── profilo/                     ← strato permanente
+│   ├── studente.md              ← come studia, cosa funziona (accrescimento)
+│   └── errori.md                ← pattern di errore ricorrenti, transdisciplinari
+├── stato/
+│   ├── briefing.md              ← GENERATO — iniettato all'avvio, non modificare a mano
+│   ├── corrente.md              ← esame attivo, riscritto a ogni sessione
+│   ├── giornata.md              ← buffer del giorno, azzerato dal cron serale
+│   └── tracker.md               ← spaced repetition, mantenuto dagli script
+├── log/                         ← append-only
+│   ├── AAAA-MM.md               ← traccia meccanica delle sessioni
+│   └── giornate.md              ← una riga per giorno, giorni vuoti inclusi
+├── corsi/<CODICE>/
+│   ├── fonti.md                 ← OBBLIGATORIO prima di aprire il corso
+│   ├── percorso.md              ← moduli e stato di dettaglio
+│   ├── stato.md                 ← archivio di corrente.md quando il corso non è attivo
+│   ├── materiali/               ← PDF, dispense, capitoli
+│   ├── prove/                   ← prove d'esame passate, testi e soluzioni
+│   ├── grezzi/                  ← appunti raw di Lorenzo
+│   ├── lezioni/                 ← output di /lezione e /lab
+│   └── appunti/                 ← output di /appunti
+├── piano/
+│   ├── piano_laurea.md          ← ripartizione per sessioni, regole di carico
+│   └── codici.txt               ← fonte unica dei codici corso: si modifica qui, non negli script
+├── plans/handoffs/
+└── scripts/
+    ├── paths.py                 ← radice e codici — unico punto che conosce i percorsi
+    ├── doctor.py                ← diagnostica dell'ambiente, non modifica niente
+    ├── briefing.py · giornata.py
+    └── session_start.sh · session_end.sh
 ```
-
-### Tipi di output per corso
-- **Diritto** (teorico): `lezione_*` → autoverifica → `appunti_*` + `speedreview_*` (ripasso MC).
-- **SysAdmin / Security** (pratici): `guida_lab_*` (walkthrough da eseguire) → Lorenzo esegue sulla
-  VM e scrive grezzi → `appunti_*` (consolidamento dell'esecuzione). Drill su `SIMULAZIONI ESAMI/<corso>/`.
 
 ### Convenzioni di naming
-- `lezione_moduloXX_argomento.md` — lezione generata da Claude (in `claudeLezioni/LEZIONI <MATERIA>/`)
-- `guida_lab_moduloXX_argomento.md` — **guida-lab operativa** (output di `/lab`), stessa cartella delle lezioni
-- `appunti_moduloXX_argomento.md` — appunti definitivi (in `claudeAppunti/APPUNTI <MATERIA>/`)
-- `Appunti_moduloXX.md` — appunti grezzi di Lorenzo
-- `es_NN_nome.md` — esercizi scripting documentati
-- `COMPITI_<corso>.md` — testi dei compiti consolidati (in `esercizi/<corso>/`)
-- `XX` = codice modulo: Diritto `D<N>`, Security `S<N>`, SysAdmin `<cifra><lettera>` (`0A`,`3D`,`4B`)
+- `lezione_<CODICE>_<modulo>_<argomento>.md`
+- `guida_lab_<CODICE>_<modulo>_<argomento>.md`
+- `appunti_<CODICE>_<modulo>_<argomento>.md`
+- `grezzi_<CODICE>_<modulo>.md`
+- `prova_<CODICE>_<AAAA-MM-GG>.md`
+- `HANDOFF_<codice-argomento>_<AAAA-MM-GG>.md`
 
 ---
 
-## Lingua e Stile
+## 10. Ripasso spaziato
 
-Italiano accademico universitario. Conciso e diretto — non ripetere quello che Lorenzo ha già detto. Se un termine tecnico appare per la prima volta, verificare se è nel glossario corrispondente; se no, aggiungerlo.
+Intervalli dalla chiusura del modulo: **3 → 7 → 14 → 30 → 90 giorni**. I primi quattro erano già in
+uso; il quinto è nuovo e serve all'orizzonte lungo — `FI2` chiuso a febbraio 2027 deve reggere fino
+a `IDS` a luglio.
 
----
+Priorità nel briefing: `SCADUTO` (in ritardo), `DOVUTO` (entro tre giorni), `OK`.
 
-## File Legacy
+Regola di ingaggio: `/ripassa <CODICE> <modulo>` genera domande adattive; **si risponde senza
+consultare gli appunti**. Una risposta esitante non è un ripasso superato: reimposta l'intervallo al
+gradino precedente, non lo azzera.
 
-`master_map_studio.md` è il file originale da cui sono stati estratti `stato/corrente.md`, `stato/percorso.md` e `stato/log_sessioni.md`. Non è più la fonte di verità — usare i file in `stato/`. Verrà rimosso in futuro.
+Il tracker è mantenuto dagli script, non a mano. Se lo stato del tracker e la realtà divergono, la
+realtà vince: correggere il file e annotare la correzione in `stato/giornata.md`.

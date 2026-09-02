@@ -35,3 +35,6 @@ Thumbs.db
 *.swp
 *.swo
 .vscode/
+
+# backup locali dei settings (non versionare)
+.claude/settings.local.json.bak-*
