@@ -38,3 +38,6 @@ Thumbs.db
 
 # backup locali dei settings (non versionare)
 .claude/settings.local.json.bak-*
+
+# briefing rigenerato a ogni avvio da scripts/briefing.py: non versionarlo
+stato/briefing.md

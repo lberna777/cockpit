@@ -18,7 +18,7 @@ in contesto. L'hook inietta un artefatto compatto: l'indice del vault + gli ulti
 - **Recap giornalieri**: `Vault/recap/YYYY-MM-DD.md` (generati da `scripts/recap_generator.py`,
   consolidati da `scripts/consolidate_recaps.py`).
 - **Note curate per Claude**: `Vault/claude/`.
-- **Studio universitario**: `Vault/UniCode` (symlink a `~/UniCode`).
+- **Studio universitario**: `Vault/UniCode` (la cartella reale; `~/UniCode` è il symlink).
 
 ### Confine con l'auto-memory di Claude (`~/.claude/.../memory/`)
 - **Auto-memory** (`MEMORY.md` + frontmatter): chi è l'utente, preferenze, stato progetti —
@@ -32,11 +32,15 @@ in contesto. L'hook inietta un artefatto compatto: l'indice del vault + gli ulti
 ## Mappa del territorio
 
 Riordinata il 2026-09-01. I symlink di navigazione ridondanti sono stati rimossi: il Vault
-si raggiunge da `Vault/UniCode` qui dentro, oppure da `~/UniCode` (usato dalle skill).
+si raggiunge da `Vault/UniCode` qui dentro, oppure da `~/UniCode` — symlink alla stessa
+cartella, usato dalle skill.
 
-- `~/cockpit/Vault/UniCode` — studio universitario (Diritto, SysAdmin, Security). Ha il suo
-  CLAUDE.md con workflow `/lezione`, `/appunti`, `/chiudi`, ecc. `ARCHIVIO/` contiene il
-  materiale degli esami chiusi.
+- `~/cockpit/Vault/UniCode` — studio universitario: dodici esami arretrati verso la laurea
+  nella sessione estiva 2028. Ha il suo CLAUDE.md e l'architettura di continuità installata il
+  2026-09-02 (memoria a strati, briefing iniettato dal SessionStart hook, consolidamento serale
+  via timer systemd). I comandi prendono `<CODICE> <ID modulo>`, es. `/lezione FI2 3A`; i codici
+  stanno in `piano/codici.txt`, il piano per sessioni in `piano/piano_laurea.md`. `ARCHIVIO/`
+  contiene il materiale degli esami chiusi.
 - `~/Sviluppo` — tutto il codice, diviso per tipo di lavoro:
   - `app/` — accountability-app, agenticdash (dashboard + memoria, Tauri), diritto-quiz-app, bibiciclo
   - `audio/` — StereoCompressor, FreakFM, acidmoog-synth, NEMO, JUCE-shared
