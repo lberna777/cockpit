@@ -116,12 +116,8 @@ _(troncato — apri il file per il resto)_
 
 ## Ripassi dovuti
 
-**1 ripassi da fare** su 1 moduli tracciati.
-
-| Stato | Corso | Modulo | Scadenza |
-|---|---|---|---|
-| DOVUTO | FI2 | modulo-di-prova | fra 3 gg |
+_Tracker presente ma vuoto: nessun modulo chiuso finora._
 
 ## Ultime giornate
 
-- **2026-09-02** · 2 eventi · chiuso FI2 modulo-di-prova
+_Nessuno storico giornaliero._
