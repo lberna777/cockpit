@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_moduloS9_demoni_autorizzazione_pam.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_moduloS9_demoni_autorizzazione_pam.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SECURITY/lezione_moduloS9_demoni_autorizzazione_pam.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-s9-demoni-di-sistema-autorizzazione-pam">Lezione — Modulo S9: Demoni di Sistema + Autorizzazione + PAM</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>PDF sorgente</strong>: <code>Demoni_di_sistema_17_aprile.pdf</code> · <code>Autorizzazione_17_aprile.pdf</code> · <code>approfondimento_PAM_-_il_framework_di_autenticazione_e_autorizzazione_.pdf</code> (Prandini, DISI)
+<strong>Natura del modulo</strong>: teorico-concettuale, ma con forti ancoraggi a comandi/file di configurazione. Nessuna tipologia d'esame pratica dedicata, ma <strong>feed diretto della tipologia Integrity/privesc (S11)</strong> e materiale caldo per il <strong>quiz teorico</strong> (copre tutti e 15 i moduli).</p>
+<hr />
+<h2 id="0-il-filo-conduttore-perche-questi-tre-argomenti-stanno-insieme">0. Il filo conduttore: perché questi tre argomenti stanno insieme</h2>
+<p>Il modulo risponde a un'unica domanda operativa: <strong>quando un utente ha già i piedi dentro il sistema (accesso legittimo con privilegi limitati), che cosa decide se e come può fare qualcosa in più?</strong></p>
+<p>Tre livelli di risposta, ciascuno un PDF:</p>
+<ol>
+<li><strong>Autorizzazione</strong> (il modello): <em>chi può fare cosa su quale risorsa</em>. Definisce le regole astratte (DAC/MAC/RBAC) e la loro implementazione concreta su Unix (i 12 bit di permesso, SUID/SGID, capabilities, ACL) e Windows (NTFS, gruppi, composizione allow/deny).</li>
+<li><strong>Demoni di sistema</strong> (gli attori privilegiati): i processi che girano con privilegi di amministrazione e i loro file di configurazione. Sono il <strong>bersaglio</strong> della privilege escalation: se i file che un demone privilegiato legge hanno permessi sbagliati, un utente non privilegiato inietta codice e aspetta che il sistema lo esegua con privilegi elevati.</li>
+<li><strong>PAM</strong> (il framework): l'infrastruttura software attraverso cui i programmi (molti dei quali sono demoni: <code>sshd</code>, <code>login</code>, <code>cron</code>) implementano concretamente <strong>autenticazione e autorizzazione di accesso</strong>, in modo modulare e configurabile per-programma.</li>
+</ol>
+<p>Il collegamento preciso: l'<strong>autorizzazione</strong> è il <em>modello</em> (le regole), i <strong>demoni</strong> sono i <em>processi</em> che agiscono con l'autorità concessa da quelle regole, <strong>PAM</strong> è il <em>framework</em> con cui i demoni verificano l'identità (autenticazione) e i diritti d'accesso (account management) prima di concedere una sessione. Un errore in uno qualsiasi dei tre livelli è un vettore di privilege escalation.</p>
+<hr />
+<h2 id="parte-a-autorizzazione-modelli-e-implementazioni">PARTE A — AUTORIZZAZIONE: modelli e implementazioni</h2>
+<h3 id="a1-il-processo-di-controllo-dellaccesso-e-la-distinzione-fondamentale">A.1 Il processo di controllo dell'accesso e la distinzione fondamentale</h3>
+<p>Un soggetto <strong>autenticato</strong> deve essere <strong>autorizzato</strong> a svolgere operazioni sulle risorse. Questa frase, nella sua banalità apparente, contiene la distinzione più importante del modulo (e quella che il profilo di Lorenzo tende a confondere):</p>
+<ul>
+<li><strong>Autenticazione</strong> = <em>provare chi sei</em>. Rispondere alla domanda "sei davvero l'utente X?" (password, chiave, biometria). È il tema di S2.</li>
+<li><strong>Autorizzazione</strong> = <em>decidere cosa ti è permesso fare</em>, dato che ora sappiamo chi sei. Rispondere a "l'utente X può leggere questo file / eseguire questo programma / aprire questa socket?".</li>
+</ul>
+<p>L'autenticazione viene <strong>prima</strong> e produce un'identità certa; l'autorizzazione viene <strong>dopo</strong> e usa quell'identità per prendere decisioni. Sono due meccanismi indipendenti: si può essere autenticati perfettamente e non autorizzati a nulla (account <code>locked</code> che può solo far girare processi), oppure — nel caso dei bit SUID che vedremo — si può eseguire codice con un'autorità che non corrisponde all'identità con cui ci si è autenticati.</p>
+<p><strong>Meccanismo</strong>: l'autorizzazione si costruisce in tre passaggi, ed è cruciale (principio ripetuto per tutto il corso) <strong>separare politiche e meccanismi</strong>:
+1. <strong>modellare</strong> il sistema controllato (solo i fattori critici per il controllo d'accesso);
+2. <strong>definire la politica</strong> (le regole con cui l'accesso è regolamentato);
+3. <strong>attuare la politica</strong> tramite meccanismi HW/SW.</p>
+<p><strong>Visione</strong>: separare <em>cosa</em> si vuole ottenere (politica) da <em>come</em> lo si realizza (meccanismo) permette di confrontare politiche diverse senza annegare nei dettagli implementativi, di identificare il set minimo di requisiti, e di progettare meccanismi riusabili come mattoni per politiche diverse. È lo stesso principio di separazione che in S5 distingue "che traffico voglio far passare" (policy) da "quale regola iptables scrivo" (meccanismo).</p>
+<h3 id="a2-caratteristiche-di-una-buona-politica-e-di-un-buon-meccanismo">A.2 Caratteristiche di una buona politica e di un buon meccanismo</h3>
+<p>Una <strong>politica</strong> ben progettata rispetta:
+- <strong>Privilegio minimo</strong>: ogni accesso concede l'insieme di autorizzazioni più ristretto possibile. È il principio-cardine che ritorna ovunque (account <code>locked</code>, capabilities al posto di root pieno, sudo puntuale).
+- <strong>Consistenza</strong>: deve esistere uno schema di risoluzione <strong>non ambiguo</strong> quando più autorizzazioni diverse potrebbero applicarsi alla stessa richiesta. Non c'è una soluzione unica: si sceglie tra "regola più/meno specifica vince", "default allow vs default deny", "vince la prima/ultima regola in ordine spaziale o temporale", gerarchia degli autori delle regole. (Nota il parallelo con S5: iptables valuta le regole <em>in ordine</em>, prima regola che fa match vince; Windows NTFS invece usa deny-esplicito-prevale, come vedremo.)
+- <strong>Completezza e correttezza</strong>: ogni richiesta riceve risposta entro un tempo predeterminato, e deve esistere una <strong>regola predefinita</strong> da applicare quando non si trova un'autorizzazione esplicita (il default-deny/default-allow).</p>
+<p>Un buon <strong>meccanismo</strong> deve essere:
+- <strong>Resistente alle manomissioni</strong> (non lo si deve poter sabotare senza che nessuno se ne accorga);
+- <strong>Mediazione completa</strong>: <em>ogni</em> accesso alle risorse passa dal controllo del meccanismo — nessuna scorciatoia (esattamente il parallelo con la topologia firewall di S5: se esiste una strada che aggira il punto di controllo, la policy non serve a nulla);
+- <strong>Piccolo e autonomo</strong> (facile da testare e riparare);
+- <strong>Ragionevolmente economico</strong> (il costo non deve superare il danno degli accessi non autorizzati).</p>
+<h3 id="a3-parametri-di-decisione">A.3 Parametri di decisione</h3>
+<p>La decisione di autorizzazione può basarsi su: <strong>identità</strong> del soggetto; <strong>ruolo</strong> (decisione presa in base al ruolo attuale, indipendentemente dall'identità → base concettuale di RBAC); <strong>modalità di accesso</strong> (che tipo di operazione — read/write/execute); <strong>vincoli spaziali e temporali</strong> (da dove e quando arriva la richiesta → in PAM lo fanno <code>pam_time</code> e <code>pam_access</code>); <strong>storia delle attività</strong> (limiti sulla quantità/tipo di uso).</p>
+<h3 id="a4-i-tre-modelli-fondamentali-dac-mac-rbac">A.4 I tre modelli fondamentali: DAC, MAC, RBAC</h3>
+<p>Questa è una classificazione da sapere a memoria per il quiz.</p>
+<ul>
+<li><strong>DAC — Discretionary Access Control</strong>: ogni oggetto ha un <strong>proprietario</strong>, e <strong>il proprietario decide i permessi</strong> a sua discrezione. È il modello di Unix e Windows "classico". "Discrezionale" = la decisione è lasciata alla discrezione del proprietario, non imposta dall'alto.</li>
+<li><strong>MAC — Mandatory Access Control</strong>: la proprietà di un oggetto <strong>non</strong> consente di modificarne i permessi. Esiste una <strong>policy centralizzata</strong> decisa da un <em>security manager</em>; i soggetti non possono cambiarne alcun dettaglio. "Mandatory" = obbligatorio, imposto dall'autorità centrale. Esempi: SELinux, AppArmor, i modelli militari Bell-LaPadula/Biba.</li>
+<li><strong>RBAC — Role-Based Access Control</strong>: i permessi sono assegnati <strong>ai ruoli</strong>, non agli utenti; l'utente eredita i permessi del ruolo che ricopre, e il ruolo può cambiare dinamicamente (nel tempo, secondo il contesto).</li>
+</ul>
+<p><strong>Perché esistono modelli diversi</strong>: DAC è flessibile e comprensibile anche ai non tecnici (ognuno gestisce le proprie risorse) ma è fragile — un utente può concedere per errore accesso a tutti. MAC è rigido ma garantisce proprietà di sicurezza globali (riservatezza/integrità) che DAC non può garantire. RBAC è un compromesso gestionale: in un'organizzazione grande, gestire i permessi per ruolo invece che per singolo utente riduce drasticamente il lavoro amministrativo.</p>
+<h3 id="a5-meccanismi-la-matrice-degli-accessi-acl-e-capability-list">A.5 Meccanismi: la matrice degli accessi, ACL e capability list</h3>
+<p>Concettualmente, il controllo d'accesso è una <strong>matrice</strong> soggetti × oggetti, dove ogni cella dice cosa quel soggetto può fare su quell'oggetto. Il problema pratico: migliaia di soggetti, milioni di oggetti — la matrice completa è enorme e per lo più fatta di valori di default. Si partiziona in due modi opposti:</p>
+<ul>
+<li><strong>Capability list</strong>: si partiziona <strong>per soggetto</strong>. A ogni soggetto è associata la lista degli oggetti su cui ha permessi ≠ default. "Cosa può fare questo utente?" è immediato; "chi può toccare questo oggetto?" è costoso.</li>
+<li><strong>Access Control List (ACL)</strong>: si partiziona <strong>per oggetto</strong>. A ogni oggetto è associata la lista dei soggetti con permessi ≠ default. "Chi può toccare questo file?" è immediato. È il modello di POSIX e Windows.</li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>Trappola terminologica</strong> (importante per il quiz): le <em>capability list</em> di questa slide (partizione della matrice per soggetto) <strong>NON</strong> sono le <em>Linux capabilities</em> di A.9 (i 41 poteri granulari di root). Stesso nome, due concetti diversi. Il PDF lo segnala esplicitamente.</p>
+</blockquote>
+<p>Il <strong>filesystem Unix tradizionale</strong> usa una ACL "rigida" memorizzata nell'inode, che elenca <strong>sempre e solo tre soggetti</strong>: l'utente proprietario (U), il gruppo proprietario (G), e il gruppo implicito di "tutti gli altri" (O, chi non è U e non appartiene a G). POSIX ACL (A.8) rimuove questa rigidità.</p>
+<h3 id="a6-dac-su-unix-utenti-gruppi-e-i-12-bit-di-permesso">A.6 DAC su Unix: utenti, gruppi, e i 12 bit di permesso</h3>
+<p><strong>Utenti e gruppi</strong>: si creano con <code>adduser</code>/<code>addgroup</code>. Ogni utente <strong>deve</strong> appartenere ad almeno un gruppo; il sistema di norma ne crea uno omonimo contenente solo lui. Un utente può appartenere a più gruppi. Un account può essere <strong><code>locked</code></strong>: non usabile per login interattivo, ma i processi possono ancora girare con quell'identità (è il minimo privilegio applicato agli account di servizio). Il comando <code>passwd</code> cambia le password (le proprie; root le cambia a chiunque) e con <code>-l</code>/<code>-u</code> blocca/sblocca un account (solo root).</p>
+<p><strong>I 12 bit di permesso</strong> nell'inode: 9 bit "standard" (rwx per U, G, O) + 3 bit "speciali" (SUID, SGID, sticky). Ogni file (regolare, directory, link, socket, block/char special) è descritto da un inode che contiene esattamente un utente proprietario, esattamente un gruppo proprietario, e questi 12 bit.</p>
+<p><strong>Significato dei bit standard</strong>, leggermente diverso tra file e directory (ricordando che <em>una directory è un file il cui contenuto è un database di coppie (nome, inode)</em>):
+- <strong>R (read)</strong>: leggere il contenuto di un file / elencare i file di una directory.
+- <strong>W (write)</strong>: scrivere dentro un file / aggiungere, cancellare, rinominare file in una directory.
+  - ⚠️ <strong>Nota controintuitiva ma esaminabile</strong>: il permesso W su una <strong>directory</strong> consente di <strong>cancellare</strong> un file di cui non si ha alcun diritto sul contenuto — perché cancellare significa rimuovere la coppia (nome, inode) dal database-directory, operazione di scrittura <em>sulla directory</em>, non sul file.
+- <strong>X (execute)</strong>: eseguire un file come programma / fare il <strong>lookup</strong> dell'inode di una directory (cioè "attraversarla").
+  - ⚠️ <strong>Nota esaminabile</strong>: accedere a un file per path richiede il permesso <strong>X su ogni directory</strong> del percorso (serve il lookup di ogni inode intermedio), mentre <strong>R non è necessario</strong> sulle directory intermedie. R su una directory serve solo a <em>elencarne</em> il contenuto, non ad attraversarla.</p>
+<p><strong>Composizione dei permessi</strong> (algoritmo deterministico, esaminabile): quando l'utente A opera su un file, il SO controlla nell'ordine:
+1. <code>A == U?</code> → sì: applica i permessi di <strong>U</strong> (e <strong>si ferma qui</strong>);
+2. altrimenti <code>A appartiene a G?</code> → sì: applica i permessi di <strong>G</strong>;
+3. altrimenti: applica i permessi di <strong>O</strong>.
+- ⚠️ <strong>Conseguenza controintuitiva</strong>: la valutazione si ferma alla prima categoria che fa match. Se A è il proprietario (<code>A == U</code>), si applicano i permessi di U <strong>anche se quelli di G sarebbero più favorevoli</strong> — quelli di G vengono ignorati. Non è "il più permissivo vince": è "la prima categoria applicabile vince".</p>
+<h3 id="a7-permessi-predefiniti-umask-e-bit-speciali">A.7 Permessi predefiniti, umask, e bit speciali</h3>
+<p><strong>Ownership alla creazione</strong>: l'utente creatore diventa proprietario; il <em>gruppo attivo</em> del creatore diventa gruppo proprietario (default = gruppo predefinito da <code>/etc/passwd</code>; si cambia a mano con <code>newgrp</code>, o automaticamente nelle directory con SGID).</p>
+<p><strong>umask</strong>: i permessi alla creazione sono "tutti quelli sensati" <strong>meno</strong> la umask.
+- "Tutti quelli sensati" = <code>666</code> (rw-rw-rw-) per i file (l'eseguibilità è un'eccezione, non si concede di default) e <code>777</code> per le directory (entrarci è la norma).
+- La umask è una <strong>maschera che toglie</strong> i permessi da non concedere. Poiché in Linux il gruppo di default contiene solo l'utente stesso, una umask sensata è <code>006</code> (toglie a "other" lettura e scrittura, lascia il gruppo — utile per collaborare mantenendo i file privati verso l'esterno).
+- Si interroga/imposta con <code>umask</code>; per renderla persistente si usano i file di configurazione della shell.</p>
+<p><strong>Bit speciali sui file</strong> (i 3 bit più significativi della dozzina):
+- <strong>BIT 11 — SUID (Set User ID)</strong>: se settato su un eseguibile, al lancio il processo esegue con l'<strong>identità dell'utente proprietario del file</strong>, non di chi lo lancia. È il meccanismo con cui un utente standard esegue codice privilegiato in modo controllato.
+- <strong>BIT 10 — SGID (Set Group ID)</strong>: come SUID ma sull'identità di <strong>gruppo</strong> (il processo prende il gruppo proprietario del file).
+- <strong>BIT 9 — STICKY (sui file)</strong>: <strong>obsoleto</strong>, suggeriva al SO di tenere in cache una copia del programma.</p>
+<p><strong>Bit speciali sulle directory</strong> (semantica diversa):
+- <strong>BIT 11 su directory</strong>: non usato.
+- <strong>BIT 10 — SGID su directory</strong>: se un utente appartiene al gruppo proprietario e il bit SGID è settato, l'utente assume quel gruppo come attivo e <strong>i file creati nella directory ereditano quel gruppo</strong>. Con <code>umask 006</code>, nelle aree collaborative i file diventano automaticamente leggibili/scrivibili da tutto il gruppo, mentre nelle aree personali restano privati (gruppo principale = solo l'utente).
+- <strong>BIT 9 — Sticky su directory (Temp bit)</strong>: nelle directory world-writable (es. <code>/tmp</code>), impone che un file sia <strong>cancellabile solo dal suo proprietario</strong>. Risolve il problema "chiunque può scrivere → chiunque può cancellare i file altrui".</p>
+<p>⚠️ <strong>Da non confondere</strong>: lo sticky bit ha significato <em>diverso</em> su file (obsoleto, cache) e su directory (protezione delle temp). Sui sistemi moderni conta solo il secondo.</p>
+<h3 id="a8-attributi-estesi-e-posix-acl">A.8 Attributi estesi e POSIX ACL</h3>
+<p><strong>Attributi</strong> (fuori dai 12 bit, gestiti da <code>chattr</code> per modificare e <code>lsattr</code> per visualizzare): primariamente per fs tuning, ma alcuni sono rilevanti per la sicurezza:
+- <strong>append only (<code>a</code>)</strong>: si può solo aggiungere in coda → <strong>impedisce il "taglio" dei logfile</strong> (un attaccante non può azzerare i log per cancellare le sue tracce). Contromisura difensiva citata anche in ambito NIDS/HIDS.
+- <strong>immutable (<code>i</code>)</strong>: vieta cancellazione, creazione di link, rinomina e scrittura → utile per blindare i file di sistema critici.
+- <strong>secure deletion (<code>s</code>)</strong>: sovrascrive con zeri i blocchi dei file cancellati (protezione limitata, valida solo contro strumenti "in linea").</p>
+<p><strong>POSIX ACL</strong>: estendono la ACL rigida a tre soggetti dell'inode, permettendo di specificare una <strong>lista arbitraria</strong> di utenti e gruppi con i loro permessi, oltre agli owner. Introducono la <strong>mask</strong> che limita simultaneamente tutti i permessi (l'effettivo è l'AND tra permesso concesso e mask). Strumenti: <code>setfacl</code> per impostare, <code>getfacl</code> per visualizzare; <code>ls -l</code> mostra un <code>+</code> dopo i permessi quando esiste una ACL estesa. Esempio dal PDF:</p>
+<pre><code>user::rw-
+user:lisa:rw-       #effective:r--   (limitato dalla mask)
+group::r--
+group:toolies:rw-   #effective:r--
+mask::r--
+other::r--
+</code></pre>
+<h3 id="a9-il-super-utente-e-le-linux-capabilities">A.9 Il super-utente e le Linux capabilities</h3>
+<p>Esiste tipicamente un utente con privilegi illimitati che <strong>scavalca</strong> i meccanismi di controllo d'accesso: <code>root</code> (Unix), <code>administrator</code> (Windows). L'account va difeso da ingressi abusivi <em>e</em> va minimizzata la probabilità di errori: usare un account non privilegiato per il 99% del tempo, disabilitare l'accesso diretto da GUI/console, ottenere i privilegi solo puntualmente (<code>sudo</code> in Linux; "esegui come amministratore" in Windows).</p>
+<p><strong>Linux capabilities</strong> (da NON confondere con le capability list di A.5): i poteri di root non sono monolitici. Esistono <strong>41 capability distinte</strong> (al kernel 5.9), ciascuna un'autorizzazione normalmente negata agli utenti standard, che coprono controllo di risorse, processi, accesso alla rete. La più citata per la sicurezza è <strong><code>CAP_DAC_OVERRIDE</code></strong>: la capacità di <strong>ignorare i permessi sul filesystem</strong>. Si possono assegnare capability specifiche a processi lanciati da utenti standard → azioni privilegiate senza dare accesso a root pieno = <strong>principio di minimo privilegio</strong> implementato in concreto. Strumenti: <code>man capabilities</code>, <code>getcap</code>, <code>setcap</code>.</p>
+<blockquote>
+<p>🔴 <strong>Ponte diretto con S11 (privesc)</strong>: negli esercizi di privilege escalation che Lorenzo ha già fatto, <code>cap_dac_override</code> su <code>tee</code> (esercizio 11/01/2024, <code>change4</code>) è <strong>esattamente questa capability</strong>: un binario con <code>cap_dac_override</code> può scrivere <code>/etc/passwd</code> o <code>/etc/shadow</code> ignorando i permessi → aggiunta di un utente root. La lezione S9 è la <em>teoria</em> di ciò che in S11 si sfrutta in pratica.</p>
+</blockquote>
+<h3 id="a10-dac-su-microsoft-domini-gruppi-ntfs-gpo-composizione-allowdeny">A.10 DAC su Microsoft: domini, gruppi, NTFS, GPO, composizione allow/deny</h3>
+<p>Il PDF dedica ampio spazio al modello Windows. Punti da conoscere:</p>
+<p><strong>Domini</strong>: nell'uso comune i sistemi Microsoft sono raggruppati in un <strong>dominio</strong> — insieme di computer che condividono un <em>directory database</em> comune (Active Directory), dove sono memorizzati computer, risorse condivise, utenti, gruppi.</p>
+<p><strong>Utenti</strong>: <strong>Local user accounts</strong> (ristretti alla macchina) vs <strong>Domain user accounts</strong> (profilo in AD, possono accedere a risorse non locali nei limiti dei privilegi, nel proprio dominio e nei domini <em>trusted</em>).</p>
+<p><strong>Gruppi</strong> — due dimensioni ortogonali:
+- <strong>Tipo</strong>: <em>Distribution Group</em> (solo liste per applicazioni, il SO non li usa, non appesantiscono il logon ticket) vs <em>Security Group</em> (come i DG ma possono essere soggetti nelle regole di accesso alle risorse).
+- <strong>Scope</strong>: <em>Machine Local</em>, <em>Domain Local (DLG)</em>, <em>Global (GG)</em>, <em>Universal (UG)</em>. Ogni scope definisce quali oggetti può contenere, di cosa può essere membro, e su quali risorse gli si possono assegnare permessi. La strategia consigliata (mnemonica <strong>A-G-DL-P</strong> implicita): mettere utenti simili in un <strong>GG</strong>, rendere i GG membri di <strong>DLG</strong>, assegnare i permessi ai <strong>DLG</strong> (con gli UG come livello extra di nesting per organizzazioni grandi).</p>
+<p><strong>NTFS e ACL</strong>: le autorizzazioni sono ACL (lista di soggetti + permessi per ogni risorsa), disponibili su partizioni <strong>NTFS (non FAT)</strong> e sulle condivisioni di rete. Per modificare una ACL serve l'ownership o il permesso <code>Full Control</code>/<code>Change Permissions</code>. <strong>Ownership</strong>: l'owner ha Full Control; Administrator può <em>sempre</em> prendere l'ownership; chi crea un file ne detiene l'ownership.</p>
+<p><strong>SACL e auditing</strong>: oltre alla ACL "normale" (DACL, che autorizza/nega), ogni risorsa ha una <strong>SACL</strong> (System ACL) usata per l'<strong>auditing</strong> — registra gli esiti (successo e/o fallimento) dei tentativi di accesso. La ACL <em>decide</em>, la SACL <em>traccia</em>.</p>
+<p><strong>Autorizzazioni standard vs speciali</strong>: sistema a tre strati per conciliare precisione e facilità d'uso. A basso livello ci sono molte <strong>autorizzazioni speciali</strong> con logica a <strong>tre valori (allow, deny, not set)</strong>; queste sono aggregate in poche <strong>autorizzazioni standard</strong> (R, W, RX, L, M, F); le standard si possono vedere a due valori (allow/not set) o esplicitando i tre.</p>
+<p><strong>Composizione dei permessi in Windows</strong> (esaminabile — logica <em>diversa</em> da Unix):
+- Windows segue <strong>default deny</strong>: ciò che non è esplicitamente consentito è proibito.
+- Un utente può appartenere a molti gruppi; il permesso complessivo è la <strong>somma bit-a-bit</strong> dei permessi ottenuti da tutti i gruppi di appartenenza (a differenza di Unix, dove <em>una sola</em> categoria vince).
+- <strong>not set</strong> (né allow né deny) == <strong>deny "debole"/scavalcabile</strong>: consente che un allow ottenuto da un altro gruppo abbia effetto.
+- <strong>deny esplicito</strong> == <strong>deny "forte"/non scavalcabile</strong>: prevale <em>sempre</em> su qualunque allow ottenuto da altri gruppi.
+- Questo spiega perché servono <em>due</em> modi di negare: "not set" lascia aperta la porta ad altri gruppi, "deny esplicito" la chiude definitivamente.</p>
+<p><strong>Condivisioni</strong>: le ACL di <em>share</em> si compongono come quelle NTFS, ma si applicano <strong>in serie</strong> — l'autorizzazione effettiva su una risorsa condivisa è <strong>la più restrittiva</strong> tra permesso di share e permesso NTFS locale. <strong>Copy/Move</strong>: un file <em>copiato</em> eredita i permessi della directory di destinazione; <em>spostato</em> nella stessa partizione conserva i suoi permessi; ma un MOVE tra <strong>partizioni diverse</strong> = COPY (+delete), quindi eredita i permessi della destinazione.</p>
+<p><strong>Group Policy (GPO)</strong>: framework per assegnare privilegi/restrizioni non legati a risorse fisiche ovvie (es. bloccare le porte USB, configurare il desktop). Le regole stanno in un <em>Group Policy Object</em> collegabile a una OU, un Site o un Domain; ogni GPO ha una sezione <em>user settings</em> e una <em>computer settings</em>.</p>
+<h3 id="a11-cenni-a-mac-bell-lapadula-e-biba">A.11 Cenni a MAC: Bell-LaPadula e Biba</h3>
+<p>Nel MAC le regole sono dettate da un'autorità centrale; a ogni soggetto/risorsa è assegnata una <strong>classe di accesso</strong>: un <strong>livello di sicurezza</strong> in un insieme <em>ordinato</em> (es. TopSecret ► Segreto ► Riservato ► Non classificato) + una <strong>categoria/compartment</strong> in un insieme <em>non ordinato</em> (es. {armi, piani di battaglia, ...}).
+- Le risorse sono etichettate con un livello (<em>classification/sensitivity</em>); i soggetti con un livello (<em>clearance</em>, la loro affidabilità).
+- Relazione di <strong>dominanza</strong>: L1 = ⟨S1,C1⟩ domina L2 = ⟨S2,C2⟩ ⇔ S1 ≥ S2 <strong>e</strong> C1 ⊇ C2.</p>
+<p>I due modelli usano la dominanza per proprietà opposte:
+- <strong>Bell-LaPadula (riservatezza)</strong>: <strong>NO-READ-UP</strong> (non leggere sopra la tua clearance) + <strong>NO-WRITE-DOWN</strong> (non scrivere sotto, per non far trapelare segreti verso il basso). Mnemonica: "no read up, no write down" → protegge la <em>confidenzialità</em>.
+- <strong>Biba (integrità)</strong>: <strong>NO-READ-DOWN</strong> (non leggere sotto, per non contaminarti con dati meno affidabili) + <strong>NO-WRITE-UP</strong> (non scrivere sopra, per non corrompere risorse più affidabili). Mnemonica: speculare a BLP → protegge l'<em>integrità</em>.</p>
+<p>⚠️ <strong>Trappola esaminabile</strong>: BLP e Biba hanno regole <em>speculari</em>. Confonderle è l'errore classico. Ancora: BLP protegge la <strong>riservatezza</strong> (segreti che non devono scendere), Biba l'<strong>integrità</strong> (spazzatura che non deve salire). Applicandoli insieme (due classi per soggetto/risorsa) si proteggono entrambe.</p>
+<h3 id="a12-cenni-a-rbac">A.12 Cenni a RBAC</h3>
+<p>Le autorizzazioni sono concesse ai <strong>ruoli</strong>, non agli utenti; il ruolo può cambiare dinamicamente. È <strong>"policy neutral"</strong>: esprime tutti i principi fondamentali (minimo privilegio, separazione delle responsabilità, astrazione). Vantaggio: le autorizzazioni cambiano poco se ben modellate; il lavoro dell'amministratore diventa essenzialmente <strong>assegnare il ruolo giusto</strong> ai soggetti. Esiste uno standard (ANSI/INCITS 359-2004) con livelli di funzionalità incrementali.</p>
+<hr />
+<h2 id="parte-b-demoni-di-sistema-i-processi-privilegiati-come-bersaglio">PARTE B — DEMONI DI SISTEMA: i processi privilegiati come bersaglio</h2>
+<h3 id="b0-il-threat-model-del-pdf-bombe-logiche">B.0 Il threat model del PDF: "bombe logiche"</h3>
+<p>Il PDF "Demoni di sistema" è dichiaratamente scritto dal <strong>punto di vista dell'attaccante già dentro</strong>: l'accesso come utente legittimo dà privilegi limitati, e la privilege escalation sfrutta <strong>vulnerabilità locali</strong>. Il vettore centrale è la <strong>bomba logica</strong>: molti processi girano con privilegi di amministrazione; se i <strong>file</strong> che questi processi usano hanno <strong>permessi errati</strong>, un utente non privilegiato può iniettarci il proprio codice e <strong>attendere che il sistema lo esegua</strong> con privilegi elevati — in un momento predeterminato, all'avvio/arresto di un sottosistema, o al verificarsi di un evento.</p>
+<p>Da qui la mappa di questa parte: <strong>quali sono i sistemi che eseguono codice per conto del sistema, e dove sono i loro file di configurazione</strong> (che diventano il bersaglio da controllare).</p>
+<h3 id="b1-esecuzione-periodica-cron">B.1 Esecuzione periodica — cron</h3>
+<p><strong><code>crond</code></strong> è un demone che ogni minuto esamina una serie di file di configurazione (<strong>crontab</strong>) e determina quali compiti eseguire. I crontab sono di due insiemi:
+- <strong>Per utente</strong>: <code>/var/spool/cron/crontabs/&lt;utente&gt;</code>, gestiti con <code>crontab -l</code> (visualizza), <code>crontab -e</code> (edita), <code>crontab &lt;file&gt;</code> (sostituisce).
+- <strong>System-wide</strong>: <code>/etc/crontab</code>, che di solito richiama tutto ciò che trova in <code>/etc/cron.hourly/</code>, <code>/etc/cron.daily/</code>, <code>/etc/cron.weekly/</code>, <code>/etc/cron.monthly/</code>. Questi file di sistema hanno <strong>un campo in più</strong> rispetto a quelli personali: <strong>il nome dell'utente</strong> per conto del quale eseguire il task.</p>
+<p><strong>Sintassi di una direttiva crontab</strong>:</p>
+<pre><code>MINUTO  ORA  G.MESE  MESE  G.SETTIMANA   &lt;comando&gt;
+</code></pre>
+<ul>
+<li>L'azione parte quando l'ora corrente corrisponde a <strong>tutti</strong> i selettori della riga (campi in <strong>AND logico</strong>).</li>
+<li><strong>ECCEZIONE esaminabile</strong>: se sono specificati (≠ <code>*</code>) <strong>entrambi</strong> i giorni (settimana E mese), i due campi sono in <strong>OR logico</strong>. Es. <code>30 4 1,15 * 6 /bin/backup</code> → il backup gira il giorno 1 <strong>+</strong> il 15 <strong>+</strong> ogni sabato, alle 4:30.</li>
+</ul>
+<blockquote>
+<p>🔴 <strong>Ponte con S11/S7</strong>: cron è un vettore di persistenza/privesc da manuale. Se un utente non privilegiato può scrivere uno script eseguito da un cron di root (perché lo script è world-writable, o la directory <code>/etc/cron.*</code> ha permessi laschi), inietta codice che root eseguirà. È il pattern "bomba logica" più diretto.</p>
+</blockquote>
+<h3 id="b2-esecuzione-posticipata-at">B.2 Esecuzione posticipata — at</h3>
+<p><strong><code>atd</code></strong> gestisce code di compiti da svolgere in momenti prefissati. Interfaccia a 4 comandi:
+- <code>at [-V] [-q queue] [-f file] [-mldbv] TIME</code> — pianifica un comando al tempo TIME;
+- <code>atq</code> — elenca i comandi in coda;
+- <code>atrm job [job...]</code> — rimuove comandi dalla coda;
+- <code>batch [-V] [-q queue] [-f file] [-mv] [TIME]</code> — esecuzione <strong>condizionata al carico</strong> del sistema.</p>
+<p>Se non si specifica un file comandi, <code>at</code>/<code>batch</code> leggono da <strong>standard input</strong>. La specifica dell'ora è flessibile (<code>/usr/share/doc/at/timespec</code> per la definizione completa). Esempi:</p>
+<pre><code>echo 'wall &quot;sveglia&quot;' | at 08:00
+echo &quot;$HOME/bin/pulisci&quot; | at now + 2 weeks
+echo &quot;$HOME/bin/auguri&quot; | at midnight 31.12.2021
+</code></pre>
+<h3 id="b3-event-manager-sistemi-ipc-dbus-e-udev">B.3 Event manager / sistemi IPC — dbus e udev</h3>
+<ul>
+<li><strong>D-Bus</strong>: architettura di <strong>Inter-Process Communication</strong>, nata per uniformare la comunicazione tra elementi delle interfacce desktop. Configurazione in <code>/etc/dbus-1/</code>; in <code>/etc/dbus-1/event.d</code> stanno gli script di avvio dei sottosistemi gestiti.</li>
+<li><strong>udev</strong>: ha rimpiazzato <em>devfs</em> come event manager per la <strong>creazione istantanea dei device special file</strong> quando si connette un nuovo dispositivo; oggi è parte di systemd. Le regole <em>evento → azione</em> stanno in <code>/etc/udev/rules.d</code> (es. <code>70-persistent-net.rules</code>, che alla comparsa nel subsystem <code>net</code> di una scheda con un certo MAC le assegna un nome fisso). Una regola udev associa un evento (connessione di un dispositivo) a un'azione (esecuzione di un comando) → altro potenziale vettore se scrivibile.</li>
+</ul>
+<h3 id="b4-inizializzazione-e-demoni-init-e-i-runlevel">B.4 Inizializzazione e demoni: init e i runlevel</h3>
+<p><strong><code>init</code></strong> è il <strong>primo processo avviato dal kernel</strong> (PID 1). Gestisce i <strong>runlevel</strong> (stati di funzionamento definiti dal sottoinsieme di servizi attivi), orchestra la sequenza per raggiungere un runlevel, intercetta eventi (ctrl-alt-canc, terminazioni anomale), e spegne il sistema in modo ordinato. Tre varianti storiche da conoscere per l'attuale mix di distribuzioni:
+- <strong>SystemV-style</strong> (storico);
+- <strong>Upstart</strong> (Canonical, 2006–2014);
+- <strong>systemd</strong> (ispirazione RedHat, 2010–oggi).</p>
+<h3 id="b5-sysvinit">B.5 sysvinit</h3>
+<p><code>/sbin/init</code> originale di SystemV Unix, configurato da <strong><code>/etc/inittab</code></strong>:
+- Specifica il <strong>default runlevel</strong> (<code>id:2:initdefault:</code>).
+- Se al kernel si passa la keyword <code>single</code> dal boot loader, il settaggio è scavalcato e il sistema parte in <strong>single user mode</strong> (runlevel 1) — nota di sicurezza: chi ha accesso fisico al boot loader può ottenere una shell di root.
+- init avvia i <strong>virtual terminal</strong> e i gestori delle console seriali (<code>getty</code>) — arcaico ma tornato attuale con l'IoT.</p>
+<p><strong>Processi avviati da sysvinit</strong> — due righe-tipo di <code>/etc/inittab</code>:
+- <code>l0:0:wait:/etc/init.d/rc 0</code> — pilota l'avvio SystemV-style: <code>wait</code> = esecuzione <strong>sequenziale</strong>; per il runlevel N, <code>rc</code> esegue ogni script che inizia per <strong><code>S</code></strong> in <code>/etc/rcN.d/</code> con parametro <code>start</code>, e ogni script che inizia per <strong><code>K</code></strong> con <code>stop</code>. Gli script veri stanno in <code>/etc/init.d/</code>, <em>symlinked</em> dalle 7 directory <code>/etc/rcN.d/</code> (per non duplicarli).
+- <code>x:5:respawn:/usr/X11/bin/gdm</code> — avvia il programma indicato e con <strong><code>respawn</code></strong> init lo <strong>riavvia</strong> se termina.</p>
+<h3 id="b6-systemd-unit-tipi-e-posizioni">B.6 systemd — unit, tipi, e posizioni</h3>
+<p>systemd sostituisce runlevel e script init con le <strong>unit</strong>, la cui denominazione segue <code>nome.tipo</code>. <strong>Tipi di unit</strong> da conoscere:
+- <strong>Service</strong>: controllo e monitoraggio dei <strong>demoni</strong> (il tipo più comune).
+- <strong>Socket</strong>: attivazione di canali IPC (file/net/Unix socket) — permette l'avvio <em>on-demand</em> di un servizio alla prima connessione.
+- <strong>Target</strong>: gruppo di unit che <strong>rimpiazza il concetto di runlevel</strong>.
+- <strong>Device</strong>: punti di accesso ai dispositivi, creati dal kernel.
+- <strong>Mount/Automount/Swap</strong>: filesystem-related.
+- <strong>Snapshot</strong>: stato salvato del sistema.
+- <strong>Timer</strong>: attività legate al tempo (→ rimpiazza cron/at).
+- <strong>Path</strong>: monitoraggio del contenuto di una directory via <code>inotify</code>.
+- <strong>Slice</strong>: gestione risorse via <strong>cgroup</strong>.
+- <strong>Scope</strong>: raggruppamento di processi.</p>
+<p><strong>Dove stanno le definizioni</strong> (ordine di priorità crescente):
+- <code>/lib/systemd/system/</code> — "libreria" di riferimento;
+- <code>/usr/lib/systemd/system/</code> — file dei manutentori dei pacchetti (quasi sempre link ai riferimenti);
+- <code>/etc/systemd/system/</code> — <strong>personalizzazioni locali, prioritarie</strong> su tutte le precedenti.</p>
+<p>⚠️ <strong>Nota di sicurezza esaminabile</strong>: poiché <code>/etc/systemd/system/</code> ha priorità, chi può scriverci può <em>ridefinire</em> una unit di sistema (override) e far eseguire codice arbitrario con i privilegi del servizio — è un vettore di privesc/persistenza se i permessi sono errati.</p>
+<h3 id="b7-systemd-gestione-dei-servizi">B.7 systemd — gestione dei servizi</h3>
+<p><strong>A run-time (volatile)</strong>:</p>
+<pre><code>systemctl {start|stop|status|restart|reload} &lt;servicename&gt;
+</code></pre>
+<ul>
+<li><code>status</code> dà output molto descrittivo: stato corrente + passi fatti, process tree, righe di log rilevanti. Con <code>-H [hostname]</code> si connette a un host remoto via SSH.</li>
+<li>Nelle unit i comandi effettivi sono definiti da <code>ExecStart</code>, <code>ExecReload</code>, <code>ExecStop</code>; <code>restart</code> = <code>stop</code> seguito da <code>start</code>; systemd traccia i PID dei processi avviati; <code>stop</code> di default manda <strong>SIGTERM</strong> e poi <strong>SIGKILL</strong> dopo un timeout (varianti in <code>man 5 systemd.kill</code>).</li>
+<li>Questi comandi sono <strong>volatili</strong>: hanno effetto immediato ma non cambiano la configurazione.</li>
+</ul>
+<p><strong>A boot/shutdown (persistente)</strong>:</p>
+<pre><code>systemctl {enable|disable|mask|unmask} &lt;servicename&gt;
+</code></pre>
+<ul>
+<li><code>enable</code>/<code>disable</code> decidono l'avvio automatico al boot; <code>disable</code> lascia comunque possibile lo <code>start</code> manuale.</li>
+<li><code>mask</code> <strong>neutralizza l'intera definizione</strong> della unit, impedendo anche il controllo manuale (la "spegne" del tutto).</li>
+<li>Questi comandi <strong>non</strong> hanno effetto immediato, ma l'effetto sulla configurazione è <strong>persistente</strong>.</li>
+</ul>
+<p>⚠️ <strong>Coppia esaminabile da tenere distinta</strong>: <code>start/stop</code> = azione <em>ora</em>, volatile; <code>enable/disable</code> = comportamento <em>al boot</em>, persistente. Fare <code>start</code> non abilita al boot; fare <code>enable</code> non avvia subito.</p>
+<hr />
+<h2 id="parte-c-pam-il-framework-di-autenticazione-e-autorizzazione">PARTE C — PAM: il framework di autenticazione e autorizzazione</h2>
+<h3 id="c1-cose-pam-e-perche-esiste">C.1 Cos'è PAM e perché esiste</h3>
+<p><strong>PAM = Pluggable Authentication Modules</strong>. Il problema che risolve: senza PAM, ogni programma che deve autenticare un utente (<code>login</code>, <code>sshd</code>, <code>su</code>, <code>sudo</code>, <code>passwd</code>, <code>cron</code>) dovrebbe implementare da sé la logica di controllo delle credenziali — con codice duplicato, incoerente e difficile da aggiornare (cambiare il meccanismo di autenticazione richiederebbe di ricompilare ogni programma).</p>
+<p>PAM astrae questa logica in un <strong>framework a moduli caricabili</strong>: il programma delega a PAM le funzioni di sicurezza, e l'amministratore decide <em>tramite configurazione</em> (senza toccare il programma) come queste funzioni sono implementate. È l'applicazione del principio "separa politiche e meccanismi" (A.1) all'autenticazione.</p>
+<p>Oltre alla pura autenticazione, PAM fornisce: <strong>gestione dei diritti di account</strong> (tempo, posizione...), <strong>gestione delle password</strong>, <strong>housekeeping delle sessioni</strong> utente, lo <strong>stacking</strong> di moduli che fanno controlli diversi, e la <strong>configurazione individuale per ogni programma</strong>.</p>
+<p><strong>Come si rende un programma PAM-aware</strong> (livello meccanismo): si include il prototipo <code>&lt;security/pam_appl.h&gt;</code> nel sorgente e si linka l'eseguibile alle <strong>librerie PAM</strong> (<code>libpam</code>, <code>libpam_misc</code>), che forniscono i meccanismi di chiamata alle funzioni di sicurezza astratte. Si verifica se un programma usa PAM con <strong><code>ldd</code></strong> (che elenca le librerie dinamiche linkate). Ogni modulo PAM è installato in <strong><code>/lib/security</code></strong>.</p>
+<h3 id="c2-configurazione-dove-e-in-che-formato">C.2 Configurazione: dove e in che formato</h3>
+<p>Due modalità:
+- <strong>File unico <code>/etc/pam.conf</code></strong>: ogni riga ha il formato <code>program module-type control-flag module-path arguments</code> (il campo <code>program</code> in più, perché il file è condiviso).
+- <strong>Un file per programma in <code>/etc/pam.d/</code></strong> (la modalità <strong>più comune</strong>): ogni file ha <strong>lo stesso nome del programma</strong> (es. <code>/etc/pam.d/sshd</code>, <code>/etc/pam.d/login</code>) e righe nel formato <code>module-type control-flag module-path arguments</code> (senza il campo <code>program</code>, implicito nel nome del file).</p>
+<p>Esempio (formato <code>/etc/pam.d/</code>):</p>
+<pre><code>auth     sufficient  /lib/security/pam_ldap.so
+account  sufficient  /lib/security/pam_ldap.so
+password sufficient  /lib/security/pam_ldap.so
+session  optional    /lib/security/pam_ldap.so
+auth     requisite   pam_unix2.so
+auth     required    pam_securetty.so
+auth     required    pam_nologin.so
+</code></pre>
+<h3 id="c3-i-quattro-module-type-la-distinzione-da-non-confondere">C.3 I quattro module-type (la distinzione da NON confondere)</h3>
+<p>Il <code>module-type</code> definisce <strong>quale servizio</strong> si sta configurando. La maggior parte dei programmi ha almeno una riga per ciascun servizio. Sono <strong>quattro fasi indipendenti</strong> del ciclo di gestione di un accesso — e vanno tenute distinte con precisione:</p>
+<table>
+<thead>
+<tr>
+<th>module-type</th>
+<th>Cosa gestisce</th>
+<th>Risponde alla domanda</th>
+<th>Esempio concreto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>auth</strong></td>
+<td><strong>Autenticazione</strong>: verifica dell'identità</td>
+<td>"sei chi dici di essere?"</td>
+<td>lookup password da <code>passwd</code>/<code>shadow</code></td>
+</tr>
+<tr>
+<td><strong>account</strong></td>
+<td><strong>Autorizzazione di account</strong> (non legata all'autenticazione): l'account autenticato può accedere <em>ora, da qui</em>?</td>
+<td>"hai il diritto di entrare in queste condizioni?"</td>
+<td>restrizioni per gruppo, ora del giorno, path d'accesso; avvisi di scadenza password</td>
+</tr>
+<tr>
+<td><strong>session</strong></td>
+<td>Gestione della <strong>sessione</strong>: setup al login e cleanup al logout</td>
+<td>"cosa va preparato/ripulito attorno alla sessione?"</td>
+<td>montare home, impostare limiti, log</td>
+</tr>
+<tr>
+<td><strong>password</strong></td>
+<td>Aggiornamento dei <strong>token di autenticazione</strong> (le password)</td>
+<td>"come si cambia la password?"</td>
+<td>controlli di robustezza al cambio password</td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong>Distinzione-cardine del modulo</strong> (quasi certa al quiz): <strong><code>auth</code> è autenticazione</strong> (<em>provi chi sei</em>), <strong><code>account</code> è autorizzazione</strong> (<em>hai il diritto di accedere in queste condizioni, ora che sappiamo chi sei</em>). È <strong>esattamente</strong> la distinzione autenticazione/autorizzazione di A.1, resa operativa in due tipi di riga diversi nello stesso file PAM. Un utente può passare <code>auth</code> (password giusta) e fallire <code>account</code> (fuori dall'orario consentito, o <code>/etc/nologin</code> presente). Non confondere neppure <code>password</code> (cambio credenziali) con <code>auth</code> (verifica credenziali): sono momenti diversi.</p>
+<h3 id="c4-i-control-flag-come-pam-reagisce-a-successofallimento">C.4 I control-flag: come PAM reagisce a successo/fallimento</h3>
+<p>Un file PAM è uno <strong>stack</strong> di moduli valutati in ordine; il <code>control-flag</code> decide come il risultato di ogni modulo influenza l'esito dell'intero stack.</p>
+<table>
+<thead>
+<tr>
+<th>Control-flag</th>
+<th>Se il modulo ha <strong>successo</strong></th>
+<th>Se il modulo <strong>fallisce</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>requisite</strong></td>
+<td>lo stack continua (esito dipende dagli altri)</td>
+<td>lo stack <strong>termina subito</strong> e <strong>fallisce</strong></td>
+</tr>
+<tr>
+<td><strong>required</strong></td>
+<td>lo stack continua (esito dipende dagli altri)</td>
+<td>lo stack <strong>continua</strong>, ma <strong>fallirà</strong> comunque</td>
+</tr>
+<tr>
+<td><strong>sufficient</strong></td>
+<td>lo stack <strong>termina subito con successo</strong> (se nessun <code>required</code> precedente è fallito)</td>
+<td>lo stack continua (esito dipende dagli altri)</td>
+</tr>
+<tr>
+<td><strong>optional</strong></td>
+<td>lo stack continua</td>
+<td>lo stack continua; conta solo se è l'unico modulo determinante</td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong>La distinzione più insidiosa: <code>required</code> vs <code>requisite</code></strong>. Entrambi <em>devono</em> passare perché lo stack abbia successo. La differenza è <strong>quando</strong> si ferma in caso di fallimento:
+- <strong><code>requisite</code></strong> fallisce → <strong>si ferma immediatamente</strong> e ritorna. L'utente non prosegue oltre. Utile per non rivelare <em>dove</em> è fallito e per non eseguire i moduli successivi.
+- <strong><code>required</code></strong> fallisce → lo stack è <strong>già condannato</strong> a fallire, ma <strong>continua a eseguire</strong> i moduli successivi (poi ritornerà fallimento). Utile perché non rivela all'attaccante <em>quale</em> controllo è fallito (il fallimento arriva alla fine, uguale in tutti i casi) e permette a moduli successivi (es. logging) di girare comunque.</p>
+<p>E la coppia con <strong><code>sufficient</code></strong>: se un <code>sufficient</code> ha successo <em>e nessun <code>required</code> precedente è fallito</em>, lo stack <strong>termina subito con successo</strong>, saltando i moduli rimanenti. Ma un <code>required</code> fallito <em>prima</em> <strong>sovrascrive</strong> un <code>sufficient</code> successivo: la sua condanna resta.</p>
+<h3 id="c5-module-path-e-argomenti">C.5 module-path e argomenti</h3>
+<p>Il <strong>module-path</strong> è il percorso assoluto della shared library (<code>.so</code>) che implementa le funzioni. Dopo il path si passano argomenti — molti specifici del modulo, alcuni standard supportati da quasi tutti:
+- <strong><code>debug</code></strong>: genera info di debug (su stdout o via <code>syslogd</code>);
+- <strong><code>no_warn</code></strong>: disabilita il logging dei fallimenti di autenticazione;
+- <strong><code>use_first_pass</code></strong>: usa la password inserita per il modulo <em>precedente</em>, e <strong>fallisce</strong> se non funziona (non richiede di nuovo la password);
+- <strong><code>try_first_pass</code></strong>: <em>tenta</em> di usare la password del modulo precedente; se fallisce, <strong>chiede</strong> all'utente di inserirla per questo modulo.</p>
+<p>⚠️ <code>use_first_pass</code> vs <code>try_first_pass</code>: entrambi riusano la password precedente per non chiederla due volte; <code>use_</code> è rigido (fallisce e basta), <code>try_</code> è morbido (ripiega chiedendola).</p>
+<h3 id="c6-moduli-pam-comuni-il-filename-e-pam_nameso">C.6 Moduli PAM comuni (il filename è <code>pam_&lt;name&gt;.so</code>)</h3>
+<p>Tabella dei più comuni, con i module-type che supportano — utile per il quiz perché lega ogni modulo al suo tipo e al suo file di configurazione:</p>
+<table>
+<thead>
+<tr>
+<th>Modulo</th>
+<th style="text-align: center;">auth</th>
+<th style="text-align: center;">account</th>
+<th style="text-align: center;">session</th>
+<th style="text-align: center;">password</th>
+<th>Funzione / file di config</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>unix</strong></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td>Autenticazione Unix tradizionale su <code>/etc/passwd</code> e <code>/etc/shadow</code></td>
+</tr>
+<tr>
+<td><strong>time</strong></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>Restrizioni temporali d'accesso (<code>/etc/security/time.conf</code>)</td>
+</tr>
+<tr>
+<td><strong>nologin</strong></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>Se esiste <code>/etc/nologin</code>, solo root può entrare; agli altri mostra il file</td>
+</tr>
+<tr>
+<td><strong>env</strong></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>Imposta variabili d'ambiente della sessione (<code>/etc/security/pam_env.conf</code>)</td>
+</tr>
+<tr>
+<td><strong>deny</strong></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td>Ritorna <strong>sempre fallimento</strong>; utile a fine stack per bloccare accessi da misconfigurazione</td>
+</tr>
+<tr>
+<td><strong>limits</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;"></td>
+<td>Limiti su memoria, CPU, ecc. (<code>/etc/security/limits.conf</code>)</td>
+</tr>
+<tr>
+<td><strong>access</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>Coppie username/macchina ammesse o negate (<code>/etc/security/access.conf</code>)</td>
+</tr>
+<tr>
+<td><strong>pwcheck</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">x</td>
+<td>Controlli extra al cambio password (<code>/etc/login.defs</code>)</td>
+</tr>
+<tr>
+<td><strong>cracklib</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">x</td>
+<td>Rifiuta password troppo semplici o già usate</td>
+</tr>
+<tr>
+<td><strong>tally</strong></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>Conta i tentativi d'accesso; <strong>nega dopo N fallimenti</strong> (anti-bruteforce)</td>
+</tr>
+<tr>
+<td><strong>warn</strong></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td>Registra informazioni su syslog</td>
+</tr>
+</tbody>
+</table>
+<p>Nota la coerenza: i moduli <code>password</code> (<code>pwcheck</code>, <code>cracklib</code>) agiscono sul <em>cambio</em> password; i moduli <code>account</code> (<code>access</code>) sull'<em>autorizzazione</em> d'accesso; i moduli <code>auth</code> (<code>unix</code>, <code>securetty</code>, <code>nologin</code>) sulla <em>verifica</em> dell'identità. Il <strong>tipo</strong> del modulo dice in <em>quale fase</em> interviene.</p>
+<h3 id="c7-esempi-di-stack-ragionati">C.7 Esempi di stack ragionati</h3>
+<p><strong>Esempio 1</strong> — tre <code>required</code> in auth:</p>
+<pre><code>auth  required  /lib/security/pam_unix.so
+auth  required  /lib/security/pam_securetty.so
+auth  required  /lib/security/pam_nologin.so
+</code></pre>
+<p>L'autenticazione riesce solo se <strong>tutti e tre</strong> approvano. <code>pam_unix</code> fa user+password su <code>/etc/passwd</code>; <code>pam_securetty</code> fa <strong>fallire un login di root</strong> a meno che sia su un terminale elencato in <code>/etc/securetty</code>; <code>pam_nologin</code> fa <strong>fallire tutti i login tranne root</strong> se esiste <code>/etc/nologin</code>. <strong>L'ordine e la combinazione contano</strong>: con <code>/etc/nologin</code> presente, solo root può entrare — <strong>ma solo da console sicura</strong> (per via di <code>securetty</code>). Se il flag della prima riga fosse <code>sufficient</code> invece di <code>required</code>, root potrebbe entrare <strong>da ovunque</strong> e <code>/etc/nologin</code> non avrebbe effetto (il <code>sufficient</code> riuscito salterebbe i controlli successivi).</p>
+<p><strong>Esempio 2</strong> — interazione required/sufficient e importanza dell'ordine:</p>
+<pre><code>auth required   pam_unix.so try_first_pass
+auth sufficient pam_krb5.so try_first_pass
+auth required   pam_env.so
+</code></pre>
+<p>Questo stack riesce <strong>se e solo se <code>pam_unix</code> riesce</strong>: se fallisce, il suo status <code>required</code> sovrascrive il <code>sufficient</code> di <code>pam_krb5</code>; se riesce, il suo successo non è sovrascrivibile da un fallimento di <code>pam_krb5</code>. Se si <strong>invertisse</strong> l'ordine dei due moduli di autenticazione:</p>
+<pre><code>auth sufficient pam_krb5.so try_first_pass
+auth required   pam_unix.so try_first_pass
+auth required   pam_env.so
+</code></pre>
+<p>poiché il <code>sufficient pam_krb5</code> viene <strong>prima</strong>, il suo successo <strong>bypassa</strong> il <code>required pam_unix</code> successivo → lo stack riesce se <strong>almeno uno</strong> dei due riesce. In entrambi i casi, però, il successo di <code>pam_krb5</code> (sufficient) <strong>salta <code>pam_env</code></strong> (che imposta variabili d'ambiente ma non ritorna mai fallimento) — effetto <strong>indesiderabile</strong>, perché le variabili non vengono impostate. Lezione: nello stacking, un <code>sufficient</code> che riesce può saltare moduli successivi <em>necessari ma non di autenticazione</em>.</p>
+<h3 id="c8-configurazione-default-deny-etcpamdother">C.8 Configurazione default-deny: <code>/etc/pam.d/other</code></h3>
+<p>Un default sicuro blocca qualunque programma che <strong>non abbia una propria configurazione PAM specifica</strong>. Si crea <code>/etc/pam.d/other</code> (il fallback per ogni servizio senza file dedicato) così:</p>
+<pre><code>auth     required  pam_warn.so
+auth     required  pam_deny.so
+account  required  pam_warn.so
+account  required  pam_deny.so
+password required  pam_warn.so
+password required  pam_deny.so
+session  required  pam_warn.so
+session  required  pam_deny.so
+</code></pre>
+<p>Per ogni module-type: <code>pam_warn</code> <strong>logga</strong> il tentativo, <code>pam_deny</code> lo <strong>nega sempre</strong>. È l'applicazione a PAM del principio <strong>default deny</strong> visto in A.2 e in S5: ciò che non è esplicitamente autorizzato (con un file PAM dedicato) è rifiutato.</p>
+<hr />
+<h2 id="parte-d-threat-model-integrato-attaccante-e-difensore">PARTE D — THREAT MODEL INTEGRATO: attaccante e difensore</h2>
+<p>Questo modulo è, per struttura, il <em>ponte teorico</em> verso la tipologia d'esame <strong>Integrity/privesc (S11)</strong>. Ecco i vettori concreti che emergono dall'unione dei tre PDF.</p>
+<h3 id="d1-vettori-di-privilege-escalation-pov-attaccante">D.1 Vettori di privilege escalation (POV attaccante)</h3>
+<ol>
+<li><strong>Binari SUID/SGID vulnerabili o mal assegnati</strong> (A.7): un binario SUID-root con un bug (o assegnato per errore) fa eseguire codice con identità root. È il vettore centrale di S11. <em>Come li trova l'attaccante</em>: <code>find / -type f -perm +6000</code> (cerca i bit SUID+SGID). Altre ricerche: <code>find / -perm +2</code> (world-writable) e <code>find / -nouser</code> (file di account cancellati).</li>
+<li><strong>Capability pericolose</strong> (A.9): un binario con <code>cap_dac_override</code> ignora i permessi del filesystem → può scrivere <code>/etc/passwd</code>/<code>/etc/shadow</code>. Corrisponde all'esercizio S11 <code>change4</code> (<code>tee</code> + <code>cap_dac_override</code>).</li>
+<li><strong>Bombe logiche via demoni</strong> (B.0–B.6): file scrivibili eseguiti da processi privilegiati —
+   - script world-writable lanciati da un <strong>cron</strong> di root (B.1);
+   - job <strong><code>at</code></strong> iniettati (B.2);
+   - regole <strong>udev</strong>/<strong>dbus</strong> scrivibili (B.3);
+   - script di init <code>/etc/init.d/</code>, <code>/etc/rc*.d/</code> (B.5) o <strong>unit systemd</strong> ridefinibili in <code>/etc/systemd/system/</code> per la priorità (B.6).</li>
+<li><strong>PAM come backdoor/persistenza</strong> (C.<em>): un attaccante che ha già root può </em><em>modificare uno stack PAM</em>* per creare una backdoor difficile da notare — ad esempio inserendo un modulo <code>sufficient</code> che accetta una password universale, o rimuovendo <code>pam_deny</code>/<code>pam_securetty</code>. Poiché PAM è caricato da tutti i servizi di login (<code>sshd</code>, <code>login</code>, <code>su</code>), una riga aggiunta a <code>/etc/pam.d/</code> è un punto di persistenza potente e discreto. È il rovescio del "separa politiche e meccanismi": la stessa modularità che rende PAM flessibile lo rende un bersaglio di manomissione.</li>
+</ol>
+<h3 id="d2-irrobustimento-pov-difensore">D.2 Irrobustimento (POV difensore)</h3>
+<ul>
+<li><strong>Minimo privilegio ovunque</strong>: account <code>locked</code> per i servizi (A.6); <code>sudo</code> puntuale invece di root permanente (A.9); <strong>capability</strong> specifiche invece di root pieno (A.9); ruoli RBAC ben modellati (A.12).</li>
+<li><strong>Sorveglianza dei binari privilegiati</strong> (A.7): auditare periodicamente i SUID/SGID con <code>find / -type f -perm +6000</code>, tenerli <strong>pochi e vincolati</strong>; nessun binario SUID che non serva.</li>
+<li><strong>Blindare i file critici</strong>: attributo <strong>immutable (<code>chattr +i</code>)</strong> sui file di sistema, <strong>append-only (<code>chattr +a</code>)</strong> sui log per impedirne il taglio (A.8).</li>
+<li><strong>Permessi corretti su tutto ciò che un demone privilegiato legge/esegue</strong>: crontab, script init, unit systemd, regole udev — nessuno di essi deve essere world-writable.</li>
+<li><strong>Default-deny in PAM</strong> (<code>/etc/pam.d/other</code> con <code>pam_deny</code>, C.8); anti-bruteforce con <code>pam_tally</code> (C.6); limitare root a console sicure con <code>pam_securetty</code> e ai momenti giusti con <code>pam_time</code>.</li>
+<li><strong>Auditing</strong>: SACL su Windows (A.10); log via <code>pam_warn</code>; integrity checking (HIDS/AIDE di S11) per accorgersi di modifiche non autorizzate a <code>/etc/passwd</code>, agli stack PAM, ai crontab.</li>
+</ul>
+<hr />
+<h2 id="connessioni-specifiche-con-altri-moduli">Connessioni SPECIFICHE con altri moduli</h2>
+<ul>
+<li><strong>S2 (Autenticazione)</strong>: S9 chiude il cerchio aperto da S2. S2 spiega <em>come</em> si autentica un utente (password, hash, <code>/etc/shadow</code>); PAM (C.3, <code>auth</code> + <code>pam_unix</code>) è <strong>il framework concreto</strong> con cui quei meccanismi di S2 vengono invocati dai programmi. La distinzione autenticazione/autorizzazione (A.1) è il punto di raccordo tra S2 (autenticazione) e S9 (autorizzazione).</li>
+<li><strong>S5 (Firewall/iptables)</strong>: stesso schema concettuale di controllo d'accesso. La <strong>mediazione completa</strong> (A.2) è il principio per cui la topologia firewall di S5 deve costringere <em>tutto</em> il traffico a passare dal punto di controllo. Il <strong>default deny</strong> di A.2/C.8 è letteralmente la <code>policy drop</code> delle catene nft di S5. La composizione ordinata delle regole iptables (prima che fa match vince) è una delle "regole di consistenza" di A.2.</li>
+<li><strong>S11 (Integrity/privesc)</strong> — connessione più forte: A.7 (SUID/SGID), A.9 (<code>cap_dac_override</code>) e B.0–B.6 (bombe logiche via cron/at/systemd) sono <strong>la teoria</strong> degli esercizi pratici già svolti da Lorenzo — <code>change1</code> (SUID su <code>cp</code>), <code>change4</code> (<code>cap_dac_override</code> su <code>tee</code>), <code>change5</code>. <code>find / -perm +6000</code> (A.7) è il primo comando di enumerazione in un esercizio privesc.</li>
+<li><strong>S7 (Backdoor injection)</strong> e <strong>S8 (Filtrare attacchi)</strong>: cron/at/udev/PAM (B.1–B.3, D.1.4) sono i <strong>meccanismi di persistenza</strong> che una backdoor sfrutta per farsi rieseguire; l'append-only sui log (A.8) è la contromisura a chi vuole cancellare le tracce.</li>
+<li><strong>S1 (Enumerazione)</strong>: <code>find</code> per SUID/world-writable/nouser (A.7) e <code>ldd</code> per verificare l'uso di PAM (C.1) sono strumenti di enumerazione locale, il gemello "post-accesso" dell'enumerazione di rete di S1.</li>
+<li><strong>S10 (NIDS)</strong>: come in S5, il controllo d'accesso è <em>prevenzione</em>; il NIDS/HIDS è <em>rilevazione</em> di ciò che passa comunque. L'auditing (SACL, <code>pam_warn</code>, AIDE) è l'anello di rilevazione locale.</li>
+</ul>
+<hr />
+<h2 id="autoverifica-quiz-in-stile-esame-verofalso-e-scelta-multipla">Autoverifica — quiz in stile esame (vero/falso e scelta multipla)</h2>
+<p><em>(Rispondi senza guardare; le risposte sono negli appunti <code>appunti_moduloS9_...</code>.)</em></p>
+<ol>
+<li><strong>V/F</strong> — L'autenticazione decide <em>cosa</em> un soggetto può fare; l'autorizzazione decide <em>chi</em> è il soggetto.</li>
+<li><strong>V/F</strong> — In DAC il proprietario di un oggetto decide i permessi; in MAC no, perché la policy è centralizzata e imposta.</li>
+<li><strong>V/F</strong> — Le "capability list" (partizione della matrice per soggetto) sono la stessa cosa delle "Linux capabilities" come <code>CAP_DAC_OVERRIDE</code>.</li>
+<li><strong>Scelta multipla</strong> — Un utente A è proprietario del file <code>f</code> (categoria U: <code>r--</code>) e appartiene anche al gruppo proprietario (categoria G: <code>rw-</code>). Che permessi ottiene A su <code>f</code>?
+   (a) <code>rw-</code> perché si sommano  (b) <code>r--</code> perché vince U e G è ignorato  (c) <code>rw-</code> perché vince il più permissivo  (d) nessun accesso.</li>
+<li><strong>V/F</strong> — Il permesso W su una directory permette di cancellare un file anche se non si ha alcun permesso sul contenuto di quel file.</li>
+<li><strong>V/F</strong> — Per attraversare le directory di un path e accedere a un file serve il permesso R su ciascuna directory intermedia.</li>
+<li><strong>Scelta multipla</strong> — Il bit <strong>SUID</strong> su un eseguibile fa sì che al lancio il processo giri con l'identità di:
+   (a) chi lancia il programma  (b) l'utente proprietario del file  (c) root sempre  (d) il gruppo proprietario del file.</li>
+<li><strong>V/F</strong> — Lo sticky bit ha lo stesso significato su file e su directory.</li>
+<li><strong>V/F</strong> — In un crontab, se sono specificati (≠ <code>*</code>) sia il giorno del mese sia il giorno della settimana, i due campi sono in <strong>AND</strong> logico.</li>
+<li><strong>Scelta multipla</strong> — In systemd, quale comando <strong>neutralizza</strong> completamente una unit impedendo anche lo start manuale?
+    (a) <code>disable</code>  (b) <code>stop</code>  (c) <code>mask</code>  (d) <code>unmask</code>.</li>
+<li><strong>V/F</strong> — <code>systemctl start</code> di un servizio lo abilita anche all'avvio automatico al boot.</li>
+<li><strong>V/F</strong> — In PAM, un modulo di tipo <strong><code>account</code></strong> verifica l'identità dell'utente (password), mentre <strong><code>auth</code></strong> verifica se l'account ha il diritto di accedere ora.</li>
+<li><strong>Scelta multipla</strong> — Differenza tra <code>required</code> e <code>requisite</code> quando il modulo <strong>fallisce</strong>:
+    (a) nessuna  (b) <code>requisite</code> ferma subito lo stack, <code>required</code> continua ma lo stack fallirà comunque  (c) <code>required</code> ferma subito, <code>requisite</code> continua  (d) entrambi fanno riuscire lo stack.</li>
+<li><strong>V/F</strong> — Un modulo <code>sufficient</code> che ha successo (senza <code>required</code> precedenti falliti) fa terminare subito lo stack con successo, saltando i moduli rimanenti.</li>
+<li><strong>V/F</strong> — Bell-LaPadula (riservatezza) impone NO-READ-UP e NO-WRITE-DOWN; Biba (integrità) impone NO-READ-DOWN e NO-WRITE-UP.</li>
+<li><strong>Scelta multipla</strong> — In Windows, un utente ha <code>not set</code> su un permesso da un gruppo e <code>allow</code> dello stesso permesso da un altro gruppo. Il risultato è:
+    (a) deny, perché not set == deny  (b) allow, perché not set è un deny "debole" scavalcabile  (c) errore  (d) dipende dall'ordine.</li>
+<li><strong>V/F</strong> — In Windows un <code>deny</code> esplicito prevale sempre su qualunque <code>allow</code> ottenuto da altri gruppi.</li>
+<li><strong>Scelta multipla</strong> — Quale comando cerca i file SUID/SGID sul sistema?
+    (a) <code>find / -perm +2</code>  (b) <code>find / -type f -perm +6000</code>  (c) <code>find / -nouser</code>  (d) <code>getcap -r /</code>.</li>
+<li><strong>V/F</strong> — <code>/etc/pam.d/other</code> con <code>pam_deny</code> per ogni module-type implementa una politica di default-deny per i programmi privi di configurazione PAM specifica.</li>
+<li><strong>V/F</strong> — Un file <em>copiato</em> in una cartella NTFS eredita i permessi della cartella di destinazione; uno <em>spostato</em> tra partizioni diverse conserva i suoi permessi originali.</li>
+</ol>
+<hr />
+<!-- AUTO-LINKS:START -->
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

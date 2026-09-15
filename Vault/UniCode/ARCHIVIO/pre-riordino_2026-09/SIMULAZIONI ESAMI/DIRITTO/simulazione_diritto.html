@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulazione — Diritto dell'Informatica T</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#1a1f35; --card2:#222842; --ink:#e8eaf6; --muted:#9aa3c4;
+    --accent:#6c8cff; --green:#3ecf8e; --red:#ff6b6b; --line:#2c3354; --gold:#ffce5a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  .wrap{max-width:780px;margin:0 auto;padding:24px 18px 60px}
+  h1{font-size:1.5rem;margin:.2em 0}
+  .sub{color:var(--muted);font-size:.95rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin:18px 0}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 20px;font-size:1rem;font-weight:600;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .bar{height:8px;background:var(--card2);border-radius:99px;overflow:hidden;margin:10px 0}
+  .bar > i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.5px;background:var(--card2);color:var(--accent);padding:3px 9px;border-radius:99px}
+  .q{font-size:1.12rem;font-weight:600;margin:14px 0 18px}
+  .opt{display:block;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:13px 15px;margin:9px 0;cursor:pointer;font-size:.98rem;transition:.15s}
+  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt:disabled{cursor:default}
+  .opt.correct{border-color:var(--green);background:rgba(62,207,142,.15)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.13)}
+  .exp{background:var(--card2);border-left:3px solid var(--gold);border-radius:8px;padding:12px 15px;margin-top:14px;font-size:.93rem;color:#dfe4ff;display:none}
+  .exp.show{display:block}
+  .stats{display:flex;gap:18px;font-size:.9rem;color:var(--muted);flex-wrap:wrap}
+  .stats b{color:var(--ink)}
+  .timer{font-variant-numeric:tabular-nums;font-weight:700}
+  .timer.low{color:var(--red)}
+  .big{font-size:2.6rem;font-weight:800;margin:.1em 0}
+  .miss{font-size:.9rem;border-top:1px solid var(--line);padding-top:10px;margin-top:14px}
+  .miss li{margin:6px 0;color:var(--muted)}
+  .miss b{color:var(--ink)}
+  label.chk{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.9rem;cursor:pointer}
+  .hidden{display:none}
+  footer{color:var(--muted);font-size:.8rem;text-align:center;margin-top:30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- START -->
+  <section id="start" class="card">
+    <h1>Simulazione d'esame — Diritto dell'Informatica T</h1>
+    <p class="sub">22 quiz a scelta multipla · 3 opzioni, 1 corretta · <b>1,5 punti</b> a risposta giusta, <b>0</b> alle errate · 45 minuti.<br>
+    Le domande sono <b>pescate a caso</b> e cambiano a ogni avvio. I distrattori sono parafrasi plausibili: leggi con attenzione.</p>
+    <div class="row" style="margin-top:8px">
+      <label class="chk"><input type="checkbox" id="optFeedback" checked> Feedback immediato (mostra la spiegazione dopo ogni risposta)</label>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label class="chk"><input type="checkbox" id="optTimer" checked> Timer 45 minuti</label>
+    </div>
+    <div class="row" style="margin-top:18px">
+      <button class="btn" onclick="startQuiz()">Inizia simulazione</button>
+    </div>
+    <p class="sub" id="poolinfo" style="margin-top:14px"></p>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="hidden">
+    <div class="row" style="justify-content:space-between">
+      <span class="tag" id="qmod">D1</span>
+      <span class="timer" id="timer">45:00</span>
+    </div>
+    <div class="bar"><i id="prog"></i></div>
+    <div class="stats">
+      <span>Domanda <b id="qnum">1</b>/<b id="qtot">22</b></span>
+      <span>Punteggio <b id="score">0,0</b></span>
+      <span>Corrette <b id="ncorr">0</b> · Errate <b id="nwrong">0</b></span>
+    </div>
+    <div class="card">
+      <div class="q" id="qtext"></div>
+      <div id="opts"></div>
+      <div class="exp" id="exp"></div>
+      <div class="row" style="margin-top:18px;justify-content:flex-end">
+        <button class="btn" id="nextBtn" onclick="nextQ()" disabled>Prossima</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="end" class="hidden card">
+    <h1>Risultato</h1>
+    <div class="big" id="finalScore">0,0 / 33</div>
+    <p class="sub" id="finalMsg"></p>
+    <div class="stats" style="margin:10px 0">
+      <span>Corrette <b id="fc">0</b>/22</span>
+      <span>Voto indicativo /30: <b id="f30">—</b></span>
+    </div>
+    <div class="miss" id="missList"></div>
+    <div class="row" style="margin-top:20px">
+      <button class="btn" onclick="restart()">Rifai (nuove domande)</button>
+      <button class="btn ghost" onclick="location.reload()">Torna all'inizio</button>
+    </div>
+  </section>
+
+  <footer>Materiale di ripasso · le domande coprono D1–D13 · aggiorna il pool man mano che emergono punti deboli.</footer>
+</div>
+
+<script>
+/* ===== POOL DI DOMANDE =====
+   m = modulo, q = testo, o = opzioni (la PRIMA è sempre quella corretta), e = spiegazione */
+const POOL = [
+// D1
+{m:"D1",q:"Quale affermazione su Regolamento e Direttiva UE è corretta?",o:["Il Regolamento UE è direttamente applicabile senza atto interno di recepimento.","La Direttiva UE è direttamente applicabile senza recepimento.","Il Regolamento UE detta solo obiettivi che lo Stato recepisce come vuole."],e:"Il Regolamento è direttamente applicabile; la Direttiva detta obiettivi vincolanti da recepire. Le altre due invertono le caratteristiche."},
+{m:"D1",q:"Un Decreto Legge non convertito entro 60 giorni:",o:["Perde efficacia retroattivamente, come se non fosse mai esistito.","Resta in vigore fino all'approvazione di una nuova legge.","Si trasforma automaticamente in Decreto Legislativo."],e:"Il D.L. non convertito decade con effetto retroattivo. Non sopravvive né si trasforma."},
+{m:"D1",q:"La nullità del contratto:",o:["Può essere fatta valere da chiunque e non si prescrive.","Può essere chiesta solo dalla parte protetta e si prescrive in 5 anni.","Opera solo se il giudice la rileva entro 5 anni."],e:"La nullità: chiunque, rilievo d'ufficio, imprescrittibile. La seconda opzione descrive l'annullabilità."},
+{m:"D1",q:"Nella gerarchia delle fonti, D.L. e D.Lgs.:",o:["Hanno forza di legge ordinaria (stesso livello delle leggi ordinarie).","Sono un gradino inferiore alle leggi ordinarie.","Sono superiori alla Costituzione."],e:"Sono atti aventi forza di legge: stesso livello delle leggi ordinarie."},
+{m:"D1",q:"La capacità giuridica:",o:["Si acquista alla nascita.","Si acquista con la maggiore età.","Coincide con la capacità di agire."],e:"Giuridica = nascita (titolarità di diritti); di agire = maggiore età (compiere atti)."},
+{m:"D1",q:"L'analogia:",o:["È vietata in materia penale e per le norme eccezionali.","È sempre ammessa in ogni ambito.","È vietata solo nel diritto civile."],e:"Divieto di analogia limitato al penale e alle norme eccezionali."},
+// D2
+{m:"D2",q:"La distinzione tra 'massima' e 'versione per esteso' riguarda:",o:["La giurisprudenza (le sentenze).","La normativa (leggi e decreti).","La dottrina."],e:"Massima/esteso = sentenze. Per la normativa la distinzione è elenchi/raccolte."},
+{m:"D2",q:"Il testo consolidato di una legge:",o:["Si trova su normattiva.it e non è pubblicato in G.U.","È pubblicato integralmente in Gazzetta Ufficiale.","È il testo storico originale dell'emanazione."],e:"La G.U. pubblica il testo storico e le singole modifiche; il consolidato (testo vigente aggiornato) sta sulle banche dati."},
+{m:"D2",q:"Le Autorità Garanti (Garante Privacy, AGCM…):",o:["Svolgono una funzione para-giurisprudenziale, con interpretazione autorevole.","Sono fonti del diritto in senso formale.","Sono equiparate alla dottrina degli studiosi."],e:"Soggetti istituzionali con funzione para-giurisprudenziale: non fonti formali, ma neppure dottrina."},
+{m:"D2",q:"Gli atti ufficiali dello Stato (leggi, decreti):",o:["Non sono protetti dal diritto d'autore (art. 5 LDA): liberamente riproducibili.","Sono protetti come opere letterarie.","Sono protetti per 70 anni dalla pubblicazione."],e:"Art. 5 LDA: gli atti ufficiali non sono soggetti al diritto d'autore."},
+// D3
+{m:"D3",q:"I diritti morali d'autore:",o:["Sono imprescrittibili: non scadono mai.","Durano 70 anni dalla morte dell'autore.","Sono liberamente cedibili a terzi."],e:"I morali sono inalienabili e imprescrittibili. I 70 anni post mortem riguardano i patrimoniali."},
+{m:"D3",q:"Il software è tutelato:",o:["Dal diritto d'autore, come opera letteraria.","Dal brevetto, come ogni invenzione.","Solo dopo la registrazione SIAE."],e:"Software = diritto d'autore (D.Lgs. 518/92). La registrazione SIAE è facoltativa."},
+{m:"D3",q:"Il diritto d'autore sul software tutela:",o:["La forma espressiva (struttura del codice), non la funzione.","La funzione che il programma realizza.","Le idee e i principi alla base."],e:"È tutelata la forma: due programmi con stessa funzione e codice diverso non violano nulla."},
+{m:"D3",q:"Il diritto d'autore sorge:",o:["Al momento della creazione dell'opera.","Con la registrazione presso la SIAE.","Con la prima pubblicazione."],e:"Sorge con la creazione (art. 6 LDA), senza formalità."},
+{m:"D3",q:"Il software sviluppato da un dipendente: i diritti patrimoniali spettano al datore di lavoro…",o:["Se sviluppato nell'esecuzione delle mansioni o su istruzioni del datore.","Solo se sviluppato durante l'orario di lavoro.","Mai: restano sempre all'autore."],e:"Bastano le mansioni O le istruzioni (art. 12-bis). I morali restano all'autore."},
+{m:"D3",q:"Il principio di esaurimento comunitario:",o:["Non si applica alla messa a disposizione on demand (streaming/download).","Si applica anche allo streaming.","Riguarda solo i marchi."],e:"L'esaurimento riguarda l'esemplare venduto; non opera per l'on demand."},
+// D4
+{m:"D4",q:"La definizione legale di banca di dati richiede elementi disposti:",o:["Sistematicamente O metodicamente.","Sistematicamente E metodicamente.","Solo in formato elettronico."],e:"Basta uno dei due criteri (alternativi). Comprende BD cartacee ed elettroniche."},
+{m:"D4",q:"Il diritto del costitutore (sui generis) su una banca dati dura:",o:["15 anni dal completamento.","70 anni dalla morte dell'autore.","20 anni dal deposito."],e:"Costitutore = 15 anni. I 70 anni sono il diritto d'autore."},
+{m:"D4",q:"Ai sensi dell'art. 102-bis LDA, l'estrazione è:",o:["Il trasferimento del contenuto su un altro supporto.","La messa a disposizione del pubblico.","La semplice consultazione."],e:"Estrazione = trasferimento su supporto; reimpiego = messa a disposizione del pubblico."},
+{m:"D4",q:"Il diritto del costitutore richiede:",o:["Un investimento rilevante (economico, di tempo, di lavoro).","Creatività e originalità della forma.","La registrazione presso l'UIBM."],e:"Tutela l'investimento, anche su BD non originali. La creatività è il requisito del diritto d'autore."},
+{m:"D4",q:"Il diritto d'autore su una banca dati tutela:",o:["La forma (struttura/scelta), non il contenuto.","Il contenuto dei singoli dati.","Il software che la fa funzionare."],e:"Tutela la forma espressiva: un concorrente può raccogliere gli stessi dati e riorganizzarli."},
+// D5
+{m:"D5",q:"La nullità di protezione delle clausole vessatorie:",o:["Può essere invocata solo dal consumatore (e rilevata d'ufficio).","Può essere invocata da entrambe le parti.","Può essere invocata solo dal professionista."],e:"Opera a vantaggio del solo consumatore; il professionista non può invocarla."},
+{m:"D5",q:"Nel contratto di sviluppo software, l'appalto comporta:",o:["Un'obbligazione di risultato.","Un'obbligazione di mezzi.","Nessuna responsabilità per vizi."],e:"Appalto (impresa) = obbligazione di risultato; opera intellettuale (professionista) = di mezzi."},
+{m:"D5",q:"La licenza d'uso del software è:",o:["Un contratto atipico che cede il godimento, non la titolarità.","Una vendita che trasferisce la proprietà del programma.","Un contratto tipico disciplinato dal codice civile."],e:"Atipico: cede il diritto di godimento; il licenziante resta titolare."},
+{m:"D5",q:"La licenza Creative Commons CC0:",o:["Comporta la rinuncia a tutti i diritti (pubblico dominio), senza obbligo di attribuzione.","Richiede comunque l'attribuzione all'autore.","Vieta sempre l'uso commerciale."],e:"CC0 = pubblico dominio. La CC BY invece richiede l'attribuzione."},
+{m:"D5",q:"Nella licenza shrink-wrap (a strappo):",o:["L'apertura della confezione sigillata vale come accettazione.","È sempre necessaria la doppia firma per concludere il contratto.","Il contratto è nullo per mancanza di forma."],e:"Conclusione per comportamento concludente (art. 1327). Le clausole onerose ex art. 1341 restano problematiche."},
+{m:"D5",q:"Le clausole 'as is' di esclusione di responsabilità:",o:["Non possono escludere la responsabilità per dolo o colpa grave (art. 1229).","Possono escludere ogni responsabilità senza limiti.","Sono sempre nulle in qualsiasi caso."],e:"Limite dell'art. 1229: niente esonero per dolo o colpa grave."},
+// D6
+{m:"D6",q:"Se l'ingegnere che sviluppa il software non è iscritto all'albo (art. 2231 c.c.):",o:["Non ha azione per ottenere il pagamento.","Il contratto è radicalmente nullo.","Non cambia nulla sul piano giuridico."],e:"Art. 2231: la prestazione non dà azione per il pagamento (rischia di lavorare gratis)."},
+{m:"D6",q:"Differenza tra difformità e vizio dell'opera:",o:["Difformità = scarto dalle specifiche; vizio = difetto intrinseco dell'opera.","Difformità = difetto interno; vizio = scarto dalle specifiche.","Sono sinonimi."],e:"Difformità: funziona ma non è quella pattuita. Vizio: difetto interno (può essere occulto)."},
+{m:"D6",q:"Con la cessione dei diritti di utilizzazione economica del software:",o:["L'ingegnere non dispone più del software ceduto.","L'ingegnere mantiene comunque i diritti.","Si tratta solo di un diritto d'uso temporaneo."],e:"La cessione = 'vendita' dei diritti; la licenza invece lascia la titolarità all'ingegnere."},
+{m:"D6",q:"Se l'ingegnere tratta i dati personali dei clienti del committente:",o:["Va nominato responsabile del trattamento (art. 28 GDPR).","È il titolare del trattamento di quei dati.","I dati trattati sono i suoi dati personali."],e:"Il committente è titolare; l'ingegnere è responsabile, disciplinato da contratto ex art. 28."},
+// D7
+{m:"D7",q:"Durata di marchio e brevetto:",o:["Marchio 10 anni rinnovabile indefinitamente; brevetto 20 anni non rinnovabile.","Marchio 20 anni non rinnovabile; brevetto 10 anni rinnovabile.","Entrambi 20 anni rinnovabili."],e:"Marchio: 10 anni, rinnovabile ∞. Brevetto: 20 anni, non rinnovabile."},
+{m:"D7",q:"I tre requisiti del brevetto sono:",o:["Novità, attività inventiva, industrialità.","Novità, capacità distintiva, rinomanza.","Solo la novità assoluta."],e:"Brevetto: novità + attività inventiva + industrialità. Capacità distintiva è del marchio."},
+{m:"D7",q:"Il software, rispetto al brevetto:",o:["Non è brevettabile 'in quanto tale' (Conv. Monaco art. 52).","È brevettabile come ogni altra invenzione.","È brevettabile se ha capacità distintiva."],e:"Escluso 'in quanto tale'; ammesso solo se incorporato in un'invenzione con effetto tecnico ulteriore."},
+{m:"D7",q:"La decadenza del marchio (diversa dalla nullità):",o:["Il marchio nasce valido ma perde i requisiti nel tempo (es. volgarizzazione).","Il marchio non avrebbe mai dovuto essere registrato.","È sinonimo di nullità."],e:"Nullità = vizio originario; decadenza = perdita sopravvenuta dei requisiti."},
+{m:"D7",q:"L'equo premio all'inventore dipendente:",o:["Spetta quando inventa nel rapporto ma senza retribuzione specifica per inventare.","Spetta sempre, in ogni caso.","Non esiste nel nostro ordinamento."],e:"È il Caso 2 (artt. 64-65 CPI). Diverso dal software, dove l'equo premio non è previsto."},
+{m:"D7",q:"L'acquisto dei diritti di proprietà industriale avviene tramite:",o:["Brevettazione per le invenzioni, registrazione per i marchi.","Registrazione per le invenzioni.","Sempre brevettazione, anche per i marchi."],e:"Brevettazione → invenzioni/modelli di utilità; registrazione → marchi/disegni/topografie."},
+// D8
+{m:"D8",q:"Nel GDPR, il titolare del trattamento:",o:["Determina le finalità e i mezzi del trattamento.","Tratta i dati solo per conto di un altro soggetto.","Coincide sempre con il DPO."],e:"Titolare = finalità e mezzi; responsabile = per conto del titolare; DPO = controllo indipendente."},
+{m:"D8",q:"Un dato pseudonimizzato:",o:["Resta un dato personale soggetto al GDPR.","È fuori dall'ambito del GDPR.","È equivalente a un dato anonimo."],e:"Pseudonimizzato = ancora personale (riconducibile). Solo l'anonimizzato esce dal GDPR."},
+{m:"D8",q:"In caso di data breach, il titolare notifica al Garante:",o:["Senza ingiustificato ritardo, entro 72 ore.","Entro 24 ore in ogni caso.","Entro 30 giorni."],e:"72 ore dal momento in cui ne viene a conoscenza (salvo improbabile rischio)."},
+{m:"D8",q:"La comunicazione del data breach all'interessato:",o:["Non è dovuta se i dati erano cifrati (rischio non elevato).","È sempre obbligatoria in ogni caso.","Non è mai obbligatoria."],e:"Se i dati erano cifrati e la chiave non è compromessa, manca il rischio elevato."},
+{m:"D8",q:"Per la liceità del trattamento (art. 6 GDPR):",o:["Basta che ricorra almeno una delle sei basi giuridiche.","Servono tutte e sei le basi insieme.","Serve sempre e comunque il consenso."],e:"Basta una base. Il consenso è solo una delle sei."},
+{m:"D8",q:"L'inciso 'intesi a identificare univocamente una persona' (art. 9) riguarda:",o:["Solo i dati biometrici.","Tutti i dati sensibili.","I soli dati sanitari."],e:"Si riferisce ai biometrici; gli altri sensibili sono vietati per la loro natura, non per l'identificazione."},
+{m:"D8",q:"La violazione dei principi base (art. 5) e dei diritti dell'interessato è sanzionata fino a:",o:["20 milioni € o 4% del fatturato mondiale.","10 milioni € o 2% del fatturato.","35 milioni € o 7% del fatturato."],e:"Fascia alta = 20M/4%. La fascia bassa (obblighi del titolare) = 10M/2%. Il 7% è l'AI Act."},
+// D9
+{m:"D9",q:"La firma elettronica qualificata è una firma avanzata che è:",o:["Creata da un dispositivo qualificato e basata su un certificato qualificato.","Dotata genericamente di requisiti più stringenti di sicurezza.","Una firma semplice con certificato."],e:"Servono entrambi gli elementi: dispositivo qualificato + certificato qualificato."},
+{m:"D9",q:"La firma elettronica avanzata ha:",o:["Il valore di scrittura privata (art. 2702 c.c.).","Il valore di firma autografa.","Nessun valore probatorio."],e:"Avanzata = scrittura privata; qualificata e digitale = firma autografa."},
+{m:"D9",q:"La firma digitale:",o:["È un tipo specifico di firma qualificata, basato su chiavi crittografiche.","È inferiore alla firma avanzata.","È una firma semplice cifrata."],e:"È un sottotipo della qualificata (CAD art. 1), non un livello inferiore."},
+{m:"D9",q:"Un documento informatico con firma qualificata che contiene macroistruzioni:",o:["Non soddisfa il requisito di immodificabilità.","Acquista comunque piena immodificabilità.","Ha la firma rafforzata dalle macro."],e:"Macro/codici eseguibili compromettono l'immodificabilità (art. 4 c.3 reg. tecn.)."},
+{m:"D9",q:"Una firma apposta con certificato revocato:",o:["Equivale a mancata sottoscrizione, salvo riferimento temporale opponibile anteriore alla revoca.","È sempre valida comunque.","È sempre nulla, anche con marca temporale anteriore."],e:"Vale solo se un riferimento temporale opponibile la colloca prima della revoca (art. 62)."},
+{m:"D9",q:"La trasmissione mediante PEC:",o:["Equivale alla notificazione a mezzo posta.","È di per sé una firma elettronica qualificata.","Non ha alcun valore legale."],e:"PEC = notificazione a mezzo posta; data/ora opponibili ai terzi."},
+// D10
+{m:"D10",q:"Il provider di hosting non è responsabile dei contenuti se:",o:["Appena a conoscenza dell'illiceità, agisce per rimuoverli.","In ogni caso risponde dei contenuti caricati dagli utenti.","Non risponde mai, a prescindere."],e:"Hosting: modello 'notice & take down' — esonero se rimuove appena a conoscenza."},
+{m:"D10",q:"Sugli intermediari (D.Lgs. 70/2003):",o:["Non esiste un obbligo generale di sorveglianza.","Devono sorvegliare preventivamente tutti i contenuti.","Devono filtrare in anticipo ogni dato trasmesso."],e:"Art. 17: nessun obbligo generale di sorveglianza né di ricerca attiva."},
+{m:"D10",q:"Il diritto di recesso del consumatore nei contratti a distanza dura:",o:["14 giorni.","7 giorni.","30 giorni."],e:"14 giorni, senza penali né motivo. Esteso di 12 mesi se manca l'informazione."},
+{m:"D10",q:"In caso di conflitto tra D.Lgs. 70/2003 e Codice del consumo:",o:["Prevale il Codice del consumo.","Prevale il D.Lgs. 70/2003.","Prevale la norma più recente."],e:"Il Codice del consumo prevale sempre."},
+{m:"D10",q:"Acquistando un software sigillato poi aperto, il consumatore:",o:["Perde il diritto di recesso (eccezione tassativa).","Mantiene sempre il diritto di recesso.","Non ha mai diritto di recesso su beni digitali."],e:"Software/audio/video sigillati aperti rientrano tra le eccezioni al recesso."},
+{m:"D10",q:"Se manca il pulsante 'ordine con obbligo di pagare':",o:["Il consumatore non è vincolato dal contratto.","Il consumatore è comunque vincolato.","Il contratto è radicalmente nullo erga omnes."],e:"Senza la dicitura inequivoca, il consumatore non è vincolato."},
+// D11
+{m:"D11",q:"L'accesso abusivo a sistema informatico (615-ter) è un reato:",o:["Di mera condotta: si perfeziona con l'accesso, senza bisogno di danno.","Che richiede un danno effettivo al sistema.","Che richiede una finalità di lucro."],e:"Mera condotta: viola il domicilio informatico; l'abusività è valutata oggettivamente."},
+{m:"D11",q:"Differenza tra art. 615-quater e 615-quinquies:",o:["Il quinquies punisce gli strumenti per danneggiare; il quater quelli per accedere.","Il quinquies punisce gli strumenti per accedere.","Sono la stessa fattispecie."],e:"Quater = mezzi d'accesso (grimaldelli); quinquies = strumenti di danneggiamento (malware)."},
+{m:"D11",q:"Nella frode informatica (640-ter), rispetto alla truffa:",o:["La vittima dell'azione è il sistema informatico, non la persona.","La vittima è la persona indotta in errore.","Non esiste una vittima."],e:"Nella truffa è la persona (indotta in errore); nella frode informatica è il sistema, manipolato."},
+{m:"D11",q:"Nella 'famiglia' del danneggiamento informatico:",o:["635-bis colpisce dati/programmi; 635-quater colpisce i sistemi.","635-bis colpisce i sistemi; 635-quater i dati.","Tutti gli articoli riguardano solo lo Stato."],e:"bis/ter = dati/programmi (contenuti); quater/quinquies = sistemi (contenitori)."},
+{m:"D11",q:"Accesso abusivo (615-ter) e frode informatica (640-ter):",o:["Possono concorrere: beni giuridici diversi.","Il 640-ter assorbe sempre il 615-ter.","Sono tra loro incompatibili."],e:"Concorso ammesso (Cass. 30/09/2008): domicilio informatico vs alterazione dati per profitto."},
+{m:"D11",q:"Negli artt. 616 e 621, il nocumento:",o:["È condizione di punibilità (senza nocumento il reato non sussiste).","È irrilevante ai fini della punibilità.","È sostituito dal dolo generico."],e:"Il nocumento (pregiudizio giuridicamente rilevante) è condizione oggettiva di punibilità."},
+// D12
+{m:"D12",q:"L'AI Act (Reg. UE 2024/1689):",o:["È in vigore dal 2024, con piena applicabilità dal 2 agosto 2026.","È pienamente applicabile in tutto fin da subito.","Non è ancora entrato in vigore."],e:"In vigore ≠ piena applicabilità. I divieti si applicano dal 2 febbraio 2025."},
+{m:"D12",q:"Distinzione tra modello GPAI e sistema di IA:",o:["Il GPAI è il modello base; il sistema lo incorpora in un contesto d'uso specifico.","Sono sinonimi.","Il sistema di IA è il modello base."],e:"GPAI = modello (es. GPT); sistema = applicazione in un contesto. Obblighi distinti."},
+{m:"D12",q:"Fornitore e deployer nell'AI Act:",o:["Il fornitore immette sul mercato col proprio marchio; il deployer usa il sistema.","Il deployer immette sul mercato.","Sono la stessa figura."],e:"Fornitore = sviluppa/fa sviluppare e mette il marchio; deployer = utilizza sotto la propria autorità."},
+{m:"D12",q:"L'identificazione biometrica remota in spazi pubblici:",o:["'In tempo reale' è vietata; quella 'retroattiva' è ad alto rischio.","Entrambe sono vietate in assoluto.","Entrambe sono solo ad alto rischio."],e:"Real-time = pratica vietata (salvo 3 eccezioni); retroattiva = alto rischio (ammessa con obblighi)."},
+{m:"D12",q:"Un sistema IA di selezione dei CV per le assunzioni è:",o:["Ad alto rischio (Allegato III), non una pratica vietata.","Una pratica vietata.","A rischio minimo."],e:"Caso Amazon: alto rischio (occupazione), soggetto a obblighi rigorosi."},
+{m:"D12",q:"Le sanzioni per le pratiche vietate (art. 5) dell'AI Act arrivano fino a:",o:["35 milioni € o 7% del fatturato mondiale.","20 milioni € o 4% del fatturato.","15 milioni € o 3% del fatturato."],e:"Fascia 1 = 35M/7%. Il 4% è il GDPR; il 3% è la fascia 2 dell'AI Act."},
+{m:"D12",q:"La vigilanza sui fornitori di modelli GPAI spetta:",o:["Alla Commissione europea (AI Office), in via esclusiva.","Alle autorità nazionali degli Stati membri.","Al Garante privacy."],e:"Competenza esclusiva della Commissione tramite AI Office; le autorità nazionali non hanno giurisdizione sui GPAI."},
+// D13
+{m:"D13",q:"VLOP (DSA) e gatekeeper (DMA):",o:["VLOP = un solo criterio (45 mln utenti); gatekeeper = tre criteri cumulativi.","Sono la stessa identica designazione.","Il gatekeeper richiede solo i 45 milioni di utenti."],e:"VLOP = soglia utenti. Gatekeeper = impatto (fatturato) + gateway + posizione consolidata."},
+{m:"D13",q:"Il divieto di anti-steering (DMA) protegge:",o:["L'utente commerciale (sviluppatore), che può informare i propri clienti di offerte fuori dalla piattaforma.","L'utente finale, vietando le offerte esterne.","I consumatori dalla pubblicità ingannevole."],e:"Caso Spotify/Apple: lo sviluppatore deve poter indirizzare i clienti verso canali alternativi."},
+{m:"D13",q:"Le sanzioni massime di DSA e DMA:",o:["DSA fino al 6%; DMA fino al 10% (20% in caso di recidiva).","DSA fino al 10%; DMA fino al 6%.","Entrambi fino al 4% del fatturato."],e:"DSA 6%; DMA 10% (20% recidiva). Da non confondere con le percentuali GDPR/AI Act."},
+{m:"D13",q:"Il principio del 'buon samaritano' (DSA):",o:["Le indagini volontarie in buona fede non fanno perdere l'esenzione di responsabilità.","Cercare contenuti illeciti fa perdere automaticamente l'esenzione.","Impone di sorvegliare tutti i contenuti."],e:"Art. 7: la ricerca attiva in buona fede non vale come 'conoscenza effettiva' e non fa perdere il safe harbour."},
+{m:"D13",q:"Nel Data Act, il 'titolare dei dati' (data holder) è:",o:["Il produttore del prodotto connesso, che detiene e mette a disposizione i dati.","L'utente del prodotto connesso.","Un soggetto inesistente nel regolamento."],e:"Titolare = produttore (custode dei dati). L'utente è beneficiario del diritto d'accesso."},
+{m:"D13",q:"In caso di conflitto tra Data Act/DMA e GDPR:",o:["Prevale il GDPR.","Prevale il Data Act / DMA.","Prevale il regolamento più recente."],e:"Il GDPR prevale in caso di conflitto, per tutti e tre i regolamenti del pacchetto."},
+{m:"D13",q:"Il self-preferencing nel DMA:",o:["È vietato: il gatekeeper non può favorire i propri servizi (es. Google Shopping).","È sempre consentito.","Riguarda esclusivamente i prezzi al consumatore."],e:"Vietato classificare i propri prodotti più favorevolmente rispetto ai terzi."}
+];
+
+const N_QUESTIONS = 22;
+const POINTS = 1.5;
+let quiz=[], idx=0, score=0, nCorr=0, nWrong=0, misses=[], timerId=null, timeLeft=45*60, feedback=true;
+
+document.getElementById('poolinfo').textContent = `Pool attuale: ${POOL.length} domande su 13 moduli.`;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function fmtPts(n){return n.toFixed(1).replace('.',',');}
+
+function startQuiz(){
+  feedback = document.getElementById('optFeedback').checked;
+  const useTimer = document.getElementById('optTimer').checked;
+  // pesca N domande casuali e mescola le opzioni
+  quiz = shuffle([...POOL]).slice(0, Math.min(N_QUESTIONS, POOL.length)).map(item=>{
+    const opts = item.o.map((text,i)=>({text, correct:i===0}));
+    return {...item, opts:shuffle(opts)};
+  });
+  idx=0;score=0;nCorr=0;nWrong=0;misses=[];timeLeft=45*60;
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('end').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  document.getElementById('qtot').textContent = quiz.length;
+  if(timerId){clearInterval(timerId);timerId=null;}
+  const tEl=document.getElementById('timer');
+  if(useTimer){ tEl.style.display=''; tick(); timerId=setInterval(tick,1000);} else { tEl.style.display='none'; }
+  renderQ();
+}
+
+function tick(){
+  const t=document.getElementById('timer');
+  const m=Math.floor(timeLeft/60), s=timeLeft%60;
+  t.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  t.classList.toggle('low', timeLeft<=300);
+  if(timeLeft<=0){clearInterval(timerId);endQuiz();return;}
+  timeLeft--;
+}
+
+function renderQ(){
+  const item=quiz[idx];
+  document.getElementById('qmod').textContent=item.m;
+  document.getElementById('qnum').textContent=idx+1;
+  document.getElementById('prog').style.width=`${(idx/quiz.length)*100}%`;
+  document.getElementById('qtext').textContent=item.q;
+  document.getElementById('score').textContent=fmtPts(score);
+  document.getElementById('ncorr').textContent=nCorr;
+  document.getElementById('nwrong').textContent=nWrong;
+  const exp=document.getElementById('exp'); exp.className='exp'; exp.textContent='';
+  const box=document.getElementById('opts'); box.innerHTML='';
+  item.opts.forEach((opt)=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=opt.text;
+    b.onclick=()=>answer(b,opt,item);
+    box.appendChild(b);
+  });
+  document.getElementById('nextBtn').disabled=true;
+  document.getElementById('nextBtn').textContent = (idx===quiz.length-1)?'Vedi risultato':'Prossima';
+}
+
+function answer(btn,opt,item){
+  const buttons=document.querySelectorAll('#opts .opt');
+  buttons.forEach(b=>b.disabled=true);
+  if(opt.correct){ btn.classList.add('correct'); score+=POINTS; nCorr++; }
+  else {
+    btn.classList.add('wrong'); nWrong++;
+    buttons.forEach(b=>{ const t=item.opts.find(o=>o.text===b.textContent); if(t&&t.correct) b.classList.add('correct'); });
+    misses.push(item);
+  }
+  document.getElementById('score').textContent=fmtPts(score);
+  document.getElementById('ncorr').textContent=nCorr;
+  document.getElementById('nwrong').textContent=nWrong;
+  if(feedback){ const exp=document.getElementById('exp'); exp.textContent='💡 '+item.e; exp.className='exp show'; }
+  document.getElementById('nextBtn').disabled=false;
+}
+
+function nextQ(){
+  if(idx<quiz.length-1){ idx++; renderQ(); } else { endQuiz(); }
+}
+
+function endQuiz(){
+  if(timerId){clearInterval(timerId);timerId=null;}
+  document.getElementById('quiz').classList.add('hidden');
+  const end=document.getElementById('end'); end.classList.remove('hidden');
+  const maxPts=quiz.length*POINTS;
+  document.getElementById('finalScore').textContent=`${fmtPts(score)} / ${fmtPts(maxPts)}`;
+  document.getElementById('fc').textContent=nCorr+'/'+quiz.length;
+  const v30=Math.round((nCorr/quiz.length)*30);
+  document.getElementById('f30').textContent=v30;
+  let msg;
+  const pct=nCorr/quiz.length;
+  if(pct>=0.9) msg='Eccellente. Sei pronto.';
+  else if(pct>=0.75) msg='Buono. Rifinisci i moduli sbagliati.';
+  else if(pct>=0.55) msg='Sufficiente. Ripassa i punti deboli qui sotto.';
+  else msg='Da consolidare. Rivedi gli speed review dei moduli sbagliati.';
+  document.getElementById('finalMsg').textContent=msg;
+  const ml=document.getElementById('missList');
+  if(misses.length===0){ ml.innerHTML='<b>Nessun errore. 🎯</b>'; }
+  else {
+    const byMod={};
+    misses.forEach(m=>{ byMod[m.m]=(byMod[m.m]||0)+1; });
+    const modsTxt=Object.entries(byMod).sort().map(([k,v])=>`${k} (${v})`).join(' · ');
+    let html=`<b>Moduli da ripassare:</b> ${modsTxt}<ul>`;
+    misses.forEach(m=>{ html+=`<li><b>${m.m}</b> — ${m.q}<br>✓ ${m.o[0]}</li>`; });
+    html+='</ul>';
+    ml.innerHTML=html;
+  }
+}
+
+function restart(){ startQuiz(); }
+</script>
+</body>
+</html>

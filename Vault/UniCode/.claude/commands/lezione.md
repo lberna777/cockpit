@@ -243,7 +243,8 @@ Se una voce non è soddisfatta, correggi prima di procedere. Poi invoca
 
 **7. Collega la nota al grafo**
 
-Invoca `lorenzo-skills:unicode-link-note` per scrivere il blocco AUTO-LINKS della nuova lezione.
+Invoca `lorenzo-skills:unicode-link-note`: la nota riceve in testa il frontmatter
+`tags: [<COD>, lezione]`, e se è la prima nota del corso si aggiunge il suo gruppo colore in Obsidian.
 
 ---
 

@@ -1,0 +1,28 @@
+Mon 2026-09-14 23:00:00 CEST     9h Mon 2026-09-14 12:30:34 CEST      - unicode-giornata.timer              unicode-giornata.service
+--- unità ---
+# /home/lorenzo/.config/systemd/user/unicode-giornata.timer
+[Unit]
+Description=Consolidamento serale UniCode
+
+[Timer]
+OnCalendar=*-*-* 23:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+# /home/lorenzo/.config/systemd/user/unicode-giornata.service
+[Unit]
+Description=Consolidamento serale UniCode
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/lorenzo/cockpit/Vault/UniCode
+ExecStart=/usr/bin/python3 /home/lorenzo/cockpit/Vault/UniCode/scripts/giornata.py
+--- abilitazione ---
+enabled
+Linger=yes
+--- ultimi giri ---
+set 14 12:30:34 debianLorenzo systemd[1569]: Starting unicode-giornata.service - Consolidamento serale UniCode...
+set 14 12:30:34 debianLorenzo python3[1664]: giornata 2026-09-14: 3 eventi, 0 movimenti sul tracker
+set 14 12:30:34 debianLorenzo systemd[1569]: Finished unicode-giornata.service - Consolidamento serale UniCode.

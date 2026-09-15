@@ -111,7 +111,55 @@ Nel file del mese corrente, in coda:
 
 ---
 
-**7. Aggiorna glossario e troubleshooting** *(solo se serve)*
+**7. Revisione degli errori — agente dedicato**
+
+Si esegue **per ogni corso toccato oggi** (i codici presenti in `stato/giornata.md`). Serve ad
+accrescere `profilo/errori.md` con gli errori che Lorenzo commette davvero sulle materie nuove:
+il quality gate conosce solo quelle vecchie, e i pattern di un corso nascono dall'esecuzione, non
+dalle previsioni.
+
+**7a. Raccogli il materiale da passare all'agente** — non leggerlo tu:
+- i file del corso creati o modificati oggi:
+  `find corsi/<COD> -type f -newermt "$(date +%F)" -not -path '*/materiali/*' -not -path '*/prove/*'`
+- le trascrizioni delle sessioni di oggi — Claude Code risolve il symlink `~/UniCode`, quindi
+  stanno sotto il percorso reale:
+  `find ~/.claude/projects/-home-lorenzo-cockpit-Vault-UniCode -maxdepth 1 -name '*.jsonl' -newermt "$(date +%F)"`;
+- la risposta di Lorenzo al passo 2 e le righe di `stato/giornata.md` del corso.
+
+**7b. Lancia un subagent** (`general-purpose`) con questo mandato, completato dei percorsi:
+
+> Sei il revisore degli errori di studio di Lorenzo per il corso `<COD>` (<nome esteso>).
+> Leggi per intero `~/UniCode/profilo/errori.md`, poi i file e la trascrizione indicati.
+> Nella trascrizione concentrati sui messaggi di Lorenzo: codice che ha scritto, risposte
+> alle autoverifiche, comandi eseguiti, domande, e i punti in cui Claude lo ha corretto.
+>
+> Cerca **solo errori commessi da Lorenzo, con un'evidenza**. Le avvertenze ⚠️ scritte nelle
+> lezioni sono previsioni, non errori: non contano. Un errore di Claude non conta.
+>
+> Per ciascun errore trovato:
+> - se è un'istanza di un pattern **trasversale** già presente, aggiungi sotto quel pattern una
+>   riga `- [AAAA-MM-GG] <COD>: <cosa è successo>. Evidenza: <file o citazione breve>`;
+> - se è un pattern **del corso**, aggiungilo nella sezione `### <COD> — <nome esteso>` sotto
+>   «Per corso», creandola prima di «Archivio — corsi chiusi» se non esiste, nel formato
+>   `- [AAAA-MM-GG] <errore> → <causa> → <correzione>. Evidenza: <…>`;
+> - se lo stesso errore di corso compare già su **un altro corso**, non duplicarlo: segnalalo
+>   come candidato trasversale nel report, senza promuoverlo.
+>
+> Regole di strato: `profilo/errori.md` si **accresce, non si riscrive**. Non cancellare né
+> riformulare righe esistenti; una riga superata si marca `[superato AAAA-MM]`. Non toccare
+> nessun altro file. Se non trovi errori con evidenza, non scrivere nulla.
+>
+> Restituisci un report breve: errori aggiunti (con sezione), ricorrenze di pattern esistenti,
+> candidati trasversali, e ciò che hai scartato per mancanza di evidenza.
+
+**7c. Registra l'esito**, dopo il ritorno dell'agente:
+- una riga in `stato/giornata.md`: `HH:MM · <COD> · revisione errori: <n> nuovi, <m> ricorrenze`;
+- il report va mostrato a Lorenzo nella conferma finale (passo 9). I candidati trasversali
+  li decide lui: non si promuovono in automatico.
+
+---
+
+**8. Aggiorna glossario e troubleshooting** *(solo se serve)*
 
 - Termini nuovi → il glossario del corso, in `corsi/<COD>/`
 - Problemi tecnici risolti sull'ambiente → `troubleshooting_vm.md`, con sintomo, causa,
@@ -119,11 +167,12 @@ Nel file del mese corrente, in coda:
 
 ---
 
-**8. Conferma finale**
+**9. Conferma finale**
 
 Mostra a Lorenzo:
 - Corso e moduli aggiornati, con i marcatori scritti
 - Il punto esatto da cui ripartirà
+- Il report della revisione errori (passo 7), con gli eventuali candidati trasversali da decidere
 - I moduli con ripasso scaduto da `stato/tracker.md`, se ce ne sono:
   `⚠️ Ripasso scaduto: [moduli]`
 - Che gradini e scadenze dei ripassi si assestano al consolidamento delle 23

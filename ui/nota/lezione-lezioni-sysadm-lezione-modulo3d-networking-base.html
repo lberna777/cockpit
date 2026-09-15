@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_modulo3D_networking_base.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_modulo3D_networking_base.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/lezione_modulo3D_networking_base.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-3d-networking-di-base">Lezione — Modulo 3D: Networking di Base</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Materiale</strong>: <code>net-config.pdf</code> (Linux Networking, Prandini), <code>servizi_base_rete.pdf</code> (Servizi rete infrastrutturali, Prandini)<br />
+<strong>Prerequisiti</strong>: 0A (filesystem), 3A (systemd — i servizi di rete sono demoni), 3E (Vagrant multi-machine — richiede comprensione delle reti VM)</p>
+<hr />
+<h2 id="obiettivo">Obiettivo</h2>
+<p>Al termine di questa lezione Lorenzo deve saper leggere l'output di <code>ip a</code>, verificare la connettività con <code>ping</code>, controllare le porte in ascolto con <code>ss</code>, e capire come la VM Debian è connessa alla rete in ambiente VirtualBox/Vagrant.</p>
+<hr />
+<h2 id="1-come-funziona-internet-modello-concettuale">1. Come funziona Internet — modello concettuale</h2>
+<p>Internet è una <strong>rete di reti</strong>: ogni sottorete IP (network IP) è un'isola. Le isole sono collegate da <strong>router</strong> (o gateway), apparati specializzati che inoltrano i pacchetti da una rete all'altra.</p>
+<pre><code>[Network IP A] --- Router --- [Network IP B] --- Router --- [Network IP C]
+</code></pre>
+<p>Ogni host ha un <strong>indirizzo IP</strong> (globale, univoco su Internet) e un <strong>indirizzo MAC</strong> (locale, valido solo all'interno della LAN).</p>
+<h3 id="perche-due-indirizzi-distinti">Perché due indirizzi distinti?</h3>
+<ul>
+<li>L'IP identifica la destinazione a livello logico (chi sei nel mondo)</li>
+<li>Il MAC identifica l'interfaccia fisica sulla LAN locale (dove sei adesso)</li>
+</ul>
+<p>Il protocollo <strong>ARP (Address Resolution Protocol)</strong> traduce un IP in MAC quando si deve recapitare un pacchetto sulla LAN locale:
+1. L'host che vuole comunicare invia in broadcast: <em>"chi ha l'IP 192.168.1.76?"</em>
+2. Il destinatario risponde in unicast: <em>"sono io, il mio MAC è bb:2c:eb:18:f6:c8"</em>
+3. La risposta viene cachata da tutti gli host che l'hanno vista</p>
+<hr />
+<h2 id="2-indirizzi-ip-netmask-cidr">2. Indirizzi IP, netmask, CIDR</h2>
+<p>Un indirizzo IPv4 è composto da 32 bit, divisi in due parti:
+- <strong>net-id</strong>: identifica la rete
+- <strong>host-id</strong>: identifica l'host all'interno della rete</p>
+<p>La <strong>netmask</strong> specifica dove cade il confine tra le due parti:</p>
+<pre><code>Indirizzo:  144.156.166.151
+Netmask:    255.255.255.192   (/26 in notazione CIDR)
+            11111111.11111111.11111111.11000000
+                                        ↑ i 6 bit finali sono host-id
+</code></pre>
+<p>La notazione <strong>CIDR</strong> <code>/N</code> indica quanti bit sono dedicati al net-id:
+- <code>/24</code> → 256 indirizzi, netmask <code>255.255.255.0</code>
+- <code>/26</code> → 64 indirizzi, netmask <code>255.255.255.192</code></p>
+<p>Due indirizzi speciali in ogni subnet:
+- <strong>Network address</strong> (host-id tutti a 0): identifica la rete, non assegnabile a host
+- <strong>Broadcast</strong> (host-id tutti a 1): usato per raggiungere tutti gli host della subnet</p>
+<h3 id="ip-privati-rfc-1918">IP privati (RFC 1918)</h3>
+<p>Questi range sono riservati alle reti interne e <strong>non vengono instradati su Internet</strong>:
+- <code>10.0.0.0/8</code>
+- <code>172.16.0.0/16</code> – <code>172.31.0.0/16</code>
+- <code>192.168.0.0/24</code> – <code>192.168.255.0/24</code></p>
+<hr />
+<h2 id="3-porte-e-servizi-come-un-host-espone-applicazioni">3. Porte e servizi — come un host espone applicazioni</h2>
+<p>L'indirizzo IP identifica un host, ma su un host girano più applicazioni contemporaneamente. Il livello di trasporto aggiunge le <strong>porte</strong> per distinguerle.</p>
+<p>Una connessione è identificata dalla <strong>quintupla</strong>:</p>
+<pre><code>(protocollo, IP_sorgente, porta_sorgente, IP_destinazione, porta_destinazione)
+</code></pre>
+<p><strong>Porte standard</strong> (well-known, 0–1023):
+| Porta | Servizio | Protocollo |
+|-------|----------|------------|
+| 22    | SSH      | TCP        |
+| 80    | HTTP     | TCP        |
+| 443   | HTTPS    | TCP        |
+| 53    | DNS      | UDP/TCP    |
+| 25    | SMTP     | TCP        |</p>
+<p>Un <strong>servizio in ascolto</strong> è un processo che ha aperto una porta e aspetta connessioni. Su Linux: <code>ss -tlnp</code> mostra tutti i processi in ascolto.</p>
+<h3 id="tcp-come-si-apre-una-connessione-three-way-handshake">TCP — come si apre una connessione (three-way handshake)</h3>
+<p>TCP è un protocollo <strong>orientato alla connessione</strong>: prima di scambiarsi dati, i due host si sincronizzano:</p>
+<pre><code>Client          Server (porta 80)
+  │──── SYN ────────►│   &quot;voglio aprire una connessione&quot;
+  │◄─── SYN+ACK ─────│   &quot;ok, confermo — e tu conferma me&quot;
+  │──── ACK ─────────►│   &quot;confermato&quot;
+  │                   │
+  │ [scambio dati]    │
+</code></pre>
+<ul>
+<li><strong>SYN</strong> (synchronize): pacchetto che inizia la connessione</li>
+<li><strong>ACK</strong> (acknowledge): conferma che il pacchetto precedente è arrivato</li>
+<li>Dopo il three-way handshake la connessione è <strong>ESTABLISHED</strong></li>
+</ul>
+<blockquote>
+<p>Questo è il meccanismo che Nmap <code>-sS</code> (SYN scan) sfrutta: manda solo il SYN e non completa l'handshake, quindi nei log del server appare una connessione a metà — più difficile da tracciare.</p>
+</blockquote>
+<hr />
+<h2 id="4-nat-network-address-translation">4. NAT — Network Address Translation</h2>
+<p>Problema: gli IP pubblici sono scarsi, ma ogni rete domestica/aziendale ha decine di host.<br />
+Soluzione: un solo IP pubblico per tutta la rete, il router <strong>traduce</strong> gli indirizzi.</p>
+<pre><code>[Host 10.0.0.5:11111] → Router (IP pubblico 82.1.2.3) → [Server 137.204.1.15:80]
+                         ↑ modifica l'IP sorgente in 82.1.2.3
+</code></pre>
+<p>Il router memorizza una tabella di traduzione per sapere a quale host interno girare le risposte.</p>
+<p><strong>SNAT</strong> (Source NAT): sostituisce l'IP sorgente → usato per dare accesso a Internet a host privati<br />
+<strong>DNAT</strong> (Destination NAT): sostituisce l'IP destinazione → usato per rendere raggiungibile dall'esterno un server interno su una porta specifica</p>
+<hr />
+<h2 id="5-virtualbox-tipi-di-interfaccia-di-rete">5. VirtualBox — tipi di interfaccia di rete</h2>
+<p>VirtualBox permette di connettere ogni VM in modi diversi. È cruciale capirli per i lab.</p>
+<table>
+<thead>
+<tr>
+<th>Modalità</th>
+<th>La VM può raggiungere</th>
+<th>La VM è raggiungibile da</th>
+<th>Uso tipico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NAT</strong></td>
+<td>Internet (tramite SNAT)</td>
+<td>Solo con port forwarding</td>
+<td>Default — navigazione</td>
+</tr>
+<tr>
+<td><strong>Bridged</strong></td>
+<td>LAN fisica + Internet</td>
+<td>Tutti nella stessa LAN</td>
+<td>VM come host reale</td>
+</tr>
+<tr>
+<td><strong>Host-only</strong></td>
+<td>Solo l'host</td>
+<td>Solo l'host</td>
+<td>Lab isolato host↔VM</td>
+</tr>
+<tr>
+<td><strong>Internal</strong></td>
+<td>Solo altre VM nella stessa internal network</td>
+<td>Solo altre VM dello stesso gruppo</td>
+<td>Lab VM↔VM isolato</td>
+</tr>
+</tbody>
+</table>
+<h3 id="nat-in-virtualbox">NAT in VirtualBox</h3>
+<ul>
+<li>VirtualBox fa da router SNAT: la VM ha IP <code>10.0.2.15</code>, il gateway è <code>10.0.2.2</code></li>
+<li>Per raggiungere la VM dall'host serve port forwarding (DNAT):
+  <code>ruby
+  # Vagrantfile
+  config.vm.network "forwarded_port", guest: 22, host: 2222</code></li>
+</ul>
+<h3 id="host-only-in-virtualbox">Host-only in VirtualBox</h3>
+<ul>
+<li>Crea una rete virtuale tra host e VM sulla subnet <code>192.168.56.0/24</code></li>
+<li>L'host ottiene <code>192.168.56.1</code>, la VM ottiene un IP nel range</li>
+<li>In Vagrant:
+  <code>ruby
+  config.vm.network "private_network", ip: "192.168.56.10"</code></li>
+</ul>
+<h3 id="internal-network">Internal network</h3>
+<ul>
+<li>Rete totalmente virtuale tra VM, l'host non partecipa</li>
+<li>In Vagrant:
+  <code>ruby
+  config.vm.network "private_network", virtualbox__intnet: "LAN1"</code></li>
+</ul>
+<hr />
+<h2 id="6-configurazione-di-rete-su-linux">6. Configurazione di rete su Linux</h2>
+<h3 id="visualizzare-la-configurazione-attuale">Visualizzare la configurazione attuale</h3>
+<pre><code class="language-bash">ip a                    # mostra tutte le interfacce e i loro indirizzi
+ip a show eth0          # solo l'interfaccia eth0
+ip r                    # mostra la tabella di routing
+</code></pre>
+<p><strong>Leggere l'output di <code>ip a</code>:</strong></p>
+<pre><code>2: enp0s3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 ...
+    link/ether 08:00:27:16:e5:88 brd ff:ff:ff:ff:ff:ff    ← MAC address
+    inet 10.0.2.15/24 brd 10.0.2.255 ...                  ← IPv4 con netmask /24
+    inet6 fd17:625c:f037:2:db52:... /64 ...                ← IPv6 globale
+    inet6 fe80::5e81:84f8:56ea:a4fa/64 ...                 ← IPv6 link-local (sempre presente)
+</code></pre>
+<p><strong>Interfaccia <code>lo</code> (loopback):</strong>
+- Interfaccia virtuale interna al kernel, non esce mai sulla rete fisica
+- IP fisso <code>127.0.0.1</code> (IPv4) e <code>::1</code> (IPv6)
+- Usata dai processi per comunicare con altri processi sullo stesso host (es. database locale)
+- È sempre in stato UP anche senza scheda di rete fisica</p>
+<p><strong>Leggere la tabella di routing:</strong></p>
+<pre><code class="language-bash">ip r
+# default via 10.0.2.2 dev enp0s3        ← default gateway: tutto ciò che non conosco va qui
+# 10.0.2.0/24 dev enp0s3 proto kernel    ← subnet locale, consegna diretta
+# 192.168.56.0/24 dev enp0s8 proto kernel ← seconda subnet locale (host-only)
+</code></pre>
+<h3 id="modificare-la-configurazione-runtime-non-persiste-al-reboot">Modificare la configurazione (runtime — non persiste al reboot)</h3>
+<pre><code class="language-bash"># Aggiungere un indirizzo IP a un'interfaccia
+sudo ip a add 192.168.56.10/24 dev eth1
+
+# Rimuovere un indirizzo IP
+sudo ip a del 192.168.56.10/24 dev eth1
+
+# Aggiungere una route
+sudo ip r add 10.10.0.0/24 via 192.168.56.1
+
+# Rimuovere una route
+sudo ip r del 10.10.0.0/24
+</code></pre>
+<h3 id="configurazione-persistente-su-debian-etcnetworkinterfaces">Configurazione persistente su Debian (<code>/etc/network/interfaces</code>)</h3>
+<pre><code class="language-bash"># Interfaccia con IP statico
+auto eth1
+iface eth1 inet static
+    address 192.168.56.10
+    netmask 255.255.255.0
+    gateway 192.168.56.1
+
+# Interfaccia con DHCP
+auto eth0
+iface eth0 inet dhcp
+</code></pre>
+<p>Applicare le modifiche senza reboot:</p>
+<pre><code class="language-bash">sudo systemctl restart networking
+# oppure per singola interfaccia:
+sudo ifup eth1
+sudo ifdown eth1
+</code></pre>
+<hr />
+<h2 id="7-strumenti-di-monitoraggio">7. Strumenti di monitoraggio</h2>
+<h3 id="ping-verifica-connettivita-di-base"><code>ping</code> — verifica connettività di base</h3>
+<pre><code class="language-bash">ping 8.8.8.8            # testa connettività verso Google DNS
+ping -c 4 192.168.56.1  # solo 4 pacchetti
+ping hostname           # risolve il nome prima di pingare
+</code></pre>
+<p>Cosa dice l'output:</p>
+<pre><code>PING 8.8.8.8: 64 bytes from 8.8.8.8: icmp_seq=1 ttl=117 time=12.3 ms
+</code></pre>
+<ul>
+<li><code>ttl</code>: quanti router può attraversare il pacchetto prima di essere scartato</li>
+<li><code>time</code>: latenza round-trip in millisecondi</li>
+</ul>
+<h3 id="ss-stato-delle-connessioni-e-porte-in-ascolto"><code>ss</code> — stato delle connessioni e porte in ascolto</h3>
+<pre><code class="language-bash">ss -tlnp   # TCP, Listen, Numeric (no risoluzione nomi), con Processo
+ss -tunap  # TCP+UDP, tutte le connessioni (incluso ESTABLISHED), Numeric, con Processo
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-t</code></td>
+<td>Solo TCP</td>
+</tr>
+<tr>
+<td><code>-u</code></td>
+<td>Solo UDP</td>
+</tr>
+<tr>
+<td><code>-l</code></td>
+<td>Solo porte in LISTEN (in ascolto)</td>
+</tr>
+<tr>
+<td><code>-a</code></td>
+<td>Tutti gli stati (LISTEN + ESTABLISHED + ...)</td>
+</tr>
+<tr>
+<td><code>-n</code></td>
+<td>Non risolvere IP/porte in nomi simbolici</td>
+</tr>
+<tr>
+<td><code>-p</code></td>
+<td>Mostra il processo che usa la socket</td>
+</tr>
+</tbody>
+</table>
+<p>Output tipico:</p>
+<pre><code>State   Recv-Q  Send-Q  Local Address:Port  Peer Address:Port  Process
+LISTEN  0       128     0.0.0.0:22          0.0.0.0:*          users:((&quot;sshd&quot;,pid=789))
+</code></pre>
+<ul>
+<li><code>0.0.0.0:22</code> = SSH in ascolto su tutte le interfacce, porta 22</li>
+<li><code>127.0.0.1:3306</code> = MySQL in ascolto solo sull'interfaccia locale (non raggiungibile dall'esterno)</li>
+</ul>
+<h3 id="traceroute-percorso-dei-pacchetti"><code>traceroute</code> — percorso dei pacchetti</h3>
+<pre><code class="language-bash">traceroute 8.8.8.8
+</code></pre>
+<p>Mostra ogni router (hop) attraversato dal pacchetto fino alla destinazione, con latenza per ogni salto.</p>
+<h3 id="tcpdump-cattura-pacchetti"><code>tcpdump</code> — cattura pacchetti</h3>
+<pre><code class="language-bash">sudo tcpdump -i eth0              # cattura tutto il traffico su eth0
+sudo tcpdump -i eth0 port 80      # solo traffico HTTP
+sudo tcpdump -i eth0 host 10.0.2.2
+</code></pre>
+<hr />
+<h2 id="8-risoluzione-dei-nomi-dns">8. Risoluzione dei nomi (DNS)</h2>
+<p>Quando scrivi <code>ping google.com</code>, il sistema deve tradurre <code>google.com</code> in un IP. La sequenza è:</p>
+<ol>
+<li>
+<p><strong>NSS (Name Service Switch)</strong>: controlla <code>/etc/nsswitch.conf</code> per sapere dove cercare
+   <code>hosts: files dns     ← prima /etc/hosts, poi DNS</code></p>
+</li>
+<li>
+<p><strong><code>/etc/hosts</code></strong> — file locale, consultato per primo
+   <code>127.0.0.1   localhost
+   192.168.56.10   server-web
+   8.8.8.8     gdns.google.com</code></p>
+</li>
+<li>
+<p><strong>DNS</strong> — interroga i server configurati in <code>/etc/resolv.conf</code>
+   <code>nameserver 8.8.8.8      ← server DNS da interrogare
+   nameserver 8.8.4.4      ← server di fallback
+   domain unibo.it         ← dominio di default per nomi parziali</code></p>
+</li>
+</ol>
+<h3 id="strumenti-di-debug-dns">Strumenti di debug DNS</h3>
+<pre><code class="language-bash">getent hosts www.unibo.it          # usa NSS (rispetta /etc/hosts + DNS)
+host www.unibo.it                  # query DNS diretta
+dig www.unibo.it                   # query DNS con dettagli tecnici
+dig mx unibo.it                    # record MX (mail exchanger)
+dig ns unibo.it                    # name server autorevoli
+host www.unibo.it 8.8.8.8         # interroga un server DNS specifico
+</code></pre>
+<hr />
+<h2 id="comandi-di-riferimento">Comandi di Riferimento</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ip a</code></td>
+<td>Mostra interfacce di rete e indirizzi IP</td>
+</tr>
+<tr>
+<td><code>ip r</code></td>
+<td>Mostra la tabella di routing</td>
+</tr>
+<tr>
+<td><code>ip a add ADDR/MASK dev IF</code></td>
+<td>Aggiunge indirizzo IP all'interfaccia</td>
+</tr>
+<tr>
+<td><code>ip r add NET/MASK via GW</code></td>
+<td>Aggiunge una route</td>
+</tr>
+<tr>
+<td><code>ping HOST</code></td>
+<td>Verifica connettività ICMP</td>
+</tr>
+<tr>
+<td><code>ping -c N HOST</code></td>
+<td>Ping con N pacchetti</td>
+</tr>
+<tr>
+<td><code>ss -tlnp</code></td>
+<td>Porte TCP in ascolto con processo</td>
+</tr>
+<tr>
+<td><code>ss -tunap</code></td>
+<td>Tutte le connessioni TCP+UDP</td>
+</tr>
+<tr>
+<td><code>traceroute HOST</code></td>
+<td>Percorso dei pacchetti</td>
+</tr>
+<tr>
+<td><code>tcpdump -i IF</code></td>
+<td>Cattura traffico sull'interfaccia</td>
+</tr>
+<tr>
+<td><code>getent hosts NOME</code></td>
+<td>Risolve nome tramite NSS</td>
+</tr>
+<tr>
+<td><code>host NOME</code></td>
+<td>Query DNS diretta</td>
+</tr>
+<tr>
+<td><code>dig NOME</code></td>
+<td>Query DNS con dettagli</td>
+</tr>
+<tr>
+<td><code>cat /etc/hosts</code></td>
+<td>File di risoluzione locale</td>
+</tr>
+<tr>
+<td><code>cat /etc/resolv.conf</code></td>
+<td>Server DNS configurati</td>
+</tr>
+<tr>
+<td><code>cat /etc/nsswitch.conf</code></td>
+<td>Ordine di risoluzione nomi</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="esercizi-guidati">Esercizi Guidati</h2>
+<blockquote>
+<p><strong>Prima di iniziare</strong>: avvia la VM con <code>cd ~/sysAdmin-lab &amp;&amp; vagrant up &amp;&amp; vagrant ssh</code></p>
+</blockquote>
+<h3 id="esercizio-1-esplorare-le-interfacce-di-rete">Esercizio 1 — Esplorare le interfacce di rete</h3>
+<pre><code class="language-bash"># Visualizza tutte le interfacce
+ip a
+
+# Rispondi:
+# - Quante interfacce ci sono?
+# - Qual è l'interfaccia NAT (IP nella subnet 10.x)?
+# - Qual è l'interfaccia host-only (IP nella subnet 192.168.x)?
+# - Cosa rappresenta l'interfaccia &quot;lo&quot;?
+
+# Visualizza la tabella di routing
+ip r
+
+# Rispondi:
+# - Qual è il default gateway?
+# - Quante subnet conosce direttamente la VM?
+</code></pre>
+<h3 id="esercizio-2-verifica-connettivita">Esercizio 2 — Verifica connettività</h3>
+<pre><code class="language-bash"># Ping verso il gateway NAT di VirtualBox
+ping -c 3 10.0.2.2
+
+# Ping verso Internet
+ping -c 3 8.8.8.8
+
+# Ping verso l'host (interfaccia host-only)
+ping -c 3 192.168.56.1
+
+# Se un ping fallisce, perché? (firewall? route mancante? host spento?)
+</code></pre>
+<h3 id="esercizio-3-porte-in-ascolto-sulla-vm">Esercizio 3 — Porte in ascolto sulla VM</h3>
+<pre><code class="language-bash"># Mostra tutte le porte TCP in ascolto
+ss -tlnp
+
+# Domande:
+# - SSH (porta 22) è in ascolto? Su quale indirizzo?
+# - Ci sono altri servizi in ascolto?
+
+# Mostra tutte le connessioni attive (inclusa la tua sessione SSH)
+ss -tnap
+
+# Identifica la connessione SSH corrente:
+# - qual è il tuo IP (client)?
+# - qual è la porta sorgente? e quella destinazione?
+</code></pre>
+<h3 id="esercizio-4-risoluzione-dei-nomi">Esercizio 4 — Risoluzione dei nomi</h3>
+<pre><code class="language-bash"># Consulta /etc/hosts
+cat /etc/hosts
+
+# Consulta /etc/resolv.conf
+cat /etc/resolv.conf
+
+# Risolvi un nome tramite NSS
+getent hosts localhost
+getent hosts www.unibo.it
+
+# Risolvi con DNS diretto
+host www.unibo.it
+dig www.unibo.it
+</code></pre>
+<h3 id="esercizio-5-aggiungere-un-alias-locale">Esercizio 5 — Aggiungere un alias locale</h3>
+<pre><code class="language-bash"># Aggiungi una voce in /etc/hosts
+echo &quot;192.168.56.1 host-mac&quot; | sudo tee -a /etc/hosts
+
+# Verifica che funzioni
+ping -c 2 host-mac
+getent hosts host-mac
+</code></pre>
+<h3 id="esercizio-6-cattura-traffico-con-tcpdump-opzionale">Esercizio 6 — Cattura traffico con tcpdump (opzionale)</h3>
+<pre><code class="language-bash"># In un terminale: avvia la cattura su enp0s3
+sudo tcpdump -i enp0s3 icmp
+
+# In un altro terminale (o dopo Ctrl+C e riprendi):
+ping -c 3 8.8.8.8
+
+# Osserva i pacchetti ICMP catturati
+# Quante righe per ogni ping? (request + reply = 2)
+</code></pre>
+<hr />
+<h2 id="connessioni">Connessioni</h2>
+<p><strong>Con SysAdmin 3A (systemd)</strong>: i servizi di rete (SSH, DNS, DHCP) sono demoni gestiti da systemd. <code>ss -tlnp</code> mostra gli stessi processi che vedi con <code>systemctl list-units --type=service</code>.</p>
+<p><strong>Con SysAdmin 3E (Vagrant multi-machine)</strong>: le modalità NAT, host-only e internal definite in questa lezione sono esattamente le direttive <code>config.vm.network</code> del Vagrantfile. Senza questa lezione il Vagrantfile multi-machine è incomprensibile.</p>
+<p><strong>Con Security S1 (Nmap e enumerazione)</strong>:
+- Nmap scansiona le porte che <code>ss -tlnp</code> mostra — stessa informazione, prospettive opposte
+- Il three-way handshake spiegato al §3 è il meccanismo che differenzia <code>-sT</code> da <code>-sS</code>
+- L'interfaccia <code>lo</code> risponde a ping locali ma non è visibile dall'esterno
+- La distinzione tra <code>0.0.0.0:22</code> (raggiungibile da fuori) e <code>127.0.0.1:3306</code> (solo locale) è il concetto chiave di "superficie d'attacco esposta"</p>
+<hr />
+<h2 id="riepilogo">Riepilogo</h2>
+<ul>
+<li><strong><code>ip a</code> / <code>ip r</code></strong>: comandi fondamentali per leggere la configurazione di rete corrente</li>
+<li><strong><code>ss -tlnp</code></strong>: mostra quali servizi sono esposti su quali porte — base per capire la superficie d'attacco</li>
+<li><strong>VirtualBox networking</strong>: NAT (uscita internet), host-only (comunicazione host↔VM), internal (VM↔VM) — configurabile in Vagrant con <code>config.vm.network</code></li>
+<li><strong>DNS</strong>: la risoluzione nomi segue NSS → <code>/etc/hosts</code> → server DNS in <code>/etc/resolv.conf</code></li>
+<li><strong>three-way handshake TCP</strong>: SYN → SYN+ACK → ACK — la base del funzionamento di ogni servizio TCP e delle tecniche di scansione Nmap</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo3D]]</li>
+<li>[[appunti_modulo3D_networking_base]]</li>
+<li>[[guida_lab_modulo3D_networking_base]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

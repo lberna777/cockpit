@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESERCIZI sysadm.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  esercizio · LAS</p>
+<h1 class="titolo-pagina">ESERCIZI sysadm.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/esercizi/SYSADM/ESERCIZI sysadm.md">Apri il file originale</a></p>
+<article class="prosa"><p><img alt="" src="https://virtuale.unibo.it/theme/image.php/boost_union/assign/1773824434/monologo?filtericon=1" /></p>
+<h1 id="estensione-degli-esercizi-risolti">Estensione degli esercizi risolti</h1>
+<p>Aggregazione dei criteri</p>
+<p><strong>Aperto:</strong> martedì, 10 marzo 2026, 00:00</p>
+<p><strong>Data limite:</strong> venerdì, 3 aprile 2026, 19:00</p>
+<p>Estendere gli script illustrati di conversione e manipolazione del tempo per gestire, in tutte le versioni proposte, la rimozione delle notifiche relative a eventi che vengono rimossi dal calendario.</p>
+<p><img alt="" src="https://virtuale.unibo.it/theme/image.php/boost_union/assign/1773824434/monologo?filtericon=1" /></p>
+<h1 id="estensioni-parametrico">"Estensioni" parametrico</h1>
+<p>Aggregazione dei criteri</p>
+<p><strong>Aperto:</strong> lunedì, 9 marzo 2026, 00:00</p>
+<p><strong>Data limite:</strong> venerdì, 3 aprile 2026, 19:00</p>
+<p>Modificare l'esercizio delle estensioni realizzando uno script estparam.sh che accetti sulla riga di comando</p>
+<ul>
+<li>un nome di directory da esplorare</li>
+<li>un elenco di lunghezza arbitraria di stringhe</li>
+</ul>
+<p>Lo script deve contare quanti file esistono nel sottoalbero definito dalla directory passata come primo parametro, che abbiano estensione uguale a una delle stringhe specificate coi parametri successivi. La soluzione deve essere efficiente, non deve invocare comandi pesanti sul filesystem in modo ridondante.</p>
+<p>Esempio: </p>
+<p><strong>./estparam /etc conf inc<br />
+</strong><strong>56 conf<br />
+28 inc</strong></p>
+<h2 id="funzioni-case-test"><strong>FUNZIONI, CASE, TEST</strong></h2>
+<p>Realizzare una funzione <strong>waitfile</strong> che accetti</p>
+<ul>
+<li>un primo parametro obbligatorio = nome di comando</li>
+<li>un secondo parametro obbligatorio = nome di file</li>
+<li>un terzo parametro facoltativo </li>
+</ul>
+<p>La funzione deve </p>
+<ul>
+<li>controllare che il valore di $1 sia uno di <strong>ls</strong>, <strong>rm</strong>, <strong>touch</strong></li>
+<li>eseguire il comando $1 con parametro $2 (basta lanciare $1 $2) in modi diversi a seconda di $3 come spiegato di seguito</li>
+</ul>
+<p>Usando case, discriminare tre possibilità:</p>
+<ul>
+<li>$3 è "force" --&gt; esecuzione immediata</li>
+<li>$3 è un numero "N" di una cifra decimale --&gt; se $2 non esiste, aspetta che eventualmente compaia, riprovando al massimo N volte con un'attesa di 1 secondo tra un tentativo e il successivo (usare sleep 1)</li>
+<li>$3 è assente o altro valore --&gt; come caso precedente, considerando un valore di default N=10</li>
+</ul>
+<p>La funzione deve ritornare exit code significativi e messaggi d'errore dove opportuno.</p>
+<p>============ processi =================</p>
+<p>Estendere l'esempio dell'esecuzione di due job in parallelo.</p>
+<p>Realizzare uno script <strong>parallenne.sh</strong> che </p>
+<ul>
+<li>lanci in parallelo tutti i comandi forniti come parametri</li>
+<li>controlli ogni 5 secondi quali sono ancora in esecuzione, verificando che il PID corrisponda al nome del comando</li>
+<li>scriva a ogni controllo sul file "log" lo stato dei processi </li>
+<li>termini quando tutti i processi in background sono terminati</li>
+<li>garantisca la terminazione di tutti i processi in background se viene terminato dall'esterno il processo parallenne</li>
+</ul>
+<p><img alt="" src="https://virtuale.unibo.it/theme/image.php/boost_union/assign/1773824434/monologo?filtericon=1" /></p>
+<h1 id="segnali-girati">Segnali girati</h1>
+<p>Aggregazione dei criteri</p>
+<p><strong>Aperto:</strong> mercoledì, 15 marzo 2023, 00:00</p>
+<p><strong>Data limite:</strong> lunedì, 3 aprile 2023, 19:00</p>
+<p>Cosa dovrebbe fare secondo voi questo script?</p>
+<p>Perchè non funziona, e come va corretto?</p>
+<h1 id="binbash">!/bin/bash</h1>
+<p>report () {<br />
+    echo $(date) osservate $TOT nuove righe<br />
+    TOT=0<br />
+}<br />
+echo $BASHPID &gt; /tmp/logwatch.pid<br />
+TOT=0<br />
+trap report USR1<br />
+tail -n +0 -f "$1" | while read R ; do<br />
+    TOT=$(( $TOT + 1 ))<br />
+done</p>
+<p>Conta occorrenze avanzato</p>
+<p>Scrivere uno script bash che dato il file allegato all'esercizio <a href="https://virtuale.unibo.it/mod/assign/view.php?id=2239085" title="Conta Occorrenze">Conta occorrenze</a> (<a href="https://virtuale.unibo.it/pluginfile.php/2919797/mod_assign/introattachment/0/The_Adventures_Of_Sherlock_Holmes.txt?forcedownload=1">The_Adventures_Of_Sherlock_Holmes.txt</a>):  </p>
+<ul>
+<li>Lanciare due processi in parallelo che contino le occorrenze della parola 'sherlock' case insensitive, il primo processo deve leggere la prima metà del file il secondo processo la seconda metà, alla fine restituisca il risultato totale sul terminale. Per definire metà del file si contino le righe totali e si arrotondi per difetto la prima metà in caso le righe siano dispari</li>
+<li>Eseguire lo stesso esercizio proposto sopra ma quando uno dei due processi termina prima dell'altro questo deve segnalare prontamente la cosa al processo che stà ancora lavorando il quale deve gestire l'interruzione interrompendo il conteggio e restituendo il risultato parziale in un file temporaneo scelto in precedenza; dopo di che deve proseguire il conteggio; lo script deve restituire la somma dei due risultati parziali stampata a terminale</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

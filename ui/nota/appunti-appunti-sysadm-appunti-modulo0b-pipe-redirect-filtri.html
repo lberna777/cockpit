@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_modulo0B_pipe_redirect_filtri.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_modulo0B_pipe_redirect_filtri.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SYSADM/appunti_modulo0B_pipe_redirect_filtri.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="pipe-redirect-e-filtri">Pipe, Redirect e Filtri</h1>
+<p>Su Linux ogni processo lavora con tre flussi di dati:</p>
+<table>
+<thead>
+<tr>
+<th>Flusso</th>
+<th>Numero</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>stdin</td>
+<td>0</td>
+<td>Input standard — tastiera</td>
+</tr>
+<tr>
+<td>stdout</td>
+<td>1</td>
+<td>Output standard — terminale</td>
+</tr>
+<tr>
+<td>stderr</td>
+<td>2</td>
+<td>Output degli errori — terminale</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Redirect e Pipe</strong> servono a reindirizzare questi flussi: prendere input da un file, scrivere output su un file, oppure passare l'output di un comando direttamente a un altro comando.</p>
+<p>Per i test ho creato un file di esempio con <code>cat &gt; frutta.txt &lt;&lt; 'EOF'</code>, che accetta righe finché non incontra una riga contenente solo <code>EOF</code> (delimitatore di fine heredoc).</p>
+<hr />
+<h2 id="output-redirect">Output — Redirect</h2>
+<h3 id="sovrascrittura"><code>&gt;</code> — Sovrascrittura</h3>
+<pre><code class="language-bash">echo &quot;primo contenuto&quot; &gt; output.txt
+</code></pre>
+<p>L'operatore <code>&gt;</code> prende lo stdout di un comando e lo scrive in un file, <strong>sovrascrivendone sempre il contenuto</strong>.</p>
+<h3 id="append"><code>&gt;&gt;</code> — Append</h3>
+<pre><code class="language-bash">echo &quot;secondo contenuto&quot; &gt;&gt; output.txt
+</code></pre>
+<p>L'operatore <code>&gt;&gt;</code> prende lo stdout di un comando e lo scrive in un file <strong>in coda al contenuto esistente</strong>. Usato nei sistemi di logging per aggiungere eventi senza cancellare la storia precedente.</p>
+<hr />
+<h2 id="input-redirect">Input — Redirect</h2>
+<h3 id="input-da-file"><code>&lt;</code> — Input da file</h3>
+<pre><code class="language-bash">wc -l &lt; frutta.txt
+</code></pre>
+<p>L'operatore <code>&lt;</code> fornisce il contenuto di un file come stdin a un comando.</p>
+<hr />
+<h2 id="errori-redirect">Errori — Redirect</h2>
+<h3 id="2-redirect-stderr"><code>2&gt;</code> — Redirect stderr</h3>
+<pre><code class="language-bash">cat file_che_non_esiste.txt 2&gt; errori.txt
+</code></pre>
+<p>L'operatore <code>2&gt;</code> reindirizza i messaggi di errore dentro a un file.</p>
+<h3 id="21-stderr-verso-stdout"><code>2&gt;&amp;1</code> — Stderr verso stdout</h3>
+<pre><code class="language-bash">cat frutta.txt file_inesistente.txt &gt; tutto.txt 2&gt;&amp;1
+</code></pre>
+<p>Con <code>2&gt;&amp;1</code> indico di mandare <strong>stderr</strong> dove sta andando <strong>stdout</strong>. Così sia l'output normale che i messaggi di errore finiscono nello stesso file.</p>
+<hr />
+<h2 id="pipe">Pipe</h2>
+<p>Il carattere <code>|</code> connette lo <strong>stdout</strong> di un comando allo <strong>stdin</strong> del successivo:</p>
+<pre><code>comando1 | comando2 | comando3
+</code></pre>
+<p>Posso ad esempio ordinare le righe di un file alfabeticamente e rimuovere le ripetizioni:</p>
+<pre><code class="language-bash">cat frutta.txt | sort | uniq
+</code></pre>
+<p>Oppure contare quante righe diverse ci sono:</p>
+<pre><code class="language-bash">cat frutta.txt | sort | uniq | wc -l
+</code></pre>
+<p>Oppure stampare ogni riga unica con il numero di occorrenze:</p>
+<pre><code class="language-bash">cat frutta.txt | sort | uniq -c
+</code></pre>
+<hr />
+<h2 id="comandi-utili">Comandi utili</h2>
+<pre><code class="language-bash">head -N file    # stampa le prime N righe
+tail -N file    # stampa le ultime N righe
+tail -f file    # segue il file in tempo reale (utile per monitorare log)
+</code></pre>
+<h3 id="grep-ricerca-nel-testo">grep — ricerca nel testo</h3>
+<pre><code class="language-bash">grep &quot;testo&quot; file    # stampa le righe che contengono &quot;testo&quot;
+</code></pre>
+<p>Flag utili:</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grep -c</code></td>
+<td>Restituisce il numero totale di righe che contengono l'occorrenza (un solo numero)</td>
+</tr>
+<tr>
+<td><code>grep -n</code></td>
+<td>Stampa le righe corrispondenti con il loro numero di riga</td>
+</tr>
+<tr>
+<td><code>grep -v</code></td>
+<td>Stampa le righe che <strong>non</strong> contengono l'occorrenza</td>
+</tr>
+<tr>
+<td><code>grep -i</code></td>
+<td>Ricerca case-insensitive (ignora maiuscole/minuscole)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="esercizi-risposte">Esercizi — risposte</h2>
+<p><strong>1. Quante righe contiene <code>/etc/passwd</code>?</strong></p>
+<pre><code class="language-bash">cat /etc/passwd | wc -l   # → 24
+</code></pre>
+<p><strong>2. Quanti utenti distinti sono in <code>/etc/passwd</code>?</strong></p>
+<pre><code class="language-bash">cat /etc/passwd | cut -d: -f1 | sort | uniq | wc -l   # → 24
+</code></pre>
+<p><code>cut -d: -f1</code> estrae il primo campo usando <code>:</code> come delimitatore (il nome utente). <code>sort | uniq</code> rimuove eventuali duplicati prima di contare.</p>
+<p><strong>3. Quali righe di <code>/var/log/syslog</code> contengono la parola "error" (maiuscolo o minuscolo)?</strong></p>
+<pre><code class="language-bash">sudo grep -i &quot;error&quot; /var/log/syslog   # → 2 risultati
+</code></pre>
+<p>Il flag <code>-i</code> gestisce entrambi i casi in un solo comando.</p>
+<p><strong>4. Ultime 5 righe di <code>/var/log/auth.log</code></strong></p>
+<pre><code class="language-bash">sudo tail -5 /var/log/auth.log
+</code></pre>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[guida_lab_modulo0B_pipe_redirect_filtri]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

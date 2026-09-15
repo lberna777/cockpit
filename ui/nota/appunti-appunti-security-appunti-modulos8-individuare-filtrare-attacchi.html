@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_moduloS8_individuare_filtrare_attacchi.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_moduloS8_individuare_filtrare_attacchi.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SECURITY/appunti_moduloS8_individuare_filtrare_attacchi.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-s8-lab-individuare-e-filtrare-attacchi">Appunti — Modulo S8: LAB — Individuare e filtrare attacchi</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Lezione di riferimento</strong>: <code>lezione_moduloS8_individuare_filtrare_attacchi.md</code>
+<strong>Stato</strong>: modulo di riepilogo trasversale — non esistono appunti grezzi di Lorenzo. Questi appunti simulano il processo di lettura critica (domande plausibili + risposte inline), con particolare attenzione alla zona grigia SNAT/DNAT.</p>
+<blockquote>
+<p>⚠️ Nota metodo: non essendoci grezzi, le domande qui sotto sono ricostruite anticipando i punti su cui Lorenzo tende a inciampare (distinzioni simili-ma-diverse, termini compressi, il <em>perché</em>). L'obiettivo dichiarato è <strong>zero zone grigie</strong> prima del quiz.</p>
+</blockquote>
+<hr />
+<h2 id="la-topologia-capire-chi-parla-con-chi">La topologia — capire chi parla con chi</h2>
+<p>La rete è: <strong>client (10.1.1.1) → r1 → r2 → {s1 (10.2.2.1), s2 (10.3.3.1)}</strong>. r2 è il router centrale con tre interfacce (eth1 verso s1, eth2 verso r1, eth3 verso s2) e fa NAT.</p>
+<blockquote>
+<p><strong>Domanda</strong>: perché è importante che "il routing è completo tra tutti gli host", visto che nell'esercizio di S5 non lo era?
+<strong>Risposta</strong>: perché sposta tutto il peso della sicurezza sul <strong>packet filter</strong>. Se la topologia già segmentasse la rete (come in S5), alcune comunicazioni sarebbero impossibili <em>fisicamente</em>, a prescindere dalle regole. Qui invece ogni macchina può raggiungere ogni altra a livello di instradamento: l'unico confine che impedisce, ad esempio, a un host qualsiasi di bussare alla porta SSH di s1 è la regola nftables. Questo è coerente con la lezione di S5 ("le regole non salvano una topologia che lascia altre strade aperte", e qui <em>tutte</em> le strade sono aperte di default): il default-drop del punto 7 non è un dettaglio, è l'intera difesa.</p>
+<p><strong>Domanda</strong>: perché s1 ha un servizio sulla 8000 <em>e</em> uno sulla 5000, e s2 il contrario? Sembra ridondante.
+<strong>Risposta</strong>: è voluto, e serve solo alla parte di filtraggio (punto 4). Il servizio "principale" di s1 è il binario pwn sulla <strong>8000</strong>; quello di s2 è il web sulla <strong>5000</strong>. Ma il requisito 4 chiede che questi due servizi siano raggiungibili "solo l'uno dall'altro": quindi <strong>s2 deve poter fare da client</strong> verso s1:8000 (4/a) e <strong>s1 deve poter fare da client</strong> verso s2:5000 (4/b). Non è che s1 esponga un secondo servizio nuovo: è che s1, come <em>client</em>, parla con la 5000 di s2, e s2, come <em>client</em>, parla con la 8000 di s1. "Servizio secondario" nella tabella indirizzi significa "in questa comunicazione la macchina è dalla parte del client", non "ospita un secondo demone".</p>
+</blockquote>
+<h2 id="enumerazione-perche-non-fidarsi-di-service">Enumerazione — perché non fidarsi di "SERVICE"</h2>
+<blockquote>
+<p><strong>Domanda</strong>: cosa vuol dire che nmap dice "unrecognized despite returning data"? Se riceve dati, perché non riconosce il servizio?
+<strong>Risposta</strong>: <code>nmap -sV</code> confronta la risposta del servizio con un database di <strong>firme note</strong> (<code>nmap-service-probes</code>). "Unrecognized despite returning data" significa: il servizio <em>ha risposto</em> (quindi è vivo e ha un protocollo), ma quella risposta non combacia con nessuna firma in database, quindi nmap non sa incasellarla con un nome. Non è un fallimento: i dati grezzi ci sono e li puoi leggere tu. Su s2 la "risposta non riconosciuta" contiene un redirect HTTP 308 e l'header <code>Server: Werkzeug/2.2.2 Python/3.11.2</code> — leggendolo <em>tu</em>, capisci che è un web server Flask, anche se nmap non ha una firma esatta per quella versione. La lezione d'esame: <strong>il campo SERVICE è un suggerimento, il fingerprint grezzo è la prova</strong>.</p>
+<p><strong>Domanda</strong>: la nota dice "prima scansioni leggere, poi approfondire" ma nell'esempio usa subito <code>-sV -p-</code>. Qual è la regola giusta?
+<strong>Risposta</strong>: la regola giusta è quella della nota (leggera prima, <code>-sV</code> mirato dopo). Nell'esercizio il docente usa direttamente <code>-sV -p-</code> solo per <strong>sintetizzare</strong> e mostrare il risultato in un colpo, ma avverte esplicitamente che nella pratica conviene il contrario, perché <code>-sV -p-</code> (version detection su tutte le 65535 porte) è <strong>lento</strong>. Sequenza consigliata: prima <code>nmap</code> veloce ad ampio spettro per trovare le porte aperte, poi <code>-sV</code> solo su quelle. All'esame, se ti chiedono la buona pratica, è "prima ampio e leggero, poi profondo e mirato".</p>
+</blockquote>
+<h2 id="buffer-overflow-il-pezzo-di-s4">Buffer overflow — il pezzo di S4</h2>
+<blockquote>
+<p><strong>Domanda</strong>: perché "resta appeso in attesa di input" è la prova che l'overflow ha funzionato? Non dovrebbe crashare?
+<strong>Risposta</strong>: dipende da <em>dove</em> salta l'esecuzione. Quando il return address sullo stack viene sovrascritto con un valore a caso (offset sbagliato), il programma di solito <strong>crasha</strong> (segfault: salta su un indirizzo non valido). Quando invece l'offset è quello giusto e sovrascrivi il return address con l'indirizzo <em>voluto</em> (<code>0x565561ad</code>, che è codice valido che legge da stdin), l'esecuzione <strong>salta lì con successo</strong> e quel codice si mette <strong>in attesa di input</strong> — non crasha, non ritorna, resta appeso. Quindi "si appende invece di crashare o terminare" è esattamente il segnale che hai centrato l'offset (16 byte) e il salto è avvenuto. È lo stesso comportamento osservato in S4 con <code>secret_function_remote</code>.</p>
+<p><strong>Domanda</strong>: cos'è la "bisezione dell'offset"? Perché si chiama così?
+<strong>Risposta</strong>: qui in realtà lo script prova le lunghezze <strong>una per una</strong> (<code>for i in {1..50}</code>), quindi è una ricerca lineare crescente più che una bisezione vera. Il termine "bisezione" (ereditato da S4) indica il <em>principio</em>: cerchi la lunghezza-soglia a cui il comportamento del programma cambia. Puoi trovarla dimezzando l'intervallo (bisezione classica: provo 25, se già va male so che è &lt;25, provo 12, ecc.) oppure incrementando finché non scatta (come fa <code>client.sh</code>). L'idea condivisa è: <strong>non serve conoscere in anticipo la dimensione del buffer, la si scopre osservando a quale lunghezza il comportamento cambia</strong>. Qui cambia a 16.</p>
+<p><strong>Domanda</strong>: cosa fa esattamente <code>( perl -e '...' ; cat ) | nc 10.2.2.1 8000</code>? Perché il <code>cat</code>?
+<strong>Risposta</strong>: è un pattern in due tempi dentro un'unica pipe verso <code>nc</code>:
+1. <code>perl -e 'print "A"x16,"\xad\x61\x55\x56","\n"'</code> genera e "spara" il payload (16 byte di riempimento + return address) che dirotta l'esecuzione: dopo questo, sul server c'è una shell in attesa di comandi.
+2. <code>cat</code> (senza argomenti) legge da <strong>stdin</strong> e lo ributta su stdout: serve a <strong>tenere il canale aperto</strong> e a inoltrare a <code>nc</code> ciò che tu digiti sulla tastiera. Senza <code>cat</code>, dopo il payload la pipe si chiuderebbe subito e non potresti interagire con la shell ottenuta.
+Le parentesi <code>( ... )</code> creano una subshell il cui output complessivo (payload + poi tutto quello che digiti) viene mandato a <code>nc</code>, cioè al servizio remoto. Risultato: shell root su s1, interattiva.</p>
+</blockquote>
+<h2 id="command-injection-il-pezzo-di-s3">Command injection — il pezzo di S3</h2>
+<blockquote>
+<p><strong>Domanda</strong>: il filtro blocca <code>;</code>, <code>e</code>, <code>|</code>. La <code>e</code> è la lettera "e"? E se <code>/etc/passwd</code> contiene delle "e", come fa <code>cat /etc/passwd</code> a funzionare?
+<strong>Risposta — chiarito</strong>: no, non è un terzo carattere filtrato. Nel testo sorgente la frase era "filtra solo i caratteri <code>;</code> e <code>|</code>" — la "e" è la <strong>congiunzione italiana</strong> tra i due caratteri elencati (<code>;</code> <strong>e</strong> <code>|</code>), non un carattere bloccato a sua volta. Il filtro blocca <strong>due</strong> caratteri, non tre. Il punto concettuale resta comunque quello che conta all'esame: la blacklist blocca i <strong>separatori di comando "ovvi"</strong> — il <code>;</code> (concatena comandi) e la pipe <code>|</code>. Il meccanismo di bypass non dipende dai singoli caratteri della blacklist, ma dal fatto che <strong>esistono altri modi di eseguire comandi che non usano quei separatori</strong>: la command substitution <code>$(...)</code> e il concatenamento <code>&amp;</code>/<code>&amp;&amp;</code>. Nota che i payload esfiltrano <code>/etc/passwd</code> e <code>flag.txt</code> via URL-encoding (<code>%2F</code> per <code>/</code>, <code>%20</code> per lo spazio, <code>%26</code> per <code>&amp;</code>): il filtro agisce sul valore del parametro <code>filepath</code>, e i costrutti scelti (<code>$(cat ...)</code>, <code>...&amp;cat...</code>) passano perché non contengono un separatore vietato. In sede d'esame concentrati su: <strong>blacklist parziale sui separatori → bypass con <code>$(...)</code>/<code>&amp;</code> → il vero fix è la whitelist</strong>.</p>
+<p><strong>Domanda</strong>: qual è la differenza tra <code>$(...)</code>, <code>&amp;</code> e <code>&amp;&amp;</code>? Sono intercambiabili qui?
+<strong>Risposta</strong>: fanno cose leggermente diverse ma nel contesto dell'injection ottengono lo scopo:
+- <code>$(comando)</code> — <strong>command substitution</strong>: la shell esegue <code>comando</code>, ne cattura l'output e lo <em>sostituisce</em> al posto di <code>$(...)</code>. Qui <code>stat $(cat /etc/passwd)</code> esegue prima <code>cat /etc/passwd</code> e ne inietta l'output; l'output del contenuto finisce nel messaggio d'errore di <code>stat</code> (che non trova un file con quel nome) e così viene esfiltrato.
+- <code>&amp;</code> — esegue il comando <strong>in background</strong> e passa al successivo; usato come <code>A &amp; B</code> avvia A e poi esegue B.
+- <code>&amp;&amp;</code> — esegue B <strong>solo se A ha successo</strong> (AND logico).
+Nel bypass sono equivalenti nell'obiettivo (eseguire un secondo comando accanto a <code>stat</code>), la differenza è il meccanismo. La trascrizione mostra sia <code>$(cat /etc/passwd)</code> sia la variante <code>stat /etc/passwd &amp; cat /etc/passwd</code> (con <code>&amp;</code> = <code>%26</code>).</p>
+</blockquote>
+<h2 id="analisi-del-traffico-i-tre-criteri-di-triage">Analisi del traffico — i tre criteri di triage</h2>
+<blockquote>
+<p><strong>Domanda</strong>: i tre criteri di Wireshark (connessioni complete / stessi endpoint / no protocolli ingannevoli) sembrano scollegati. C'è una logica unica dietro?
+<strong>Risposta</strong>: sì, la logica è <strong>escludere ciò che NON è l'attacco che cerchi</strong>, per pattern grossolani, prima di leggere i payload. Ogni criterio esclude una classe di traffico:
+- <strong>connessioni complete</strong> → escludi i SYN flood / port scan a metà (che non completano l'handshake, non hanno ACK di risposta). L'attacco che cerchi (pwn, injection) è fatto di connessioni <em>complete e funzionanti</em>.
+- <strong>stessi endpoint</strong> → escludi le enumerazioni (che toccano molti IP/porte diversi). Il tuo attacco riuscito è una conversazione mirata <em>tra due host precisi</em>.
+- <strong>niente DHCP/ARP</strong> → escludi gli attacchi che manipolano la <em>consegna</em> (chi-è-chi in rete) invece del <em>contenuto</em>. Qui l'attacco è nel payload applicativo, non nella risoluzione degli indirizzi.
+È lo stesso triage per esclusione di S10: da migliaia di pacchetti a poche connessioni plausibili, senza aver ancora aperto un singolo payload.</p>
+</blockquote>
+<h2 id="suricata-le-due-regole">Suricata — le due regole</h2>
+<blockquote>
+<p><strong>Domanda</strong>: perché la firma del BOF è l'indirizzo <code>|ad 61 55 56|</code> e non la sequenza di <code>A</code>? Le <code>A</code> non sono più caratteristiche dell'attacco?
+<strong>Risposta</strong>: è il contrario. Le <code>A</code> sono solo <strong>riempimento generico</strong> scelto dall'attaccante — potrebbe usare qualunque byte, e sequenze lunghe di uno stesso carattere possono comparire per caso in traffico legittimo (upload, dati binari): firmerebbero un sacco di <strong>falsi positivi</strong>. L'indirizzo di ritorno <code>0x565561ad</code> invece è <strong>specifico di quell'exploit</strong>: è l'indirizzo concreto della funzione a cui l'attaccante vuole saltare, un valore che non ricorre per caso nel traffico normale. Per questo la regola cerca i byte grezzi <code>|ad 61 55 56|</code> (la notazione Suricata <code>|...|</code> = sequenza esadecimale). Principio generale NIDS: <strong>firma su ciò che è invariante e specifico dell'attacco, non su ciò che è variabile e rumoroso</strong>.</p>
+<p><strong>Domanda</strong>: cosa fa <code>detection_filter:track by_src, count 10, seconds 60</code>? È obbligatorio?
+<strong>Risposta</strong>: non è obbligatorio, è un <strong>tuning anti-falsi-positivi</strong>. Dice a Suricata: "fai scattare l'alert solo se questa firma compare <strong>più di 10 volte in 60 secondi</strong>, contando <strong>per indirizzo sorgente</strong> (<code>track by_src</code>)". La ragione: un singolo pacchetto con quei byte potrebbe essere casuale; una <em>raffica</em> ripetuta in poco tempo dallo stesso mittente è un segnale molto più forte di un vero tentativo di exploit (che, ricorda, prova tanti offset in fila → tanti pacchetti). Incarna il compromesso centrale del NIDS: alzare la soglia riduce i falsi positivi ma rischia di perdere attacchi "lenti"; abbassarla è più sensibile ma più rumoroso.</p>
+<p><strong>Domanda</strong>: nella regola web, a cosa servono <code>http.uri</code> e <code>http_decode_uri</code>? Non basta cercare la stringa?
+<strong>Risposta</strong>: no, e il motivo è l'<strong>URL-encoding</strong>. L'attacco arriva codificato (<code>%26</code> per <code>&amp;</code>, <code>%2F</code> per <code>/</code>, ecc.). <code>http.uri</code> dice a Suricata di guardare specificamente il campo URI della richiesta HTTP (non tutto il pacchetto); <code>http_decode_uri</code> <strong>normalizza</strong> l'URI decodificando il percent-encoding, così che <code>%26</code> ridiventi <code>&amp;</code> <em>prima</em> del match. Senza la normalizzazione, l'attaccante evaderebbe la firma semplicemente codificando i caratteri chiave. È lo stesso principio della normalizzazione vista in S10/S3: <strong>normalizza prima di confrontare</strong>, altrimenti la firma si aggira con banali ri-codifiche.</p>
+</blockquote>
+<h2 id="snat-vs-dnat-la-zona-grigia-sciolta-del-tutto">SNAT vs DNAT — la zona grigia, sciolta del tutto</h2>
+<blockquote>
+<p><strong>Domanda</strong>: i requisiti 2 e 3 mi sembrano identici — in entrambi il client raggiunge un server via r1→r2. Perché uno è SNAT e l'altro DNAT? Come li distinguo senza sbagliare al quiz?
+<strong>Risposta</strong>: sono davvero simili nel percorso, e questa è <em>la</em> trappola del modulo. La chiave è chiedersi <strong>cosa viene mascherato: il mittente o il destinatario?</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Requisito 2 (SNAT)</th>
+<th>Requisito 3 (DNAT)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Testo consegna</td>
+<td>"mascherato <strong>come se provenisse da</strong> r2"</td>
+<td>"come se fosse <strong>esposto da</strong> r2 sulla porta 222"</td>
+</tr>
+<tr>
+<td>Cosa si maschera</td>
+<td>la <strong>sorgente</strong> (chi bussa)</td>
+<td>la <strong>destinazione</strong> (a chi si bussa)</td>
+</tr>
+<tr>
+<td>Chi viene "ingannato"</td>
+<td><strong>s1</strong> (crede di parlare con r2, non col client)</td>
+<td>il <strong>client</strong> (crede di parlare con r2:222, non con s2:22)</td>
+</tr>
+<tr>
+<td>Indirizzo che il client digita</td>
+<td>l'IP <strong>reale</strong> di s1 (10.2.2.1:22)</td>
+<td>un IP <strong>finto</strong>, 10.9.9.2:222</td>
+</tr>
+<tr>
+<td>Chain / hook</td>
+<td><strong>POSTROUTING</strong> (<code>priority srcnat</code>)</td>
+<td><strong>PREROUTING</strong> (<code>priority dstnat</code>)</td>
+</tr>
+<tr>
+<td>Statement</td>
+<td><code>snat to 10.2.2.254</code></td>
+<td><code>dnat to 10.3.3.1:22</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Come ricordarlo senza tabella</strong>:
+- <strong>S</strong>NAT = <strong>S</strong>ource, cambia il <strong>mittente</strong> → agisce quando il pacchetto sta per <strong>uscire</strong>, cioè <strong>POSTROUTING</strong> (l'ultimo hook). Il server non deve sapere chi è il vero client → gli fai vedere r2 come sorgente.
+- <strong>D</strong>NAT = <strong>D</strong>estination, cambia il <strong>destinatario</strong> → deve agire <strong>prima</strong> della decisione di routing (è la destinazione riscritta a decidere <em>dove</em> instradare!), cioè <strong>PREROUTING</strong> (il primo hook). Il client si connette a un indirizzo/porta che non esistono davvero (10.9.9.2:222) e r2 li riscrive verso s2 reale (10.3.3.1:22).</p>
+<p>Frase-chiave da fissare: <strong>"Source ⇒ Post (uscita), Destination ⇒ Pre (entrata)"</strong>. E il nome della priority te lo conferma: <code>srcnat</code> sta in postrouting, <code>dstnat</code> in prerouting.</p>
+<p><strong>Domanda</strong>: perché DNAT <em>deve</em> stare in PREROUTING e non potrebbe stare dopo? È una regola arbitraria?
+<strong>Risposta</strong>: non è arbitraria, è <strong>causale</strong>. La decisione di routing ("dove mando questo pacchetto?") si basa sull'<strong>indirizzo di destinazione</strong>. Se vuoi cambiare la destinazione (DNAT), devi farlo <em>prima</em> che il kernel decida dove instradare, altrimenti il pacchetto verrebbe instradato verso l'indirizzo finto (10.9.9.2) e non arriverebbe mai a s2. Perciò DNAT vive in PREROUTING (prima del routing). Specularmente, SNAT cambia solo la sorgente, che non influenza il routing: puoi farlo all'ultimo momento, in POSTROUTING, appena prima che il pacchetto esca. È lo stesso ragionamento sugli hook di netfilter visto in S5 ("la catena decide <em>quando</em> nel ciclo di vita del pacchetto la regola scatta").</p>
+<p><strong>Domanda</strong>: perché per il traffico di ritorno del NAT non serve una regola? Se ho tradotto l'indirizzo all'andata, al ritorno non devo "ritradurlo"?
+<strong>Risposta</strong>: sì, va ritradotto, ma lo fa <strong>da solo il conntrack</strong>, non tu. Quando la regola NAT traduce il <em>primo</em> pacchetto di una connessione, netfilter registra l'associazione (indirizzo originale ↔ tradotto) nella tabella conntrack. Da quel momento <strong>tutti i pacchetti successivi della stessa connessione, in entrambe le direzioni, vengono tradotti automaticamente</strong> secondo quell'associazione — comprese le risposte, che vengono ri-tradotte all'indirizzo originale prima ancora che tu le riveda. Ecco perché nel <code>r2.nft</code> c'è <strong>una sola</strong> regola SNAT e <strong>una sola</strong> DNAT, senza la loro "inversa": scriverla sarebbe ridondante e sbagliato. È esattamente il conntrack di S5.</p>
+</blockquote>
+<h2 id="nat-vs-filter-non-confonderli">NAT vs filter — non confonderli</h2>
+<blockquote>
+<p><strong>Domanda</strong>: se ho messo SNAT/DNAT su r2, perché nel file r2.nft ci sono ancora le regole FORWARD? Il NAT non basta a far passare il traffico?
+<strong>Risposta</strong>: no, e questa è una seconda zona grigia. <strong>NAT e filter rispondono a due domande diverse e indipendenti</strong>:
+- la tabella <strong>nat</strong> (PREROUTING/POSTROUTING) risponde a <em>"quali indirizzi/porte deve mostrare questo pacchetto?"</em> — riscrive, ma <strong>non decide se passa</strong>. Anzi, la sua policy è <code>accept</code> proprio perché non è lì che si filtra.
+- la tabella <strong>filter</strong> (INPUT/OUTPUT/<strong>FORWARD</strong>) risponde a <em>"questo pacchetto ha il permesso di passare?"</em> — con <code>policy drop</code> di default.
+Con default-drop su FORWARD, se non scrivi la coppia di regole FORWARD per una connessione, quel traffico viene <strong>scartato</strong>, NAT o non NAT. Il NAT ti cambia gli indirizzi ma non ti apre il varco. Slogan da ricordare: <strong>"il NAT dice <em>come</em> si vede il pacchetto, il filter dice <em>se</em> passa"</strong>. Servono entrambi.</p>
+</blockquote>
+<h2 id="il-pattern-nftables-generale-da-riscrivere-a-memoria">Il pattern nftables generale (da riscrivere a memoria)</h2>
+<blockquote>
+<p><strong>Domanda</strong>: c'è uno schema fisso per costruire questi file .nft senza doverli imparare a memoria caso per caso?
+<strong>Risposta</strong>: sì, ed è il vero "trucco" d'esame. Tre regole:
+1. <strong>Host non-router</strong> (client, s1, s2): chain INPUT e OUTPUT con <code>policy drop</code>; prima riga sempre <code>iif lo accept</code> / <code>oif lo accept</code> (il loopback non va mai bloccato); poi, per <strong>ogni comunicazione permessa</strong>, una <strong>coppia</strong> di regole:
+   - andata: match sulla <strong>porta di destinazione</strong> (<code>tcp dport N accept</code>);
+   - ritorno: match sulla <strong>porta sorgente</strong> + <code>ct state established accept</code>.
+   Chi <em>inizia</em> la connessione ha <code>dport</code> nell'OUTPUT e la risposta con <code>sport ... established</code> nell'INPUT; chi la <em>riceve</em> ha il contrario.
+2. <strong>Router</strong> (r1, r2): stesso schema di coppie andata/ritorno, ma nella chain <strong>FORWARD</strong>, e con <code>iif</code>/<code>oif</code> espliciti (da quale interfaccia entra, verso quale esce) per instradare correttamente.
+3. <strong>NAT solo dove serve</strong> (qui solo r2): si <strong>aggiunge</strong> alle regole filter, non le sostituisce; conntrack copre il ritorno.
+Se interiorizzi "coppia dport-andata / sport+established-ritorno" e "non-router→INPUT/OUTPUT, router→FORWARD", puoi ricostruire qualunque file di questo esercizio ragionando, senza memorizzarli.</p>
+<p><strong>Domanda</strong>: perché nel ritorno c'è quasi sempre <code>ct state established</code> ma nell'andata no?
+<strong>Risposta</strong>: perché l'andata è il pacchetto che <strong>inizia</strong> la connessione (<code>NEW</code>): non c'è ancora nessuno stato "established" da matchare, la fai passare in base a porta/indirizzo. Il ritorno invece appartiene a una connessione <strong>già aperta</strong> dall'andata: <code>ct state established</code> dice "accetta questo pacchetto solo se fa parte di una connessione che <em>io</em> ho già visto iniziare e autorizzato". È più sicuro che aprire genericamente la porta sorgente: eviti che qualcuno sfrutti quella regola di ritorno per iniziare una connessione non autorizzata "al contrario". È lo stateful filtering di S5.</p>
+</blockquote>
+<hr />
+<h2 id="connessioni-riepilogo-trasversale">Connessioni (riepilogo trasversale)</h2>
+<blockquote>
+<p>Questo modulo <strong>è</strong> una sezione connessioni fatta esercizio. Ogni pezzo richiama un modulo:
+- <strong>S1</strong> — <code>nmap -sV -p-</code>, lettura del fingerprint grezzo (Werkzeug/Flask "unrecognized").
+- <strong>S3</strong> — command injection via <code>filepath</code>, bypass blacklist con <code>$(...)</code>/<code>&amp;</code>.
+- <strong>S4</strong> — buffer overflow, offset 16, return address little-endian <code>\xad\x61\x55\x56</code> = <code>0x565561ad</code>, <code>( payload ; cat ) | nc</code>.
+- <strong>S10</strong> — triage Wireshark per esclusione; firme Suricata (<code>|ad 61 55 56|</code>, pcre su URI), <code>detection_filter</code>, <code>http_decode_uri</code>.
+- <strong>S5</strong> — packet filter default-drop, coppie andata/ritorno, SNAT/DNAT, hook PRE/POSTROUTING, conntrack.</p>
+</blockquote>
+<h2 id="domande-di-autoverifica-risposte">Domande di autoverifica — Risposte</h2>
+<p><em>(dalla lezione; c'è penalità per errore all'esame reale)</em></p>
+<ol>
+<li><strong>Falso</strong> — la firma affidabile del BOF è l'indirizzo di ritorno (<code>|ad 61 55 56|</code>), non i <code>A</code> di riempimento.</li>
+<li><strong>Falso</strong> — il fingerprint grezzo (header Werkzeug/Python, redirect 308) identifica comunque il servizio come web.</li>
+<li><strong>(a)</strong> — DNAT in <strong>PREROUTING</strong>, <code>priority dstnat</code>, <code>dnat to 10.3.3.1:22</code>.</li>
+<li><strong>(b)</strong> — SNAT in <strong>POSTROUTING</strong> (mascherare la sorgente = "provenisse da r2").</li>
+<li><strong>Vero</strong> — filter e nat sono ortogonali; le regole FORWARD servono comunque.</li>
+<li><strong>Falso</strong> — il conntrack gestisce il de-NAT del ritorno; nessuna regola inversa.</li>
+<li><strong>(c)</strong> — <code>$(cmd)</code> non contiene separatori filtrati.</li>
+<li><strong>Vero</strong> — "appeso in attesa di input" = salto riuscito all'indirizzo target.</li>
+<li><strong>Vero</strong> — little-endian: <code>ad 61 55 56</code> → <code>0x565561ad</code>.</li>
+<li><strong>(b)</strong> — il SYN flood senza ACK viola il criterio "connessioni complete".</li>
+</ol>
+<h2 id="riepilogo">Riepilogo</h2>
+<blockquote>
+<p>⚠️ Sezione non presente in appunti grezzi (non esistono grezzi per questo modulo).</p>
+</blockquote>
+<ul>
+<li><strong>Modulo di sintesi</strong>: enumerazione (S1) → pwn (S4) → command injection (S3) → analisi traffico (S10) → Suricata (S10) → packet filtering/NAT (S5), stesso scenario.</li>
+<li><strong>Firme su ciò che è specifico</strong>: indirizzo di ritorno, catena <code>filepath=...bypass...flag.txt</code>; <code>detection_filter</code> e <code>http_decode_uri</code> per robustezza.</li>
+<li><strong>SNAT vs DNAT</strong> (la trappola): SNAT = Source = <strong>POSTROUTING</strong> (<code>srcnat</code>), maschera il mittente, inganna il server; DNAT = Destination = <strong>PREROUTING</strong> (<code>dstnat</code>), maschera il destinatario, inganna il client. DNAT deve stare in PREROUTING perché la destinazione decide il routing. Il NAT <strong>si aggiunge</strong> al filter; conntrack copre il ritorno.</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[lezione_moduloS8_individuare_filtrare_attacchi]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

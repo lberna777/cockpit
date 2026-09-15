@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>template_report_binary.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">template_report_binary.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/template_report_binary.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="template-deliverable-binary-exploitation-boftxt-pwntxt-screenshot">Template — deliverable Binary Exploitation (bof.txt / pwn.txt + screenshot)</h1>
+<blockquote>
+<p>Struttura riutilizzabile per il resoconto testuale richiesto negli esercizi di Binary Exploitation
+(il file si chiama <code>bof.txt</code> nelle consegne 2021–2024, <code>pwn.txt</code> in quelle 2025–2026). Ogni sezione
+indica, tra <code>[ ]</code>, <strong>da dove</strong> ricavare l'informazione e <strong>con quale comando</strong>. Generalizzato per
+ogni ramo (ret2secret-function / shellcode injection / ret2libc) e per PIE/non-PIE, SUID o no.
+Vedi <code>modello_binary_exploitation.md</code> per 7 esempi reali compilati, <code>guida_esame_binary.md</code> per la
+scelta del ramo, <code>procedura_operativa_binary.md</code> per le zone grigie.</p>
+<p>⚠️ <strong>Il livello di dettaglio della descrizione è criterio di valutazione esplicito</strong>: includi il
+ragionamento (perché quell'offset, perché quella funzione/quel bad char), non solo la sequenza di
+comandi. Puoi includere anche i tentativi falliti (utile: dimostra il metodo).</p>
+</blockquote>
+<hr />
+<h2 id="a-file-di-testo-boftxt-pwntxt">A. File di testo — <code>bof.txt</code> / <code>pwn.txt</code></h2>
+<pre><code>=========================================================
+BOF.TXT / PWN.TXT — Esercizio &lt;data&gt; (&lt;nome binario&gt;)
+Binary Exploitation — buffer overflow x86_32
+=========================================================
+
+FLAG:
+  SEC{&lt;...&gt;}                    [ ret2secret: stampata dalla funzione target ]
+                                [ shellcode/ret2libc: se l'obiettivo è una shell, riporta invece
+                                  l'output di `id`/il prompt ottenuto ]
+
+[ SOLO se richiesta la password (bonus ex6/ex7): ]
+PASSWORD:
+  &lt;password&gt;                    [ da `strings &lt;bin&gt;` oppure da gdb: x/s $eax a un breakpoint
+                                  prima della strcmp — vedi sezione BONUS in fondo ]
+
+PAYLOAD FINALE:
+  [ input via ARGV (i 7 casi del pool): ]
+  ./&lt;bin&gt; $(python -c 'print(&quot;A&quot;*&lt;OFFSET&gt; + &quot;&lt;...little-endian...&gt;&quot;)')
+                                [ o perl -e 'print &quot;A&quot;x&lt;OFFSET&gt;, &quot;&lt;...&gt;&quot;' ]
+  [ input via STDIN (binario gets/fgets/read — vedi guida §4-bis): il payload è lo stesso,
+    cambia il TRASPORTO. Riporta il comando effettivamente usato, es: ]
+  python3 -c 'import sys; sys.stdout.buffer.write(b&quot;A&quot;*&lt;OFFSET&gt; + b&quot;&lt;...&gt;&quot;)' | ./&lt;bin&gt;
+                                [ oppure  ./&lt;bin&gt; &lt; payload.bin  /  ./&lt;bin&gt; &lt;&lt;&lt; &quot;$(...)&quot; ]
+  [ ret2secret:      &quot;A&quot;*OFFSET + &lt;indirizzo funzione, byte invertiti&gt; ]
+  [ shellcode inj.:  &quot;\x90&quot;*(OFFSET-LEN) + &lt;shellcode LEN byte&gt; + &lt;indirizzo nel NOP sled&gt; ]
+  [ ret2libc:        &quot;\x90&quot;*OFFSET + &lt;system&gt; + &lt;exit&gt; + &lt;addr &quot;/bin/sh&quot;&gt; , con &quot;$( )&quot; QUOTATO ]
+  [ NB stdin: 0x00 diventa USABILE, 0x0a (newline) è il nuovo bad char — vedi guida §4-bis.3 ]
+
+---------------------------------------------------------
+DESCRIZIONE DEI PASSAGGI
+---------------------------------------------------------
+
+0. Ambiente
+   - ASLR disabilitata:  echo 0 | sudo tee /proc/sys/kernel/randomize_va_space   (verifica: cat ... = 0)
+   [ motiva: serve per avere indirizzi stabili tra gdb ed esecuzione standalone ]
+
+1. Triage del binario
+   - file ./&lt;bin&gt;              → ELF 32-bit i386
+   - readelf -lW ./&lt;bin&gt; | grep GNU_STACK   → &lt;RWE = stack eseguibile | RW = NX attivo&gt;
+   - nm ./&lt;bin&gt; (funzioni)     → &lt;PIE (0x0000..) | non-PIE (0x0804..)&gt;; funzioni segrete presenti? &lt;sì/no&gt;
+   - ls -l ./&lt;bin&gt;             → &lt;SUID? sì/no&gt;
+   - vettore d'ingresso        → &lt;argv (./bin $(…)) | stdin (gets/fgets/read → payload su pipe/file, guida §4-bis)&gt;
+   [ conclusione triage: il ramo scelto è &lt;ret2secret-function | shellcode injection | ret2libc&gt; perché &lt;...&gt; ]
+
+2. Ricerca dell'offset (bisezione)
+   [ incolla i tentativi significativi con l'interpretazione del crash: ]
+   (gdb) run $(perl -e 'print &quot;A&quot;x&lt;N&gt;')        → &lt;SIGSEGV in &lt;func&gt; = corto (EBP) | SIGILL = ret storto | ...&gt;
+   (gdb) run $(perl -e 'print &quot;A&quot;x&lt;OFF&gt;,&quot;BBBB&quot;') → Program received signal SIGSEGV, 0x42424242 in ?? ()
+   [ conclusione: offset = &lt;OFF&gt; byte, perché con OFF A + BBBB l'EIP vale esattamente 0x42424242 ]
+
+3. Individuazione dell'indirizzo target
+   [ ret2secret: elenca le funzioni candidate e i tentativi ]
+     info functions  (dopo un `run`, se PIE)  →
+        0x........  &lt;func1&gt;   → &lt;output decoy&gt;
+        0x........  &lt;funcOK&gt;  → SEC{...}   ✅
+     [ spiega: il nome NON è affidabile, provate tutte finché non compare SEC{...} ]
+   [ shellcode: x/200xw $esp → fascia dei 0x41414141; indirizzo NOP sled scelto = 0x........ ]
+   [ ret2libc: p system = 0x........ ; p exit = 0x........ ; find $esp,+0x3000,&quot;SHELL=&quot; → /bin/sh a 0x........+6 ]
+
+4. Costruzione del payload finale
+   [ come si compone, con il valore in little-endian e il perché di ogni pezzo ]
+   [ eventuali bad character incontrati e come risolti (0x00 → indirizzo vicino / 0x20 → quoting del $()) ]
+
+5. Esecuzione e risultato
+   [ ret2secret: ./&lt;bin&gt; &lt;payload&gt; → SEC{...} (poi Segmentation fault, atteso: la flag esce prima) ]
+   [ shellcode/ret2libc: shell aperta; se SUID → id → uid=0(root), verificato FUORI da gdb ]
+
+---------------------------------------------------------
+[ BONUS — recupero password, solo ex6/ex7 ]
+---------------------------------------------------------
+Metodo A (in chiaro):   strings ./&lt;bin&gt;  → &lt;password&gt;
+Metodo B (de-offuscata): b *&lt;addr prima di strcmp&gt; ; run ciao ; x/s $eax → &lt;password&gt;
+[ nota: il metodo B funziona solo se il programma de-offusca la password per confrontarla;
+  non funziona per sistemi reali che hashano l'input e confrontano col digest ]
+</code></pre>
+<hr />
+<h2 id="b-screenshot-da-consegnare">B. Screenshot da consegnare</h2>
+<p>La consegna chiede <strong>2 o più</strong> screenshot. Nomi ricorrenti nel pool: <code>overflow.png</code>, <code>payload.png</code>,
+<code>exploit.png</code>, <code>overflowNN.png</code>. Copertura minima:</p>
+<table>
+<thead>
+<tr>
+<th>Screenshot</th>
+<th>Cosa deve mostrare</th>
+<th>Comando che lo produce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>overflow.png</strong> (controllo del ret address)</td>
+<td>il crash con <code>0x42424242 in ?? ()</code> dal payload <code>A</code>*OFFSET + <code>BBBB</code> — prova che controlli l'indirizzo di ritorno</td>
+<td><code>(gdb) run $(perl -e 'print "A"x&lt;OFF&gt;,"BBBB"')</code></td>
+</tr>
+<tr>
+<td><strong>payload.png / exploit.png</strong> (exploit riuscito)</td>
+<td>il payload finale + il risultato: <code>SEC{...}</code> stampata, <strong>oppure</strong> la shell ottenuta (<code>$</code>, <code>executing new program: /bin/sh</code>, <code>id</code> → <code>uid=0</code>)</td>
+<td>argv: <code>./&lt;bin&gt; $(python -c '...')</code> — <strong>stdin</strong>: <code>python3 -c '...' \| ./&lt;bin&gt;</code> (o <code>./&lt;bin&gt; &lt; payload.bin</code>)</td>
+</tr>
+<tr>
+<td>(opzionali <code>overflowNN.png</code>)</td>
+<td>i tentativi intermedi / le funzioni decoy provate — utili quando la consegna chiede "la metodologia di ricerca" (ex6/ex7)</td>
+<td>i vari <code>run</code> di bisezione e prova funzioni</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Regole per gli screenshot</strong> (dai deliverable persi al revert VM, memory <code>feedback_deliverable_vm_revert</code>):
+- Cattura gli screenshot <strong>durante</strong> l'esercizio, non a fine sessione — se la VM viene ripristinata a
+  uno snapshot pulito perdi i file.
+- Assicurati che nello screenshot siano leggibili: il <strong>comando completo</strong> (payload incluso) e
+  l'<strong>output rilevante</strong> (<code>0x42424242 in ?? ()</code>, oppure <code>SEC{...}</code> / il prompt di shell / <code>uid=0</code>).</p>
+<hr />
+<h2 id="c-confezionamento-finale">C. Confezionamento finale</h2>
+<pre><code class="language-bash">ls -la     # verifica di avere il file di testo (bof.txt/pwn.txt) + tutti gli screenshot richiesti
+</code></pre>
+<p>Rispetta il <strong>nome file</strong> esatto della consegna (<code>bof.txt</code> vs <code>pwn.txt</code>; <code>overflow.png</code>/<code>payload.png</code>
+vs <code>overflowNN.png</code>) e il <strong>numero minimo</strong> di screenshot richiesto.</p>
+<hr />
+<h2 id="checklist-rapida-prima-di-consegnare">Checklist rapida prima di consegnare</h2>
+<ul>
+<li>[ ] Offset e indirizzi sono <strong>quelli del binario d'esame</strong>, trovati da te (non copiati dal modello).</li>
+<li>[ ] La sezione bisezione mostra il crash <code>0x42424242 in ?? ()</code> che <strong>prova</strong> il controllo del ret address.</li>
+<li>[ ] (ret2secret) Hai provato <strong>tutte</strong> le funzioni candidate e riconosciuto <code>SEC{...}</code> come unica valida
+      — e lo hai scritto (dimostra il metodo, non solo il risultato).</li>
+<li>[ ] Eventuali <strong>bad character</strong> incontrati sono documentati col rimedio applicato (indirizzo vicino / quoting).</li>
+<li>[ ] Il payload finale nel testo è <strong>esattamente</strong> quello dello screenshot dell'exploit riuscito.</li>
+<li>[ ] (shellcode/ret2libc) L'esito è verificato <strong>fuori</strong> da gdb; se SUID, lo screenshot mostra <code>uid=0(root)</code>.</li>
+<li>[ ] La descrizione spiega il <strong>perché</strong> (offset, scelta funzione, meccanismo del bypass), non è solo
+      un elenco di comandi — il dettaglio è criterio di voto.</li>
+<li>[ ] (bonus) Se richiesta, la password è riportata con il metodo usato per ottenerla.</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[guida_esame_binary]]</li>
+<li>[[procedura_operativa_binary]]</li>
+<li>[[modello_binary_exploitation]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diario · cockpit</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="index.html">Oggi</a>
+    <a href="laurea.html">Laurea</a>
+    <a href="corsi.html">Corsi</a>
+    <a href="materiali.html">Materiali</a>
+    <a href="workflow.html">Workflow</a>
+    <a href="diario.html" aria-current="page">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<h1 class="titolo-pagina">Diario</h1>
+<p class="tenue">32 voci fra recap giornalieri e note curate.</p>
+<article class="voce-diario" data-entra>
+  <h2>2026-08-01</h2>
+  <div class="prosa"><h1 id="recap-2026-08-01">Recap 2026-08-01</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="commit">Commit</h3>
+<p><strong>bibiciclo</strong>:
+  - af8087f fix: giorni fertili visibili e .ics aperto invece che salvato
+  - 73444dd docs: registro delle verifiche e delle questioni aperte
+  - e9ca4a1 test: make durataMestruazioni fixtures actually discriminate old vs new rule
+  - 963edea fix: final review wave — restore safety, honesty of predictions, docs
+  - edd76a6 feat: schermata impostazioni, calendario iOS e backup
+  - 220d6c5 docs: il ripristino dichiara quante voci ha scartato
+  - d88dcc2 fix: detect silent data loss during backup restore
+  - 3447e50 feat: esportazione e importazione dei dati
+  - 596b0c8 docs: UID stabili per posizione, SEQUENCE crescente dall'installazione
+  - 57d4d9b fix: UIDs slot-based per idempotenza, SEQUENCE, escaping, test robustezza
+  - 757cf8e feat: generazione degli eventi .ics per il Calendario iOS
+  - 5bfa4b7 fix(ui): correggere gap e padding bottoni navigazione calendario
+  - 780f354 feat(ui): vista calendario mensile
+  - 0b422f7 docs: ramo 'oggi' e accordo singolare/plurale nella schermata Oggi
+  - be35b09 fix(ui): singular/plural agreement for day counts in predictions and warnings
+  - 3b0105f feat(ui): add special case for period due today (giorniAlProssimo === 0)
+  - 1382fb6 fix(ui): explicit line-height for calendar button, square touch targets for month arrows
+  - d2c2d24 fix(ui): touch targets for month arrows, calendar link, and day cells
+  - bc1198a docs: vincolo globale 44px sulle aree di tocco e correzioni nel piano
+  - 031772a feat(ui): schermata Oggi
+  - 22bf184 docs: il foglio di registrazione va montato con key={data}
+  - c9f35ff fix(ui): touch target compliance — add py-3 to text buttons
+  - c1ee657 feat(ui): foglio di registrazione del flusso
+  - 7be10b3 docs: onboarding con tasto indietro e pavimento a 180 giorni
+  - 18493b4 fix(ui): aumenta altezza touch target pulsante indietro a 44px
+  - 2d1d78d fix(ui): correggi guardia navigazione mese per controllare ultimo giorno
+  - 0a0128d fix(ui): aggiunta pulsante indietro e limite minimo di 180 giorni
+  - 5774dce feat(ui): primo avvio con avvertenza e due domande
+  - 2f413d5 feat(ui): guscio dell'app e barra delle schede
+  - 0c7bd9b docs: schermata d'errore all'avvio e firewall dati in db.ts
+  - 44ecd53 fix(storage,core): valida dayLogs, deriva periods, preserva schemaVersion futuro, gestisci errori nello store
+  - 966456c feat: persistenza su IndexedDB e store Zustand
+  - 2357283 docs: i cicli sono derivati dal diario, non costruiti a rami
+  - 339bdae fix(core/periods): normalizzazione derivata da dayLogs per eliminare merge-blindness e invarianti
+  - 93ae738 feat(core): registrazione e rimozione dei giorni di ciclo
+  - 2b0bf69 docs: il vincolo 21-45 non e' piu' silenzioso (durataVincolata)
+  - 9d31987 fix(core): aggiungi durataVincolata e test copertura mediana pari
+  - df1a57e feat(core): statistiche del ciclo e previsioni
+  - 5370c07 docs: fissa TZ nei test e spiega quali test DST discriminano davvero
+  - 6302035 fix(test): pin TZ=Europe/Rome for all vitest invocations
+  - b8b5173 fix(test): improve DST test accuracy and add missing coverage
+  - 129bb29 feat(core): aritmetica e formattazione delle date
+  - 2df5920 fix: distingue l'annullamento della condivisione da un successo reale
+  - 099641d docs: condividiFile distingue l'esito 'annullato' dal successo
+  - d443cfc feat: helper di condivisione file e schermata di prova iOS
+  - ccf4023 docs: allinea il piano all'icona corretta (nessun angolo trasparente)
+  - 49b97e6 fix: rendi opache le icone PWA (niente angoli trasparenti)
+  - ce5d982 feat: PWA installabile e workflow di deploy su GitHub Pages
+  - 8dfa1f0 chore: ignora tsconfig.tsbuildinfo e rimuovilo dal tracking
+  - d5960e4 chore: impalcatura Vite + React + TS + Tailwind + vitest
+  - 6dbc0d4 docs: specifica e piano di implementazione</p>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $108.36 · in 5772 tok · out 1192487 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p><em>(ollama non disponibile — solo fatti grezzi)</em></p></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-31</h2>
+  <div class="prosa"><h1 id="recap-2026-07-31">Recap 2026-07-31</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $5.59 · in 67 tok · out 90188 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha effettuato una transazione di acquisto con una somma di denaro equival
+equivalente a $5,59.</li>
+<li>La transazione è stata effettuata tramite 67 token (probabilmente un sist
+sistema di pagamento digitale).</li>
+<li>Successivamente, ha effettuato una transazione di uscita con un totale di
+di 90.188 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-25</h2>
+  <div class="prosa"><h1 id="recap-2026-07-25">Recap 2026-07-25</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="commit">Commit</h3>
+<p><strong>acidmoog-synth</strong>:
+  - d792174 Add macOS/Logic install guide and self-contained JUCE fetch
+  - a2988ff Implement AcidMoog monophonic bass synth (JUCE VST3/AU)
+  - 6895bd2 Initial plan draft for AcidMoog bass synth VST/AU plugin</p>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $9.18 · in 216 tok · out 90271 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro in 3 bullet punti:</p>
+<ul>
+<li>Sono stati completati gli strumenti per l'installazione di macOS/Logic e 
+la raccolta delle librerie JUCE.</li>
+<li>È stato realizzato il sintetizzatore monofonico AcidMoog, che supporta en
+entrambe le versioni VST3/AU.</li>
+<li>È stata completata la prima parte del piano per lo sviluppo del plugin di
+di synth AcidMoog.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-24</h2>
+  <div class="prosa"><h1 id="recap-2026-07-24">Recap 2026-07-24</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="commit">Commit</h3>
+<p><strong>FreakFM</strong>:
+  - 48010d7 docs: add clone/auth instructions for private repo and Ableton VST3 minimum version
+  - c59a94b docs: update implementation status (phases 0-9 done except deferred song mode)
+  - 5ca1b0f chore: pluginval pass (strictness 8), manual DAW checklist, v0.1.0 release notes
+  - dc85dfe feat: full plugin UI (shell + SYNTH/SEQ/MOD/OUT panels + preset manager)
+  - 6abb4fa test: feature-based golden render regression tests (seeded)
+  - 18cfc14 feat: macOS/AU support (universal build, MusicDevice AU) + Mac install guide
+  - 64a15fb feat: per-voice analog drift and stereo spread via detune/pan
+  - 1c73c80 feat: output stage bitcrush/downsample/soft-clip
+  - 8dca19c feat: FREAK macro knob and velocity follower source
+  - 40a50e0 feat: global LFOs (incl. chaos/random-walk), global mod matrix, per-step LFO reset
+  - 54fac15 feat: note-stage step modulators (chord shift, extreme pitch bend with glide)
+  - c2f758e feat: engine-stage step modulators with declick ramp on discrete switches
+  - 57c3a7a feat: trigger-stage step modulators (probability, ratchet, nudge, gate, velocity)
+  - b66d866 feat: modulator type table and staged precedence pipeline (TDD)
+  - 0af99e1 feat: sub-block rendering, MIDI transpose, full state save/restore with versioning
+  - c41c8f3 feat: euclidean pattern generator and swing
+  - b1f9c93 feat: host-synced step sequencer core (ppq-driven, variable length)
+  - f21936a feat: pattern ValueTree store with triple-buffered POD snapshot for audio thread
+  - 01e7f6b feat: wavefold, noise injection, key tracking, hard sync, ring mod per operator
+  - 4248ab5 feat: free cross-mod matrix and feedback shapes (linear/exp/wavefold)
+  - a1b9562 feat: FreakEngine with MIDI input, APVTS op params, offline render tool
+  - 3bd12c5 feat: FMVoice 4-op render + paraphonic VoiceAllocator with stealing
+  - 8868f8d feat: EngineParams base/effective POD contract
+  - 816b1f1 feat: 8 fixed 4-op FM algorithms (TX81Z-inspired routing tables)
+  - cd2fe94 feat: per-operator ADSR envelope, live-retunable for envelope reshape
+  - efc59a9 feat: FMOperator with ratio/fixed mode, per-op feedback, detune
+  - a992155 test: add Catch2 headless test harness
+  - 368cd3f feat: FreakFM plugin scaffold (JUCE 8.0.8, VST3+Standalone, silent synth)
+  - 61a3eed Add architecture document and phased implementation plan
+  - 39afe6e Scaffold FreakFM: design document, README, gitignore</p>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $59.59 · in 671 tok · out 360968 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p><em>(ollama non disponibile — solo fatti grezzi)</em></p></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-22</h2>
+  <div class="prosa"><h1 id="recap-2026-07-22">Recap 2026-07-22</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $0.00 · in 10 tok · out 3294 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude in 3 punti:</p>
+<ul>
+<li>Ha utilizzato 10 token (tok) senza spendere nulla ($0.00).</li>
+<li>Ha spento 3294 token durante la sua giornata lavorativa.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-18</h2>
+  <div class="prosa"><h1 id="recap-2026-07-18">Recap 2026-07-18</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="commit">Commit</h3>
+<p><strong>diritto-quiz-app</strong>:
+  - f0c9f5d Build web condivisibile: persistenza browser + nav ridotta per utente finale
+  - be9c8f5 Pool 2 "modalità prof": +143 domande (362 totali su 13 moduli)</p>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $4.02 · in 182 tok · out 52788 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco una riassunto della giornata di lavoro in 3 punti:</p>
+<ul>
+<li>Sono stati implementati i passaggi per la persistenza delle sessioni de
+del browser e la riduzione della navigazione per utenti finali, migliorando
+migliorando l'esperienza user experience.</li>
+<li>È stato aggiornato il pool di domande con una nuova modalità "professio
+"professionale", che contiene 143 domande in più (totale 362 domande su 13 
+moduli).</li>
+<li>Il consumo energetico del software è stato ridotto a 52788 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-17</h2>
+  <div class="prosa"><h1 id="recap-2026-07-17">Recap 2026-07-17</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $1.81 · in 164 tok · out 37782 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco una possibile interpretazione della giornata di lavoro di Claude:</p>
+<ul>
+<li>Inizia utilizzando 181 centesimi ($1.81) per effettuare un'operazione (no
+(non specificata).</li>
+<li>Questa operazione è effettuata con 164 token (unità di pagamento non spec
+specificate).</li>
+<li>Il risultato di questa operazione è che Claude riceve 37782 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-16</h2>
+  <div class="prosa"><h1 id="recap-2026-07-16">Recap 2026-07-16</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $60.57 · in 7950 tok · out 839200 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude in 3 bullet points:</p>
+<p>• Ha utilizzato il proprio conto $60.57.
+• Ha fatto 7950 trasazioni (tok).
+• Ha ottenuto un totale di $839200 (out).</p></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-15</h2>
+  <div class="prosa"><h1 id="recap-2026-07-15">Recap 2026-07-15</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $13.70 · in 339 tok · out 301550 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude in 3 bullet punti:</p>
+<ul>
+<li>Ha utilizzato il suo denaro per acquistare qualcosa con un costo di $13,7
+$13,70.</li>
+<li>Ha compiuto 339 transazioni (ad esempio pagamenti o rilasci di soldi).</li>
+<li>Ha effettuato una uscita di 301.550 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-14</h2>
+  <div class="prosa"><h1 id="recap-2026-07-14">Recap 2026-07-14</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $6.75 · in 274 tok · out 126050 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha usato il denaro per un totale di 6,75 dollari</li>
+<li>Ha effettuato 274 transazioni (possibilmente acquisti o pagamenti)</li>
+<li>Ha spento 126050 token (possibilmente una valuta digitale)</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-13</h2>
+  <div class="prosa"><h1 id="recap-2026-07-13">Recap 2026-07-13</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $14.43 · in 16694 tok · out 192492 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude in 3 bullet punti:</p>
+<ul>
+<li>Ha utilizzato il suo denaro per acquistare beni con un totale di $14,43.</li>
+<li>La sua utilizzazione del denaro è stata registrata in 16.694 transazioni 
+(tok).</li>
+<li>Nel corso della giornata ha espresso denaro di $192.492.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-12</h2>
+  <div class="prosa"><h1 id="recap-2026-07-12">Recap 2026-07-12</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $1.18 · in 214 tok · out 6725 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha utilizzato il denaro per 214 transazioni (valore di $1,18)</li>
+<li>Ha ricevuto un pagamento di 6725 token (denominazione non specificata)</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-10</h2>
+  <div class="prosa"><h1 id="recap-2026-07-10">Recap 2026-07-10</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $4.56 · in 16066 tok · out 135439 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto breve della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha lavorato per 16066 token (unità di misura non specificate)</li>
+<li>Ha utilizzato circa $4,56 a livello globale</li>
+<li>Ha trascorso un totale di 135439 token nella sua giornata di lavoro</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-09</h2>
+  <div class="prosa"><h1 id="recap-2026-07-09">Recap 2026-07-09</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $14.82 · in 19828 tok · out 225026 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco una possibile rappresentazione della giornata di lavoro di Claude in 3
+3 bullet points:</p>
+<ul>
+<li>Ha utilizzato il computer per un totale di 19828 token.</li>
+<li>Ha inserito i dati, pagando $14.82 come riconoscimento del suo lavoro.</li>
+<li>Ha completato la sua attività, uscendo dal sistema con un totale di 225
+225026 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-08</h2>
+  <div class="prosa"><h1 id="recap-2026-07-08">Recap 2026-07-08</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $5.21 · in 9320 tok · out 114559 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha usato il denaro in 5.21 dollari ($)</li>
+<li>Ha scritto 9320 token</li>
+<li>Ha usato un altro denaro per un totale di 11.4559 token</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-07</h2>
+  <div class="prosa"><h1 id="recap-2026-07-07">Recap 2026-07-07</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $15.33 · in 18677 tok · out 170575 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha eseguito una certa quantità di operazioni per un totale di 170575 toke
+token (in uscita)</li>
+<li>Il costo delle sue operazioni è stato di $15,33</li>
+<li>È stata utilizzata circa 18677 token (in ingresso)</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-06</h2>
+  <div class="prosa"><h1 id="recap-2026-07-06">Recap 2026-07-06</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $1.15 · in 9548 tok · out 32019 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto delle informazioni sulla giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha utilizzato il denaro per un periodo di tempo di 9548 token.</li>
+<li>È uscito con un denaro di 32019 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-05</h2>
+  <div class="prosa"><h1 id="recap-2026-07-05">Recap 2026-07-05</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $6.12 · in 73668 tok · out 58666 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha utilizzato $6.12 (il denaro guadagnato)</li>
+<li>Ha effettuato 73668 transazioni</li>
+<li>Ha esito di 58666 transazioni (le transazioni riuscite)</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-02</h2>
+  <div class="prosa"><h1 id="recap-2026-07-02">Recap 2026-07-02</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $2.59 · in 14880 tok · out 69895 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude in 3 punti:</p>
+<ul>
+<li>Ha utilizzato $2.59 in contanti.</li>
+<li>Ha ricevuto 14.880 token.</li>
+<li>Ha spenduto un totale di 6.995 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-07-01</h2>
+  <div class="prosa"><h1 id="recap-2026-07-01">Recap 2026-07-01</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $8.47 · in 49634 tok · out 140039 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude in 3 bullet punti:</p>
+<ul>
+<li>Ha lavorato per un total tempo di 49634 token.</li>
+<li>Ha usato il software per un totale di 140039 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-30</h2>
+  <div class="prosa"><h1 id="recap-2026-06-30">Recap 2026-06-30</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $28.70 · in 51152 tok · out 150833 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco una possibile interpretazione della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha lavorato per un'ora (considerando il costo del tempo di 28,70 dollari)
+dollari) e ha generato 5.152 token.</li>
+<li>Nel corso della giornata, ha gestito un flusso di token che ha generato u
+un total di 15.0833 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-29</h2>
+  <div class="prosa"><h1 id="recap-2026-06-29">Recap 2026-06-29</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $8.67 · in 24145 tok · out 68452 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco una breve descrizione della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha lavorato per un totale di 68452 token;</li>
+<li>Ha utilizzato i token di 24145 unità durante il suo lavoro.</li>
+<li>La sua produttività è stata di circa 8,67 token ogni minuto.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-26</h2>
+  <div class="prosa"><h1 id="recap-2026-06-26">Recap 2026-06-26</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $12.07 · in 23215 tok · out 149415 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Non sono riuscito a estrar</p></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-24</h2>
+  <div class="prosa"><h1 id="recap-2026-06-24">Recap 2026-06-24</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $9.30 · in 1557 tok · out 85442 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto brief della giornata di lavoro di Claude:</p>
+<ul>
+<li>Inizia lavorando alle 9:30</li>
+<li>Lavora per 1 ora e 55 minuti (1557 token, dove "token" sembra essere il c
+codice per misurare l'attività di lavoro)</li>
+<li>Termina la sua attività lavorativa.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-23</h2>
+  <div class="prosa"><h1 id="recap-2026-06-23">Recap 2026-06-23</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $8.09 · in 4882 tok · out 106685 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto in 3 bullet punti della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha lavorato per 4882 token.</li>
+<li>Ha usato $8.09 per compensare i costi.</li>
+<li>Ha fatto un totale di 106685 token usati.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-22</h2>
+  <div class="prosa"><h1 id="recap-2026-06-22">Recap 2026-06-22</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="attivita-annotate">Attività annotate</h3>
+<ul>
+<li>[13:46] Security S1: <code>/sessione sicurezza</code> + <code>/lab S1</code> → prodotta guida_lab_moduloS1_enumerazione_nmap.md (5 esercizi completi: nmap, psql, nc, hydra, john)</li>
+<li>[13:46] link_modules.py --apply → S1: 2 note collegate (lezione ↔ guida-lab nmap)</li>
+<li>[13:46] corrente.md aggiornato: S1 guida-lab ✅ (22/06), prossimo: eseguire lab su VM</li>
+<li>[~14:30] Pausa pranzo → ripresa pomeriggio: /appunti S1 poi lab S1 su VM</li>
+</ul>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $9.87 · in 13242 tok · out 107104 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha utilizzato 9,87 dollari (9.87) per le spese personali</li>
+<li>Ha ricevuto 12.342 token (tok)</li>
+<li>Ha spendo 10.704 token (out)</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-20</h2>
+  <div class="prosa"><h1 id="recap-2026-06-20">Recap 2026-06-20</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $18.65 · in 25672 tok · out 171609 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco una possibile interpretazione della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha lavorato per un totale di 25672 token (unità di testo) con un costo di
+di $18,65 all'unità.</li>
+<li>Ha concluso il suo giorno di lavoro con un totale di 171609 token.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-19</h2>
+  <div class="prosa"><h1 id="recap-2026-06-19">Recap 2026-06-19</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $1.73 · in 20711 tok · out 24517 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro di Claude:</p>
+<ul>
+<li>Ha utilizzato il denaro per 1.73 dollari.</li>
+<li>Ha effettuato 20.711 transazioni entranti (tok).</li>
+<li>Ha effettuato 24.517 transazioni uscenti (tok).</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-18</h2>
+  <div class="prosa"><h1 id="recap-2026-06-18">Recap 2026-06-18</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="commit">Commit</h3>
+<p><strong>agenticdash</strong>:
+  - c5c105e chore: script update-app.sh (build + reinstall app utente)
+  - 44f130d feat(memoria): grafo 3D dei wikilink del Vault
+  - 90197cb feat(ui): dashboard laterale responsive (finestra stretta ↔ fullscreen)</p>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $53.33 · in 103675 tok · out 442074 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto breve della giornata di lavoro:</p>
+<ul>
+<li>Sono stato aggiornato il file <code>update-app.sh</code> per far riscrivere l'appl
+l'applicazione e reinstallarla sul dispositivo.</li>
+<li>Ho creato un grafico 3D dei link del Vault per migliorare la memoria.</li>
+<li>Ho implementato una finestra laterale responsive per il dashboard, che 
+può essere impostata tra strettissima e piena schermo.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>2026-06-17</h2>
+  <div class="prosa"><h1 id="recap-2026-06-17">Recap 2026-06-17</h1>
+<h2 id="fatti-verbatim">FATTI (verbatim)</h2>
+<h3 id="attivita-annotate">Attività annotate</h3>
+<ul>
+<li>Progettata e avviata AgenticDash: layer memoria (cockpit + vault + SessionStart hook G1)</li>
+<li>Verificato graphify reale, corretta la spec, scritto il piano fasato</li>
+</ul>
+<h3 id="claude">Claude</h3>
+<p>Claude usage: $9.05 · in 82201 tok · out 105885 tok</p>
+<h2 id="sintesi">SINTESI <!-- ollama --></h2>
+<p>Ecco un riassunto della giornata di lavoro:</p>
+<ul>
+<li>Sviluppata e avviata l'applicazione AgenticDash con la funzione layer m
+memoria, composta da cockpit, vault e SessionStart hook G1.</li>
+<li>Verificato correttamente il graphify reale e corretto il modello spec.</li>
+<li>Scritto il piano fasato.</li>
+</ul></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>README</h2>
+  <div class="prosa"><h1 id="claude-file-curati-per-claude">claude/ — file curati per Claude</h1>
+<p>Metti qui note, decisioni e reference che vuoi siano sempre disponibili a Claude Code
+attraverso la memoria. Vengono indicizzati in <code>index.md</code> e (se G3 passa) nel grafo.</p></div>
+</article>
+<article class="voce-diario" data-entra>
+  <h2>graphify_bakeoff</h2>
+  <div class="prosa"><h1 id="gate-g3-graphify-vs-rg-esito">GATE G3 — graphify vs rg (esito)</h1>
+<p><strong>Data:</strong> 2026-06-17
+<strong>Esito:</strong> <code>rg</code> vince. graphify <strong>esce</strong> dal layer memoria/ricerca.</p>
+<h2 id="metodo">Metodo</h2>
+<p>5 domande reali sul vault, confronto <code>rg</code> (baseline) vs <code>graphify path/explain</code>.</p>
+<h2 id="risultati-rg">Risultati rg</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Domanda</th>
+<th>rg trova il rilevante?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Moduli Diritto su privacy/GDPR</td>
+<td>Sì — glossario, stato/corrente, handoff D12/D13</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Dove ho parlato di systemd</td>
+<td>Sì — master_map, concept_maps, percorso</td>
+</tr>
+<tr>
+<td>3</td>
+<td>AI Act</td>
+<td>Sì — handoff dedicati, master_map</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Reati informatici</td>
+<td>Sì — handoff reati-ia, percorso</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Firme elettroniche</td>
+<td>Sì — speedreview_D09 (file dedicato), glossario</td>
+</tr>
+</tbody>
+</table>
+<h2 id="decisione-pre-autorizzata-da-spec-912">Decisione (pre-autorizzata da spec §9/§12)</h2>
+<ul>
+<li><strong>Ricerca memoria = <code>rg</code></strong> sul vault. Veloce, trasparente, zero costo, zero dipendenze.</li>
+<li><strong>graphify NON entra</strong> nel layer memoria: l'estrazione su markdown è un run di agente LLM
+  pesante sull'intero UniCode e richiede modifica di <code>~/.claude</code> (install della skill).
+  Costo/permessi non giustificati dato che <code>rg</code> già risponde bene su 119 note.</li>
+<li><strong>G2 (build headless)</strong>: non eseguito — moot, graphify fuori dal layer core.</li>
+<li><strong>Grafo come feature OPZIONALE futura</strong>: se in futuro si vuole la visualizzazione
+  interattiva (<code>graph.html</code>) come oggetto visivo (non come motore di ricerca), si potrà
+  installare graphify allora, con consenso esplicito per la modifica di <code>~/.claude</code> e
+  accettando il costo dell'estrazione. La schermata Memoria dell'app funziona senza.</li>
+</ul>
+<h2 id="nota">Nota</h2>
+<p>Il vault resta compatibile con graphify (è una cartella di markdown): la decisione è
+reversibile in qualsiasi momento senza rifare nulla.</p></div>
+</article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "";</script>
+<script src="assets/indice.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

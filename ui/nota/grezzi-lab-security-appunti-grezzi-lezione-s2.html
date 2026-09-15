@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_grezzi_lezione_S2.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi</p>
+<h1 class="titolo-pagina">Appunti_grezzi_lezione_S2.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - Security/Appunti_grezzi_lezione_S2.md">Apri il file originale</a></p>
+<article class="prosa"><p><strong>Autenticazione / Autorizzazione / Auditing</strong></p>
+<p>Autenticazione è l'attribuzione certa dell'identità di un soggetto che usa il sistema. include un'<strong>identificazione</strong> preliminare, che non è sufficiente a dichiararsi autenticati.
+l'identificazione è il <strong>nome che dichiari</strong> mentre l'autenticazione è la <strong>prova che quel nome sia davvero tuo</strong></p>
+<p>Autorizzazione è la verifica dei <strong>diritti</strong> di un soggetto di <strong>compiere un azione su un determinato oggetto</strong> nel sistema. o se ne a il permesso o non lo si ha. i propri permessi sono definiti <strong>dopo l'autenticazione</strong>. su Linux, <strong>PAM</strong> gestisce l'autenticazione, <strong>sudo</strong> e i <strong>permessi su file</strong> gestiscono l'autorizzazione.</p>
+<p>Auditing è il tracciamento delle <strong>decisioni di autenticazione e autorizzazione</strong>. ma è base di un compromesso. più dettagliato è il log, più ne risentono prestazioni e privacy</p>
+<p><strong>I fattori dell'autenticazione - come può essere il segreto?</strong>
+L'autenticazione si basa su ciò che l'utente <strong>conosce, possiede, è, o fa</strong>. il <strong>prover (P)</strong> deve dimostrare al <strong>Verifier (V)</strong> di conoscere un segreto dei tipi elencati prima:</p>
+<p>Sono quindi fattori di autenticazione: <strong>password, PIN, risposte segrete</strong>, sicure fino a quando la password fuoriesce dal canale o DB del verifier, <strong>hard-token, Yubikey, chiavette</strong>, non si possono clonare via rete ma non sono infallibili. <strong>Dati biometrici: iride, impronta...</strong>, sicure finchè non compromesse, ma anche incambiabili in quanto uniche, e infine <strong>GPS, localizzazione</strong>, ma come fattore contestuale, per dire, la posizione non è sufficiente a fare il login, ma al contrario se la posizione non è conosciuta ci obbliga a passare uno step di sicurezza in più.ù</p>
+<p><strong>/etc/shadow: dove vive il segreto lato server</strong></p>
+<p>/etc/shadow è il file che contiene la <strong>fingerprint della password</strong>, una versione <strong>criptata</strong> della password stessa ottenuto dalla <strong>concatenazione password || salt</strong>. il <strong>salt</strong> è una <strong>variazione random</strong> generata quando scelgo la password, e serve a rompere la simmetria, così che <strong>due utenti</strong> con la stessa password <strong>non abbiano la stessa fingerprint</strong>.</p>
+<p>il <strong>salt non basta però a difendersi da attacchi offline</strong>, se un attaccante viene in possesso di /etc/shadow può attaccarlo con <strong>metodi brute force</strong> senza limite di tentativi, e per questo la contromisura base più efficace è avere una <strong>password difficile da brute forcare</strong></p>
+<p>Esiste anche <strong>Pepper</strong>, una variante di salt che vive in un <strong>HSM (Hardware Security Module)</strong> a cui l'attaccante non accede anche se copia /etc/shadow. così facendo si impossibilita l'attaccante a <strong>calcolare</strong> la password</p>
+<p>(mi spieghi cos'è un HSM nel pratico? che forma ha? cos'è?)</p>
+<p><strong>Password: L'entropia conta più della complessità percepita</strong></p>
+<p>(ho capito il concetto leggendo dal pdf, replicalo qua, ma spiega il concetto di entropia, in base a cosa si ottiene, cosa la determina?)</p>
+<p><strong>Autentiazione passiva vs attiva</strong></p>
+<p>L'autenticazione <strong>passiva</strong>, dove P e V concordano un segreto e lo memorizzano, è il modello della password classica. presenta <strong>problemi strutturali</strong>, se il segreto viaggia in chiaro può essere <strong>intercettato</strong> e anche se è offuscato, se è sempre lo stesso, basta <strong>catturarlo e riprodurlo</strong>. inoltre, V possiede una copia del segreto, e in caso di <strong>compromissione di V</strong> tutti i segreti sono a rischio.</p>
+<p>(Spiega meglio, più semplicemente e chiaramente, il concetto di autenticazione attiva, con qualche esempio, la descrizione che hai fatto mi ha confuso, pensavo fosse una sorta di 2fa ma non lo è. stessa cosa per SKEY ONE TIME PASSWORD)</p>
+<p><strong>/etc/pam.d/: il framework che collega tutto a Linux</strong></p>
+<p>PAM (<strong>Pluggable Authentication Modules</strong>) è il (che cos'è?) a cui ogni programma in Linux delega l'autenticazione dell'utente, facendogli caricare <strong>moduli configurabili per programma</strong>. la configurazione per ogni programma vive in /etc/pam.d/, un file per ogni programma</p>
+<p>(tabella accurata che spiega più chiaramente tutti i parametri della riga di pam.d, specialmente il control-flag di cui non ho capito proprio a che cosa serva.)</p>
+<p>(dopo la tabella aiutami a capi il concetto della modularità di questo sistema, parli dell'importanza dell 'ordine dei moduli, cosa sono? come funzionano? schematizza i più comuni, spiega a parole meglio e rendi tutto chiaro)</p>
+<p><strong>2FA vs 2SA vs MFA</strong></p>
+<p><strong>2FA (Two-Factor Authentication)</strong>: richiede 2 fattori di autenticazioni, e devono essere distinti, ovvero provenire da due categorie diverse (ciò che l'utente <strong>conosce, possiede, è, o fa</strong>, mix &amp; match di 2 a piacere). </p>
+<p><strong>2SA (Two-Step Authentication)</strong>: richiede 2 passi ma non necessariamente due fattori distinti. Lo sono le autenticazioni tramite <strong>OTP</strong> via sms, o mail, che sono mezzi non considerati attendibili per <strong>l'autenticazione di secondo fattore</strong> perchè chi controlla il canale può <strong>intercettare il codice</strong></p>
+<p><strong>MFA (Multi-Factor Authentication)</strong>: generalizza 2FA a <strong>più di due fattori</strong></p>
+<p><strong>FIDO: standard di crittografia a chiave pubblica per il grande pubblico</strong></p>
+<p>FIDO (<strong>Fast IDentity Online</strong>) è un consorzio di big tech che ha sviluppato uno standard per rendere l'autorizzazione a doppia chiave usabile su larga scala</p>
+<p><strong>FIDO UAF (Universal Authentication Framework)</strong> è lo standard per autenticazione senza password, quando l'utente di autentica localmente sul dispositivo con <strong>biometria o pin</strong>, il dispositivo usa questa verifica per <strong>sbloccare una chiave privata</strong> che firma la sfida emessa dal server FIDO UAF. in questo modo <strong>le informazioni di sicurezza non lasicano mai il dispositivo</strong></p>
+<p><strong>FIDO U2F (Universal Second Factor)</strong> è l'evoluzione che raffrorza e semplifica la 2FA usando dispositivi hardware (chiavette, NFC, o bluetooth)</p>
+<p><strong>DOMANDE DI AUTOVERIFICA</strong>
+1:C 2:F 3:B 4:non ho capito l'argomento 5:non ho capito l'argomento 6:falso</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_moduloS13_offensive_netsec_tls.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_moduloS13_offensive_netsec_tls.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SECURITY/lezione_moduloS13_offensive_netsec_tls.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-s13-offensive-net-security-protezione-delle-comunicazioni-openssltls">Lezione — Modulo S13: Offensive Net Security + Protezione delle Comunicazioni + OpenSSL/TLS</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Fonti primarie</strong>:
+- <code>SLIDE TEORIA/SICINF/05_05__va_pt.pdf</code> (Prandini, "Offensive security I — Reconnaissance &amp; Assessment", 53 slide)
+- <code>SLIDE TEORIA/SICINF/Protezione_delle_comunicazioni_15-20_maggio.pdf</code> (Prandini, 78 slide)
+- <code>SLIDE TEORIA/SICINF/Altri_esercizi_configurazione_servizi_con_TLS_20_maggio.pdf</code> (Melis/Prandini, 17 slide)
+- <code>SLIDE LAB/SICINF/LAB_Offensive_network_security.pdf</code> (Prandini/Melis, sniffing/spoofing/DoS)
+- <code>SLIDE LAB/SICINF/Comandi_offensive_net_sec.html</code> (comandi passo-passo del lab)
+- <code>SLIDE LAB/SICINF/LAB_OpenSSL_20_maggio.pdf</code> (Melis/Prandini, 28 slide)</p>
+<p><strong>Tipo</strong>: modulo misto — teoria (offensive security + protezione delle comunicazioni) e tre laboratori (offensive net sec, OpenSSL, TLS). Rilevante sia per il <strong>quiz teorico (40%)</strong> — è pieno di distinzioni vero/falso e di nomi di attacchi — sia per la <strong>prova pratica</strong> (comandi <code>openssl</code>, <code>nmap</code>, <code>ettercap</code>, <code>hping3</code>, configurazione <code>nginx</code>).</p>
+<hr />
+<h2 id="dove-si-colloca-questo-modulo-e-i-suoi-due-threat-model">Dove si colloca questo modulo, e i suoi due threat model</h2>
+<p>Questo è un modulo "a due facce", ed è essenziale tenerle distinte per non confondersi all'esame.</p>
+<ol>
+<li>
+<p><strong>Faccia offensiva</strong> — <em>Offensive net security</em>: ci si mette nei panni dell'attaccante per <strong>verificare</strong> l'esposizione di un sistema. È la parte iniziale della <em>kill chain</em> (reconnaissance ed enumeration) più il passaggio da <em>Vulnerability Assessment</em> a <em>Penetration Testing</em>. Threat model: l'attaccante parte da zero conoscenza e accumula informazioni finché non trova una via d'ingresso; il "difensore" qui è chi conduce il test in modo autorizzato (<strong>mai</strong> su risorse non proprie senza permesso) per scoprire i buchi prima dei veri avversari.</p>
+</li>
+<li>
+<p><strong>Faccia difensiva</strong> — <em>Protezione delle comunicazioni</em>: dato che i protocolli fondamentali di Internet (ARP, IP, TCP, DNS) sono nati <strong>senza autenticazione né cifratura</strong>, si costruiscono <strong>canali sicuri</strong> come strato aggiuntivo, layer per layer (data link → VLAN, network → IPSec, transport → TLS), più strumenti d'uso quotidiano (TOR, SSH). Threat model: l'attaccante è un <em>man-in-the-middle</em> che ascolta o altera il traffico; il difensore aggiunge riservatezza, integrità e autenticità dove il protocollo nudo non le offre.</p>
+</li>
+</ol>
+<p><strong>Confine con i moduli vicini — leggere prima di tutto il resto:</strong>
+- <strong>S1 (Offensive Security &amp; Enumerazione)</strong>: ha già trattato in dettaglio Google dorking, OSINT, DNS/subdomain enumeration, <code>nmap</code>, evasione, vulnerability scanner. Qui li <strong>richiamo</strong> per completezza (il PDF <code>va_pt</code> li ripresenta) ma non li rispiego riga per riga: il valore aggiunto di S13 è la <strong>distinzione VA→PT</strong>, le <strong>metodologie di PT</strong> e l'<strong>architettura di OpenVAS</strong>.
+- <strong>S12 (Sicurezza delle comunicazioni)</strong>: ha già trattato in teoria gli <em>attacchi</em> al traffico (sniffing, ARP/DNS spoofing, hijacking, DoS). Il <strong>lab offensive net sec</strong> di S13 è la loro <strong>controparte pratica</strong> (li eseguo con <code>ettercap</code>/<code>hping3</code>), e la parte "Protezione" di S13 è la <strong>risposta difensiva</strong> che S12 lasciava annunciata ma non svolta ("contromisure: canali sicuri", in grigio nelle slide di S12).
+- <strong>S14 (Crittografia)</strong>: ha fornito i mattoni (simmetrico/asimmetrico, RSA, hash, firma digitale, PKI come concetto). Qui li <strong>uso in pratica</strong> con <code>openssl</code>, senza rispiegare <em>come</em> funziona RSA — solo <em>come si invoca</em>.</p>
+<hr />
+<h1 id="parte-1-offensive-net-security">PARTE 1 — OFFENSIVE NET SECURITY</h1>
+<h2 id="1-il-ciclo-di-vita-della-vulnerabilita">1. Il ciclo di vita della vulnerabilità</h2>
+<p>Le vulnerabilità si annidano a ogni livello dello stack (applicazioni, sistema operativo, hardware, interfacce di I/O). Alcuni concetti di temporizzazione, importanti per il quiz:</p>
+<ul>
+<li><strong>Vulnerabilità zero-day</strong>: una vulnerabilità <strong>sconosciuta</strong> a chi dovrebbe mitigarla.</li>
+<li><strong>Finestra di opportunità</strong>: il tempo tra quando il primo exploit diventa attivo e quando il fornitore rilascia (e si applica) una patch. Dato citato: nel 2005 durava in media 54 giorni, nel 2014 quasi 12 mesi.</li>
+<li><strong>Attacco zero-day</strong>: un attacco che avviene <em>dentro</em> la finestra di opportunità.</li>
+<li><strong>Meccanismo</strong>: gli attacchi si <strong>intensificano dopo</strong> la pubblicazione della vulnerabilità, non prima — appena esce una CVE, tipicamente entro <strong>15 minuti</strong> iniziano scansioni massive di Internet. Contro-intuitivo ma cruciale: rendere pubblica una vulnerabilità aumenta gli attacchi nel breve, ma è l'unico modo per far partire le patch.</li>
+<li><strong>Visione</strong>: esiste un intero ecosistema di <em>responsible disclosure</em> — database pubblici (<strong>CVE</strong> di MITRE, <strong>NVD</strong> del NIST, exploit-db, cvedetails) e programmi di <strong>bug bounty</strong> (Zerodium, Google Project Zero) che pagano chi trova bug. La stessa informazione serve al difensore per correggere e all'attaccante per colpire.</li>
+</ul>
+<h2 id="2-offensive-security-perche-e-con-quali-cautele">2. Offensive security: perché e con quali cautele</h2>
+<p>Porsi nel ruolo dell'attaccante serve a tre cose: <strong>verificare</strong> l'esistenza di vulnerabilità, <strong>stimare</strong> l'impatto reale di un attacco, <strong>testare</strong> l'efficacia delle contromisure. Il processo si modella con la <strong>kill chain</strong> (la catena di passi di un attacco; il primo anello è <em>Reconnaissance</em>, tattica <code>TA0043</code> di MITRE ATT&amp;CK).</p>
+<ul>
+<li><strong>Regola deontologica assoluta</strong>: MAI usare queste tecniche su risorse non proprie senza permesso. "Permesso" è un termine ampio — anche in buona fede si rischiano grattacapi legali, effetti imprevisti sul bersaglio e danni alle <strong>reti attraversate</strong> per raggiungerlo.</li>
+<li><strong>Compromesso di fondo</strong>: velocità <em>o</em> precisione? Ricerca esaustiva delle vulnerabilità <em>o</em> verifica di quanto i sistemi di rilevazione (IDS/IPS) se ne accorgono? Non si può ottimizzare tutto insieme.</li>
+</ul>
+<h2 id="3-va-pt-la-distinzione-che-lesame-ama">3. VA → PT — la distinzione che l'esame ama</h2>
+<p>Questa è la distinzione-chiave della Parte 1, candidata perfetta a una domanda vero/falso.</p>
+<ul>
+<li><strong>Vulnerability Assessment (VA)</strong>: trova <strong>solo vulnerabilità note</strong> e <strong>non procede oltre</strong>. Non sfrutta i buchi, quindi non vede la "vista interna" che si aprirebbe superandone uno; non considera la specificità del sistema (produce anche <strong>falsi positivi</strong>, es. un servizio che dichiara una versione vulnerabile ma è stato patchato). È automatizzabile.</li>
+<li><strong>Penetration Testing (PT)</strong>: un <strong>tester umano</strong> avanza fin dove può, <strong>sfruttando</strong> le vulnerabilità con veri <em>exploit</em>. Più realistico, report più dettagliato, ma <strong>RISCHIOSO</strong> (può danneggiare il bersaglio).</li>
+<li>In una frase: <em>il VA fotografa i buchi noti; il PT li attraversa per vedere dove portano.</em></li>
+</ul>
+<p><strong>Punti di partenza del PT:</strong>
+- <strong>Regole d'ingaggio</strong>: mappatura, prioritizzazione, tracciamento dei confini del target.
+- <strong>Postura e visibilità</strong> (assi "conoscenza dell'attaccante sul target" × "conoscenza del target sull'attacco"): dal <strong>Blind/Double Blind</strong> (l'attaccante sa poco, il target non sa di essere testato — sembra realistico ma fa perdere tempo al tester esperto) al <strong>Grey Box / Double Grey Box / Tandem / Reversal</strong> (gradi crescenti di conoscenza condivisa). Nota di Prandini: gli attacchi "ciechi" sembrano realistici ma spesso è meglio spendere il tempo del tester sui dettagli davvero nascosti.
+- <strong>Protezione del bersaglio</strong>: dove possibile si testa una <strong>replica</strong>, ma alcuni sistemi sono troppo complessi o troppo critici per rischiare che un dettaglio perso nella copia alteri il test.</p>
+<p><strong>Metodologie di PT</strong> (seguirne una rende il test coerente, ripetibile, misurabile — senza pregiudizi o aneddoti). Da conoscere per nome:
+- <strong>OSSTMM</strong> — Open Source Security Testing Methodology Manual (generale, aperta).
+- <strong>OWASP</strong> — specifico per applicazioni <strong>web</strong>.
+- <strong>PCI DSS</strong> — settore finanziario; la sezione <strong>11.3</strong> riguarda il pentesting.
+- <strong>NIST 800-115</strong> — standard ufficiale del governo USA.
+- <strong>ISSAF</strong> — completo ma non più sviluppato attivamente.</p>
+<h2 id="4-reconnaissance-ed-enumeration-richiamo-dettaglio-in-s1">4. Reconnaissance ed Enumeration (richiamo, dettaglio in S1)</h2>
+<blockquote>
+<p>Questa sezione ricalca il PDF <code>va_pt</code>, che coincide in gran parte con S1. La riassumo per completezza del quiz; per gli esempi di comando approfonditi vedi la lezione S1.</p>
+</blockquote>
+<ul>
+<li><strong>Reconnaissance</strong> = raccolta di informazioni utili + estensione del perimetro + preparazione degli strumenti. <strong>Enumeration</strong> = delimitazione del perimetro + verifica puntuale delle risorse.</li>
+<li><strong>OSINT</strong> (Open Source INTelligence): uso di <strong>qualsiasi fonte pubblica</strong> per profilare un obiettivo (geolocation, domini DNS, range IP, autonomous system, certificati X.509, porte, fingerprinting, username). Legale "sostanzialmente sì", con aree grigie. Strumento-indice: <code>osintframework.com</code>.</li>
+<li><strong>Google Dork</strong>: operatori di ricerca per affinare i risultati. I principali: <code>site:</code> (URL indicizzati di un dominio), <code>filetype:</code> (estensione), <code>intitle:</code>/<code>inurl:</code>/<code>intext:</code> (parole nel titolo/URL/testo), <code>cache:</code> (versione in cache), <code>allintext:</code>/<code>allinurl:</code>, <code>link:</code>, <code>*</code> (wildcard). Esempi d'attacco: <code>allintext:password filetype:log after:2020</code>, <code>site:ulisse.unibo.it intitle:index.of id_rsa -id_rsa.pub</code> (chiavi SSH indicizzate). <strong>Contromisura</strong>: <code>robots.txt</code> (<code>User-agent: *</code> / <code>Disallow: /</code>) — tutto ciò che Google trova è perché è stato indicizzato.</li>
+<li><strong>DNS enumeration</strong>: i record DNS svelano IP registrati, server applicativi, sottoreti non raggiungibili, alias verso risorse in cloud o domini fidati (foresta Active Directory). Strumenti: lookup di base (<code>host</code>, <code>dig</code>, <code>nslookup</code>; es. <code>nslookup -type=any google.com</code>), e con guessing/bruteforce (<code>dnsenum</code>, <code>dnsmap</code>, <code>dnsrecon -d DOMAIN</code>, <code>fierce</code>). Aggravanti: <em>domain transfer</em> abilitato (plateale), record rimossi ma rimasti in cache (sottile).</li>
+<li><strong>Subdomain enumeration</strong>: amplia enormemente la superficie d'attacco (sottodomini dimenticati, non aggiornati). <strong>Passiva</strong> (query a dataset noti: SecurityTrails, Shodan, Censys, VirusTotal; wrapper come <strong>amass</strong> di OWASP, subfinder, assetfinder) vs <strong>attiva</strong> (bruteforce DNS, permutation, VHOST probing). <strong>CT abuse</strong>: poiché ogni certificato TLS emesso finisce nei log pubblici di <strong>Certificate Transparency</strong> (RFC 6962), interrogandoli (es. <code>https://crt.sh/?q=%25.dell.com</code>) si enumerano i sottodomini che hanno un certificato. Precisazione: un <strong>FQDN</strong> (<code>miopc.ulisse.com</code>) è un sottodominio; <code>internal.accounts.ulisse.com</code> come <em>URL</em> è invece un'applicazione web su una porta di un host, non necessariamente un sottodominio DNS distinto.</li>
+<li><strong>Enumerazione host/servizi</strong>: individuare i <strong>live host</strong> (ping — ma bloccabile da FW o ignorabile dagli host; <code>masscan</code> per scansioni massive; <code>arping</code>/sniffing passivo su rete locale) e poi le <strong>porte aperte</strong> (le due fasi possono collassare se si sospetta che gli host ignorino i ping → si sondano direttamente le porte). Tool principe: <strong>nmap</strong> (scansione di range di IP e porte, fingerprinting di OS e versioni). <code>unicornscan</code> è un'alternativa con fingerprinting più affidabile, più veloce, e — importante per l'evasione — <strong>non usa lo stack TCP/IP dell'host di origine</strong>, evitando il <em>reverse fingerprinting</em>.</li>
+<li><strong>Evasione</strong>: reconnaissance in modalità anonima (TOR, account usa-e-getta, VM sostituite periodicamente); enumerazione <em>stealth</em> (temporizzazione configurabile, randomizzazione di indirizzi/porte, stack proprio) e adattativa rispetto a FW/IDS/IPS.</li>
+<li><strong>Postura interna vs esterna</strong>: la recon esterna è più fedele all'attaccante reale ma potrebbe non trovare la via d'ingresso; auto-attaccarsi <em>dall'interno</em> scavalca NIDS e FW ed è il miglior test per gli <strong>HIDS</strong>.</li>
+<li><strong>Vulnerability scanner completi</strong>: <strong>Nessus</strong> (commerciale, Tenable) e il suo equivalente open-source <strong>OpenVAS</strong> (nato nel 2005 come fork quando Nessus passò a licenza proprietaria, oggi <strong>Greenbone Community Edition</strong>). Il valore fondamentale è il <strong>feed</strong> di <em>Network Vulnerability Tests</em> (descrizione + piattaforme colpite + processo di verifica, aggiornato ogni giorno), collegato alla documentazione (CVE).</li>
+</ul>
+<h2 id="5-il-lab-offensive-sniffing-spoofing-e-dos-in-pratica">5. Il lab offensive: sniffing, spoofing e DoS in pratica</h2>
+<p>Questo è il laboratorio con <code>docker-compose</code>: tre container sulla stessa rete <em>self-named bridge</em> — <strong>A (Alice, 10.9.0.5)</strong>, <strong>B (Bob, 10.9.0.6)</strong> e <strong>M (MITM, 10.9.0.105)</strong>. Wireshark si lancia <strong>sulla VM host</strong>, non nei container, in ascolto sull'interfaccia <code>br-&lt;esadecimale&gt;</code>. Ci si connette a un container con <code>sudo docker exec -it NOME /bin/bash</code>. Sull'attaccante va abilitato l'ip forwarding (<code>echo 1 &gt;/proc/sys/net/ipv4/ip_forward</code>), altrimenti il MITM interrompe il traffico invece di inoltrarlo.</p>
+<h3 id="51-arp-poisoning-mitm">5.1 ARP poisoning (MITM)</h3>
+<p>L'<strong>ARP spoofing/poisoning</strong> è la tecnica principe per un MITM in una switched LAN. Si osservano le tabelle ARP con <code>arp -n</code>, si può cancellare una entry con <code>arp -d HOST</code>.</p>
+<pre><code class="language-bash">ettercap -T -M arp /// ///                 # poisoning di TUTTI gli host (di fatto un DoS)
+ettercap -T -M arp /10.9.0.6// /10.9.0.5//  # poisoning MIRATO: solo Alice e Bob
+</code></pre>
+<ul>
+<li><strong>Meccanismo</strong>: <code>ettercap</code> inonda gli host di risposte ARP fasulle che associano il MAC dell'attaccante agli IP delle vittime; da quel momento Alice e Bob mandano i pacchetti destinati l'uno all'altro a M, che li inoltra (avendo ip_forward attivo) restando in mezzo. La versione <code>/// ///</code> avvelena tutti → tutto il traffico converge su M: utile solo in laboratorio, di fatto un DoS.</li>
+<li><strong>Visione</strong>: si verifica l'attacco guardando le tabelle ARP alterate sulle vittime e i pacchetti "che non dovrebbero" arrivare a M in Wireshark. Per simulare connessioni si usano <code>nc -vnlp 8080</code> (Bob in ascolto) + <code>nc 10.9.0.6 8080</code> (Alice), oppure <code>iperf -u -s</code>/<code>iperf -u -c</code> per UDP.</li>
+</ul>
+<h3 id="52-dhcp-spoofing">5.2 DHCP spoofing</h3>
+<pre><code class="language-bash"># Bob: si toglie l'IP per forzare una nuova richiesta
+ip addr del 10.9.0.6/24 dev eth0
+# MITM: inonda la rete di offerte DHCP con gateway/DNS a piacere
+ettercap -T -M dhcp:10.9.0.20-60/255.255.255.0/8.8.8.8
+# Bob: chiede una configurazione
+dhclient eth0
+</code></pre>
+<ul>
+<li><strong>Meccanismo</strong>: "battere" il DHCP legittimo significa <strong>rispondere più in fretta</strong> con un'offerta che impone all'attaccante come gateway (o un DNS malevolo). Inondando di <em>request</em> si può anche saturare il server DHCP legittimo (DoS). La sintassi <code>dhcp:range/netmask/DNS</code> dice a ettercap quali IP offrire, con quale maschera e quale DNS annunciare.</li>
+<li><strong>Visione</strong>: dopo l'attacco la configurazione di rete di Bob non è più l'originale; per ripristinarla il modo più semplice è fermare <code>docker-compose</code> (Ctrl-C) e rilanciarlo.</li>
+</ul>
+<h3 id="53-dos-syn-flood">5.3 DoS — SYN flood</h3>
+<pre><code class="language-bash"># baseline: banda disponibile senza attacco
+iperf -s              # Bob (server)
+iperf -c 10.9.0.6     # Alice (client)
+# attacco dal MITM
+hping3 -c 10000 -d 120 -S -w 64 -p 21 --flood --rand-source 10.9.0.6
+</code></pre>
+<ul>
+<li><strong>Meccanismo dei flag</strong> (<code>hping3</code>): <code>-c 10000</code> numero di pacchetti; <code>-d 120</code> dimensione di ciascuno; <code>-S</code> invia solo pacchetti <strong>SYN</strong>; <code>-w 64</code> TCP window size; <code>-p 21</code> porta di destinazione; <code>--flood</code> invia il più veloce possibile <strong>senza guardare le risposte</strong>; <code>--rand-source</code> usa IP sorgente casuali (una "connessione" per ogni IP, e nasconde l'origine). Il SYN flood apre una valanga di mezze connessioni TCP che saturano la vittima.</li>
+<li><strong>Visione</strong>: si rimisura la banda con <code>iperf</code> sotto attacco e si osserva il degrado. <code>hping3</code> supporta anche LAND e SMURF attack.</li>
+</ul>
+<hr />
+<h1 id="parte-2-protezione-delle-comunicazioni-canali-sicuri">PARTE 2 — PROTEZIONE DELLE COMUNICAZIONI (canali sicuri)</h1>
+<p>L'idea unificante: per ogni layer esiste una tecnologia che aggiunge sicurezza dove il protocollo nudo non ne ha. <strong>Data link → VLAN</strong>; <strong>network → IPSec</strong>; <strong>transport → TLS</strong>; e come strumenti d'uso comune <strong>TOR</strong> e <strong>SSH</strong>. Più il caso applicativo di <strong>HTTPS</strong> con i suoi attacchi e contromisure.</p>
+<h2 id="6-ssltls-architettura">6. SSL/TLS — architettura</h2>
+<p>SSL è stato progettato come uno <strong>strato di protocolli indipendente</strong>, collocato <strong>logicamente tra il livello di trasporto e le applicazioni</strong>. Vantaggio: non richiede di modificare i protocolli di rete; l'implementazione è una <strong>libreria</strong> (SSLeay, poi OpenSSL) e per rendere un'applicazione capace di SSL basta inserire le chiamate a quelle funzioni.</p>
+<p><strong>Sessione vs connessione</strong> (distinzione da tenere ferma):
+- Due entità che colloquiano in SSL devono avere aperto una <strong>sessione</strong>.
+- Una singola sessione può includere <strong>molte connessioni</strong> sicure contemporanee, e due entità possono avere più sessioni attive insieme. La sessione porta i parametri crittografici negoziati; le connessioni li riutilizzano.</p>
+<p><strong>Due sotto-protocolli:</strong>
+- <strong>Handshake Protocol</strong> — la parte più complessa. Consente a server e client di <strong>autenticarsi reciprocamente</strong> (challenge-response su crittografia asimmetrica e <strong>certificati X.509</strong> — nel web è comune che <em>solo il server</em> provi la propria identità), <strong>negozia</strong> algoritmi e chiavi per cifratura e integrità, <strong>prima</strong> che qualsiasi dato sia trasmesso. Progettato per limitare il carico: usa un <strong>caching delle sessioni</strong> (numero di sessione) così che, se la comunicazione si interrompe, i parametri si recuperano senza rinegoziarli.
+- <strong>Record Protocol</strong> (SSLRP) — impacchetta i dati in <strong>record</strong> e si occupa di cifratura/decifrazione dei record conformemente a quanto negoziato.</p>
+<p><strong>SSL → TLS</strong> (distinzione classica da quiz): <strong>TLS è l'evoluzione di SSL</strong>, con lo <strong>stesso formato di record</strong>; definito in <strong>RFC 5246 (v1.2)</strong> e <strong>8446 (v1.3)</strong>. Simile a SSLv3 ma diverso in: numero di versione, codice di autenticazione del messaggio, funzione pseudocasuale, codici di avviso, suite di cifratura, tipi di certificato client, <code>certificate_verify</code>/messaggio <em>finished</em>, calcoli crittografici, padding. In pratica oggi "SSL" e "TLS" si usano come sinonimi, ma <strong>SSL è la vecchia famiglia (insicura), TLS la nuova</strong>.</p>
+<p><strong>Confronto SSL/TLS vs IPSec</strong> (per il quiz):
+- SSL/TLS: <strong>specifico di un dominio applicativo</strong>, semplice e realmente standard.
+- IPSec: <strong>generale e trasparente alle applicazioni</strong>, implementato nello stack TCP/IP del SO, con varianti che ne rendono difficile l'interoperabilità.
+- Soluzioni <strong>ibride</strong>: varianti di SSL per trasportare pacchetti IP (analogo al tunnel mode di IPSec) ma in <strong>user space</strong>, indipendenti dal SO — es. <strong>OpenVPN</strong>.</p>
+<h2 id="7-https-attacchi-al-caso-applicativo-e-contromisure">7. HTTPS — attacchi al caso applicativo e contromisure</h2>
+<p>HTTPS = HTTP over SSL/TLS. Blocca gli attacchi al traffico, ma esistono modi per aggirarlo. Il browser verifica la prova del server (il certificato) tramite il proprio <strong>certificate store</strong> e le <strong>Trusted CA</strong>.</p>
+<ul>
+<li><strong>Occultamento della barra degli indirizzi</strong>: nascondere/falsificare la URL mostrata (vecchio: JS/ActiveX; nuovo: auto-hiding della barra nei browser mobili → <em>inception bar</em>).</li>
+<li><strong>Attacchi omografici (IDN)</strong>: gli <strong>International Domain Names</strong> ammettono alfabeti non latini, ma il DNS supporta solo il latino base → conversione in <strong>punycode</strong> (<code>點看 → xn--c1yn36f</code>). Problema: esistono caratteri <strong>omografi</strong> (es. una "а" cirillica identica alla "a" latina): <code>pаypal.com → xn--pypal-4ve.com</code>. Nulla impedisce di registrare quel dominio e ottenerne un <strong>certificato X.509 legittimo</strong> (HTTPS funziona regolarmente!). Contromisura lato browser: <strong>mostrare il punycode</strong> invece del font internazionale ingannevole.</li>
+<li><strong>Iniezione di CA nel certificate store / fake certificate</strong>: il modo più semplice di impersonare un sito è <strong>falsificare il certificato</strong>; raro ma gravissimo se si compromette una <strong>CA</strong>. Contromisure:</li>
+<li><strong>HPKP</strong> (HTTP Public Key Pinning, RFC 7469): limita quali chiavi (root/intermediate/end-entity) sono associabili a un dominio, dichiarato nell'header <code>Public-Key-Pins</code>. <strong>Deprecato</strong> da Google Chrome.</li>
+<li><strong>Certificate Transparency (CT, RFC 6962)</strong>: framework aperto che rende <strong>impossibile (o molto difficile)</strong> a una CA emettere un certificato senza che sia <strong>visibile</strong> al proprietario del dominio; sistema pubblico di auditing/monitoraggio (è lo stesso meccanismo che l'attaccante <em>abusa</em> per la subdomain enumeration — la stessa trasparenza serve difesa e offesa).</li>
+<li><strong>Stripping</strong>: pagine HTTP che poi inviano dati sensibili via HTTPS possono essere <strong>modificate da un MITM</strong> (che declassa la connessione a HTTP in chiaro). Mitigazione: <strong>HSTS</strong> (HTTP Strict Transport Security, RFC 6797) — una policy nell'header di risposta che forza il browser a usare <strong>solo HTTPS</strong>; ma è <strong>inefficace sulla prima richiesta</strong> (il browser non ha ancora visto la policy). Attacco analogo senza equivalente di HSTS: <strong>STARTTLS command injection</strong> (connessioni che partono in chiaro e chiedono l'upgrade; il MITM interferisce o accoda comandi in ordine errato).</li>
+</ul>
+<h2 id="8-vulnerabilita-di-ssltls-il-catalogo-da-quiz">8. Vulnerabilità di SSL/TLS — il catalogo da quiz</h2>
+<p>Distinguere <strong>due livelli</strong>: vulnerabilità <strong>di protocollo</strong> (difetti di progettazione) e <strong>di implementazione</strong> (bug nel codice, es. OpenSSL).</p>
+<p><strong>A livello di protocollo:</strong>
+- <strong>Crittografia debole</strong>: cifrari con problemi noti (<strong>RC4</strong> — "non abilitatelo!"), IV prevedibili.
+- <strong>BEAST</strong> (2011, CVE-2011-3389): "Browser Exploit Against SSL/TLS"; sfrutta il <strong>CBC con IV concatenati</strong>; un MITM recupera header HTTP in chiaro con un <em>blockwise chosen-boundary attack</em> + codice JavaScript.
+- <strong>Padding Oracle Attacks</strong>: causati dalla sequenza <strong>MAC-then-encrypt</strong>. Famiglia: <strong>Lucky Thirteen</strong> (2013, CVE-2013-0169; side-channel di <strong>timing</strong> sul controllo del MAC durante il padding CBC malformato; basso impatto, mitigato da scelte crittografiche più accorte) e <strong>POODLE</strong> (2014, CVE-2014-3566; un MITM forza il <strong>downgrade</strong> verso <strong>SSLv3</strong>, che usa cifrari deboli — RC4 e CBC vulnerabile a padding oracle; impatto: decifrazione del traffico; <strong>unica mitigazione: disabilitare SSLv3</strong>).
+- <strong>Compressione</strong>: <strong>CRIME, TIME, BREACH</strong>.
+- <strong>DROWN</strong> (2016, CVE-2016-0800): "Decrypting RSA with Obsolete and Weakened eNcryption"; sfrutta il supporto residuo a <strong>SSLv2</strong> (indebolito dalle restrizioni USA all'export di crittografia → probe che limitano lo spazio di ricerca delle chiavi a <strong>40 bit</strong>). Se un server con una certa chiave privata supporta SSLv2, <strong>tutti</strong> i server che usano quella chiave sono vulnerabili. Impatto: controllo completo, impersonamento del server.</p>
+<p><strong>A livello di implementazione:</strong>
+- <strong>Heartbleed</strong> (2014, CVE-2014-0160): implementazione errata della <strong>heartbeat extension</strong> (RFC 6520) in <strong>OpenSSL</strong>. Il heartbeat è uno scambio per tenere viva la connessione: il client manda una stringa <strong>dichiarandone la lunghezza</strong>, il server la restituisce. <strong>Bug</strong>: il server usa la lunghezza <em>dichiarata</em> per leggere la propria memoria <strong>senza controllare</strong> che corrisponda alla stringa realmente ricevuta → restituisce anche pezzi di memoria adiacente. Impatto: <strong>leak di materiale sensibile, incluse le chiavi private</strong>. È un difetto di <em>codice</em>, non di <em>protocollo</em> — da qui l'importanza di aggiornare le librerie.</p>
+<h2 id="9-ipsec-protezione-a-livello-di-rete">9. IPSec — protezione a livello di rete</h2>
+<p><strong>IPSec non è un protocollo singolo</strong>: è un insieme di algoritmi + un framework per negoziarli + specifiche per la gestione delle chiavi. Vantaggi: <strong>trasparente alle applicazioni</strong> e applicabile anche al traffico infrastrutturale (es. messaggi di routing tra router). Standard: RFC 4301 (architettura), 4302 (AH), 4303 (ESP), 7296 (IKEv2).</p>
+<p><strong>Servizi</strong>: controllo dell'accesso, integrità senza connessione, autenticazione dell'origine, rilevazione dei <strong>replay</strong>, riservatezza (con cifrari come 3DES, IDEA, CAST, Blowfish; autenticazione con HMAC-MD5/SHA-1; gestione chiavi manuale o automatica via ISAKMP/Oakley).</p>
+<p><strong>Terminologia:</strong>
+- <strong>SA (Security Association)</strong>: relazione <strong>unidirezionale</strong> mittente→destinatario, identificata da <strong>SPI (Security Parameter Index) + IP destinazione + identificatore del protocollo di sicurezza</strong>. Due modalità: <strong>Transport</strong> e <strong>Tunnel</strong>.
+- <strong>Due protocolli di sicurezza:</strong>
+  - <strong>AH (Authentication Header)</strong>: garantisce <strong>autenticazione e integrità</strong> del pacchetto IP e protegge dai replay. Gli <strong>indirizzi vengono autenticati</strong> → le alterazioni del <strong>NAT</strong> sono percepite come violazioni dell'integrità (AH e NAT sono incompatibili!).
+  - <strong>ESP (Encapsulating Security Payload)</strong>: offre essenzialmente <strong>riservatezza</strong> (cifratura); opzionalmente anche aut/int, ma in grado minore di AH (ESP non autentica l'header IP esterno).</p>
+<p><strong>Transport vs Tunnel mode</strong> (tabella riassuntiva — molto probabile a quiz):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Transport Mode</th>
+<th>Tunnel Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AH</strong></td>
+<td>autentica il payload IP + alcuni campi dell'header</td>
+<td>autentica l'intero pacchetto IP <strong>interno</strong> + alcuni campi dell'esterno</td>
+</tr>
+<tr>
+<td><strong>ESP</strong></td>
+<td>cifra il <strong>contenuto</strong> del pacchetto</td>
+<td>cifra l'<strong>intero pacchetto IP interno</strong></td>
+</tr>
+<tr>
+<td><strong>ESP+auth</strong></td>
+<td>cifra il contenuto, autentica il payload ma <strong>non l'header IP</strong></td>
+<td>cifra e autentica l'intero pacchetto IP interno</td>
+</tr>
+</tbody>
+</table>
+<p>Idea: <strong>Transport mode</strong> protegge il payload lasciando visibile l'header originale (host-to-host); <strong>Tunnel mode</strong> incapsula l'intero pacchetto dentro un nuovo pacchetto (gateway-to-gateway, nasconde la topologia interna).</p>
+<h2 id="10-vpn-e-openvpn">10. VPN e OpenVPN</h2>
+<p><strong>VPN</strong> = metodi di trasporto del traffico che sono <em>virtualmente privati</em>: <strong>privati</strong> perché garantiscono sicurezza, <strong>virtualmente</strong> perché il traffico passa su reti insicure. Scenari: host-host, host-net, net-net.</p>
+<p><strong>OpenVPN</strong> riproduce in <strong>software user space</strong> i concetti di transport e tunnel mode di IPSec, senza dipendere dal SO. Serve solo un piccolo componente kernel: la creazione di <strong>interfacce di rete virtuali</strong>:
+- <strong>tun</strong> (layer 3, punto-punto): i pacchetti inviati a questa interfaccia non vanno a una scheda fisica ma <strong>al processo OpenVPN</strong>, che li incapsula in TLS e li spedisce come payload UDP all'omologo remoto (che decifra, verifica, decapsula ed emette sull'interfaccia). Usata per il <strong>tunnel mode</strong> — connette due reti remote; gli IP delle interfacce tun sono un puro artificio punto-punto, trasparenti alle applicazioni.
+- <strong>tap</strong> (layer 2): usata per il <strong>transport mode</strong> associato al <strong>bridging</strong> — fa apparire una macchina remota come <strong>fisicamente parte</strong> della LAN remota (tap0 fa da "cavo", niente IP separato, inoltro layer 2 in un bridge <code>br0 = tap0 + eth1</code>).
+- L'uso o meno di queste interfacce è deciso da normali entry nella <strong>routing table</strong>.</p>
+<h2 id="11-data-link-security-vlan">11. Data link security — VLAN</h2>
+<p>Gli switch gestiscono <strong>Virtual LAN</strong>: segregano il traffico tra subnet diverse anche se condividono l'infrastruttura fisica. Senza VLAN servirebbe un segmento fisico e una porta del router per ogni subnet; con VLAN le subnet possono essere sparse su più segmenti, con anche una sola porta del router e collocazione configurabile dei membri.</p>
+<ul>
+<li><strong>Classificazione</strong>: <strong>statica/port-based</strong> (l'appartenenza dipende dalla <strong>porta</strong> dello switch; spostare un host = riconfigurare la porta) vs <strong>dinamica</strong> (dipende da <strong>MAC/IP</strong> dell'host, indipendente dalla porta).</li>
+<li><strong>Tagging 802.1q</strong>: i frame vengono marcati con un tag di VLAN. Le <strong>porte</strong> funzionano in:</li>
+<li><strong>access mode</strong>: appartengono a <strong>una sola</strong> VLAN, tagging non necessario (uso tipico: host semplici).</li>
+<li><strong>trunk mode</strong>: appartengono a <strong>più</strong> VLAN, tagging <strong>necessario</strong> per distinguerle; possono gestire una <strong>VLAN nativa</strong> per i pacchetti <em>untagged</em> + pacchetti tagged delle altre (uso tipico: connessione a router o tra switch).</li>
+<li><strong>VLAN hopping</strong> (la separazione logica non è robusta come quella fisica):</li>
+<li><strong>Switched spoofing</strong>: l'attaccante finge di essere uno switch (via <strong>DTP</strong>) e fa configurare la propria porta come <strong>trunk</strong>, ricevendo tutte le VLAN.</li>
+<li><strong>Double tagging</strong>: l'attaccante, sulla VLAN <strong>nativa</strong> del trunk, invia un pacchetto con <strong>due tag annidati</strong> (V2 dentro V1); il primo switch rimuove V1 e inoltra sul trunk, il secondo interpreta V2 e consegna alla vittima. Funziona <strong>solo in andata</strong> (non c'è modo di farsi rispondere).</li>
+</ul>
+<h2 id="12-strumenti-duso-comune-socks5-tor-ssh">12. Strumenti d'uso comune — SOCKS5, TOR, SSH</h2>
+<h3 id="121-socks5-rfc-1928">12.1 SOCKS5 (RFC 1928)</h3>
+<p>Un <strong>circuit-level gateway</strong>: un proxy che <strong>spezza la connessione a livello di sessione</strong> diventando lui stesso endpoint del traffico (non un intermediario trasparente come un router). Usi: decidere quali connessioni sono ammesse da una rete protetta verso l'esterno; intermediario generico (senza predefinire i protocolli applicativi). Svantaggio: richiede la modifica dello stack del client o la configurazione consapevole delle applicazioni ("socksified client").</p>
+<h3 id="122-tor-the-onion-router">12.2 TOR (The Onion Router)</h3>
+<p>Progetto open source (avviato dalla EFF) per connessioni cifrate in cui il legame tra chi fa richieste e il contenuto è <strong>profondamente oscurato</strong>. Un <em>local proxy</em> espone un'interfaccia <strong>SOCKS5</strong> ai client locali per farli accedere a TOR.</p>
+<ul>
+<li><strong>Meccanismo</strong>: il setup del percorso restituisce al client un set di <strong>chiavi AES</strong> condivise con ognuno dei relay attraversati; il messaggio è cifrato <strong>"a cipolla"</strong> (a strati); <strong>ogni relay conosce solo i suoi due vicini</strong> di percorso.</li>
+<li><strong>Debolezze</strong>: entry ed exit node nello stesso <strong>AS</strong> → correlazione; l'<strong>exit node vede il traffico in chiaro</strong> (ma non l'IP sorgente — attenzione a dati identificativi nel payload!); <em>bad apple</em> (un'app insicura che fa IP leak traccia anche quelle sicure dello stesso utente); usare TOR aumenta il sospetto. Contromisure: percorso random per ogni connessione, cifratura applicativa (HTTPS sull'ultimo hop), <strong>bridges</strong> (entry node non elencati nella directory, per non mostrare all'ISP che si usa TOR o aggirarne il blocco).</li>
+</ul>
+<h3 id="123-ssh-amministrazione-remota">12.3 SSH — amministrazione remota</h3>
+<p>Nasce per rimpiazzare <strong>TELNET</strong> (nessuna confidenzialità, nessuna autenticazione dell'host, autenticazione utente passiva). Il collegamento tra <code>ssh</code> (client) e <code>sshd</code> (server) segue: negoziazione dei cifrari → <strong>autenticazione dell'host remoto</strong> (via chiave pubblica) → canale cifrato → negoziazione dei metodi di autenticazione utente → <strong>autenticazione dell'utente</strong>.</p>
+<ul>
+<li><strong>Host authentication</strong>: serve a non cadere nella trappola di un MITM che catturerebbe la password dell'amministratore. Non c'è un sistema centralizzato (solo supporto non ufficiale a X.509): alla <strong>prima connessione</strong> l'admin verifica <em>out-of-band</em> la chiave pubblica dell'host; questa viene salvata in <code>~/.ssh/known_hosts</code> per le connessioni successive (autenticazione attiva).</li>
+<li><strong>User authentication</strong>: <strong>passiva</strong> (username+password, trasmessi però su canale già cifrato) o <strong>attiva</strong> (challenge-response a chiave pubblica: l'utente genera una coppia di chiavi e installa la pubblica sul server). L'identità con cui ci si logga è selezionabile: <code>ssh remoteserver</code> usa lo stesso username locale; <code>ssh root@remoteserver</code> si presenta come root.</li>
+<li><strong>Generazione chiavi</strong>:
+  <code>bash
+  ssh-keygen -t rsa -b 2048        # → chiave privata ~/.ssh/id_rsa, pubblica id_rsa.pub
+  ssh-copy-id [-i file] user@remote  # installa la pubblica sul remoto
+  # oppure manualmente:
+  scp .ssh/id_rsa.pub user@remote:
+  cat id_rsa.pub &gt;&gt; .ssh/authorized_keys   # sul remoto</code>
+  Il ruolo autenticante della password è sostituito dalla <strong>presenza della chiave privata</strong> sul client → grande cura nei <strong>permessi</strong> di <code>.ssh</code> (spesso il passwordless login non funziona perché i permessi sono troppo larghi e <code>sshd</code> "non si fida"). La chiave privata può essere protetta con una passphrase (perde il passwordless, ma è più sicuro).</li>
+<li><strong>Esecuzione remota</strong>: <code>ssh utente@host</code> dà un terminale interattivo; aggiungendo un comando (<code>ssh root@server "grep pattern"</code>) quel comando viene eseguito sul remoto e i suoi STDIN/STDOUT/STDERR passano cifrati attraverso il canale.</li>
+</ul>
+<h3 id="124-ssh-tunnelling-le-quattro-forme-probabile-a-quiz">12.4 SSH tunnelling — le quattro forme (probabile a quiz)</h3>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Nome/idea</th>
+<th>Effetto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-L [bind:]port:host:hostport</code></td>
+<td><em>local forward</em> ("poor man's VPN")</td>
+<td>una porta <strong>locale</strong> viene inoltrata a <code>host:hostport</code> visto <strong>dal lato remoto</strong> — rende raggiungibili servizi al di là del gateway. Es: <code>ssh -L 110:10.0.0.2:110 200.1.1.1</code></td>
+</tr>
+<tr>
+<td><code>-R port:host:hostport</code></td>
+<td><em>remote forward</em></td>
+<td>una porta sul <strong>server remoto</strong> viene inoltrata a <code>host:hostport</code> visto <strong>dal lato locale</strong> — "buca il firewall": espone verso l'esterno un servizio interno non altrimenti raggiungibile. Es: <code>ssh -R 110:10.0.0.2:110 200.1.1.1</code></td>
+</tr>
+<tr>
+<td><code>-D [bind:]port</code></td>
+<td><em>dynamic</em> — attiva un <strong>proxy SOCKS</strong></td>
+<td>ssh agisce da server SOCKS4/5; il lato remoto decide dove connettersi in base al protocollo — simil-TOR (senza il triplo salto) o simil-VPN per porte arbitrarie. Es: <code>ssh -D 10.0.0.2:8888 200.1.1.1</code></td>
+</tr>
+<tr>
+<td><code>-J jumphost</code></td>
+<td><em>jump</em></td>
+<td>si connette alla destinazione <strong>passando prima</strong> per uno o più jumphost (separati da virgole) — come <code>-L</code> ma specifico per SSH e multi-salto. Es: <code>ssh -J u1@1.1.1.1,u2@2.2.2.2 u3@3.3.3.3</code></td>
+</tr>
+</tbody>
+</table>
+<p>Distinzione chiave: <strong><code>-L</code></strong> apre una porta <em>locale</em> (io raggiungo qualcosa oltre il gateway); <strong><code>-R</code></strong> apre una porta <em>remota</em> (io espongo qualcosa di mio verso l'esterno); <strong><code>-D</code></strong> è un proxy dinamico; <strong><code>-J</code></strong> è solo un modo comodo di concatenare salti SSH.</p>
+<hr />
+<h1 id="parte-3-openssl-in-pratica">PARTE 3 — OPENSSL IN PRATICA</h1>
+<p><strong>OpenSSL</strong> è una libreria C che implementa le principali operazioni crittografiche (simmetrica, chiave pubblica, firma, hash) e il protocollo SSL/TLS. Da riga di comando è una "cassetta degli attrezzi". Orientamento:</p>
+<pre><code class="language-bash">openssl version        # es. &quot;OpenSSL 3.0.8 7 Feb 2023&quot;
+openssl help           # Standard / Message Digest / Cipher commands
+</code></pre>
+<p>Comandi principali: <code>ca</code> (creare una CA), <code>dgst</code> (digest hash), <code>enc</code> (cifra simmetrica), <code>genrsa</code> (coppia RSA), <code>pkeyutl</code>/<code>rsautl</code> (asimmetrico), <code>rand</code>, <code>rsa</code> (manipolare chiavi RSA), <code>verify</code> (verificare certificati/catene), <code>x509</code> (manipolare certificati X.509).</p>
+<h2 id="13-codifica-vs-cifratura-simmetrica">13. Codifica vs cifratura simmetrica</h2>
+<pre><code class="language-bash">openssl enc -base64 -in file_base64.txt     # NON è cifratura!
+</code></pre>
+<ul>
+<li><strong>Meccanismo/visione</strong>: <code>base64</code> è solo una <strong>codifica</strong> (reversibile da chiunque, senza chiave). Manca proprio la chiave: non nasconde nulla. È la trappola concettuale della slide ("Cosa manca per poterla considerare una cifratura?" → una <strong>chiave segreta</strong>).</li>
+</ul>
+<p>Cifratura vera con AES:</p>
+<pre><code class="language-bash">openssl enc -aes-256-cbc -md sha512 -pbkdf2 -iter 100000 -salt -in file_testo.txt -out cifrato.bin
+openssl enc -aes-256-cbc -md sha512 -pbkdf2 -iter 100000 -salt -d -in cifrato.bin   # -d = decifra
+</code></pre>
+<ul>
+<li><strong>Significato dei flag</strong>: <code>-aes-256-cbc</code> algoritmo AES a 256 bit in modalità CBC (molto sicuro); <code>-md sha512</code> funzione hash usata nella derivazione della chiave dalla password; <code>-pbkdf2</code> usa la <strong>Password-Based Key Derivation Function 2</strong> per derivare la chiave dalla password; <code>-iter 100000</code> numero di iterazioni della derivazione (<strong>più alto → più lento il brute-force</strong> del file); <code>-salt</code> aggiunge sale casuale (impedisce rainbow tables); <code>-d</code> decifra; <code>-pass pass:"..."</code> per passare la password inline (<strong>sconsigliato</strong> — resta nella history). L'elenco dei cifrari disponibili: <code>openssl enc -ciphers</code>.</li>
+</ul>
+<h2 id="14-chiave-pubblica-rsa">14. Chiave pubblica (RSA)</h2>
+<pre><code class="language-bash">openssl genrsa -out chiave.pem 2048        # coppia RSA; MINIMO 2048 bit per dirsi sicura
+openssl rsa -in chiave.pem -text -noout    # dettagli; -noout = NON stampare la chiave in base64
+</code></pre>
+<ul>
+<li><strong>Punto sottile fondamentale</strong>: il file <code>chiave.pem</code> generato contiene <strong>SIA la chiave privata SIA la pubblica</strong> (la pubblica è derivabile dalla privata). Delimitatori: <code>-----BEGIN RSA PRIVATE KEY-----</code> … <code>-----END RSA PRIVATE KEY-----</code>.</li>
+</ul>
+<p>Proteggere la chiave privata e estrarre la pubblica:</p>
+<pre><code class="language-bash">openssl rsa -in chiave.pem -aes-256-cbc -out enc_chiave.pem   # cifra il FILE della chiave privata con AES (passphrase)
+openssl rsa -in chiave.pem -pubout -out pub_chiave.pem        # ESTRAE la sola chiave pubblica
+</code></pre>
+<ul>
+<li>La chiave pubblica ha delimitatori diversi: <code>-----BEGIN PUBLIC KEY-----</code> … <code>-----END PUBLIC KEY-----</code>.</li>
+</ul>
+<p>Cifratura/decifratura asimmetrica e firma:</p>
+<pre><code class="language-bash">openssl rsautl -encrypt -in testo.txt -inkey chiave.pem -out cifrato_rsa.bin
+openssl rsautl -encrypt -in testo.txt -inkey pub_chiave.pem -pubin -out cifrato_rsa.bin  # -pubin: la chiave in input È già pubblica
+openssl rsautl -decrypt -in cifrato_rsa.bin -inkey chiave.pem -out nuova.txt             # per decifrare serve la privata
+
+openssl dgst -md5 -out digestfile testo.txt          # 1) calcola il digest (hash) del file
+openssl rsautl -sign  -in digestfile -out digest_firmato -inkey chiave.pem   # 2) firma il digest con la privata
+openssl rsautl -verify -in digest_firmato -out digest_verifica -inkey chiave.pem  # 3) verifica con la coppia
+diff digestfile digest_verifica                      # se identici → firma valida (nessun output)
+</code></pre>
+<ul>
+<li><strong>Perché firmare il digest e non il file</strong>: non è efficiente firmare direttamente un file grande con un algoritmo a chiave pubblica → si firma il suo <strong>hash</strong> (la slide avverte: questo schema è in realtà meno sicuro della firma diretta con RSA, ma è il modello didattico).</li>
+</ul>
+<h2 id="15-pki-e-certificati-x509">15. PKI e certificati X.509</h2>
+<p><strong>Perché serve una PKI</strong>: la crittografia a chiave pubblica risolve la distribuzione delle chiavi, ma resta il <strong>problema del MITM</strong> — se un avversario (Marco) mi convince che <em>la sua</em> chiave pubblica è quella di Bob, cifro per lui pensando di parlare con Bob. Serve un meccanismo per <strong>legare in modo affidabile una chiave pubblica a un'identità</strong>. Due approcci (distinzione da quiz):
+- <strong>PGP → Web of Trust</strong>: ognuno costruisce la propria rete di fiducia condividendo chiavi affidabili (decentralizzato).
+- <strong>PKI → Root CA trust</strong>: soluzione <strong>centralizzata</strong> — un'entità fidata (CA) certifica che una chiave pubblica appartiene davvero a una persona identificata, emettendo un <strong>certificato</strong> firmato.</p>
+<p><strong>Cosa contiene un certificato</strong>: informazioni identificative, la <strong>chiave pubblica</strong> del soggetto, data di creazione, data di <strong>revoca</strong> (validità tipica 1-3 anni), e la <strong>firma digitale</strong> della CA su tutto quanto sopra. Chi riceve il certificato controlla la firma della CA e la data di revoca.</p>
+<p><strong>Creare una CA locale e firmare un certificato</strong> (il cuore del lab — file di configurazione in <code>/etc/ssl/openssl.cnf</code>, sezioni <code>[ca]</code>, policy, req):</p>
+<pre><code class="language-bash"># 1) La CA: coppia di chiavi + certificato auto-firmato (self-signed) valido 10 anni
+openssl genrsa -out rootCA.key 2048
+openssl req -x509 -new -key rootCA.key -days 3650 -out rootCA.pem
+#   -x509: produce un certificato (non una CSR); rootCA.pem contiene SOLO la pubblica + identità + firma,
+#          NON la chiave privata (che resta in rootCA.key)
+
+# (opzionale) esportare il cert della CA in formato DER per caricarlo nel browser
+openssl x509 -in rootCA.pem -outform DER -out cacert.der
+
+# 2) Il client: coppia di chiavi + richiesta di certificato (CSR)
+openssl genrsa -out client1.key 2048
+openssl req -new -key client1.key -out client1.csr
+#   -new senza -x509 → una CSR (Certificate Signing Request): contiene la chiave PUBBLICA da firmare
+#   per il Web PKI aggiungere:  -addext &quot;subjectAltName = DNS:www.sitename.domain&quot;
+
+# 3) La CA firma la CSR → certificato del client
+openssl x509 -req -days 365 \
+  -CA rootCA.pem -CAkey rootCA.key \
+  -CAcreateserial -CAserial serial \
+  -copy_extensions copy \
+  -in client1.csr -out client1.pem
+
+# 4) Visualizzare e verificare
+openssl x509 -in client1.pem -text -noout
+openssl verify -verbose -CAfile rootCA.pem client1.pem
+</code></pre>
+<ul>
+<li><strong>Significato dei flag di firma</strong>: <code>-req</code> dice a <code>x509</code> che l'input è una CSR; <code>-CA</code>/<code>-CAkey</code> sono cert e chiave della CA firmante; <code>-CAcreateserial</code>/<code>-CAserial serial</code> gestiscono il <strong>numero di serie</strong> univoco del certificato (un file che tiene il contatore); <code>-copy_extensions copy</code> copia le estensioni (es. il SAN) dalla CSR al certificato; <code>-days</code> la validità. <code>verify -CAfile</code> controlla che il certificato del client sia firmato da una CA di cui ci fidiamo.</li>
+</ul>
+<p><strong>Le tre entità da non confondere</strong> (Lorenzo, attenzione): la <strong>chiave</strong> (<code>.key</code>, coppia priv+pub, segreta); la <strong>CSR</strong> (<code>.csr</code>, richiesta = chiave pubblica + identità, ancora <em>non</em> firmata); il <strong>certificato</strong> (<code>.pem</code>/<code>.crt</code>, = chiave pubblica + identità + <strong>firma della CA</strong>, pubblicabile). Il certificato <strong>non</strong> contiene mai la chiave privata.</p>
+<hr />
+<h1 id="parte-4-tls-in-pratica-configurazione-servizi">PARTE 4 — TLS IN PRATICA (configurazione servizi)</h1>
+<p>Obiettivo: usare la catena di certificati per creare un <strong>tunnel TLS</strong> su servizi reali (web server nginx, broker MQTT) e testare la vulnerabilità <strong>Heartbleed</strong>.</p>
+<h2 id="16-https-con-nginx-e-certificato-self-signed">16. HTTPS con nginx e certificato self-signed</h2>
+<pre><code class="language-bash"># certificato self-signed in un solo comando
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/nginx-selfsigned.key \
+  -out /etc/ssl/certs/nginx-selfsigned.crt
+</code></pre>
+<ul>
+<li><strong>Flag</strong>: <code>-x509</code> produce direttamente un certificato (auto-firmato); <code>-nodes</code> = "<strong>no DES</strong>" → <strong>non</strong> cifra la chiave privata con passphrase (comodo per far ripartire il server senza digitarla, meno sicuro); <code>-newkey rsa:2048</code> genera al volo una nuova coppia RSA a 2048 bit; <code>-keyout</code>/<code>-out</code> i due file prodotti. Durante l'input, il campo <strong>Common Name (CN)</strong> deve essere il <strong>FQDN del sito</strong> (es. <code>seclab.it</code>): è il sito per cui il certificato vale.</li>
+<li><strong>Self-signed vs CA-signed</strong>: qui la CA è il sito stesso → il browser avvisa che non si fida (va "accettato il rischio"). Con una CA importata nel browser l'avviso sparisce.</li>
+</ul>
+<pre><code class="language-bash"># gruppo Diffie-Hellman per la Perfect Forward Secrecy (PFS)
+sudo openssl dhparam -out /etc/nginx/dhparam.pem 512
+</code></pre>
+<ul>
+<li><strong>Meccanismo</strong>: il gruppo DH serve a negoziare chiavi effimere → <strong>Perfect Forward Secrecy</strong> (se in futuro si compromette la chiave del server, le sessioni passate restano protette). Il <strong>minimo raccomandato è 2048</strong> (qui 512 solo per non aspettare; "la security è scomoda").</li>
+</ul>
+<p>Configurazione nginx (snippet): <code>ssl_certificate</code>/<code>ssl_certificate_key</code> (cert e chiave), poi <code>ssl-params.conf</code> con <code>ssl_protocols TLSv1.2;</code> (impone la versione), <code>ssl_prefer_server_ciphers on;</code>, <code>ssl_dhparam</code>, una <code>ssl_ciphers</code> selezionata (ECDHE/DHE-RSA-AES256-GCM…), <code>ssl_session_*</code> (cache/timeout), e header di sicurezza (<code>X-Frame-Options DENY</code>, <code>X-Content-Type-Options nosniff</code>, <code>X-XSS-Protection</code>). Il virtual host mette <code>listen 443 ssl;</code> e include gli snippet; un secondo <code>server</code> su <code>listen 80</code> fa <code>return 302 https://...</code> (redirect da HTTP a HTTPS). Si abilita con un symlink <code>sites-available → sites-enabled</code>, si verifica con <code>sudo nginx -t</code> (il warning <code>ssl_stapling ignored</code> è <strong>normale</strong> con un self-signed) e si riavvia con <code>systemctl restart nginx</code>. Per risolvere il nome si aggiunge <code>127.0.0.1 seclab.it</code> a <code>/etc/hosts</code>.</p>
+<p>Test:</p>
+<pre><code class="language-bash">wget --no-check-certificate seclab.it     # --no-check-certificate: accetta il self-signed
+</code></pre>
+<ul>
+<li>Nota: <code>http://seclab.it</code> risponde <strong>302</strong> (redirect), <code>https://seclab.it</code> risponde <strong>200</strong>.</li>
+</ul>
+<h2 id="17-tls-su-mqtt-cenno">17. TLS su MQTT (cenno)</h2>
+<p><strong>MQTT</strong> (Message Queuing Telemetry Transport) è un protocollo publish/subscribe con un <strong>broker</strong> centrale (qui <code>mosquitto</code>) che accoda i messaggi per i subscriber. In chiaro:</p>
+<pre><code class="language-bash">mosquitto_sub -h localhost -t sensor/#              # subscriber
+mosquitto_pub -t sensor/dht11/temperature -m 25     # publisher
+</code></pre>
+<p>Su Wireshark si vede il messaggio in chiaro. Abilitare TLS (compito per casa) significa applicare <strong>lo stesso schema PKI</strong>: creare CA + coppia+CSR del broker + firma, mettere i file in <code>&lt;mosquitto&gt;/certs/</code>, e nel <code>mosquitto.conf</code> impostare <code>port 8883</code>, <code>cafile</code>/<code>certfile</code>/<code>keyfile</code> e <code>tls_version</code>. Concetto-chiave: <strong>TLS è solo un layer che cifra il traffico del tunnel</strong>, quindi si applica a qualunque protocollo, non solo HTTP.</p>
+<h2 id="18-heartbleed-dal-riconoscimento-allexploit">18. Heartbleed — dal riconoscimento all'exploit</h2>
+<pre><code class="language-bash">nmap -p 443 --script ssl-heartbleed 192.168.56.XXX
+</code></pre>
+<ul>
+<li><strong>Meccanismo</strong>: lo script NSE <code>ssl-heartbleed</code> di <code>nmap</code> sonda la porta 443 e riporta <code>State: VULNERABLE</code> se il server usa una versione OpenSSL affetta (1.0.1 – 1.0.1f, 1.0.2-beta). Ricollega la teoria (§8) alla pratica: la heartbeat extension mal implementata legge memoria oltre la stringa ricevuta.</li>
+<li><strong>Exploit</strong>: non esiste un exploit generico unico — deve adattarsi a SO e applicazione perché lavora leggendo <em>memoria</em>. Nel lab si usa un PoC (<code>git clone https://github.com/sensepost/heartbleed-poc.git</code>) che, dopo alcune iterazioni, legge dagli <code>access.log</code> di nginx richieste POST precedenti con <strong>username e password in chiaro</strong>. Insegnamento: un bug di <em>implementazione</em> di una libreria vanifica un protocollo teoricamente sicuro.</li>
+</ul>
+<hr />
+<h2 id="connessioni-con-altri-moduli">Connessioni con altri moduli</h2>
+<ul>
+<li><strong>Con S1 (Offensive Security &amp; Enumerazione)</strong>: la Parte 1 (recon, OSINT, dorking, DNS/subdomain enum, <code>nmap</code>, evasione, OpenVAS) è la stessa fase di <em>reconnaissance</em> di S1. Il di più di S13 è la coppia <strong>VA/PT</strong>, le <strong>metodologie</strong> (OSSTMM/OWASP/PCI-DSS/NIST/ISSAF) e le <strong>posture</strong> (blind/grey box). Non ripetere i dettagli dei comandi <code>nmap</code>: sono in S1.</li>
+<li><strong>Con S12 (Sicurezza delle comunicazioni)</strong>: S12 ha catalogato in <strong>teoria</strong> gli attacchi (sniffing, ARP/DNS spoofing, hijacking, DoS); il <strong>lab offensive</strong> di S13 (§5) li <strong>esegue</strong> con <code>ettercap</code>/<code>hping3</code>, e la <strong>Parte 2</strong> di S13 fornisce le <strong>contromisure</strong> (canali sicuri) che S12 lasciava "in grigio". Sono le due metà complementari: attacco (S12) ↔ difesa (S13).</li>
+<li><strong>Con S14 (Crittografia)</strong>: S14 spiega <em>come</em> funzionano RSA, hash, firma, PKI; la <strong>Parte 3</strong> di S13 li <strong>invoca</strong> con <code>openssl</code> (genrsa, dgst, rsautl, x509). Il "problema del MITM" che motiva la PKI (§15) è esattamente la firma digitale di S14 applicata all'associazione chiave↔identità.</li>
+<li><strong>Con S15 (comunicazioni sicure, se distinto)</strong>: TLS/IPSec/VPN come <em>realizzazioni concrete</em> delle proprietà di sicurezza (riservatezza/integrità/autenticità) discusse nei moduli crittografici — TLS usa asimmetrico per l'handshake e simmetrico per il record, esempio da manuale di <strong>cifrario ibrido</strong>.</li>
+</ul>
+<hr />
+<h2 id="domande-di-autoverifica-stile-quiz-teorico-40">Domande di autoverifica — stile quiz teorico (40%)</h2>
+<p>Rispondere <strong>prima</strong> di guardare le soluzioni (in fondo agli appunti). Attenzione: nel quiz reale le risposte sbagliate hanno <strong>penalità</strong>, quindi meglio astenersi se davvero incerti.</p>
+<ol>
+<li><strong>V/F</strong> — Un Vulnerability Assessment sfrutta le vulnerabilità trovate per accedere a viste più interne del sistema.</li>
+<li><strong>V/F</strong> — In TLS, una singola connessione può contenere più sessioni.</li>
+<li><strong>V/F</strong> — TLS e SSL condividono lo stesso formato di record; TLS è definito in RFC 5246 e 8446.</li>
+<li><strong>Scelta multipla</strong> — L'unica mitigazione efficace contro POODLE è: (a) abilitare RC4; (b) <strong>disabilitare SSLv3</strong>; (c) usare CBC con IV concatenati; (d) attivare la compressione.</li>
+<li><strong>V/F</strong> — Heartbleed è una vulnerabilità di <em>protocollo</em> di TLS.</li>
+<li><strong>V/F</strong> — HSTS protegge anche la primissima richiesta HTTP di un browser verso un sito mai visitato.</li>
+<li><strong>Scelta multipla</strong> — In IPSec, quale protocollo offre <em>riservatezza</em> (cifratura) come servizio principale? (a) AH; (b) <strong>ESP</strong>; (c) SPI; (d) ISAKMP.</li>
+<li><strong>V/F</strong> — AH è pienamente compatibile con il NAT, perché non autentica gli indirizzi IP.</li>
+<li><strong>Scelta multipla</strong> — In una porta di switch in <em>access mode</em>: (a) serve il tagging 802.1q; (b) <strong>appartiene a una sola VLAN e il tagging non serve</strong>; (c) trasporta più VLAN; (d) è l'uso tipico verso i router.</li>
+<li><strong>V/F</strong> — <code>openssl enc -base64</code> fornisce riservatezza perché trasforma il testo in una stringa illeggibile.</li>
+<li><strong>V/F</strong> — Il file prodotto da <code>openssl genrsa -out chiave.pem 2048</code> contiene sia la chiave privata sia la pubblica.</li>
+<li><strong>V/F</strong> — Il certificato <code>rootCA.pem</code> prodotto con <code>openssl req -x509</code> contiene anche la chiave privata della CA.</li>
+<li><strong>Scelta multipla</strong> — Il flag <code>-nodes</code> in <code>openssl req -x509 -nodes ...</code> significa: (a) nessun output; (b) <strong>non cifrare la chiave privata con una passphrase</strong>; (c) usa più nodi; (d) disabilita DES nel certificato.</li>
+<li><strong>V/F</strong> — Con <code>ssh -L 8080:interno:80 gateway</code>, la porta 8080 viene aperta sul <em>server remoto</em>.</li>
+<li><strong>Scelta multipla</strong> — Il <em>double tagging</em> nel VLAN hopping: (a) funziona in entrambe le direzioni; (b) <strong>funziona solo in andata</strong>; (c) richiede DTP sulla vittima; (d) non usa i tag 802.1q.</li>
+<li><strong>V/F</strong> — In TOR l'exit node vede il traffico applicativo in chiaro se non c'è cifratura end-to-end.</li>
+<li><strong>V/F</strong> — PGP usa una Root CA centralizzata, mentre la PKI usa un Web of Trust.</li>
+<li><strong>Scelta multipla</strong> — Cosa distingue tunnel mode da transport mode in IPSec? (a) nulla; (b) <strong>il tunnel incapsula l'intero pacchetto IP originale in uno nuovo</strong>; (c) il transport cifra sempre l'header esterno; (d) il tunnel è solo per host-to-host.</li>
+</ol></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

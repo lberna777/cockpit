@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_modulo2A_utenti_permessi.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_modulo2A_utenti_permessi.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SYSADM/appunti_modulo2A_utenti_permessi.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="gestione-utenti-e-permessi">Gestione Utenti e Permessi</h1>
+<p><strong>Modulo</strong>: 2A | <strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Prerequisiti</strong>: Moduli 0A–1B completati<br />
+<strong>VM</strong>: <code>cd ~/sysAdmin-lab &amp;&amp; vagrant up --provider=virtualbox &amp;&amp; vagrant ssh</code></p>
+<hr />
+<h2 id="il-modello-utenti-di-linux">Il modello utenti di Linux</h2>
+<p>Linux non conosce i nomi: internamente ogni utente è un numero. <code>vagrant</code>, <code>root</code>, <code>alice</code> sono tutte etichette leggibili che il sistema traduce consultando <code>/etc/passwd</code>. Il comando che mostra i propri numeri è <code>id</code>:</p>
+<pre><code class="language-bash">id
+# uid=1000(vagrant) gid=1000(vagrant) groups=1000(vagrant)
+</code></pre>
+<blockquote>
+<p><strong>Risposta alla domanda — differenza tra <code>gid</code> e <code>groups</code></strong></p>
+<p><code>gid</code> è il <strong>gruppo primario</strong>: il gruppo assegnato di default a ogni file creato dall'utente. È uno solo.
+<code>groups</code> è la lista di <strong>tutti i gruppi</strong> a cui l'utente appartiene — il primario più tutti i gruppi secondari aggiunti con <code>usermod -aG</code>. Nel caso di vagrant appena installato, i due coincidono perché non è stato aggiunto a nessun gruppo secondario. Se aggiungiamo vagrant al gruppo <code>sudo</code>, l'output diventerebbe <code>groups=1000(vagrant),27(sudo)</code>.</p>
+</blockquote>
+<h3 id="la-convenzione-degli-uid">La convenzione degli UID</h3>
+<table>
+<thead>
+<tr>
+<th>Intervallo</th>
+<th>Destinazione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Root — sempre e solo</td>
+</tr>
+<tr>
+<td><code>1 – 999</code></td>
+<td>Utenti di sistema (demoni, servizi: <code>www-data</code>, <code>sshd</code>, <code>nobody</code>...)</td>
+</tr>
+<tr>
+<td><code>1000+</code></td>
+<td>Utenti fisici reali</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># Vedere tutti gli utenti del sistema
+cat /etc/passwd
+
+# Vedere solo gli utenti fisici (UID ≥ 1000)
+awk -F: '$3 &gt;= 1000 {print $1, $3}' /etc/passwd
+</code></pre>
+<blockquote>
+<p><strong>Risposta alla domanda — posso vedere solo la lista degli utenti fisici?</strong></p>
+<p>Sì, il comando <code>awk -F: '$3 &gt;= 1000 {print $1, $3}' /etc/passwd</code> filtra le righe di <code>/etc/passwd</code> mostrando solo gli utenti con UID ≥ 1000, che per convenzione sono quelli fisici. <code>awk -F:</code> imposta <code>:</code> come separatore di campo; <code>$3</code> è il terzo campo (l'UID); <code>$1</code> è il primo (il nome utente).</p>
+</blockquote>
+<h3 id="struttura-di-etcpasswd">Struttura di <code>/etc/passwd</code></h3>
+<pre><code>vagrant : x  : 1000 : 1000 : ,,, : /home/vagrant : /bin/bash
+   |      |     |      |      |         |               |
+  nome  pw(x)  UID   GID   GECOS      home           shell
+</code></pre>
+<ul>
+<li><strong>pw</strong>: sempre <code>x</code> — indica che la password è in <code>/etc/shadow</code>, non qui</li>
+<li><strong>GECOS</strong>: campo informativo opzionale (nome completo, telefono, ecc.) — spesso lasciato vuoto (<code>,,,</code>)</li>
+<li><strong>shell</strong>: interprete assegnato al login; <code>/bin/bash</code> per utenti normali, <code>/usr/sbin/nologin</code> o <code>/bin/false</code> per utenti di sistema che non devono effettuare login interattivi</li>
+</ul>
+<h3 id="storage-delle-password-etcshadow">Storage delle password — <code>/etc/shadow</code></h3>
+<p>Le password non sono in <code>/etc/passwd</code> (leggibile da tutti) ma in <code>/etc/shadow</code>, accessibile solo da root. Contiene gli hash delle password e le politiche di scadenza.</p>
+<pre><code class="language-bash">sudo cat /etc/shadow | grep vagrant
+</code></pre>
+<p>Struttura di una riga:</p>
+<pre><code>vagrant : $6$abc123... : 19800 : 0 : 99999 : 7 : : :
+   |           |           |     |     |     |
+  nome      hash pw     gg ult  min   max  warn
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nome</code></td>
+<td>Nome utente</td>
+</tr>
+<tr>
+<td><code>hash pw</code></td>
+<td>Hash della password (<code>$6$</code> = algoritmo SHA-512)</td>
+</tr>
+<tr>
+<td><code>gg ult</code></td>
+<td>Giorni dall'epoch (1 gen 1970) dell'ultimo cambio password</td>
+</tr>
+<tr>
+<td><code>min</code></td>
+<td>Giorni minimi prima di poter cambiare password di nuovo (<code>0</code> = nessun limite)</td>
+</tr>
+<tr>
+<td><code>max</code></td>
+<td>Giorni massimi prima che la password scada (<code>99999</code> ≈ mai)</td>
+</tr>
+<tr>
+<td><code>warn</code></td>
+<td>Giorni di preavviso prima della scadenza</td>
+</tr>
+</tbody>
+</table>
+<p>Il fatto che <code>/etc/shadow</code> sia leggibile solo da root è una misura di sicurezza critica: se fosse leggibile da tutti, un attaccante potrebbe copiare gli hash e craccarne le password offline con strumenti come <code>john</code> o <code>hashcat</code>.</p>
+<hr />
+<h2 id="gestione-degli-utenti">Gestione degli utenti</h2>
+<h3 id="creare-un-utente-useradd">Creare un utente — <code>useradd</code></h3>
+<pre><code class="language-bash">sudo useradd -m -s /bin/bash alice
+sudo passwd alice
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-m</code></td>
+<td>Crea la home directory <code>/home/alice</code></td>
+</tr>
+<tr>
+<td><code>-s /bin/bash</code></td>
+<td>Assegna Bash come shell di login</td>
+</tr>
+</tbody>
+</table>
+<p>Senza <code>-m</code> la home non viene creata. Senza <code>-s</code> viene usata la shell di default del sistema (spesso <code>sh</code>).</p>
+<h3 id="modificare-un-utente-usermod">Modificare un utente — <code>usermod</code></h3>
+<p><code>usermod</code> permette di modificare quasi ogni attributo di un utente esistente:</p>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Effetto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sudo usermod -aG gruppo nome</code></td>
+<td>Aggiunge l'utente a un gruppo secondario (senza rimuoverlo dagli altri)</td>
+</tr>
+<tr>
+<td><code>sudo usermod -s /bin/zsh nome</code></td>
+<td>Cambia la shell di login</td>
+</tr>
+<tr>
+<td><code>sudo usermod -d /nuova/home nome</code></td>
+<td>Cambia la home directory</td>
+</tr>
+<tr>
+<td><code>sudo usermod -l nuovo_nome vecchio_nome</code></td>
+<td>Rinomina l'utente</td>
+</tr>
+<tr>
+<td><code>sudo usermod -L nome</code></td>
+<td>Blocca l'account (lock)</td>
+</tr>
+<tr>
+<td><code>sudo usermod -U nome</code></td>
+<td>Sblocca l'account (unlock)</td>
+</tr>
+</tbody>
+</table>
+<p>Il flag <code>-aG</code> è la combinazione più usata: <code>-a</code> significa <strong>append</strong> (aggiungi senza sostituire), <code>-G</code> specifica il gruppo. Usare <code>-G</code> senza <code>-a</code> sostituirebbe tutti i gruppi secondari con quello indicato — errore comune e potenzialmente distruttivo.</p>
+<h3 id="cambiare-utente-su">Cambiare utente — <code>su</code></h3>
+<pre><code class="language-bash">su - alice   # con trattino: carica l'ambiente completo di alice
+su alice     # senza trattino: cambia utente ma mantiene l'ambiente corrente
+</code></pre>
+<p>Il trattino in <code>su - alice</code> è importante: carica le variabili d'ambiente di alice (<code>$HOME</code>, <code>$PATH</code>, ecc.) e posiziona nella sua home. Senza trattino ci si ritrova nell'ambiente del chiamante — comportamento quasi sempre indesiderato, fonte di bug difficili da diagnosticare.</p>
+<pre><code class="language-bash">exit   # per tornare all'utente precedente
+</code></pre>
+<h3 id="eliminare-un-utente-userdel">Eliminare un utente — <code>userdel</code></h3>
+<pre><code class="language-bash">sudo userdel alice      # elimina l'utente, lascia la home intatta
+sudo userdel -r alice   # elimina l'utente E la home directory
+</code></pre>
+<hr />
+<h2 id="proprieta-di-un-file-chown-e-chgrp">Proprietà di un file — <code>chown</code> e <code>chgrp</code></h2>
+<p>Alla creazione, ogni file viene associato all'utente che lo ha creato (owner) e al suo gruppo primario. Questi attributi si modificano con <code>chown</code> e <code>chgrp</code>.</p>
+<pre><code class="language-bash">echo &quot;file di vagrant&quot; &gt; file_vagrant.txt
+ls -la file_vagrant.txt
+# output: -rw-r--r-- 1 vagrant vagrant ...
+
+# Cambiare solo il proprietario
+sudo chown alice file_vagrant.txt
+# output: -rw-r--r-- 1 alice vagrant ...
+
+# Cambiare proprietario e gruppo insieme
+sudo chown alice:alice file_vagrant.txt
+# output: -rw-r--r-- 1 alice alice ...
+
+# Cambiare solo il gruppo
+sudo chgrp vagrant file_vagrant.txt
+# output: -rw-r--r-- 1 alice vagrant ...
+</code></pre>
+<p><code>chown</code> richiede <code>sudo</code> perché solo root può trasferire la proprietà di un file. Un utente può modificare il gruppo solo verso un gruppo di cui fa già parte.</p>
+<hr />
+<h2 id="permessi-chmod">Permessi — <code>chmod</code></h2>
+<p>Ogni file ha una stringa di 10 caratteri che ne descrive i permessi:</p>
+<pre><code>- r w x  r - x  r - -
+| |||    |||    |||
+| owner  group  others
+|
+tipo: - = file, d = directory, l = link simbolico
+</code></pre>
+<p>Le tre lettere <code>rwx</code> valgono:
+- <code>r</code> = 4 (read)
+- <code>w</code> = 2 (write)
+- <code>x</code> = 1 (execute)</p>
+<p>La somma dei tre valori per ciascun blocco produce la notazione ottale:</p>
+<table>
+<thead>
+<tr>
+<th>Stringa</th>
+<th>Ottale</th>
+<th>Uso tipico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rw-r--r--</code></td>
+<td>644</td>
+<td>File normale — owner scrive, tutti leggono</td>
+</tr>
+<tr>
+<td><code>rwxr-xr-x</code></td>
+<td>755</td>
+<td>Script/directory — owner tutto, altri leggono+eseguono</td>
+</tr>
+<tr>
+<td><code>rw-------</code></td>
+<td>600</td>
+<td>File privato — solo owner</td>
+</tr>
+<tr>
+<td><code>rwx------</code></td>
+<td>700</td>
+<td>Directory/script privato — solo owner</td>
+</tr>
+<tr>
+<td><code>rwxrwx---</code></td>
+<td>770</td>
+<td>Condiviso tra owner e gruppo, nessun altro</td>
+</tr>
+<tr>
+<td><code>rwxrwxrwx</code></td>
+<td>777</td>
+<td>Tutti fanno tutto — pericoloso</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># Notazione ottale (la più usata)
+chmod 644 file.txt
+chmod 755 script.sh
+chmod 700 file_privato.txt
+chmod 000 file_test.txt    # nessuno può fare nulla
+
+# Verifica che il blocco funzioni davvero
+echo &quot;segreto&quot; &gt; file_test.txt
+chmod 000 file_test.txt
+cat file_test.txt          # → Permission denied
+chmod 644 file_test.txt
+cat file_test.txt          # → segreto
+
+# Notazione simbolica (utile per modifiche puntuali)
+chmod u+x script.sh        # aggiunge esecuzione all'owner
+chmod g-w file.txt         # rimuove scrittura al gruppo
+chmod o-r file.txt         # rimuove lettura agli altri
+chmod a+r file.txt         # aggiunge lettura a tutti
+</code></pre>
+<p><code>u</code> = user (owner), <code>g</code> = group, <code>o</code> = others, <code>a</code> = all.</p>
+<hr />
+<h2 id="come-linux-decide-i-permessi-composizione">Come Linux decide i permessi — composizione</h2>
+<p>Quando un utente <code>A</code> accede a un file, il kernel segue questo schema <strong>deterministico</strong>:</p>
+<pre><code>A è il proprietario (U)?
+  Sì → applica i permessi di U. Fine.
+  No → A appartiene al gruppo proprietario (G)?
+         Sì → applica i permessi di G. Fine.
+         No → applica i permessi di O (others). Fine.
+</code></pre>
+<p><strong>Punto controintuitivo</strong>: i blocchi si escludono a vicenda. Se <code>A</code> è il proprietario del file, si applicano <strong>solo</strong> i permessi di U — anche se i permessi di G o O fossero più permissivi. Esempio:</p>
+<pre><code class="language-bash"># File con questi permessi: ---rwxrwx  (000 per owner, 777 per group e others)
+# Se sei il proprietario: non puoi fare nulla
+# Se sei nel gruppo: puoi fare tutto
+</code></pre>
+<p>Questo è il motivo per cui a volte un proprietario ha meno accesso di un altro utente sullo stesso file — è by design, non un bug.</p>
+<hr />
+<h2 id="umask-permessi-di-default-alla-creazione"><code>umask</code> — permessi di default alla creazione</h2>
+<p>Quando crei un file o una directory, Linux non assegna permessi fissi: parte da un massimo e <strong>sottrae</strong> la <code>umask</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Massimo di partenza</th>
+<th>Umask tipica (<code>002</code>)</th>
+<th>Risultato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File</td>
+<td><code>666</code> (rw-rw-rw-)</td>
+<td><code>002</code></td>
+<td><code>664</code> (rw-rw-r--)</td>
+</tr>
+<tr>
+<td>Directory</td>
+<td><code>777</code> (rwxrwxrwx)</td>
+<td><code>002</code></td>
+<td><code>775</code> (rwxrwxr-x)</td>
+</tr>
+</tbody>
+</table>
+<p>Il massimo per i file è <code>666</code> (non <code>777</code>) perché l'eseguibilità è un'eccezione — non si concede per default.</p>
+<pre><code class="language-bash"># Vedere la umask corrente
+umask
+# → 0002
+
+# Cambiarla per la sessione corrente
+umask 0027   # owner tutto, gruppo legge, others nulla
+
+# Verificare l'effetto
+touch file_test &amp;&amp; ls -la file_test
+# → -rw-r----- (640)
+</code></pre>
+<p>La umask è per sessione: per renderla persistente va messa in <code>~/.bashrc</code>.</p>
+<p><strong>Umask usata nel lab</strong>: il prof usa <code>umask 0002</code> (rimuove write agli others), che va inserita nel <code>.bashrc</code> degli utenti collaborativi. In questo modo i file creati nella directory condivisa sono leggibili e scrivibili da tutto il gruppo, ma non da estranei.</p>
+<hr />
+<h2 id="bit-speciali-suid-sgid-sticky">Bit speciali — SUID, SGID, Sticky</h2>
+<p>Oltre ai 9 bit <code>rwx</code>, esistono 3 bit speciali che alterano il comportamento del sistema.</p>
+<h3 id="suid-bit-11-set-user-id">SUID (bit 11) — Set User ID</h3>
+<p>Applicato a un <strong>file eseguibile</strong>: quando viene lanciato, il processo gira con l'identità del <strong>proprietario del file</strong>, non di chi lo esegue.</p>
+<pre><code class="language-bash"># Esempio classico: passwd
+ls -la /usr/bin/passwd
+# → -rwsr-xr-x 1 root root ...
+#       ^
+#       's' al posto di 'x' = SUID attivo
+</code></pre>
+<p><code>passwd</code> deve scrivere in <code>/etc/shadow</code> (accessibile solo a root) — lo fa grazie al SUID: chiunque lo esegua, il processo ottiene i privilegi di <code>root</code>. Questo è il meccanismo che permette agli utenti di cambiare la propria password.</p>
+<pre><code class="language-bash">chmod 4755 mio_eseguibile   # imposta SUID + rwxr-xr-x
+chmod u+s  mio_eseguibile   # equivalente simbolico
+</code></pre>
+<h3 id="sgid-bit-10-set-group-id">SGID (bit 10) — Set Group ID</h3>
+<p><strong>Su file eseguibili</strong>: funziona come SUID ma per il gruppo — il processo gira con il gruppo proprietario del file.</p>
+<p><strong>Su directory</strong>: questo è il caso più utile in pratica. Se una directory ha SGID impostato, i file creati al suo interno ereditano il <strong>gruppo della directory</strong> (non il gruppo primario del creatore).</p>
+<pre><code class="language-bash"># Senza SGID: alice crea un file → gruppo = alice (suo gruppo primario)
+# Con SGID:   alice crea un file → gruppo = programmatori (gruppo della dir)
+
+chmod 2770 /home/programmatori   # SGID + rwxrwx---
+chmod g+s  /home/programmatori   # equivalente simbolico
+</code></pre>
+<p>Questo è esattamente il meccanismo del lab: con <code>umask 0002</code> + SGID sulla directory, qualsiasi file creato da maria o piero risulta automaticamente scrivibile da entrambi, senza dover fare <code>chgrp</code> manualmente ogni volta.</p>
+<h3 id="sticky-bit-bit-9">Sticky bit (bit 9)</h3>
+<p>Applicato a una <strong>directory</strong>: i file al suo interno possono essere cancellati solo dal loro proprietario, anche se la directory è world-writable.</p>
+<pre><code class="language-bash">ls -la /tmp
+# → drwxrwxrwt  (nota la 't' finale = sticky)
+</code></pre>
+<p><code>/tmp</code> è scrivibile da tutti, ma nessun utente può cancellare i file degli altri — solo i rispettivi proprietari (o root).</p>
+<pre><code class="language-bash">chmod 1777 /tmp      # sticky + rwxrwxrwx
+chmod +t   /tmp      # equivalente simbolico
+</code></pre>
+<h3 id="lettura-nella-stringa-permessi">Lettura nella stringa permessi</h3>
+<pre><code>- r w s  r - s  r - t
+        ^       ^       ^
+       SUID    SGID   Sticky
+  (su owner) (su grp) (su dir)
+</code></pre>
+<p>La lettera <code>s</code> compare al posto della <code>x</code> del blocco corrispondente. Se il bit eseguibile non è impostato, appare <code>S</code> maiuscola (bit impostato ma senza effetto).</p>
+<h3 id="notazione-ottale-con-bit-speciali">Notazione ottale con bit speciali</h3>
+<p>Il quarto cifra ottale (quella davanti) codifica i tre bit speciali:</p>
+<table>
+<thead>
+<tr>
+<th>Valore</th>
+<th>Bit impostato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>4xxx</code></td>
+<td>SUID</td>
+</tr>
+<tr>
+<td><code>2xxx</code></td>
+<td>SGID</td>
+</tr>
+<tr>
+<td><code>1xxx</code></td>
+<td>Sticky</td>
+</tr>
+<tr>
+<td><code>6xxx</code></td>
+<td>SUID + SGID</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash">chmod 2770 /home/programmatori   # SGID + rwxrwx---
+chmod 4755 /usr/bin/mioprog      # SUID + rwxr-xr-x
+chmod 1777 /tmp                  # Sticky + rwxrwxrwx
+</code></pre>
+<hr />
+<h2 id="privilegi-elevati-sudo">Privilegi elevati — <code>sudo</code></h2>
+<p><code>sudo</code> (superuser do) permette di eseguire un singolo comando come root senza diventare root permanentemente. La configurazione che stabilisce chi può fare cosa sta in <code>/etc/sudoers</code>.</p>
+<pre><code class="language-bash"># Non modificare mai /etc/sudoers direttamente — usare visudo
+sudo cat /etc/sudoers
+</code></pre>
+<p>La riga chiave per Debian è:</p>
+<pre><code>%sudo   ALL=(ALL:ALL) ALL
+</code></pre>
+<p>Traduzione: il gruppo <code>sudo</code> (<code>%sudo</code>) può eseguire qualsiasi comando su qualsiasi host, come qualsiasi utente.</p>
+<h3 id="sudo-l-interpretare-loutput"><code>sudo -l</code> — interpretare l'output</h3>
+<pre><code class="language-bash">sudo -l
+</code></pre>
+<p>Output sulla VM Vagrant:</p>
+<pre><code>Matching Defaults entries for vagrant on bookworm:
+    env_reset, mail_badpass,
+    secure_path=...,
+    use_pty
+
+User vagrant may run the following commands on bookworm:
+    (ALL) NOPASSWD: ALL
+</code></pre>
+<blockquote>
+<p><strong>Risposta alla domanda — cosa ottengo materialmente da <code>sudo -l</code>?</strong></p>
+<p><code>sudo -l</code> elenca tutti i comandi che l'utente corrente può eseguire con <code>sudo</code>, in che contesto, e se è richiesta o meno la password. È uno dei primi comandi eseguiti da un attaccante dopo aver ottenuto accesso a una macchina — per questo è fondamentale saperlo leggere.</p>
+<p>Per interpretare l'output bisogna conoscere la struttura completa di una regola sudoers:</p>
+<p><code>CHI     DOVE  = (COME_CHI)   COSA
+vagrant ALL   =    (ALL)     NOPASSWD: ALL</code></p>
+<ul>
+<li><strong>CHI</strong> (<code>vagrant</code>) — l'utente a cui si applica la regola. Vale solo per vagrant.</li>
+<li><strong>DOVE</strong> (<code>ALL</code>) — su quale macchina vale. In infrastrutture con <code>/etc/sudoers</code> condiviso via rete si può limitare a un host specifico; <code>ALL</code> significa qualsiasi.</li>
+<li><strong>COME CHI</strong> (<code>ALL</code> tra parentesi) — quale utente vagrant può <strong>impersonare</strong> quando usa sudo. Per default <code>sudo</code> esegue come root, ma <code>sudo -u alice comando</code> permette di eseguire come alice. Il valore <code>ALL</code> significa che vagrant può impersonare qualsiasi utente del sistema, non solo root. Questo campo non amplia a chi si applica la regola — si applica sempre e solo a vagrant — ma allarga la gamma di identità che vagrant può assumere.</li>
+<li><strong>COSA</strong> (<code>ALL</code> finale) — quali comandi sono permessi.</li>
+<li><strong>NOPASSWD</strong> — nessuna password richiesta per nessuno di questi comandi.</li>
+</ul>
+<p>La configurazione complessiva è la più permissiva possibile: normale in un ambiente di laboratorio Vagrant, pericolosa in produzione.</p>
+<p><strong>Implicazione pratica del campo COME CHI — accesso a risorse di altri utenti</strong></p>
+<p>Il campo <code>(ALL)</code> non riguarda solo root. Significa che vagrant può impersonare <strong>qualsiasi</strong> utente del sistema tramite <code>sudo -u nome comando</code>. In pratica: se alice appartiene al gruppo <code>progetto</code> e vagrant no, vagrant è normalmente escluso dalla directory <code>/srv/progetto</code> (permessi <code>770</code>). Ma con <code>(ALL)</code> in sudoers può aggirare questo limite:</p>
+<p>```bash</p>
+<h1 id="come-vagrant-accesso-diretto-negato">Come vagrant, accesso diretto → negato</h1>
+<p>cd /srv/progetto</p>
+<h1 id="-bash-cd-srvprogetto-permission-denied">-bash: cd: /srv/progetto/: Permission denied</h1>
+<h1 id="come-vagrant-tramite-sudo-u-alice-funziona">Come vagrant, tramite sudo -u alice → funziona</h1>
+<p>sudo -u alice cat /srv/progetto/alice.txt</p>
+<h1 id="file-di-alice">→ file di alice</h1>
+<p>```</p>
+<p>Vagrant non entra nella directory — esegue <code>cat</code> con l'identità di alice, e il filesystem vede alice (membro del gruppo <code>progetto</code>), non vagrant. Il risultato è accesso completo a qualsiasi risorsa legata all'identità di qualsiasi utente del sistema: file privati, chiavi SSH, dati applicativi.</p>
+<p>La contromisura è restringere il campo COME CHI nella regola sudoers. Se vagrant ha bisogno di sudo solo per operazioni di sistema come root, la regola corretta è:
+<code>vagrant ALL=(root) NOPASSWD: ALL</code>
+Con <code>(root)</code> al posto di <code>(ALL)</code>, <code>sudo -u alice</code> viene rifiutato — vagrant può eseguire solo come root, non come utenti arbitrari.</p>
+<p><strong>Risposta alla domanda — perché vagrant ha sudo se <code>groups vagrant</code> non mostra il gruppo <code>sudo</code>?</strong></p>
+<p>Vagrant configura i privilegi di root tramite un file dedicato in <code>/etc/sudoers.d/vagrant</code>, non tramite l'appartenenza al gruppo <code>sudo</code>. I file in <code>/etc/sudoers.d/</code> vengono letti da <code>sudo</code> esattamente come <code>/etc/sudoers</code> — sono solo file separati per organizzare meglio le regole. Puoi verificarlo:
+```bash
+sudo cat /etc/sudoers.d/vagrant</p>
+<h1 id="output-vagrant-allall-nopasswd-all">output: vagrant ALL=(ALL) NOPASSWD: ALL</h1>
+<p><code>``
+Quindi vagrant ha accesso root completo senza password, indipendentemente dai suoi gruppi. Il gruppo</code>sudo<code>è il meccanismo standard di Debian/Ubuntu;</code>/etc/sudoers.d/` è il meccanismo che Vagrant usa per configurare la VM senza toccare il file principale.</p>
+</blockquote>
+<hr />
+<h2 id="esercizio-integrato-directory-condivisa">Esercizio integrato — directory condivisa</h2>
+<pre><code class="language-bash"># Creare gruppo e utenti
+sudo groupadd progetto
+sudo useradd -m -s /bin/bash alice
+sudo useradd -m -s /bin/bash bob
+sudo passwd alice   # imposta password
+sudo passwd bob
+
+# Aggiungere alice e bob al gruppo progetto
+sudo usermod -aG progetto alice
+sudo usermod -aG progetto bob
+groups alice   # alice : alice progetto
+groups bob     # bob : bob progetto
+
+# Creare la directory condivisa
+sudo mkdir /srv/progetto
+sudo chown root:progetto /srv/progetto
+sudo chmod 770 /srv/progetto
+ls -la /srv/
+</code></pre>
+<blockquote>
+<p><strong>Risposta alla domanda — perché cambiamo il proprietario della directory con <code>chown root:progetto</code>?</strong></p>
+<p>Il comando non cambia il proprietario individuale (che resta <code>root</code>) ma il <strong>gruppo proprietario</strong>: lo imposta a <code>progetto</code>. Questo è il meccanismo che rende la directory condivisa tra alice e bob senza che uno sia il proprietario dell'altro. Con <code>chmod 770</code>, il blocco dei permessi per il gruppo è <code>rwx</code> — quindi tutti i membri del gruppo <code>progetto</code> possono creare, leggere e modificare file dentro quella directory. Il proprietario individuale <code>root</code> non è significativo qui; quello che conta è che il gruppo sia <code>progetto</code>.</p>
+<p><strong>Risposta alla domanda — <code>/srv</code> è una cartella preesistente? cosa sono <code>.</code> e <code>..</code>?</strong></p>
+<p>Sì, <code>/srv</code> è una directory standard del filesystem Linux (definita dallo standard FHS — Filesystem Hierarchy Standard). È destinata ai dati dei servizi ospitati dalla macchina (es. file di un server web, file FTP, ecc.). Sulla VM Debian appena installata è vuota — l'unico contenuto è la directory <code>progetto</code> che hai creato tu.</p>
+<p>Le voci <code>.</code> e <code>..</code> che appaiono in ogni <code>ls -la</code> <strong>non sono file</strong>: sono voci speciali del filesystem che ogni directory contiene sempre. <code>.</code> è un riferimento alla directory stessa; <code>..</code> è un riferimento alla directory genitore. Compaiono in qualsiasi <code>ls -la</code> su qualsiasi directory Linux — sono struttura del filesystem, non file creati da qualcuno.</p>
+</blockquote>
+<pre><code class="language-bash"># Test come alice
+su - alice
+cd /srv/progetto
+echo &quot;file di alice&quot; &gt; alice.txt
+ls -la
+exit
+
+# Test come bob
+su - bob
+cd /srv/progetto
+cat alice.txt          # funziona — bob è nel gruppo progetto
+exit
+
+# Test come utente fuori dal gruppo
+sudo useradd -m -s /bin/bash sconosciuto
+sudo passwd sconosciuto
+su - sconosciuto
+cd /srv/progetto       # → Permission denied (sconosciuto non è nel gruppo)
+exit
+</code></pre>
+<p>Il risultato dimostra concretamente il funzionamento del modello a tre categorie di Linux: <code>owner</code>, <code>group</code>, <code>others</code>. <code>sconosciuto</code> cade nel blocco <code>others</code>, che per questa directory ha permessi <code>---</code>.</p>
+<hr />
+<h2 id="connessione-con-security">Connessione con Security</h2>
+<p>Questo modulo è il prerequisito concettuale diretto per <strong>privilege escalation</strong>:</p>
+<ul>
+<li>Dopo aver ottenuto accesso come utente non privilegiato, l'attaccante esegue subito <code>sudo -l</code>: se trova <code>NOPASSWD: ALL</code> o un singolo interprete (<code>python</code>, <code>vim</code>, <code>bash</code>) eseguibile con sudo, può ottenere una shell root in secondi</li>
+<li>File con permessi <code>777</code>, o file di configurazione critici scrivibili da utenti normali, sono vettori di escalation classici</li>
+<li><code>/etc/shadow</code> leggibile da non-root è una vulnerabilità critica: gli hash si craccano offline</li>
+<li>Utenti nel gruppo <code>sudo</code> senza necessità operativa reale ampliano inutilmente la superficie d'attacco</li>
+<li>La directory condivisa con <code>770</code> è la configurazione corretta: un <code>777</code> sulla stessa directory permetterebbe a qualsiasi utente del sistema di accedere ai file</li>
+</ul>
+<hr />
+<h2 id="riepilogo-comandi">Riepilogo comandi</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id [nome]</code></td>
+<td>Mostra UID, GID e tutti i gruppi</td>
+</tr>
+<tr>
+<td><code>groups [nome]</code></td>
+<td>Mostra i gruppi dell'utente</td>
+</tr>
+<tr>
+<td><code>cat /etc/passwd</code></td>
+<td>Lista tutti gli utenti del sistema</td>
+</tr>
+<tr>
+<td><code>awk -F: '$3&gt;=1000 {print $1}' /etc/passwd</code></td>
+<td>Lista solo gli utenti fisici</td>
+</tr>
+<tr>
+<td><code>sudo cat /etc/shadow</code></td>
+<td>Mostra hash password (solo root)</td>
+</tr>
+<tr>
+<td><code>sudo useradd -m -s /bin/bash nome</code></td>
+<td>Crea utente con home e shell Bash</td>
+</tr>
+<tr>
+<td><code>sudo passwd nome</code></td>
+<td>Imposta/cambia password utente</td>
+</tr>
+<tr>
+<td><code>sudo usermod -aG gruppo nome</code></td>
+<td>Aggiunge utente a un gruppo</td>
+</tr>
+<tr>
+<td><code>sudo usermod -s /bin/zsh nome</code></td>
+<td>Cambia la shell</td>
+</tr>
+<tr>
+<td><code>sudo userdel -r nome</code></td>
+<td>Elimina utente e home directory</td>
+</tr>
+<tr>
+<td><code>sudo groupadd nome</code></td>
+<td>Crea un nuovo gruppo</td>
+</tr>
+<tr>
+<td><code>su - nome</code></td>
+<td>Cambia utente con caricamento ambiente completo</td>
+</tr>
+<tr>
+<td><code>sudo comando</code></td>
+<td>Esegue comando come root</td>
+</tr>
+<tr>
+<td><code>sudo -i</code></td>
+<td>Apre shell root completa</td>
+</tr>
+<tr>
+<td><code>sudo -l</code></td>
+<td>Elenca comandi eseguibili con sudo (e se serve password)</td>
+</tr>
+<tr>
+<td><code>sudo cat /etc/sudoers.d/vagrant</code></td>
+<td>Mostra le regole sudo specifiche di Vagrant</td>
+</tr>
+<tr>
+<td><code>chmod 755 file</code></td>
+<td>Modifica permessi in notazione ottale</td>
+</tr>
+<tr>
+<td><code>chmod u+x file</code></td>
+<td>Modifica permessi in notazione simbolica</td>
+</tr>
+<tr>
+<td><code>chmod 2770 dir</code></td>
+<td>Imposta SGID + rwxrwx--- su una directory</td>
+</tr>
+<tr>
+<td><code>chmod g+s dir</code></td>
+<td>Imposta SGID in notazione simbolica</td>
+</tr>
+<tr>
+<td><code>chmod +t dir</code></td>
+<td>Imposta sticky bit</td>
+</tr>
+<tr>
+<td><code>sudo chown utente:gruppo file</code></td>
+<td>Cambia proprietario e gruppo</td>
+</tr>
+<tr>
+<td><code>sudo chgrp gruppo file</code></td>
+<td>Cambia solo il gruppo</td>
+</tr>
+<tr>
+<td><code>umask</code></td>
+<td>Mostra la umask corrente</td>
+</tr>
+<tr>
+<td><code>umask 0002</code></td>
+<td>Imposta umask per la sessione</td>
+</tr>
+</tbody>
+</table>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo2A]]</li>
+<li>[[guida_lab_modulo2A_utenti_permessi]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

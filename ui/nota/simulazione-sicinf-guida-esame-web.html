@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_esame_web.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">guida_esame_web.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/guida_esame_web.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="guida-esame-web-vulnerabilities">Guida Esame — Web Vulnerabilities</h1>
+<blockquote>
+<p>File cockpit da aprire il giorno dell'esame appena riconosci un esercizio di questo tipo (una
+<strong>web app</strong> in un container docker — <code>docker run ... -p ...:5000</code> o <code>:8000</code> — da testare <strong>solo con
+browser/curl</strong>, di solito con <code>payload.png</code>/<code>exploitN.png</code> + <code>web.txt</code> da consegnare, spesso con
+l'obiettivo di <strong>esfiltrare una flag</strong> o <strong>eseguire un <code>alert()</code></strong>). Autosufficiente per la maggior
+parte dei casi. Per l'algoritmo passo-passo vedi <code>procedura_operativa_web.md</code>; per i 5 casi reali
+già risolti, <code>modello_web_vulnerabilities.md</code>; per il template del deliverable, <code>template_report_web.md</code>.</p>
+<p><strong>Principio guida</strong>: davanti a un input controllabile, la domanda non è "quale exploit conosco?" ma
+<strong>"a quale interprete arriva questo input?"</strong> (HTML del browser, SQL, shell, filesystem). Lo scopri
+mandando input che romperebbero <em>ciascun</em> interprete e guardando la reazione (Sezione 1). Una volta
+saputo l'interprete, la famiglia è decisa e il resto è meccanico.</p>
+</blockquote>
+<hr />
+<h2 id="0-i-gate-che-non-hai-il-permesso-di-saltare">0. I gate che NON hai il permesso di saltare</h2>
+<ul>
+<li>⚠️ <strong>Gate A — niente scanner, niente bruteforce.</strong> In (quasi) ogni consegna: <em>"Non è possibile
+  utilizzare tool di scansione automatica e non è consentito alcun tipo di bruteforce."</em> Vale come
+  <strong>vincolo generale del tipo d'esame</strong>, non del singolo esercizio (confermato su tutti e 5 i casi
+  del pool, con lievi variazioni di formula). Quindi <strong>niente sqlmap, nikto, dirb, gobuster, wfuzz,
+  hydra</strong>. Solo browser, inspector (DevTools), curl, e — dove serve comporre una richiesta a mano —
+  Burp/proxy. L'exploit va <strong>ragionato</strong>, non forzato.</li>
+<li>⚠️ <strong>Gate B — la prova è visiva.</strong> Il voto dipende dagli screenshot + dal livello di dettaglio del
+  <code>web.txt</code> ("il livello di dettaglio e precisione della descrizione sarà utilizzato come
+  valutazione"). Cattura <strong>ogni passaggio fondamentale</strong> (classificazione, ostacolo, bypass,
+  successo), non solo il risultato finale. Se la VM fa revert, salva gli screenshot sull'host mentre
+  procedi (vedi memoria <code>deliverable_vm_revert</code>).</li>
+<li>⚠️ <strong>Gate C — leggi TUTTA la pagina prima di sparare payload.</strong> Molte app d'esame <strong>mostrano
+  indizi</strong>: la command line eseguita (Caso 4), un link alla documentazione dello schema (Caso 5), un
+  suggerimento sul formato dell'input (Caso 3, "base64"). Il primo passo è <strong>leggere</strong>, non iniettare.</li>
+</ul>
+<hr />
+<h2 id="1-triage-a-quale-interprete-arriva-linput-lalbero-decisionale">1. TRIAGE — a quale interprete arriva l'input? (l'albero decisionale)</h2>
+<p>Individua <strong>l'input controllabile</strong> (parametro GET nell'URL <code>?x=...</code>, campo POST, campo di ricerca,
+dropdown). Poi manda, uno alla volta, questi input-sonda e osserva la reazione. <strong>Ogni sonda rompe un
+interprete diverso</strong>: la reazione ti dice quale.</p>
+<table>
+<thead>
+<tr>
+<th>Sonda</th>
+<th>Se provoca...</th>
+<th>Interprete probabile → Famiglia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;b&gt;test&lt;/b&gt;</code> o <code>&lt;img src=x onerror=alert(1)&gt;</code></td>
+<td>il <strong>grassetto compare</strong> / parte un alert / il tag è interpretato</td>
+<td>l'output è <strong>riflesso nell'HTML</strong> → <strong>XSS</strong></td>
+</tr>
+<tr>
+<td><code>'</code> (apice singolo)</td>
+<td><strong>errore SQL</strong> / la pagina cambia / più righe del previsto</td>
+<td>l'input compone una <strong>query SQL</strong> → <strong>SQL Injection</strong></td>
+</tr>
+<tr>
+<td><code>;</code> <code>|</code> <code>`</code> <code>$(...)</code> <code>#</code></td>
+<td><strong>errore shell</strong> / output di un comando / la command line mostrata cambia</td>
+<td>l'input compone una <strong>riga di comando</strong> → <strong>Command Injection</strong></td>
+</tr>
+<tr>
+<td><code>../</code> o <code>/etc/passwd</code> o <code>../../../../etc/passwd</code></td>
+<td>compare il <strong>contenuto di un file</strong> / errore "file not found" con un path</td>
+<td>l'input compone un <strong>percorso di file</strong> → <strong>Path Traversal / LFI</strong></td>
+</tr>
+<tr>
+<td>nome di file/record valido → poi lo stesso ma inesistente</td>
+<td>messaggio d'errore che <strong>rivela un path</strong> o una query</td>
+<td>conferma path/SQL a seconda dell'errore</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Regole di lettura del triage:</strong></p>
+<ol>
+<li><strong>Parti dallo scenario più veloce da verificare.</strong> Il web.txt ufficiale del Caso 3 lo dice
+   esplicitamente: se l'input "ritorna solo quanto inserito" (riflesso) e non altri dati recuperati,
+   SQLi è improbabile → prova prima XSS. Se l'app <em>mostra il comando eseguito</em> → command injection.
+   Se l'app <em>apre/mostra file</em> → path traversal.</li>
+<li><strong>La consegna spesso ti dà la famiglia (o la esclude).</strong> Frasi-chiave:
+   - <em>"vulnerabilità Client Side"</em> / <em>"eseguire un alert o prompt"</em> → <strong>XSS</strong> (Casi 1, 3).
+   - <em>"siti che interrogano database"</em> / <em>"esfiltrare le flag nel database"</em> → <strong>SQL Injection</strong> (Caso 5).
+   - <em>"Server Side ... non sono coinvolti database"</em> → <strong>Path Traversal o Command Injection</strong> (Casi 2, 4).
+     Distingui i due: <em>legge un file</em> (file/doc browser) → traversal; <em>esegue e mostra un comando</em>
+     (finder/search) → command injection.
+   - <em>"identificare il tipo di vulnerabilità"</em> (Caso 3) → NON te la dà, la sonda del punto 1 decide.</li>
+<li><strong>Il nome dell'immagine docker è un indizio forte</strong>: <code>vuln-decoder</code> (decodifica → riflette → XSS),
+   <code>vuln-finder</code> (<code>find</code> → command injection), <code>vuln-file-browser</code> (apre file → path traversal),
+   <code>union.sh</code> (UNION → SQLi UNION-based).</li>
+</ol>
+<hr />
+<h2 id="2-ramo-xss-cross-site-scripting">2. Ramo XSS (Cross-Site Scripting)</h2>
+<p><strong>Riconoscimento</strong>: il tuo input <strong>ricompare nella pagina</strong> (riflesso). Con <code>&lt;b&gt;test&lt;/b&gt;</code> il testo
+diventa grassetto = i tag NON sono HTML-encoded.</p>
+<p><strong>Exploit passo-passo:</strong>
+1. Conferma la riflessione senza encoding: <code>?name=&lt;b&gt;x&lt;/b&gt;</code> → grassetto.
+2. Prova il payload classico: <code>&lt;script&gt;alert("vuln")&lt;/script&gt;</code>.
+3. <strong>Se <code>&lt;script&gt;</code> è bloccato/filtrato</strong> (ritorna "error", o sparisce): NON mollare. Il filtro quasi
+   sempre colpisce solo la stringa <code>script</code>. Vettori <strong>script-less</strong> che eseguono JS:
+   - <code>&lt;img src=x onerror="alert(1)"&gt;</code> ← il più usato nel pool (Casi 1 e 3)
+   - <code>&lt;svg onload="alert(1)"&gt;</code>
+   - <code>&lt;body onload="alert(1)"&gt;</code>
+   - <code>&lt;a href="javascript:alert(1)"&gt;click&lt;/a&gt;</code> (richiede click, meno preferito)
+4. Bypass di filtri sulla parola <code>script</code> (se proprio serve <code>&lt;script&gt;</code>): prova <code>&lt;ScRiPt&gt;</code> (molti
+   filtri sono case-sensitive) o <code>&lt;scr&lt;script&gt;ipt&gt;</code> (se la sostituzione non è ricorsiva, il <code>script</code>
+   interno viene tolto e i pezzi si richiudono in <code>&lt;script&gt;</code>).
+5. <strong>Ostacoli lato client</strong> (limite <code>maxlength</code>, ecc.): sono difese <strong>finte</strong>. Aggirali con
+   l'inspector (rimuovi <code>maxlength</code> dal DOM) o inviando la richiesta a mano (Burp/curl) senza passare
+   dal campo HTML.
+6. <strong>Involucri</strong>: se l'app decodifica l'input prima di rifletterlo (es. base64, Caso 3), <strong>codifica</strong>
+   il payload nello stesso formato prima di inviarlo.
+7. Prova = screenshot dell'<strong>alert nativo</strong> del browser sopra la pagina.</p>
+<p><strong>Prima di sparare il payload: DOVE finisce il tuo input?</strong> (il contesto di riflessione decide la
+sintassi). I casi del pool riflettono l'input nel <strong>corpo HTML</strong> (<code>Hello &lt;INPUT&gt;</code>), dove <code>&lt;img
+onerror&gt;</code> va da sé. Ma una variante può riflettere l'input <strong>dentro un attributo</strong> o <strong>dentro uno
+script</strong>, e lì il payload cambia. Guarda il <strong>view-source</strong> (o l'inspector) e cerca dove ricompare una
+stringa-sonda univoca (es. <code>zzz123</code>):
+- <strong>Nel corpo HTML</strong> (<code>...&gt;Hello zzz123&lt;...</code>): caso standard → inietti direttamente il tag,
+  <code>&lt;img src=x onerror=alert(1)&gt;</code>.
+- <strong>Dentro un attributo</strong> (<code>&lt;input value="zzz123"&gt;</code> o <code>&lt;img alt='zzz123'&gt;</code>): sei <strong>dentro le
+  virgolette</strong> di un attributo — un <code>&lt;tag&gt;</code> lì è solo testo. Devi prima <strong>uscire</strong> dall'attributo e
+  dal tag (breakout): chiudi la virgoletta e il <code>&gt;</code>, poi apri il tuo tag →
+  <code>"&gt;&lt;img src=x onerror=alert(1)&gt;</code> (se l'attributo è fra apici doppi) o <code>'&gt;&lt;svg onload=alert(1)&gt;</code> (se
+  fra apici singoli). Guarda nel source <strong>quale virgoletta</strong> racchiude l'input e usa quella.
+- <strong>Dentro un contesto JavaScript</strong> (<code>&lt;script&gt;var x='zzz123';&lt;/script&gt;</code>): sei <strong>dentro una stringa
+  JS</strong> — non serve nessun tag, ti basta <strong>chiudere la stringa e iniettare codice</strong>:
+  <code>';alert(1)//</code> → diventa <code>var x='';alert(1)//';</code> (il <code>//</code> commenta la coda). Se sei fra apici
+  doppi, <code>";alert(1)//</code>. Qui <code>&lt;img&gt;</code>/<code>&lt;svg&gt;</code> <strong>non</strong> servono (non sei in contesto HTML): il canale è
+  già JS, sfruttalo diretto.</p>
+<p>Regola: <strong>il contesto (body / attributo / JS) si legge nel source, e detta il payload.</strong> Sbagliare
+contesto è la causa n.1 di "il payload sembra non funzionare" in una XSS che invece è sfruttabile.</p>
+<p><strong>Mitigazione (per il <code>web.txt</code>)</strong>: output encoding (HTML entity per <code>&lt; &gt; " ' &amp;</code>) di ogni input
+riflesso; whitelist dei caratteri ammessi lato server; CSP restrittiva che vieti script inline. (Nota:
+l'encoding corretto <strong>dipende dal contesto</strong> — HTML-entity nel body, escaping degli apici/<code>&lt;&gt;</code>
+nell'attributo, JS-string-escaping in uno script: un input riflesso in più contesti va encodato per
+ciascuno.)</p>
+<hr />
+<h2 id="3-ramo-sql-injection">3. Ramo SQL Injection</h2>
+<p><strong>Riconoscimento</strong>: input in un contesto "database" (directory/lista/ricerca di record); <code>'</code> provoca
+errore o cambia il numero di righe.</p>
+<p><strong>Prima biforcazione — l'output è riflesso o no?</strong> Appena confermi che tocchi SQL, decidi <em>subito</em>
+quale ramo: se i <strong>dati recuperati compaiono nella pagina</strong> (le righe della directory, un campo
+mostrato) → <strong>UNION-based</strong>, qui sotto. Se l'app ti dà solo un <strong>esito</strong> ("trovato/non trovato",
+pagina diversa) e non i dati → è <strong>BLIND</strong>: salta a <strong>§3-bis</strong>, UNION non serve. Il test lampo è al
+punto 1 di §3-bis (<code>' UNION select 'AAAA' --</code> → <code>AAAA</code> appare o no?).</p>
+<p><strong>Exploit passo-passo (UNION-based, la tecnica del pool — Caso 5):</strong>
+1. Conferma: <code>?id=X' OR '1'='1</code> (+ <code>--</code> se serve chiudere) → tornano <strong>tutte</strong> le righe. Prova che
+   l'iniezione funziona.
+2. <strong>Conta le colonne</strong> della query originale (obbligatorio per UNION):
+   - <code>?id=X' UNION select NULL,NULL,... --</code> aggiungendo NULL finché <strong>sparisce l'errore</strong>, <strong>oppure</strong>
+   - <code>?id=X' ORDER BY 1--</code>, <code>ORDER BY 2--</code>, ... finché <strong>dà</strong> errore (ultimo valido = n. colonne).
+3. <strong>Trova quali colonne sono visibili</strong> a schermo: metti stringhe/<code>sqlite_version()</code> al posto dei
+   NULL e guarda quali compaiono. Piazza i dati da leggere nelle posizioni visibili.
+4. <strong>Enumera le tabelle</strong> dalla tabella di metadati del <strong>DBMS giusto</strong>:
+   - SQLite → <code>sqlite_schema</code> (o <code>sqlite_master</code>): <code>UNION select type,name,tbl_name,NULL from sqlite_schema --</code>
+   - MySQL/MariaDB → <code>information_schema.tables</code> / <code>information_schema.columns</code>
+   - PostgreSQL → <code>information_schema.tables</code> / <code>pg_tables</code>
+   - Oracle → <code>all_tables</code> / <code>all_tab_columns</code>
+5. <strong>Estrai</strong> dalla tabella interessante: <code>?id=X' UNION select * from flags --</code> (o elencando le
+   colonne trovate al punto 4).
+6. Prova = screenshot con l'URL della query iniettata e le flag mostrate.</p>
+<h3 id="3-bis-variante-blind-cieca-quando-loutput-non-e-riflesso-a-schermo">3-bis. Variante BLIND (cieca) — quando l'output NON è riflesso a schermo</h3>
+<blockquote>
+<p>⚠️ <strong>Perché questa sotto-sezione esiste</strong>: i 5 casi del pool sono tutti UNION-based, cioè
+presuppongono che i dati estratti <strong>compaiano nella pagina</strong> (le righe della directory, gli
+Address con le flag). Ma una variante d'esame plausibile è una <strong>SQLi cieca</strong>: l'app interroga il
+DB ma <strong>non riflette il risultato</strong> — mostra solo un esito binario ("utente trovato" / "nessun
+utente"), o una pagina diversa, o (peggio) solo un tempo di risposta diverso. Qui <strong>UNION non
+serve a niente</strong>: puoi anche accodare la tua query, ma il suo output non viene stampato da nessuna
+parte. La flag va estratta <strong>un bit alla volta</strong>, facendo al database domande <strong>sì/no</strong>. Questo è
+materiale didattico (non uno dei 5 casi ufficiali), ma il meccanismo è quello standard.</p>
+</blockquote>
+<p><strong>Riconoscimento — è blind quando:</strong>
+1. <code>'</code> provoca comunque un cambiamento (errore, o l'esito cambia) → l'input <strong>tocca SQL</strong> (come nel
+   ramo normale), MA
+2. per quanto tu inietti, <strong>non riesci a far comparire dati arbitrari</strong> nella pagina: l'app risponde
+   sempre con lo <strong>stesso schema fisso</strong> (un messaggio "trovato/non trovato", un conteggio, un
+   redirect, una pagina che c'è o non c'è), non con il <strong>contenuto</strong> delle righe.
+3. La spia decisiva: <code>' UNION select 'AAAA' --</code> <strong>non fa apparire <code>AAAA</code> da nessuna parte</strong>, ma la
+   pagina reagisce lo stesso (cambia trovato↔non trovato). Se <code>AAAA</code> <strong>comparisse</strong>, saresti nel caso
+   UNION normale (§3 sopra) e questa sotto-sezione non ti serve.</p>
+<p><strong>L'oracolo</strong>: in una SQLi cieca l'app diventa un <strong>oracolo booleano</strong>. Tu costruisci una condizione
+vera/falsa sul dato segreto, e l'app ti dice — indirettamente — se è vera. Serve un <strong>segnale
+osservabile</strong> che distingua VERO da FALSO. In ordine di comodità:</p>
+<table>
+<thead>
+<tr>
+<th>Segnale osservabile</th>
+<th>Tecnica da usare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L'esito <strong>cambia</strong> (trovato/non trovato, pagina A/pagina B, redirect sì/no, lunghezza risposta diversa)</td>
+<td><strong>Boolean-based blind</strong></td>
+</tr>
+<tr>
+<td>L'esito è <strong>sempre identico</strong>, ma puoi far <strong>variare il tempo di risposta</strong></td>
+<td><strong>Time-based blind</strong> (ultima spiaggia)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="3-bisa-boolean-based-blind">3-bis.a — Boolean-based blind</h4>
+<p><strong>Passo 1 — conferma che l'iniezione è booleana.</strong> Manda due payload che differiscono solo per una
+condizione vera vs falsa e verifica che l'app risponde <strong>in modo diverso</strong>:</p>
+<pre><code>?id=Alice' AND 1=1--      → &quot;utente trovato&quot;     (condizione VERA)
+?id=Alice' AND 1=2--      → &quot;nessun utente&quot;      (condizione FALSA)
+</code></pre>
+<p>Se le due risposte sono <strong>diverse</strong>, hai un oracolo: l'app ti sta dicendo "la condizione dopo AND è
+vera/falsa". (Se l'input è dentro un literal fra apici, puoi anche bilanciare gli apici senza
+commento: <code>Alice' AND '1'='1</code> vs <code>Alice' AND '1'='2</code> — stesso effetto, comodo quando <code>--</code> fa i
+capricci, vedi §4.7 di <code>procedura_operativa_web.md</code>.) <strong>Questo è il gate</strong>: da qui in poi ogni domanda
+al DB ha questa forma — cambi solo la condizione dopo <code>AND</code>.</p>
+<p><strong>Passo 2 — orientati: quale dato voglio e da dove.</strong> Come nel ramo UNION devi sapere <em>cosa</em> leggere.
+Puoi porre domande booleane anche sui <strong>metadati</strong> per scoprirlo, una alla volta:</p>
+<pre><code># esiste una tabella che si chiama 'flags'? (SQLite)
+?id=Alice' AND (SELECT count(*) FROM sqlite_schema WHERE name='flags')=1--
+   → trovato = sì, esiste.
+</code></pre>
+<p><strong>Passo 3 — trova la LUNGHEZZA del dato</strong> (ti serve per sapere quando fermarti). Ricerca binaria sul
+numero, non a tentoni:</p>
+<pre><code>?id=Alice' AND length((SELECT password FROM users LIMIT 1))&gt;8--    → falso  ⇒ len ≤ 8
+?id=Alice' AND length((SELECT password FROM users LIMIT 1))&gt;4--    → vero   ⇒ len ≥ 5
+?id=Alice' AND length((SELECT password FROM users LIMIT 1))=6--    → vero   ⇒ len = 6
+</code></pre>
+<p><strong>Passo 4 — estrai un carattere alla volta</strong> con <code>substr()</code>. Due modi:</p>
+<p><em>Modo A — scansione lineare (semplice da capire):</em> per la posizione <code>i</code>, provi ogni carattere
+dell'alfabeto candidato finché l'app dice "vero":</p>
+<pre><code>?id=Alice' AND substr((SELECT password FROM users LIMIT 1),1,1)='a'--   → falso
+?id=Alice' AND substr((SELECT password FROM users LIMIT 1),1,1)='b'--   → falso
+...
+?id=Alice' AND substr((SELECT password FROM users LIMIT 1),1,1)='c'--   → VERO  ⇒ 1° char = 'c'
+</code></pre>
+<p>Semplice ma lento: fino a ~95 richieste per carattere.</p>
+<p><em>Modo B — ricerca binaria sul codice ASCII (quello da usare):</em> invece di indovinare il carattere,
+<strong>dimezzi</strong> ogni volta l'intervallo dei codici (32–126 = caratteri stampabili) confrontando il
+<strong>codepoint</strong> con <code>unicode()</code> (SQLite) / <code>ascii()</code> o <code>ord()</code> (MySQL):</p>
+<pre><code>?id=Alice' AND unicode(substr((SELECT password FROM users LIMIT 1),1,1))&gt;79--
+</code></pre>
+<p>VERO → il codice sta nella metà alta; FALSO → metà bassa. <strong>~7 richieste per carattere</strong> invece di 95.</p>
+<p><strong>Algoritmo completo (bisezione, pseudo-passi):</strong></p>
+<pre><code>L = lunghezza trovata al Passo 3
+per ogni posizione i da 1 a L:
+    lo = 32 ; hi = 126
+    finché lo &lt; hi:
+        mid = (lo + hi) / 2                 # divisione intera
+        chiedi:  unicode(substr(SEGRETO,i,1)) &gt; mid
+        se VERO:  lo = mid + 1              # il char sta sopra mid
+        se FALSO: hi = mid                  # il char sta a mid o sotto
+    carattere_i = chr(lo)                   # (mentalmente: il carattere con quel codice)
+ricomponi carattere_1 … carattere_L
+</code></pre>
+<p><strong>Nota sui costrutti per DBMS</strong> (il substr è quasi ovunque, il resto cambia):
+- estrazione carattere: <code>substr(str, pos, 1)</code> — SQLite <strong>e</strong> MySQL; su MySQL anche <code>substring()</code> / <code>mid()</code>.
+- codice del carattere: SQLite <code>unicode(c)</code>; MySQL <code>ascii(c)</code> o <code>ord(c)</code>.
+- lunghezza: <code>length()</code> (SQLite) / <code>length()</code>/<code>char_length()</code> (MySQL).
+- concatenazione (se serve): SQLite <code>a||b</code>; MySQL <code>concat(a,b)</code>.
+- selezione della riga giusta: <code>... LIMIT 1 OFFSET n</code> per scorrere le righe una a una.</p>
+<hr />
+<h4 id="3-bisb-time-based-blind-quando-non-ce-nemmeno-una-risposta-binaria">3-bis.b — Time-based blind (quando NON c'è nemmeno una risposta binaria)</h4>
+<p>Quando l'app risponde <strong>sempre allo stesso identico modo</strong> a vero e a falso (nessun "trovato/non
+trovato", nessuna differenza di pagina o di lunghezza), l'unico canale che ti resta è il <strong>tempo</strong>:
+fai in modo che la query <strong>ci metta di più</strong> se la condizione è vera, e <strong>misuri</strong> il ritardo.</p>
+<ul>
+<li>
+<p><strong>MySQL / MariaDB</strong>: c'è <code>SLEEP()</code>. Conferma dell'iniezione: <code>?id=Alice' AND sleep(5)--</code> — se la
+  pagina ci mette ~5 s in più, è iniettabile. Estrazione condizionata:
+  <code>?id=Alice' AND IF(unicode(substr((SELECT password FROM users LIMIT 1),1,1))&gt;79, sleep(3), 0)--</code>
+  → se risponde lento, la condizione è vera. Poi stessa bisezione del Modo B, ma il segnale "VERO" è
+  "ha risposto lento" invece di "trovato".</p>
+</li>
+<li>
+<p><strong>SQLite — attenzione, NON ha <code>SLEEP()</code></strong> (né alcuna funzione di pausa nativa). Verificato: il
+  time-based su SQLite si fa con una <strong>heavy query</strong>, cioè un'operazione volutamente costosa che
+  brucia tempo CPU. Il costrutto standard usa <code>randomblob()</code> (genera N byte casuali) dentro <code>hex()</code> +
+  <code>like()</code> per forzare un calcolo pesante:
+  <code>?id=Alice' AND CASE WHEN (unicode(substr((SELECT password FROM users LIMIT 1),1,1))&gt;79)
+       THEN like('a', upper(hex(randomblob(100000000)))) ELSE 0 END--</code>
+  Se la condizione è vera, SQLite deve generare ~100 MB casuali, esadecimalizzarli e fare un <code>like</code>
+  su una stringa enorme → ritardo di secondi misurabile; se è falsa, ritorna subito. Aumenta/riduci
+  il numero di byte per tarare il ritardo (<code>randomblob(1000000)</code> ≈ mezzo secondo, <code>100000000</code> ≈
+  parecchi secondi).
+  ⚠️ <strong>Onestà operativa per l'esame</strong>: il pool è <strong>SQLite</strong> e la prova va fatta <strong>a mano</strong> (niente
+  sqlmap, Gate A). Estrarre una stringa carattere-per-carattere a colpi di heavy query cronometrate a
+  mano è <strong>lentissimo e fragile</strong>. Perciò, su questo tipo d'esame, il time-based è davvero l'<strong>ultima
+  spiaggia</strong>: prima <strong>cerca meglio un oracolo booleano</strong> (una differenza di pagina, di messaggio, di
+  lunghezza della risposta anche minima) — quasi sempre c'è. Se lo trovi, usa il boolean-based
+  (3-bis.a), molto più pratico da eseguire manualmente.</p>
+</li>
+</ul>
+<hr />
+<h4 id="3-bisc-quando-scegliere-quale-tecnica-albero-di-decisione-sqli">3-bis.c — Quando scegliere quale tecnica (albero di decisione SQLi)</h4>
+<pre><code>L'input tocca SQL (l'apice ' cambia qualcosa)?
+│
+├─ NO  → non è SQLi, torna al triage §1.
+│
+└─ SÌ → riesco a far COMPARIRE dati arbitrari nella pagina?
+        (test: ' UNION select 'AAAA',... --  →  'AAAA' appare?)
+        │
+        ├─ SÌ, i dati si vedono            → UNION-based        (§3, la via maestra del pool)
+        │
+        └─ NO, la pagina non stampa i dati → è BLIND. Che segnale ho?
+                │
+                ├─ l'ESITO cambia (trovato/non trovato,
+                │  pagina A/B, redirect, lunghezza diversa) → Boolean-based  (§3-bis.a)  ← preferito
+                │
+                └─ l'esito è sempre identico, ma posso
+                   far variare il TEMPO di risposta        → Time-based     (§3-bis.b)  ← ultima spiaggia
+                                                              (su SQLite: heavy query, no SLEEP)
+</code></pre>
+<p>Regola sintetica: <strong>vedo i dati → UNION; vedo una differenza sì/no → boolean; non vedo niente tranne
+il cronometro → time-based.</strong></p>
+<hr />
+<h4 id="3-bisd-esempio-lavorato-end-to-end-didattico-non-un-caso-del-pool">3-bis.d — Esempio lavorato end-to-end (didattico, NON un caso del pool)</h4>
+<blockquote>
+<p>Scenario inventato a scopo illustrativo: una "People Directory" come il Caso 5, ma che <strong>non mostra
+le righe</strong> — risponde solo <strong>"Utente trovato"</strong> oppure <strong>"Nessun utente"</strong>. Backend SQLite.
+Obiettivo: estrarre una flag breve, <code>flag = "cat"</code> (3 caratteri), dalla tabella <code>flags</code>. Serve a
+vedere il <strong>procedimento concreto</strong>; i valori sono inventati.</p>
+</blockquote>
+<p><strong>1) Conferma oracolo booleano:</strong></p>
+<pre><code>?id=Alice' AND 1=1--   → &quot;Utente trovato&quot;    (VERO)
+?id=Alice' AND 1=2--   → &quot;Nessun utente&quot;     (FALSO)
+</code></pre>
+<p>Risposte diverse ⇒ ho l'oracolo: "trovato" = condizione vera, "nessun utente" = falsa.</p>
+<p><strong>2) Lunghezza della flag</strong> (bisezione sul numero):</p>
+<pre><code>?id=Alice' AND length((SELECT val FROM flags LIMIT 1))&gt;4--   → Nessun utente   ⇒ len ≤ 4
+?id=Alice' AND length((SELECT val FROM flags LIMIT 1))&gt;2--   → Utente trovato  ⇒ len ≥ 3
+?id=Alice' AND length((SELECT val FROM flags LIMIT 1))=3--   → Utente trovato  ⇒ len = 3
+</code></pre>
+<p><strong>3) 1° carattere</strong> — bisezione sul codice ASCII (intervallo 32–126). Il segreto è <code>'c'</code> = codice 99;
+guarda come l'oracolo mi ci porta senza che io lo sappia in anticipo:</p>
+<pre><code>unicode(substr(flag,1,1)) &gt; 79 ?  → trovato (VERO)   ⇒ lo=80  hi=126
+                          &gt; 103 ? → nessuno (FALSO)  ⇒ lo=80  hi=103
+                          &gt; 91 ?  → trovato (VERO)   ⇒ lo=92  hi=103
+                          &gt; 97 ?  → trovato (VERO)   ⇒ lo=98  hi=103
+                          &gt; 100 ? → nessuno (FALSO)  ⇒ lo=98  hi=100
+                          &gt; 99 ?  → nessuno (FALSO)  ⇒ lo=98  hi=99
+                          &gt; 98 ?  → trovato (VERO)   ⇒ lo=99  hi=99   STOP
+</code></pre>
+<p><code>lo == hi == 99</code> → codice 99 → carattere <strong>'c'</strong>. (7 richieste.) Ogni richiesta è, per esteso:
+<code>?id=Alice' AND unicode(substr((SELECT val FROM flags LIMIT 1),1,1))&gt;79--</code> ecc.</p>
+<p><strong>4) 2° e 3° carattere</strong> — stessa bisezione cambiando l'indice di <code>substr(...,2,1)</code> e <code>substr(...,3,1)</code>:
+si ottengono codice 97 = <strong>'a'</strong> e codice 116 = <strong>'t'</strong>.</p>
+<p><strong>5) Ricomposizione</strong>: <code>c</code> + <code>a</code> + <code>t</code> = <strong><code>cat</code></strong>. Flag estratta con ~3 + 7·3 ≈ 24 richieste
+sì/no, senza mai vedere il dato stampato: l'ho <strong>dedotto</strong> dalle sole risposte "trovato/non trovato".</p>
+<p><strong>Cosa consegnare</strong> (deliverable): NON esiste uno screenshot di "output esfiltrato" come nel ramo
+UNION. La prova è la <strong>sequenza di richieste/risposte</strong> che dimostra il canale booleano: cattura
+almeno (a) i due screenshot <code>AND 1=1</code> vs <code>AND 1=2</code> con le due risposte diverse (la prova che l'oracolo
+esiste), (b) un paio di richieste di estrazione con l'esito, (c) la stringa finale ricostruita. Vedi
+<code>template_report_web.md</code> per come strutturare il <code>web.txt</code> di una blind. Documenta l'<strong>algoritmo</strong>
+(bisezione) nel <code>web.txt</code>: è esattamente il tipo di "ragionamento" che vale il voto.</p>
+<p><strong>Come sapere il DBMS</strong>: indizi nella pagina/consegna ("formato sqlite" nel Caso 5), messaggi
+d'errore, o quale sintassi di commento/funzione funziona.</p>
+<p><strong>Mitigazione (per il <code>web.txt</code>)</strong>: prepared statement / bind variables (PREPARE) — il fix vero;
+in subordine whitelist dei valori ammessi del parametro; input validation che vieti i metacaratteri SQL.</p>
+<hr />
+<h2 id="4-ramo-command-injection">4. Ramo Command Injection</h2>
+<p><strong>Riconoscimento</strong>: app "server-side, no database" che <strong>esegue un comando</strong> (finder, search, ping,
+convert, ...) — spesso <strong>mostra la command line</strong> eseguita ("Command run: ..."). <code>;</code>/<code>|</code>/<code>`</code> nel
+tuo input cambiano l'output o generano errore shell.</p>
+<p><strong>Exploit passo-passo (Caso 4):</strong>
+1. Inserisci un pattern innocuo (<code>ANF</code>) e <strong>guarda dove finisce il tuo input</strong> nella command line
+   mostrata, e <strong>cosa gli sta attaccato dopo</strong> (es. <code>&lt;INPUT&gt;\*.pem 2&gt;/dev/null</code>).
+2. <strong>Neutralizza la coda del comando</strong> con un commento shell <code>#</code>: tutto ciò dopo <code>#</code> è ignorato.
+3. <strong>Concatena il tuo comando</strong> con un separatore: <code>;</code> (esegue sempre), <code>&amp;&amp;</code> (se il primo riesce),
+   <code>|</code> (pipe). Esempio in due tempi:
+   - Scoperta: <code>flag.txt #</code> → trova il percorso del file.
+   - Esfiltrazione: <code>flag.txt ; cat /percorso/trovato/flag.txt #</code>
+4. Se non conosci il percorso della flag, <strong>prima scoprilo</strong> (usa il comando nativo dell'app, es.
+   <code>find</code>, o inietta <code>; ls -R / ...</code>), <strong>poi</strong> leggilo. Il percorso è spesso randomizzato per container.
+5. Altri comandi utili una volta dentro: <code>; id #</code>, <code>; cat /etc/passwd #</code>, <code>; ls -la /tmp #</code>.
+6. Prova = screenshot con il payload nel campo, la command line risultante, e l'output (la flag).</p>
+<p><strong>Mitigazione (per il <code>web.txt</code>)</strong>: non costruire command line con input utente — usare librerie/API
+native (es. la funzione di ricerca file del linguaggio) che non passano da una shell; se inevitabile,
+whitelist di pattern ammessi + escaping dei metacaratteri shell + esecuzione senza shell (<code>execve</code>
+con argomenti separati, non <code>system()</code>).</p>
+<hr />
+<h2 id="5-ramo-path-traversal-lfi">5. Ramo Path Traversal / LFI</h2>
+<p><strong>Riconoscimento</strong>: app che <strong>apre/mostra un file</strong> indicato per nome/percorso (file browser, viewer,
+<code>?page=</code>, <code>?file=</code>, <code>?path=</code>, download). Server-side, no database. Obiettivo tipico: leggere un file
+fuori dalla cartella prevista (<code>/tmp/flag.txt</code>, <code>/etc/passwd</code>).</p>
+<p><strong>Exploit passo-passo (Caso 2 — ricostruito; metodo confermato dal lab S3):</strong>
+1. Individua il parametro che sceglie <strong>quale file</strong> viene letto.
+2. Conferma che è un path reale: un nome inesistente → errore con un percorso.
+3. <strong>Risali le directory</strong> con <code>../</code> fino alla radice, poi punta al bersaglio:
+   <code>?file=../../../../../tmp/flag.txt</code>. <strong>Aumenta il numero di <code>../</code> incrementalmente</strong> finché
+   funziona (in eccesso è innocuo: <code>/</code> non ha padre). Nel lab S3 servivano <strong>5</strong> livelli per DVWA.
+4. Se l'app accetta percorsi assoluti: prova direttamente <code>?file=/tmp/flag.txt</code>.
+5. <strong>Se <code>../</code> è filtrato</strong>: percorso assoluto; doppia URL-encoding (<code>%2e%2e%2f</code>); <code>....//</code> (dopo la
+   rimozione di un <code>../</code> interno torna <code>../</code>); null byte <code>%00</code> (su stack vecchi).
+6. Prova = screenshot con l'URL/payload e il contenuto del file mostrato.</p>
+<p><strong>Mitigazione (per il <code>web.txt</code>)</strong>: canonicalizzare il percorso (realpath) e verificare che resti
+dentro la base dir; whitelist di file ammessi o id numerico mappato server-side; minimo privilegio
+del processo web.</p>
+<hr />
+<h2 id="6-confronti-che-salvano-il-colpo-i-bivi-tra-famiglie-che-si-somigliano">6. Confronti che salvano il colpo (i bivi tra famiglie che si somigliano)</h2>
+<ul>
+<li><strong>XSS vs "sito non vulnerabile"</strong>: <code>&lt;script&gt;</code> bloccato NON chiude la pista XSS — prova <code>&lt;img onerror&gt;</code>.</li>
+<li><strong>SQLi vs Command Injection</strong>: entrambe spezzano un linguaggio interpolato. Distingui dal
+  <strong>carattere</strong> che ha effetto (<code>'</code>/<code>--</code>/<code>UNION</code> → SQL; <code>;</code>/<code>|</code>/<code>`</code>/<code>#</code> → shell) e dal <strong>contesto</strong>
+  (directory/record → SQL; finder/ping/convert → shell).</li>
+<li><strong>Path Traversal vs Command Injection</strong>: entrambe server-side senza DB. <em>Legge un file</em> → traversal;
+  <em>esegue un comando</em> → command injection. Il segnale forte: l'app mostra la <strong>command line</strong> → CI.</li>
+<li><strong>XSS riflesso vs stored</strong>: nel pool sono tutti <strong>riflessi</strong> (payload nell'URL/POST, effetto
+  immediato). Se il payload venisse <strong>salvato</strong> dal server (commento, nome profilo, messaggio,
+  guestbook) e <strong>ricomparisse da solo</strong> ricaricando la pagina — anche senza rimandare l'input —
+  sarebbe <strong>stored</strong>. Come cambiano i passi operativi: (1) <strong>riconoscimento</strong>: dopo aver inviato il
+  payload una volta, <strong>ricarica la pagina "pulita"</strong> (senza il parametro nell'URL) o riapri la
+  sezione — se l'<code>alert</code> riscatta comunque, è persistente. (2) <strong>prova/deliverable</strong>: NON è un URL da
+  condividere (quello è il tratto del reflected); è la <strong>persistenza</strong> — screenshot dell'alert che
+  parte <strong>al semplice caricamento</strong> della pagina, idealmente da una <strong>sessione/scheda diversa</strong> (o
+  descrivendo che scatterebbe per <em>qualunque</em> altro utente che visita la pagina), a dimostrare che il
+  payload vive nel server e colpisce le vittime senza che clicchino un link preparato. (3) La
+  <strong>mitigazione</strong> è la stessa (output encoding in fase di visualizzazione), ma sottolinea che
+  l'impatto è maggiore: colpisce ogni visitatore, non solo chi apre un link malevolo.</li>
+<li><strong>SQLi UNION vs blind</strong>: entrambe partono dall'apice <code>'</code> che tocca SQL. Le distingui con <strong>un solo
+  test</strong>: <code>' UNION select 'AAAA',... --</code> fa <strong>comparire <code>AAAA</code></strong> nella pagina? Sì → UNION-based
+  (§3, i dati si leggono a schermo). No, ma la pagina reagisce lo stesso (trovato/non trovato, pagina
+  diversa) → <strong>blind boolean</strong> (§3-bis): la flag si estrae carattere-per-carattere con <code>substr()</code> +
+  domande sì/no. Nessuna differenza osservabile tranne il tempo → <strong>blind time-based</strong> (su SQLite:
+  heavy query con <code>randomblob</code>, niente <code>SLEEP</code>). Non insistere con UNION se l'output non è riflesso:
+  passa al ramo blind.</li>
+<li><strong>Difesa client-side (<code>maxlength</code>, dropdown, JS validation) vs server-side (filtro sulla stringa)</strong>:
+  la prima si bypassa banalmente (inspector/POST diretto), la seconda va aggirata nel contenuto del
+  payload. Non confonderle: sono ostacoli <strong>indipendenti</strong>, affrontane uno alla volta.</li>
+</ul>
+<hr />
+<h2 id="7-deliverable">7. Deliverable</h2>
+<ul>
+<li><code>payload.png</code> / <code>exploitN.png</code> (o <code>queryN.png</code>): numera gli screenshot; copri classificazione →
+  ostacolo → bypass → successo.</li>
+<li><code>web.txt</code>: struttura <strong>VULNERABILITÀ / PASSI ESEGUITI / MITIGAZIONE</strong> (+ contenuto flag se
+  richiesto). Template pronto in <code>template_report_web.md</code>. Il livello di dettaglio <strong>è</strong> il voto.</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

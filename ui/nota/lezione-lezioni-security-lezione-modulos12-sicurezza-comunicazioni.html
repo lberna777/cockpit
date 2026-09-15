@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_moduloS12_sicurezza_comunicazioni.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_moduloS12_sicurezza_comunicazioni.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SECURITY/lezione_moduloS12_sicurezza_comunicazioni.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-s12-sicurezza-delle-comunicazioni">Lezione — Modulo S12: Sicurezza delle comunicazioni</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Fonte primaria</strong>: <code>SLIDE TEORIA/SICINF/Sicurezza_delle_comunicazioni_23_aprile.pdf</code> (Marco Prandini, "Chapter 7", 62 slide)
+<strong>Tipo</strong>: modulo teorico (nessun LAB dedicato). Rilevante per il <strong>quiz teorico</strong> (40% del voto): è un catalogo di attacchi al traffico di rete, terreno fertile per domande vero/falso e a scelta multipla.</p>
+<hr />
+<h2 id="dove-si-colloca-questo-modulo-e-il-suo-threat-model">Dove si colloca questo modulo, e il suo threat model</h2>
+<p>Questo modulo risponde a una sola domanda, declinata in molti modi: <strong>cosa può fare un avversario che ha accesso, anche solo parziale, al percorso che i tuoi dati attraversano in rete?</strong></p>
+<p>La comunicazione tra due applicazioni non è un filo diretto: è una catena di segmenti fisici (LAN Ethernet, Wi-Fi, link tra router) attraversati da un pacchetto che cambia "vestito" a ogni salto. Ogni segmento, ogni apparato intermedio (switch, router, resolver DNS) è un punto in cui qualcuno può <strong>ascoltare</strong> (attacco passivo) o <strong>intervenire</strong> (attacco attivo). Il modulo cataloga sistematicamente questi punti, layer per layer.</p>
+<p><strong>Il threat model del modulo, in una frase</strong>: l'attaccante mira alle proprietà della comunicazione — <strong>riservatezza</strong> (sniffing, recupero chiavi), <strong>integrità e autenticità</strong> (spoofing, hijacking), <strong>disponibilità</strong> (DoS/DDoS) — sfruttando il fatto che i protocolli fondamentali di Internet (ARP, IP, BGP, DNS, TCP) sono nati <strong>senza autenticazione né cifratura</strong>. Il difensore, in questo modulo, è quasi sempre in posizione di svantaggio strutturale: le contromisure vere (canali sicuri) sono un <em>aggiunta</em> posticcia a protocolli progettati fidandosi di tutti.</p>
+<p><strong>Confine con S13 — importante per non fare confusione all'esame.</strong> L'outline del PDF stesso divide il territorio in due: gli <strong>attacchi</strong> (questo modulo, S12) e le <strong>contromisure: canali sicuri</strong> (data-link → VLAN/802.1X, network → IPSec, transport → TLS). Nel PDF la sezione contromisure è <em>in grigio</em>, cioè annunciata ma non svolta: le slide reali si fermano al DNS pharming. Quelle contromisure sono il contenuto di <strong>S13 (Protezione delle comunicazioni + OpenSSL/TLS)</strong>. Quindi:</p>
+<ul>
+<li>Sniffing, MAC/ARP/IP/BGP/DNS spoofing e hijacking, DoS → <strong>stanno QUI, in S12</strong> (lato attaccante).</li>
+<li>VLAN, 802.1X, IPsec, TLS, VPN come <em>meccanismi di protezione</em> → <strong>sono S13</strong> (lato difensore).</li>
+</ul>
+<p>Il PDF di S12 nomina comunque, sulle slide "The Internet model", <em>quali</em> famiglie di tecnologie di sicurezza risolvono il problema a ciascun layer: le uso come "puntatori in avanti" verso S13/S14, senza svilupparle qui (non lo fa nemmeno la slide). Dove il PDF dice "vedi più avanti", il "più avanti" è S13.</p>
+<hr />
+<h2 id="parte-1-richiami-di-reti-senza-questi-gli-attacchi-non-si-capiscono">Parte 1 — Richiami di reti (senza questi, gli attacchi non si capiscono)</h2>
+<p>Metà del PDF è ripasso di reti. Non è riempitivo: <strong>ogni attacco della seconda metà sfrutta esattamente un meccanismo di questa prima metà</strong>. Li tratto quindi come "premesse dell'attacco", segnalando fin da subito la vulnerabilità che ciascuno nasconde.</p>
+<h3 id="11-internet-come-rete-di-reti">1.1 Internet come "rete di reti"</h3>
+<p>Internet è una grande <em>rete di reti</em>. Il mattone elementare è la <strong>network IP</strong>: un'"isola" che contiene gli <strong>host</strong> (i nodi terminali) e che è connessa alle altre isole da apparati-ponte, i <strong>router</strong> (o <strong>gateway</strong>), calcolatori specializzati.</p>
+<ul>
+<li><strong>Meccanismo</strong>: le isole sono isolate per default; per farle parlare servono (a) collegamenti fisici tra isole, spesso con tecnologia diversa da quella interna all'isola; (b) apparati che sappiano usare quei collegamenti; (c) un modo per scegliere il collegamento giusto verso la destinazione.</li>
+<li><strong>Visione (sicurezza)</strong>: il fatto che il traffico attraversi apparati e link <em>di terzi</em> è la radice del problema. Non controlli il percorso, quindi devi assumere che sia ostile.</li>
+</ul>
+<h3 id="12-indirizzo-globale-vs-locale-rete-logica-vs-rete-fisica">1.2 Indirizzo globale vs locale, rete logica vs rete fisica</h3>
+<p>Due distinzioni che Prandini tiene separate con cura:</p>
+<ul>
+<li><strong>Indirizzo globale</strong>: valido su tutta la rete, deve essere <strong>univoco</strong> (nessuna replica → nessuna ambiguità), assegnato con una procedura di gestione globale. È l'<strong>indirizzo IP</strong> pubblico.</li>
+<li><strong>Indirizzo locale</strong>: valido solo in una sottoporzione (dentro un terminale, o in un dominio di rete specifico), <strong>può non essere globalmente univoco</strong>, assegnabile con procedura puramente locale. Esempio: l'<strong>indirizzo MAC</strong> (locale al segmento fisico), o gli IP privati.</li>
+</ul>
+<p>Parallelamente:</p>
+<ul>
+<li><strong>Rete logica</strong>: la network IP (o <em>subnet</em>) a cui un host appartiene <em>logicamente</em>.</li>
+<li><strong>Rete fisica</strong>: la rete (tipicamente una <strong>LAN</strong>) a cui un host è <em>effettivamente</em> connesso.</li>
+</ul>
+<p>L'architettura a strati <strong>nasconde gli indirizzi fisici</strong> e lascia che le applicazioni lavorino solo con indirizzi IP. Questa astrazione è comoda ma, come vedremo, è anche ciò che permette a un attaccante di manipolare la corrispondenza IP↔MAC senza che l'applicazione se ne accorga.</p>
+<h3 id="13-le-tecnologie-e-la-rete-wireless">1.3 Le tecnologie e la rete wireless</h3>
+<p>Ogni network IP può essere realizzata con una tecnologia specifica: <strong>Wi-Fi</strong> (wireless in area locale), <strong>ADSL/xDSL</strong> (media distanza via cavo, infrastruttura di un fornitore pubblico), <strong>Ethernet</strong> (breve distanza via cavo, privata, in area locale), <strong>GPRS/EDGE/LTE</strong> (radio a media distanza, infrastruttura pubblica).</p>
+<p>Architettura Wi-Fi (802.11): un <strong>Basic Service Set (BSS)</strong> è l'insieme delle stazioni gestite da un <strong>Access Point (AP)</strong> / <em>base station</em>; l'AP fa da ponte verso la rete cablata attraverso il <strong>Distribution System</strong>; i client sono le <strong>Wireless Station</strong>.</p>
+<ul>
+<li><strong>Visione (sicurezza)</strong>: il wireless trasmette <em>in broadcast nell'etere</em>. Chiunque nel raggio riceve i frame senza dover toccare un cavo. Per questo il wireless <em>dovrebbe</em> essere sempre cifrato — ed è il motivo per cui gli attacchi di "wireless key recovery" (§2.5) sono così centrali.</li>
+</ul>
+<h3 id="14-switch-hub-e-il-learning-bridge">1.4 Switch, hub e il "learning bridge"</h3>
+<p>Un <strong>bridge</strong> è un ponte tra due LAN; un bridge tra più di due LAN (stessa tecnologia) è un <strong>hub</strong>. Uno <strong>switch</strong> Ethernet fa una cosa simile all'hub ma meglio: opera <strong>commutazione a livello 2 basata sull'indirizzo MAC</strong>, trasferendo trame da più porte di ingresso a più porte di uscita <em>contemporaneamente</em>.</p>
+<p>Differenza cruciale (ricorre spesso nei quiz):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Hub</strong></th>
+<th><strong>Switch</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Comportamento</td>
+<td>bus collassato = <strong>mezzo condiviso</strong>, trasmissione <strong>broadcast</strong> delle trame</td>
+<td>sistema di commutazione = ri-trasmissione <strong>selettiva</strong> delle trame</td>
+</tr>
+<tr>
+<td>Capacità aggregata</td>
+<td>= capacità della singola porta</td>
+<td><strong>superiore</strong> a quella della singola porta</td>
+</tr>
+<tr>
+<td>Esempio Fast Ethernet</td>
+<td>100 Mbit/s totali</td>
+<td>200 Mbit/s (due flussi paralleli)</td>
+</tr>
+</tbody>
+</table>
+<p>Come fa lo switch a essere selettivo? Costruisce una <strong>tabella di inoltro</strong> (implementata in <strong>CAM</strong>, <em>Content Addressable Memory</em>) che associa ogni MAC alla porta su cui quel MAC è raggiungibile. La riempie <em>imparando</em> (<strong>learning bridge / learning switch</strong>): quando vede una trama in ingresso da una porta, registra "il MAC sorgente sta su questa porta". Se a una porta è connesso un altro switch, da quella porta si raggiungono <em>molti</em> MAC.</p>
+<ul>
+<li><strong>Visione (sicurezza)</strong>: lo switch offre una protezione <em>contro lo sniffing</em>, ma <strong>limitata</strong>. Idealmente manda ogni trama solo sulla porta del destinatario (gli altri non la vedono). Ma la CAM è finita, e il comportamento di <em>fallback</em> quando un MAC non è in tabella è <strong>inondare in broadcast</strong>. Questa è la crepa che il <strong>MAC flooding</strong> (§2.4) spalanca.</li>
+</ul>
+<h3 id="15-interconnettere-le-lan-switch-vs-router">1.5 Interconnettere le LAN: switch vs router</h3>
+<ul>
+<li><strong>LAN interconnesse via switch</strong>: <strong>unico dominio di broadcast</strong>, funzionalmente equivalente a un'unica LAN (es. tutte in <code>192.168.8.0/22</code>).</li>
+<li>
+<p><strong>LAN interconnesse via router</strong>: <strong>domini di broadcast separati</strong> — permette di separare le LAN per <strong>efficienza</strong> e <strong>sicurezza</strong> (es. <code>192.168.8.0/24</code>, <code>.9.0/24</code>, <code>.10.0/23</code> distinte). Costo: <strong>mobilità limitata</strong> degli host da una LAN all'altra.</p>
+</li>
+<li>
+<p><strong>Visione (sicurezza)</strong>: il router come <em>confine di broadcast</em> è già una prima linea di segmentazione. Molti attacchi di livello 2 (ARP poisoning, MAC flooding, MAC/IP spoofing) sono <strong>confinati alla LAN</strong>: non attraversano il router. La segmentazione via router quindi <em>contiene</em> il raggio d'azione dell'attaccante di livello 2 — è la stessa logica delle VLAN che vedrai come contromisura in S13.</p>
+</li>
+</ul>
+<h3 id="16-doppio-indirizzamento-nella-lan-e-arp">1.6 Doppio indirizzamento nella LAN e ARP</h3>
+<p>Dentro una LAN/subnet ogni dispositivo ha <strong>due</strong> identità:</p>
+<ol>
+<li>un <strong>MAC address</strong> — l'inoltro <em>fisico</em> del traffico avviene tra schede di rete;</li>
+<li>un <strong>indirizzo IP</strong> — le applicazioni si conoscono come endpoint IP.</li>
+</ol>
+<p>Serve tradurre l'uno nell'altro: lo fa <strong>ARP — Address Resolution Protocol (RFC 826)</strong>. Meccanismo:</p>
+<ul>
+<li><strong>ARP request</strong> = <strong>broadcast</strong>: "<em>Who has 192.168.1.76? Tell 192.168.1.34 (at 54:8d:...)</em>" — la domanda arriva a <em>tutti</em> gli host del segmento.</li>
+<li><strong>ARP reply</strong> = <strong>unicast</strong>: solo il possessore di quell'IP risponde "<em>192.168.1.76 is at 8d:ab:e4:0d:d8:5d</em>".</li>
+<li>
+<p><strong>Caching opportunistico</strong>: chiunque <em>vede passare</em> l'associazione IP↔MAC la mette in cache ("nice, I have learned that 192.168.1.34 is at 54:8d:... — let's cache this"), anche senza averla chiesta.</p>
+</li>
+<li>
+<p><strong>Visione (sicurezza)</strong>: qui c'è il difetto di progetto più sfruttato del modulo. <strong>ARP non ha autenticazione</strong>: nessuno verifica che chi risponde sia davvero il proprietario dell'IP. Peggio, il caching opportunistico accetta anche reply <em>non richieste</em> (<strong>gratuitous ARP</strong>). Questa è l'esatta leva dell'<strong>ARP poisoning</strong> (§3.2.2).</p>
+</li>
+</ul>
+<h3 id="17-instradamento-consegna-diretta-vs-indiretta">1.7 Instradamento: consegna diretta vs indiretta</h3>
+<p>Quando un host ha un pacchetto da spedire, la <strong>domanda cruciale</strong> è: <em>"la destinazione è sulla mia network, o devo usare un ponte (router)?"</em> La <strong>risposta</strong>: ogni nodo ha una base dati di destinazioni; legge l'IP di destinazione, consulta la base dati, decide.</p>
+<ul>
+<li><strong>Direct delivery</strong> (consegna diretta): IP sorgente e IP destinatario sono <strong>sulla stessa rete fisica</strong>; l'host spedisce il datagramma <strong>direttamente</strong> al destinatario. In trama: <code>L2 address = HOST3</code>, <code>IP address = HOST3</code> — <strong>entrambi puntano al destinatario finale</strong>.</li>
+<li><strong>Indirect delivery</strong> (consegna indiretta): sorgente e destinatario <strong>non</strong> sono sulla stessa rete fisica; l'host manda il datagramma a un <strong>router intermedio</strong>. In trama: <code>L2 address = ROUTER1</code>, <code>IP address = HOST4</code> — <strong>l'indirizzo L2 punta al prossimo salto, l'IP punta ancora al destinatario finale</strong>.</li>
+</ul>
+<p>Questa asimmetria è il concetto-chiave del routing e va capito bene:</p>
+<blockquote>
+<p><strong>Il MAC di destinazione cambia a ogni hop; l'IP di destinazione resta quello finale per tutto il viaggio.</strong> Il <strong>routing</strong> è la scelta del percorso; ogni singolo salto si chiama <strong>hop</strong>. Da mittente a destinatario c'è <strong>sempre esattamente una consegna diretta</strong> (l'ultimo tratto, dall'ultimo router all'host finale — o l'unico tratto se sono già vicini) e <strong>zero o più consegne indirette</strong>.</p>
+</blockquote>
+<ul>
+<li><strong>Visione (sicurezza)</strong>: il fatto che il MAC di destinazione sia "solo il prossimo ponte" è ciò che rende efficace l'ARP poisoning: se avveleno la cache facendoti credere che il MAC del gateway sia il mio, tu mi consegni <em>fisicamente</em> tutti i pacchetti diretti fuori dalla LAN, pur avendo scritto nell'IP la destinazione giusta. Tu pensi di parlare col router; parli con me.</li>
+</ul>
+<h3 id="18-il-modello-internet-a-strati-e-dove-agisce-la-sicurezza">1.8 Il modello Internet a strati e "dove agisce la sicurezza"</h3>
+<p>Il PDF chiude i richiami con quattro versioni della stessa figura (client → switch → router → router → server), evidenziando di volta in volta <em>quale problema</em> ogni layer risolve e <em>quali tecnologie di sicurezza</em> gli competono. Questa è la <strong>mappa che collega S12 a S13/S14</strong> — vale la pena memorizzarla come tabella:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Problema che risolve</th>
+<th>Tecnologie di sicurezza (→ dove le studi)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data link</strong> (Ethernet/PPP)</td>
+<td><em>local connectivity</em> (connettività locale)</td>
+<td>IEEE <strong>802.1X</strong>, <strong>WPA2</strong>, <strong>Layer-2 VPN</strong> → S13</td>
+</tr>
+<tr>
+<td><strong>Rete</strong> (IP)</td>
+<td><em>global connectivity</em> (connettività globale)</td>
+<td><strong>IPsec</strong>, <strong>Layer-3 VPN</strong>, autenticazione router → S13</td>
+</tr>
+<tr>
+<td><strong>Trasporto</strong> (TCP)</td>
+<td><em>end-to-end reliable data transfer</em></td>
+<td><strong>SSL/TLS</strong> → S13</td>
+</tr>
+<tr>
+<td><strong>Applicazione</strong> (HTTP…)</td>
+<td><em>transparent data exchange between applications</em></td>
+<td>autenticazione, crittografia, VPN applicative, soluzioni specifiche → S13/S14/S15</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Visione</strong>: ogni riga è "un attacco di S12 ↔ la sua difesa di S13". Sniffing/MAC-flooding/ARP-poisoning (link) ↔ 802.1X/WPA2/VLAN. IP/BGP hijacking (rete) ↔ IPsec/autenticazione router. TCP hijacking + DNS spoofing (trasporto/applicazione) ↔ TLS. <strong>Se in un quiz ti chiedono "a quale layer opera IPsec?" la risposta è: rete/IP.</strong></li>
+</ul>
+<hr />
+<h2 id="parte-2-attacchi-passivi">Parte 2 — Attacchi passivi</h2>
+<p><strong>Definizione (dal PDF)</strong>: gli attacchi passivi <strong>non modificano i dati in transito</strong>. Sono utili all'aggressore e comunque dannosi per la vittima:</p>
+<ul>
+<li>la <strong>scansione</strong> è uno dei primi passi della ricognizione;</li>
+<li>lo <strong>sniffing</strong> può compromettere la <strong>riservatezza</strong> dei dati;</li>
+<li>il <strong>recupero di una chiave</strong> consente di <strong>impersonare</strong> la vittima.</li>
+</ul>
+<p>Usati <em>contro se stessi</em>, questi stessi strumenti fanno parte di un <strong>vulnerability assessment (VA)</strong>.</p>
+<ul>
+<li><strong>Distinzione da tenere ferma</strong>: "passivo" = non altera i dati, mira alla <strong>riservatezza</strong> e alla <strong>ricognizione</strong>. "Attivo" (Parte 3) = altera/inietta/interrompe, mira a <strong>integrità, autenticità, disponibilità</strong>. È la prima grande dicotomia del modulo, e una tipica domanda V/F ("lo sniffing è un attacco attivo" → <strong>Falso</strong>).</li>
+</ul>
+<h3 id="21-scanning-e-esattamente-il-lab-di-s1">2.1 Scanning (→ è esattamente il LAB di S1)</h3>
+<p>Due granularità:</p>
+<ul>
+<li><strong>Scansione di una rete</strong>: quali <strong>indirizzi sono raggiungibili</strong> (host vivi). Esempio dal PDF: <code>nmap -sP 137.204.57.200-205</code> → <em>"6 IP addresses (2 hosts up) scanned"</em>.</li>
+<li><strong>Scansione di un host</strong>: quali <strong>porte TCP/UDP sono aperte</strong>; consente di <strong>dedurre le versioni</strong> del sistema operativo e dei servizi in esecuzione (<em>fingerprinting</em>). Esempio: <code>nmap -A 137.204.57.104</code> → elenca <code>21/tcp ftp vsftpd 3.0.2</code>, <code>22/tcp ssh OpenSSH 6.6.1p1</code>, <code>80/tcp http Apache 2.4.7</code>, con hostkey SSH, header del server, e persino l'OS (<code>Unix, Linux</code>).</li>
+</ul>
+<p><strong>Loudness (rumorosità)</strong>: a scopo VA la scansione può essere <em>aggressiva</em> (rumorosa); ma gli strumenti implementano <strong>molti modelli di scansione silenziosa</strong> per eludere il rilevamento.</p>
+<ul>
+<li><strong>Threat model — attaccante</strong>: la scansione è la <strong>fase di ricognizione</strong> che precede tutto. Sapere versione esatta di FTP/SSH/Apache significa poter cercare l'exploit pubblico corrispondente (il ponte verso S3/S4).</li>
+<li><strong>Threat model — difensore</strong>: un IDS/NIDS (S10) rileva le scansioni rumorose; un firewall (S5) fa apparire le porte come <code>filtered</code> anziché <code>open</code>/<code>closed</code>, negando informazione all'attaccante.</li>
+</ul>
+<h3 id="22-sniffing-e-lo-strumento-di-s10">2.2 Sniffing (→ è lo strumento di S10)</h3>
+<p>Lo <strong>sniffing richiede l'accesso fisico ai dati in transito</strong>. Due modi per ottenerlo:</p>
+<ol>
+<li><strong>essere già sulla rete locale</strong>;</li>
+<li>arrivarci <strong>a seguito di un attacco di dirottamento</strong> (ecco perché sniffing passivo e hijacking attivo spesso si combinano).</li>
+</ol>
+<p>Su reti locali:</p>
+<ul>
+<li><strong>wireless</strong>: <em>tutto dovrebbe essere criptato, ma molti protocolli sono difettosi</em> (→ §2.5);</li>
+<li><strong>cablate</strong>: la crittografia esiste — <strong>802.1x</strong> per l'autenticazione delle porte, <strong>802.1AE</strong> per la cifratura del traffico (MACsec) — <em>ma non la usa quasi nessuno</em>.</li>
+</ul>
+<p>Il PDF mostra un esempio con <strong>Wireshark</strong> (una cattura <code>.pcap</code> con traffico Netflix/DNS/TCP dissezionato frame per frame): lo strumento con cui hai lavorato tutto il LAB NIDS in S10.</p>
+<ul>
+<li><strong>Threat model — attaccante</strong>: cattura credenziali in chiaro, cookie di sessione, contenuti. Non lascia tracce (è passivo!) → difficile da rilevare.</li>
+<li><strong>Threat model — difensore</strong>: cifrare il traffico rende lo sniffing inutile (leggi solo ciphertext). È il <em>perché esistono</em> TLS (S13), 802.1AE, le VPN.</li>
+</ul>
+<h3 id="23-precisazione-importante-scanning-e-sniffing-non-sono-la-stessa-cosa">2.3 Precisazione importante: scanning e sniffing non sono la stessa cosa</h3>
+<p>Coppia facile da confondere. <strong>Scanning</strong> = <em>sondare attivamente</em> mandando pacchetti e osservando le risposte (genera traffico, può essere rumoroso, è ricognizione). <strong>Sniffing</strong> = <em>ascoltare passivamente</em> il traffico che già passa (non genera nulla di suo, è pura intercettazione). Entrambi sono classificati "passivi" nel senso che <strong>non modificano i dati della vittima</strong>, ma il primo <em>emette</em> pacchetti-sonda, il secondo no.</p>
+<h3 id="24-mac-flooding-lattacco-che-riabilita-lo-sniffing-su-switch">2.4 MAC flooding (l'attacco che riabilita lo sniffing su switch)</h3>
+<p>Ricorda (§1.4): lo switch offre protezione <em>limitata</em> contro lo sniffing — idealmente il traffico va solo sulla porta del destinatario, <strong>ma se lo switch non trova un MAC nella CAM manda i pacchetti in broadcast</strong>.</p>
+<p>Il <strong>MAC flooding</strong> sfrutta esattamente questo: l'attaccante <strong>inonda lo switch di MAC sorgente falsi</strong> (<code>flood of fake MACs</code>) finché la CAM (di dimensione finita, es. 6 righe nell'esempio) <strong>si riempie</strong>. A quel punto lo switch non ha più spazio per le associazioni legittime e, non trovandole, ripiega sul broadcast.</p>
+<blockquote>
+<p><strong>Il MAC flooding costringe lo switch a comportarsi come un hub.</strong> Da quel momento l'attaccante vede <em>tutto</em> il traffico del segmento, e lo sniffing (§2.2) torna possibile anche su una rete commutata.</p>
+</blockquote>
+<ul>
+<li><strong>Threat model — attaccante</strong>: trasforma una rete switch (che lo isolava) in un mezzo condiviso; obiettivo = sniffing di massa.</li>
+<li><strong>Threat model — difensore</strong>: <em>port security</em> sugli switch gestiti (limitare il numero di MAC per porta), 802.1X.</li>
+</ul>
+<h3 id="25-wireless-key-recovery-e-la-crittografia-di-s14-vista-da-rotta">2.5 Wireless key recovery (→ è la crittografia di S14 vista "da rotta")</h3>
+<p>Quattro generazioni di protezione Wi-Fi, ciascuna nata per riparare la precedente e ciascuna poi bucata. È la parte più densa di dettagli quiz-abili del modulo.</p>
+<p><strong>WEP (Wired Equivalent Privacy)</strong>
+- chiave <strong>simmetrica precondivisa</strong>;
+- <strong>stream cipher RC4</strong>, con una <strong>falla di progettazione</strong>: è possibile <strong>recuperare la chiave</strong> se si raccoglie sufficiente testo cifrato prodotto con la stessa chiave;
+- la chiave è "randomizzata" tramite <strong>XOR con un IV (Initialization Vector) piccolo, 24 bit</strong>;
+- generando abbastanza traffico, <strong>l'IV si ripete</strong> → e con la ripetizione dell'IV la protezione crolla.</p>
+<p><strong>WPA (Wi-Fi Protected Access)</strong>
+- una <strong>patch intermedia</strong> durante il lancio di WPA2;
+- sostituisce l'IV con <strong>TKIP (128 bit)</strong>;
+- <strong>modalità personale</strong> con <strong>chiave precondivisa</strong> → <em>nessuna segretezza in avanti</em> (no forward secrecy): qualsiasi utente che conosce la chiave può decifrare <strong>tutti</strong> i pacchetti;
+- <strong>modalità aziendale</strong> con <strong>autenticazione utente su canale protetto</strong>.</p>
+<p><strong>WPA2</strong>
+- a lungo considerato <strong>essenzialmente sicuro</strong>;
+- grave vulnerabilità nel <strong>2017: KRACK</strong> (Key Reinstallation Attacks) —
+  - Android e Linux possono essere indotti a (re)installare una <strong>chiave di crittografia completamente a zero</strong>;
+  - su altri dispositivi è comunque possibile decrittografare un gran numero di pacchetti;
+  - i pacchetti possono contenere <strong>credenziali utente con validità a livello aziendale</strong>;
+- <strong>PSK corta</strong> se si usa <strong>WPS</strong>.</p>
+<p><strong>WPA3</strong>
+- vari miglioramenti a garanzia della <strong>scelta di cifrari robusti</strong>;
+- sostituisce la PSK con <strong>SAE (Simultaneous Authentication of Equals)</strong>, che usa un handshake detto <strong>Dragonfly</strong>;
+- vulnerabile ad <strong>attacchi Dragonblood</strong>:
+  - <strong>tipo 1</strong>: sfrutta la <strong>retrocompatibilità con WPA2</strong> → attacco <strong>MITM per forzare un downgrade</strong>;
+  - <strong>tipo 2</strong>: sfrutta un'<strong>implementazione non corretta</strong> di alcuni passaggi crittografici → consente <strong>password partitioning</strong>;
+- i dispositivi sono <strong>aggiornabili</strong>.</p>
+<ul>
+<li><strong>Threat model — attaccante</strong>: recuperata la chiave, entra nella "rete fidata" e da lì fa sniffing (§2.2) e attacchi attivi <em>dall'interno</em>. "Il recupero di una chiave consente di impersonare la vittima" (definizione di §2).</li>
+<li><strong>Threat model — difensore</strong>: usare WPA3 aggiornato, PSK lunghe, disabilitare WPS, modalità <em>enterprise</em> con 802.1X.</li>
+<li><strong>Visione (ponte con S14)</strong>: qui vedi la crittografia <em>da dove rompe</em> — IV troppo corto e riusato, stream cipher con chiave riusata, downgrade. In <strong>S14 (Crittografia)</strong> vedrai <em>perché</em> uno stream cipher che riusa il keystream è fatale e cosa rende robusto un cifrario; in <strong>S15 (gpg/gestione chiavi)</strong> vedrai la gestione delle chiavi che qui, se fatta male (PSK condivisa, no forward secrecy), è il punto debole.</li>
+</ul>
+<hr />
+<h2 id="parte-3-attacchi-attivi">Parte 3 — Attacchi attivi</h2>
+<p><strong>Definizione (dal PDF)</strong>: gli attacchi attivi <strong>minacciano l'integrità, l'autenticità o la disponibilità</strong> di reti e sistemi. <strong>Spoofing e hijacking</strong> sono spesso un <em>passaggio preliminare</em> per un attacco più impattante, ad esempio: rubare una rete per originare spam e sparire; fingere un'identità di rete per rubare credenziali; <strong>dirottare il traffico per fare sniffing</strong>. Il <strong>Denial of Service (DoS)</strong> rende inaccessibile un servizio — a volte come passaggio intermedio, a volte come obiettivo principale.</p>
+<ul>
+<li><strong>Distinzione spoofing vs hijacking</strong> (utile a tenere ordinati i termini): <strong>spoofing</strong> = <em>falsificare un'identità</em> (assumere un MAC/IP/nome altrui); <strong>hijacking</strong> = <em>dirottare/impossessarsi</em> di un flusso o di una rotta già esistente. Lo spoofing è spesso il <em>mezzo</em>, l'hijacking l'<em>effetto</em>.</li>
+</ul>
+<p>Gli attacchi attivi si distribuiscono su tutti i layer. Li seguo dal basso verso l'alto.</p>
+<h3 id="31-link-layer">3.1 Link layer</h3>
+<h4 id="311-mac-spoofing">3.1.1 MAC spoofing</h4>
+<ul>
+<li><strong>assumere l'identità di un dispositivo a livello di indirizzo fisico</strong> (mettersi il MAC di un altro);</li>
+<li><strong>molto efficace</strong> per <strong>bypassare le ACL</strong> (liste di controllo accessi basate su MAC) e per <strong>ottenere tutto il traffico destinato alla vittima</strong>;</li>
+<li><strong>limitato alla LAN</strong>;</li>
+<li><strong>tecnicamente facile da mitigare con 802.1x</strong>, ma <em>organizzativamente complesso</em> → <strong>raro che lo si faccia</strong>.</li>
+</ul>
+<h4 id="312-arp-poisoning-arp-cache-poisoning">3.1.2 ARP poisoning (ARP cache poisoning)</h4>
+<p>Sfrutta il difetto di §1.6 (ARP non autenticato + caching opportunistico). Obiettivo: <strong>convincere un host — specialmente il gateway — che l'IP di una vittima è associato al MAC dell'attaccante</strong>.</p>
+<ul>
+<li>Meccanismo: l'attaccante invia <strong>gratuitous ARP replies</strong> non richieste — "<em>l'IP del gateway è al MAC dell'attaccante</em>". Gli host mettono in cache l'associazione avvelenata.</li>
+<li>
+<p>Effetto: gli host usano la <strong>cache "avvelenata"</strong> e <strong>mandano sul cavo all'attaccante i pacchetti destinati all'IP del gateway</strong>. L'attaccante si è inserito <strong>in mezzo</strong> (man-in-the-middle) tra vittima e gateway.</p>
+</li>
+<li>
+<p><strong>Threat model — attaccante</strong>: da qui parte lo sniffing di §2.2 e la manipolazione del traffico; è la via classica per un MITM in LAN.</p>
+</li>
+<li><strong>Threat model — difensore</strong>: <em>Dynamic ARP Inspection</em> sugli switch gestiti, tabelle ARP statiche per host critici, 802.1X, segmentazione (l'attacco è confinato alla LAN, §1.5).</li>
+</ul>
+<h4 id="313-coppia-da-non-confondere-mac-flooding-vs-arp-poisoning">3.1.3 Coppia da non confondere: MAC flooding vs ARP poisoning</h4>
+<p>Entrambi sono di livello 2 ed entrambi <em>abilitano lo sniffing</em>, ma il meccanismo e la portata sono diversi:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>MAC flooding</strong></th>
+<th><strong>ARP poisoning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bersaglio</td>
+<td>la <strong>CAM dello switch</strong></td>
+<td>la <strong>cache ARP degli host</strong> (spesso il gateway)</td>
+</tr>
+<tr>
+<td>Meccanismo</td>
+<td>saturare la tabella con MAC falsi</td>
+<td>inviare ARP reply false (gratuitous)</td>
+</tr>
+<tr>
+<td>Effetto</td>
+<td>switch → hub: vedo <strong>tutto</strong> il segmento (sniffing di massa, indiscriminato)</td>
+<td>reindirizzo a me un <strong>flusso specifico</strong> (MITM mirato vittima↔gateway)</td>
+</tr>
+<tr>
+<td>Selettività</td>
+<td>indiscriminato</td>
+<td>mirato</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-network-layer">3.2 Network layer</h3>
+<h4 id="321-ip-spoofing">3.2.1 IP spoofing</h4>
+<ul>
+<li><strong>assumere l'indirizzo IP di una vittima</strong>;</li>
+<li><strong>efficace per dirottare il traffico solo su LAN</strong>. Perché solo su LAN? Perché <strong>su Internet il routing invierà le risposte agli indirizzi mimati</strong>: l'attaccante <em>manda</em> pacchetti con IP sorgente falso ma <strong>non può ricevere</strong> le risposte (tornano al vero proprietario dell'IP). Le risposte che arrivano a un IP-vittima non coinvolto sono il fenomeno del <strong>backscatter</strong>.</li>
+</ul>
+<h4 id="322-ip-hijacking-bgp-hijacking">3.2.2 IP hijacking (BGP hijacking)</h4>
+<ul>
+<li>i <strong>router si scambiano informazioni</strong> su come raggiungere le destinazioni (routing inter-dominio);</li>
+<li><strong>BGP non è autenticato!</strong> — chiunque annunci una rotta viene, in linea di principio, creduto;</li>
+<li><strong>estende la portata dello spoofing IP su scala globale</strong>: non più confinato alla LAN, ma capace di dirottare interi blocchi di indirizzi in tutta Internet.</li>
+</ul>
+<p>Entrambi (IP spoofing e IP hijacking) sono utili per <strong>bypassare le ACL</strong> e per <strong>dirottare le connessioni dopo l'autenticazione</strong> (il "vedere più avanti" del PDF → l'idea del session hijacking di §3.3).</p>
+<h4 id="323-coppia-da-non-confondere-ip-spoofing-vs-ip-hijacking">3.2.3 Coppia da non confondere: IP spoofing vs IP hijacking</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>IP spoofing</strong></th>
+<th><strong>IP hijacking (BGP)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cosa falsifico</td>
+<td>l'<strong>IP sorgente</strong> dei miei pacchetti</td>
+<td>le <strong>rotte</strong> annunciate tra router</td>
+</tr>
+<tr>
+<td>Portata</td>
+<td><strong>LAN</strong> (su Internet le risposte non mi tornano → backscatter)</td>
+<td><strong>globale</strong> (dirotto blocchi di IP in tutta Internet)</td>
+</tr>
+<tr>
+<td>Difetto sfruttato</td>
+<td>nessuna verifica dell'IP sorgente</td>
+<td><strong>BGP non autenticato</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="324-il-caso-famoso-youtube-pakistan-telecom-2008">3.2.4 Il caso famoso: YouTube &amp; Pakistan Telecom (2008)</h4>
+<p>Esempio reale di <strong>BGP hijacking</strong>, dalla presentazione Pilosov &amp; Kapela a DEFCON16. YouTube annuncia i suoi prefissi (tra cui un <code>/22</code> = <code>208.65.152.0/22</code>). Il governo pakistano decide di <strong>bloccare</strong> YouTube; Pakistan Telecom annuncia internamente una rotta <strong>più specifica</strong> (<code>208.65.153.0/24</code>) verso <code>null0</code> (l'interfaccia che scarta) per farlo internamente. Per errore, questa rotta <strong>fuoriesce</strong> (redistribuita da statico → BGP → verso l'upstream PCCW) e si propaga a tutti: essendo <em>più specifica</em> del <code>/22</code> di YouTube, <strong>la maggior parte di Internet inizia a mandare il traffico YouTube verso il Pakistan</strong>, dove viene scartato. YouTube reagisce annunciando rotte ancora più specifiche (<code>/24</code> e due <code>/25</code>); PCCW stacca il peering di Pakistan Telecom dopo due ore; in 3-5 minuti la tabella BGP globale torna pulita.</p>
+<ul>
+<li><strong>Lezione</strong>: mostra <em>concretamente</em> che (a) BGP crede a chi annuncia, (b) vince la <strong>rotta più specifica</strong> (prefisso più lungo), (c) un errore locale può diventare un blackout globale. È l'illustrazione del perché serve autenticazione del routing (S13).</li>
+</ul>
+<h3 id="33-layer-di-trasporto-e-applicazione">3.3 Layer di trasporto e applicazione</h3>
+<p>Se il dirottamento IP serve a <strong>impossessarsi di una connessione dopo un'autenticazione</strong>, devono essere coinvolti i livelli superiori:</p>
+<ul>
+<li><strong>UDP</strong> è <strong>privo di connessione</strong> → <strong>molto facile</strong> da dirottare (non c'è stato da indovinare);</li>
+<li><strong>TCP</strong> invece <strong>perderà la connessione se l'attaccante non usa i numeri di sequenza corretti</strong> per la finestra scorrevole → più difficile;</li>
+<li>a livello <strong>applicazione</strong>, spesso i protocolli usano <strong>identificatori di sessione</strong> come i <strong>cookie HTTP</strong>.</li>
+</ul>
+<p>In tutti i casi l'attaccante ha <strong>due opzioni</strong>:
+1. <strong>indovinare</strong> (forza bruta — spesso molto difficile, es. i sequence number TCP);
+2. <strong>sfruttare lo sniffing</strong> (facile <em>se è già sul percorso dei dati</em> — ecco di nuovo la sinergia passivo+attivo: prima si mette in mezzo con ARP poisoning, poi sniffa il sequence number / il cookie, poi dirotta).</p>
+<ul>
+<li><strong>Coppia da non confondere: UDP vs TCP hijacking</strong> — UDP è facile <em>perché</em> stateless (niente da indovinare); TCP è difficile <em>perché</em> stateful (i sequence number della sliding window vanno azzeccati). Non è che TCP sia "più sicuro per progetto crittografico": è solo che il suo stato alza la barriera del brute force.</li>
+</ul>
+<h3 id="34-ddos-denial-of-service">3.4 (D)DoS — Denial of Service</h3>
+<ul>
+<li><strong>Qualsiasi attacco di dirottamento può causare un errore mirato</strong>: a livello di trasporto, <strong>inviare un SN (sequence number) errato o un reset (RST) esplicito interrompe una connessione TCP</strong>.</li>
+<li><strong>DDoS (Distributed DoS)</strong>: <strong>molti host coordinano gli sforzi</strong> per saturare la capacità di rete o le risorse di calcolo della vittima. Le <strong>botnet</strong> sono insiemi di <strong>computer zombie</strong> che lanciano DDoS quando istruiti da un <strong>Command &amp; Control (C&amp;C)</strong>. Esempi di botnet IoT: <strong>Mirai, Bashlite</strong>.</li>
+<li>
+<p><strong>Un controllo degli accessi impreciso sull'infrastruttura può peggiorare le cose</strong>: amplificando l'effetto, nascondendo l'origine — esempio: <strong>attacchi di amplificazione DNS</strong> (piccola query con IP sorgente spoofato → risposta grande verso la vittima).</p>
+</li>
+<li>
+<p><strong>Threat model — difensore</strong>: rate limiting, anti-DDoS a monte, chiudere i resolver DNS aperti (contro l'amplificazione), controllo accessi preciso sull'infrastruttura.</p>
+</li>
+</ul>
+<h3 id="35-attacchi-ai-protocolli-ausiliari-dns">3.5 Attacchi ai protocolli ausiliari: DNS</h3>
+<p>Il DNS è "ausiliario" ma onnipresente (traduce nomi in IP), e come ARP/IP/BGP è <strong>non autenticato</strong>. Il PDF ne cataloga quattro abusi, facili da confondere: teniamoli separati.</p>
+<h4 id="351-dns-tunnelling-esfiltrazione">3.5.1 DNS tunnelling (esfiltrazione)</h4>
+<ul>
+<li><strong>Query e risposte DNS possono contenere dati</strong>;</li>
+<li>utilizzabile per <strong>esfiltrare dati</strong> da un computer infettato, o per <strong>mettere in contatto un bot con il C&amp;C</strong> (canale nascosto: il traffico DNS è quasi sempre lasciato uscire dai firewall).</li>
+<li><strong>Nota</strong>: qui il DNS non è "attaccato" — è <em>abusato come canale</em>. È un uso <em>offensivo</em> del DNS, non una sua falsificazione.</li>
+</ul>
+<h4 id="352-dns-hijacking">3.5.2 DNS hijacking</h4>
+<ul>
+<li>un <strong>server DNS malevolo</strong> fornisce in risposta <strong>l'IP dell'attaccante</strong> quando la vittima chiede di risolvere un nome legittimo;</li>
+<li>il DNS si presta perché <strong>non è autenticato</strong>, è <strong>distribuito</strong>, ha <strong>molti livelli di caching</strong>;</li>
+<li>la <strong>falsificazione arbitraria è difficile</strong> (per via del caching e della distribuzione) <strong>ma</strong>: si può fare con un attacco <em>combinato</em> (→ pharming), oppure i <strong>server legittimi possono essere attaccati e portati ad agire in modo malevolo</strong>.</li>
+</ul>
+<h4 id="353-dns-spoofing">3.5.3 DNS spoofing</h4>
+<ul>
+<li>caso concreto: la vittima chiede <code>www.amazon.com?</code>; nella risposta <em>normale</em> riceve l'IP vero (<code>207.171.166.48</code> del web server Amazon);</li>
+<li>nella <strong>risposta falsificata</strong> un <strong>rogue name server</strong> restituisce l'indirizzo del <strong>cracker</strong> → il browser mostra una pagina Amazon <em>identica</em> servita dal <strong>web server dell'attaccante</strong>.</li>
+<li>L'utente non si accorge di nulla: URL corretto nella barra, pagina identica, IP sbagliato sotto.</li>
+</ul>
+<h4 id="354-dns-spoofing-pharming-lattacco-combinato">3.5.4 DNS spoofing (pharming) — l'attacco combinato</h4>
+<p>Risponde alla domanda "<em>ma non è difficile falsificare una risposta DNS?</em>" mostrando come aggirare la difficoltà <strong>non falsificando il DNS in transito, ma riprogrammando chi fa le domande</strong>:</p>
+<ol>
+<li>l'utente <strong>visita una pagina HTML</strong> (consapevolmente o no);</li>
+<li>la pagina <strong>contiene uno script</strong>;</li>
+<li>lo script, <strong>usando la password di default del router domestico</strong>, <strong>riprogramma il server DNS</strong> configurato sul router;</li>
+<li><strong>da quel momento ogni risoluzione di nomi sarà eseguita dal name server dell'attaccante</strong>.</li>
+</ol>
+<ul>
+<li><strong>Perché "combinato"</strong>: mette insieme web (pagina+script), debolezza di configurazione (password di default), e DNS. Non rompe la crittografia di nulla: sfrutta l'anello umano/gestionale più debole.</li>
+<li><strong>Threat model — attaccante</strong>: <em>persistenza</em> — non deve più intercettare nulla in tempo reale, ha spostato la fiducia sul proprio name server.</li>
+<li><strong>Threat model — difensore</strong>: cambiare le password di default (!), <strong>DNSSEC</strong> (autentica le risposte DNS), DoH/DoT (DNS cifrato), aggiornare i router.</li>
+</ul>
+<h4 id="355-le-quattro-varianti-dns-a-colpo-docchio-coppiaquartetto-da-non-confondere">3.5.5 Le quattro varianti DNS a colpo d'occhio (coppia/quartetto da non confondere)</h4>
+<table>
+<thead>
+<tr>
+<th>Attacco</th>
+<th>Cosa fa</th>
+<th>Il DNS è…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tunnelling</strong></td>
+<td>usa query/risposte come <em>canale nascosto</em> per esfiltrare/C&amp;C</td>
+<td><strong>abusato come veicolo</strong> (non falsificato)</td>
+</tr>
+<tr>
+<td><strong>Hijacking</strong></td>
+<td>un DNS malevolo dà l'IP dell'attaccante per un nome legittimo</td>
+<td><strong>sostituito/compromesso</strong> (il server risolutore mente)</td>
+</tr>
+<tr>
+<td><strong>Spoofing</strong></td>
+<td>risposta falsificata → il nome giusto punta all'IP dell'attaccante</td>
+<td><strong>falsificato nella risposta</strong></td>
+</tr>
+<tr>
+<td><strong>Pharming</strong></td>
+<td>riprogramma il resolver del router (via script + password default) → tutte le future risoluzioni passano dall'attaccante</td>
+<td><strong>dirottato alla fonte, in modo persistente</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="parte-4-il-threat-model-del-modulo-in-tabella">Parte 4 — Il threat model del modulo, in tabella</h2>
+<p>Vista d'insieme attaccante/difensore per layer (sintesi di tutto il modulo — utile come ripasso finale):</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Attacco passivo</th>
+<th>Attacco attivo</th>
+<th>Proprietà colpita</th>
+<th>Difesa (→ S13/S14)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data link</strong></td>
+<td>sniffing (dopo MAC flooding)</td>
+<td>MAC spoofing, ARP poisoning</td>
+<td>riservatezza, autenticità</td>
+<td>802.1X, 802.1AE/MACsec, VLAN, port security, DAI</td>
+</tr>
+<tr>
+<td><strong>Rete (IP)</strong></td>
+<td>—</td>
+<td>IP spoofing, BGP hijacking</td>
+<td>autenticità, integrità</td>
+<td>IPsec, autenticazione del routing</td>
+</tr>
+<tr>
+<td><strong>Trasporto</strong></td>
+<td>—</td>
+<td>TCP/UDP hijacking, RST injection, DoS</td>
+<td>integrità, disponibilità</td>
+<td>TLS, anti-DDoS</td>
+</tr>
+<tr>
+<td><strong>Applicazione</strong></td>
+<td>sniffing di credenziali/cookie</td>
+<td>session hijacking (cookie), DNS spoofing/hijacking/pharming, DNS tunnelling, DNS amplification</td>
+<td>riservatezza, autenticità, disponibilità</td>
+<td>TLS/HTTPS, DNSSEC, auth applicativa, hardening config</td>
+</tr>
+<tr>
+<td><strong>Wireless (trasversale)</strong></td>
+<td>sniffing dell'etere, wireless key recovery (WEP/WPA/WPA2/WPA3)</td>
+<td>(da chiave recuperata: tutto il resto)</td>
+<td>riservatezza → poi tutto</td>
+<td>WPA3 aggiornato, PSK lunga, no WPS, enterprise+802.1X</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Filo conduttore</strong>: quasi ogni attacco sfrutta l'<strong>assenza di autenticazione</strong> di un protocollo fondamentale (ARP, IP, BGP, DNS) o l'<strong>assenza/debolezza di cifratura</strong> (Wi-Fi difettoso, traffico in chiaro). Le contromisure di S13 <em>aggiungono</em> proprio queste due cose — autenticazione e cifratura — a un layer alla volta.</p>
+<hr />
+<h2 id="connessioni-con-altri-moduli-specifiche">Connessioni con altri moduli (specifiche)</h2>
+<ul>
+<li><strong>← S1 (Enumerazione)</strong>: la sezione <em>Scanning</em> di questo modulo <strong>è</strong> il LAB di S1 — gli stessi comandi <code>nmap -sP</code> (host discovery) e <code>nmap -A</code> (fingerprinting versioni/OS) che hai eseguito lì. S12 li ricolloca come "attacco passivo / prima fase della kill chain".</li>
+<li><strong>← S5 (Firewall/ACL)</strong>: MAC spoofing e IP spoofing sono descritti come modi per <strong>"bypassare le ACL"</strong>. Quelle ACL sono le regole <code>iptables</code>/<code>nft</code> di S5 basate su indirizzo sorgente: lo spoofing dell'IP sorgente vanifica una regola <code>-s &lt;ip&gt;</code> che si fida dell'IP mittente. Il firewall che filtra <code>-i &lt;interfaccia&gt;</code> + coerenza subnet/interfaccia è la contromisura all'IP spoofing.</li>
+<li><strong>← S10 (NIDS/Suricata/Wireshark)</strong>: lo <strong>sniffing</strong> qui descritto è l'atto che produce i <code>.pcap</code> che in S10 analizzi con Wireshark; il <strong>port scan</strong>, il <strong>DDoS</strong> e l'<strong>ARP</strong> che hai cercato nelle simulazioni NIDS sono esattamente gli attacchi di questo modulo <em>visti dal lato rilevamento</em>. S12 li spiega dal lato attaccante, S10 dal lato difensore/analista.</li>
+<li><strong>→ S13 (Protezione delle comunicazioni + OpenSSL/TLS)</strong>: è il <strong>seguito diretto</strong>. La sezione "Contromisure: canali sicuri" annunciata (in grigio) nell'outline di S12 — VLAN al data-link, IPsec alla rete, TLS al trasporto — è il <em>corpo</em> di S13. Ogni attacco di S12 motiva una difesa di S13: DNS spoofing + TCP hijacking + sniffing → <strong>TLS</strong>; ARP poisoning/MAC flooding → <strong>802.1X/VLAN</strong>; BGP hijacking → <strong>autenticazione del routing/IPsec</strong>.</li>
+<li><strong>→ S14 (Crittografia)</strong>: la sezione <em>Wireless key recovery</em> ti mostra la crittografia <em>da dove si rompe</em> (IV di 24 bit riusato in WEP, keystream RC4 riusato, downgrade WPA3). S14 spiega il <em>perché</em> teorico: cos'è uno stream cipher, perché riusare il keystream è fatale, cosa rende un cifrario robusto. Il "recupero della chiave" che qui <em>permette di impersonare la vittima</em> è il problema che S14/S15 affrontano alla radice.</li>
+<li><strong>→ S15 (gpg / gestione chiavi)</strong>: la debolezza "chiave precondivisa → nessuna forward secrecy" (WPA personale) è un problema di <strong>gestione delle chiavi</strong> — il tema di S15.</li>
+<li><strong>↔ S2 (Autenticazione)</strong>: il <em>session hijacking</em> via cookie HTTP dopo l'autenticazione, e la modalità WPA-enterprise con "autenticazione utente su canale protetto", sono l'anello con S2. Molti attacchi qui mirano precisamente a <strong>scavalcare</strong> un'autenticazione già avvenuta senza rifarla.</li>
+</ul>
+<hr />
+<h2 id="autoverifica-stile-quiz-teorico-40">Autoverifica — stile quiz teorico (40%)</h2>
+<blockquote>
+<p>Formato dell'esame reale: <strong>vero/falso</strong> e <strong>scelta multipla</strong>, <strong>penalità sulle risposte sbagliate</strong> → se sei incerto e la penalità è significativa, valuta di non rispondere. Prova a rispondere <em>prima</em> di guardare la soluzione in fondo agli appunti. Le risposte commentate sono in <code>appunti_moduloS12_sicurezza_comunicazioni.md</code>.</p>
+</blockquote>
+<p><strong>Vero o Falso</strong></p>
+<ol>
+<li>Un attacco passivo, per definizione, non modifica i dati in transito.</li>
+<li>Lo sniffing su una rete basata su switch è impossibile, perché lo switch invia ogni trama solo alla porta del destinatario.</li>
+<li>Nella consegna indiretta, l'indirizzo IP di destinazione della trama è quello del router del prossimo hop.</li>
+<li>ARP è un protocollo autenticato: solo il legittimo proprietario di un IP può rispondere a una ARP request.</li>
+<li>L'IP spoofing è efficace per ricevere le risposte della vittima anche quando attaccante e vittima si trovano su reti diverse attraverso Internet.</li>
+<li>In WEP, la ripetizione dell'IV (24 bit) contribuisce alla possibilità di recuperare la chiave.</li>
+<li>BGP autentica gli annunci di rotta, per cui il caso YouTube/Pakistan Telecom fu possibile solo per un bug del software.</li>
+<li>Il MAC flooding riempie la cache ARP degli host della vittima.</li>
+<li>Il DNS tunnelling consiste nel falsificare la risposta di un name server per dirottare la vittima su un IP malevolo.</li>
+<li>La modalità WPA "personale" con chiave precondivisa non fornisce forward secrecy.</li>
+</ol>
+<p><strong>Scelta multipla</strong></p>
+<ol start="11">
+<li>
+<p>Il MAC flooding ha successo perché lo switch, quando un MAC di destinazione non è presente in CAM:
+    a) scarta la trama; b) la invia in broadcast su tutte le porte; c) genera una ARP request; d) la reindirizza al gateway.</p>
+</li>
+<li>
+<p>Quale coppia descrive correttamente gli indirizzi della trama in una <em>consegna diretta</em>?
+    a) L2 = destinatario finale, IP = destinatario finale; b) L2 = router, IP = destinatario finale; c) L2 = router, IP = router; d) L2 = destinatario finale, IP = router.</p>
+</li>
+<li>
+<p>Il pharming (DNS spoofing) illustrato nel modulo ottiene la falsificazione:
+    a) rompendo la firma DNSSEC della risposta; b) saturando la CAM dello switch; c) riprogrammando, via script e password di default, il server DNS del router domestico; d) indovinando i sequence number TCP.</p>
+</li>
+<li>
+<p>Perché dirottare una connessione <strong>TCP</strong> è più difficile che dirottare <strong>UDP</strong>?
+    a) TCP è cifrato per default; b) UDP non attraversa i router; c) TCP richiede di indovinare i sequence number corretti della finestra scorrevole; d) UDP usa sempre i cookie HTTP.</p>
+</li>
+<li>
+<p>Quale tecnologia, citata nel modello Internet del PDF, protegge la connettività <strong>end-to-end reliable</strong> a livello di trasporto?
+    a) 802.1X; b) IPsec; c) SSL/TLS; d) WPA2.</p>
+</li>
+<li>
+<p>WPA3 è vulnerabile a Dragonblood di "tipo 1" perché:
+    a) usa RC4; b) sfrutta la retrocompatibilità con WPA2 per forzare un downgrade via MITM; c) espone la CAM dello switch; d) non usa alcun handshake.</p>
+</li>
+<li>
+<p>L'ARP poisoning permette a un attaccante di fare MITM perché:
+    a) modifica la tabella di routing BGP; b) convince gli host (spesso il gateway) che l'IP della vittima è al MAC dell'attaccante, tramite gratuitous ARP reply; c) satura la banda con pacchetti zombie; d) cifra il traffico della vittima.</p>
+</li>
+<li>
+<p>Un attacco di <strong>amplificazione DNS</strong> serve tipicamente a:
+    a) esfiltrare dati via query DNS; b) autenticare gli annunci BGP; c) potenziare e mascherare l'origine di un DDoS; d) recuperare la chiave WEP.</p>
+</li>
+</ol>
+<hr />
+<h2 id="riepilogo-la-mappa-mentale-del-modulo">Riepilogo (la mappa mentale del modulo)</h2>
+<ul>
+<li><strong>Due grandi famiglie</strong>: <strong>passivi</strong> (non toccano i dati → riservatezza/ricognizione: scanning, sniffing, MAC flooding, wireless key recovery) e <strong>attivi</strong> (toccano/iniettano/interrompono → integrità/autenticità/disponibilità: MAC/IP spoofing, ARP/BGP/DNS hijacking, DoS/DDoS).</li>
+<li><strong>Il filo rosso</strong>: i protocolli fondanti di Internet (ARP, IP, BGP, DNS) sono <strong>non autenticati</strong>, e molta comunicazione viaggia <strong>in chiaro</strong> → l'attaccante sfrutta l'una o l'altra assenza.</li>
+<li><strong>La sinergia ricorrente</strong>: prima ci si <em>mette in mezzo</em> con un attacco attivo (ARP poisoning), poi si <em>ascolta</em> con uno passivo (sniffing); prima si <em>recupera una chiave</em> (passivo), poi si <em>impersona</em> (attivo).</li>
+<li><strong>La mappa a strati</strong> collega ogni attacco alla sua difesa: data-link → 802.1X/VLAN; rete → IPsec; trasporto → TLS. Le difese sono <strong>S13</strong>; la crittografia sotto WEP/WPA/TLS è <strong>S14</strong>; la gestione chiavi è <strong>S15</strong>.</li>
+<li><strong>Confine</strong>: questo modulo si ferma agli attacchi (fino al DNS pharming). Le contromisure "canali sicuri" sono annunciate ma non svolte qui — sono il modulo successivo.</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

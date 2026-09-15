@@ -32,9 +32,15 @@ i file da convertire prima di iniziare.
 Crea le cartelle di destinazione se non esistono, poi per ogni file:
 
 ```bash
-pandoc '<path_md>' -o '<path_pdf>' --pdf-engine=xelatex \
-  -V geometry:margin=2.5cm -V fontsize=11pt -V lang=it
+sed 's/\xEF\xB8\x8F//g' '<path_md>' | pandoc -f markdown -o '<path_pdf>' --pdf-engine=xelatex \
+  -V geometry:margin=2.5cm -V fontsize=11pt -V lang=it \
+  -V mainfont="DejaVu Sans" -V monofont="DejaVu Sans Mono"
 ```
+
+Il font di default (Latin Modern) non ha `⚠` e le lezioni perderebbero in silenzio gli avvisi
+sugli errori ricorrenti: DejaVu Sans li ha. Il `sed` toglie il selettore di variante U+FE0F
+che segue gli emoji, assente in ogni font. Controllo: la conversione non deve stampare
+`Missing character`.
 
 Se xelatex fallisce per sequenze di escape nel sorgente (tipicamente `\x` dentro blocchi di
 codice), fai il pre-processing su una copia temporanea invece di modificare il sorgente.

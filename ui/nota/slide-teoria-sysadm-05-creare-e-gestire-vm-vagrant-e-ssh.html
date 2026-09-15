@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 - Creare e Gestire VM (Vagrant e SSH).md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  slide-teoria · LAS</p>
+<h1 class="titolo-pagina">05 - Creare e Gestire VM (Vagrant e SSH).md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/05 - Creare e Gestire VM (Vagrant e SSH).md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="creare-e-gestire-macchine-virtuali-vagrant-e-ssh">Creare e Gestire Macchine Virtuali: Vagrant e SSH</h1>
+<p>Laboratorio di Amministrazione di Sistemi — Prof. Prandini</p>
+<hr />
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-motivazione-amministrazione-remota-e-ssh">Motivazione: Amministrazione Remota e SSH</a></li>
+<li><a href="#2-il-predecessore-telnet">Il Predecessore: TELNET</a></li>
+<li><a href="#3-autenticazione-a-chiave-pubblica">Autenticazione a Chiave Pubblica</a></li>
+<li><a href="#4-passi-della-connessione-ssh">Passi della Connessione SSH</a></li>
+<li><a href="#5-autenticazione-dellhost">Autenticazione dell'Host</a></li>
+<li><a href="#6-autenticazione-dellutente">Autenticazione dell'Utente</a></li>
+<li><a href="#7-gestione-delle-chiavi-ssh-keygen-e-ssh-copy-id">Gestione delle Chiavi: ssh-keygen e ssh-copy-id</a></li>
+<li><a href="#8-esecuzione-remota-di-comandi">Esecuzione Remota di Comandi</a></li>
+<li><a href="#9-vagrant-riproducibilità-e-portabilità">Vagrant: Riproducibilità e Portabilità</a></li>
+<li><a href="#10-il-modello-vagrant">Il Modello Vagrant</a></li>
+<li><a href="#11-il-vagrantfile">Il Vagrantfile</a></li>
+<li><a href="#12-operazioni-vagrant">Operazioni Vagrant</a></li>
+<li><a href="#13-vagrant-e-ssh">Vagrant e SSH</a></li>
+</ol>
+<hr />
+<h2 id="1-motivazione-amministrazione-remota-e-ssh">1. Motivazione: Amministrazione Remota e SSH</h2>
+<p>L'amministrazione di sistemi raramente avviene con accesso fisico diretto alle macchine. La stragrande maggioranza delle operazioni viene condotta <strong>da remoto</strong>, attraverso reti potenzialmente non fidate. Ciò introduce tre requisiti fondamentali di sicurezza:</p>
+<ul>
+<li><strong>Riservatezza</strong>: i dati trasmessi non devono essere leggibili da terzi.</li>
+<li><strong>Autenticazione dell'host</strong>: il client deve poter verificare di star effettivamente comunicando con il server atteso, e non con un impostore (attacco <em>man-in-the-middle</em>).</li>
+<li><strong>Autenticazione dell'utente</strong>: il server deve verificare l'identità di chi si connette.</li>
+</ul>
+<p>Il protocollo <strong>SSH</strong> (<em>Secure Shell</em>) soddisfa tutti e tre questi requisiti, ed è oggi lo standard de facto per l'accesso remoto ai sistemi Unix-like.</p>
+<hr />
+<h2 id="2-il-predecessore-telnet">2. Il Predecessore: TELNET</h2>
+<p>Prima di SSH, il protocollo dominante per l'accesso remoto era <strong>TELNET</strong>. TELNET soffriva di tre gravi lacune di sicurezza:</p>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>TELNET</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Riservatezza</td>
+<td>✗ — tutto in chiaro</td>
+</tr>
+<tr>
+<td>Autenticazione host</td>
+<td>✗ — assente</td>
+</tr>
+<tr>
+<td>Autenticazione utente</td>
+<td>Solo passiva (password in chiaro)</td>
+</tr>
+</tbody>
+</table>
+<p>L'assenza di cifratura implica che qualunque nodo di rete intermedio possa leggere l'intera sessione, incluse le credenziali. L'assenza di autenticazione dell'host espone l'utente ad attacchi di tipo <em>man-in-the-middle</em>: un avversario potrebbe impersonare il server e raccogliere le password inserite dall'utente ignaro.</p>
+<hr />
+<h2 id="3-autenticazione-a-chiave-pubblica">3. Autenticazione a Chiave Pubblica</h2>
+<p>SSH supporta l'autenticazione basata su <strong>crittografia asimmetrica</strong> (a chiave pubblica). Il meccanismo si fonda sulla proprietà matematica per cui, dato un messaggio cifrato con la chiave privata, solo il possessore della corrispondente chiave pubblica può decifrarlo, e viceversa.</p>
+<p>Il protocollo di autenticazione segue il paradigma <strong>PROVER / VERIFIER</strong>:</p>
+<ol>
+<li>Il <strong>VERIFIER</strong> (chi vuole verificare l'identità) genera un valore casuale (<em>nonce</em>) e lo cifra con la <strong>chiave pubblica</strong> del PROVER.</li>
+<li>Il <strong>PROVER</strong> (chi deve dimostrare la propria identità) decifra il nonce con la propria <strong>chiave privata</strong> e lo restituisce al VERIFIER.</li>
+<li>Il VERIFIER confronta il valore ricevuto con quello originale: se coincidono, il PROVER ha dimostrato di possedere la chiave privata corrispondente alla chiave pubblica dichiarata.</li>
+</ol>
+<p>Questo schema è detto <strong>challenge-response con RSA</strong> ed è impiegato sia per l'autenticazione dell'host che per quella dell'utente (con chiave pubblica).</p>
+<hr />
+<h2 id="4-passi-della-connessione-ssh">4. Passi della Connessione SSH</h2>
+<p>Una sessione SSH si stabilisce attraverso la seguente sequenza di fasi:</p>
+<ol>
+<li><strong>Negoziazione del cifrario</strong>: client e server concordano gli algoritmi crittografici da utilizzare (cifratura simmetrica, hash, ecc.).</li>
+<li><strong>Autenticazione dell'host</strong>: il server dimostra la propria identità presentando la propria chiave pubblica; il client verifica che corrisponda a quanto atteso.</li>
+<li><strong>Canale cifrato</strong>: una volta autenticato l'host, viene stabilito un canale cifrato con la chiave di sessione negoziata.</li>
+<li><strong>Negoziazione del metodo di autenticazione utente</strong>: client e server concordano come autenticare l'utente (password, chiave pubblica, ecc.).</li>
+<li><strong>Autenticazione dell'utente</strong>: l'utente dimostra la propria identità con il metodo concordato.</li>
+</ol>
+<p>Stabilite tutte queste fasi, la sessione interattiva (o l'esecuzione di un comando remoto) ha inizio.</p>
+<hr />
+<h2 id="5-autenticazione-dellhost">5. Autenticazione dell'Host</h2>
+<p>Alla prima connessione verso un host, SSH non conosce la chiave pubblica del server. Il client deve quindi affidarsi a un meccanismo di verifica <strong>fuori banda</strong> (<em>out-of-band</em>): l'amministratore del server pubblica l'impronta digitale (<em>fingerprint</em>) della propria chiave pubblica attraverso un canale sicuro (documentazione interna, sito web istituzionale, ecc.), e l'utente la confronta manualmente con quanto presentato da SSH.</p>
+<p>Una volta accettata, la chiave pubblica del server viene memorizzata nel file <code>~/.ssh/known_hosts</code> del client. Nelle connessioni successive, SSH verifica automaticamente che la chiave presentata dal server corrisponda a quella memorizzata: se non corrisponde, emette un <strong>avviso di sicurezza</strong> che segnala una possibile compromissione.</p>
+<pre><code>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!    @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+</code></pre>
+<hr />
+<h2 id="6-autenticazione-dellutente">6. Autenticazione dell'Utente</h2>
+<p>SSH supporta diversi metodi di autenticazione utente:</p>
+<p><strong>Autenticazione con password</strong> (passiva): l'utente inserisce la propria password, che viene trasmessa al server attraverso il canale cifrato. Questo metodo è detto <em>passivo</em> perché l'utente si limita a rivelare un segreto.</p>
+<p><strong>Autenticazione con chiave pubblica</strong> (attiva): il server verifica che l'utente possieda la chiave privata corrispondente a una delle chiavi pubbliche autorizzate, elencate nel file <code>~/.ssh/authorized_keys</code> dell'account di destinazione. Il meccanismo è identico a quello descritto per l'autenticazione dell'host (challenge-response), ed è detto <em>attivo</em> perché l'utente dimostra il possesso del segreto senza rivelarlo.</p>
+<p>Per impostazione predefinita, SSH utilizza il nome dell'utente locale come identità remota. È possibile specificare un utente diverso con la sintassi <code>ssh utente@host</code>.</p>
+<hr />
+<h2 id="7-gestione-delle-chiavi-ssh-keygen-e-ssh-copy-id">7. Gestione delle Chiavi: ssh-keygen e ssh-copy-id</h2>
+<h3 id="generazione-della-coppia-di-chiavi">Generazione della coppia di chiavi</h3>
+<pre><code class="language-bash">ssh-keygen -t rsa -b 2048
+</code></pre>
+<p>Il comando genera una coppia di chiavi RSA a 2048 bit, salvando:
+- la chiave <strong>privata</strong> in <code>~/.ssh/id_rsa</code> (permessi <code>600</code>, leggibile solo dal proprietario)
+- la chiave <strong>pubblica</strong> in <code>~/.ssh/id_rsa.pub</code></p>
+<p>La chiave privata può essere protetta da una <em>passphrase</em>, che aggiunge un ulteriore livello di sicurezza: anche in caso di furto del file, l'attaccante non può utilizzare la chiave senza conoscere la passphrase.</p>
+<blockquote>
+<p><strong>Attenzione</strong>: i permessi della directory <code>~/.ssh</code> devono essere restrittivi (<code>700</code>). Se i permessi sono troppo aperti, SSH rifiuta di utilizzare le chiavi presenti.</p>
+</blockquote>
+<h3 id="installazione-della-chiave-pubblica-sul-server-remoto">Installazione della chiave pubblica sul server remoto</h3>
+<p><strong>Metodo automatico</strong> con <code>ssh-copy-id</code>:</p>
+<pre><code class="language-bash">ssh-copy-id [-i ~/.ssh/id_rsa.pub] utente@remoto
+</code></pre>
+<p><strong>Metodo manuale</strong> con <code>scp</code> e aggiunta al file <code>authorized_keys</code>:</p>
+<pre><code class="language-bash"># Copia la chiave pubblica sul server remoto
+scp ~/.ssh/id_rsa.pub utente@remoto:
+
+# Sul server remoto, aggiunge la chiave alle autorizzate
+cat id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys
+</code></pre>
+<hr />
+<h2 id="8-esecuzione-remota-di-comandi">8. Esecuzione Remota di Comandi</h2>
+<p>SSH consente non solo sessioni interattive, ma anche l'<strong>esecuzione remota di singoli comandi</strong>:</p>
+<pre><code class="language-bash">ssh utente@host comando [argomenti...]
+</code></pre>
+<p>In questo caso, stdin, stdout e stderr del comando remoto vengono <strong>tunnelizzati</strong> attraverso il canale cifrato SSH: l'input locale viene inviato al processo remoto, e l'output (sia standard che di errore) viene restituito localmente. Questo meccanismo permette di integrare comandi remoti all'interno di pipeline locali.</p>
+<pre><code class="language-bash"># Esempio: lista dei file su un host remoto, ordinata localmente
+ssh utente@host &quot;ls /var/log&quot; | sort
+</code></pre>
+<hr />
+<h2 id="9-vagrant-riproducibilita-e-portabilita">9. Vagrant: Riproducibilità e Portabilità</h2>
+<p><strong>Vagrant</strong> è uno strumento per la creazione e la gestione di ambienti di sviluppo virtualizzati, progettato attorno a due obiettivi fondamentali:</p>
+<ul>
+<li><strong>Riproducibilità</strong>: l'ambiente viene descritto in modo dichiarativo in un file di testo (<code>Vagrantfile</code>), versionabile con git. Chiunque — o qualsiasi macchina CI/CD — può ricreare un ambiente identico a partire dalla stessa descrizione.</li>
+<li><strong>Portabilità</strong>: il <code>Vagrantfile</code> può essere condiviso nel repository del progetto. L'intero team di sviluppo lavora su ambienti identici, eliminando il problema "funziona sulla mia macchina".</li>
+</ul>
+<hr />
+<h2 id="10-il-modello-vagrant">10. Il Modello Vagrant</h2>
+<p>Vagrant si basa su un modello a componenti distinti:</p>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Box</strong></td>
+<td>Immagine base della VM, distribuita sotto forma di file compresso.</td>
+</tr>
+<tr>
+<td><strong>VagrantCloud</strong></td>
+<td>Repository pubblico (e privato) di box preconfezionati.</td>
+</tr>
+<tr>
+<td><strong>Vagrantfile</strong></td>
+<td>File di configurazione Ruby che descrive la VM desiderata.</td>
+</tr>
+<tr>
+<td><strong>Provider</strong></td>
+<td>Backend di virtualizzazione (VirtualBox, VMware, Hyper-V, …).</td>
+</tr>
+<tr>
+<td><strong>Provisioner</strong></td>
+<td>Sistema di configurazione automatica della VM dopo la creazione (shell inline, Ansible, Puppet, …).</td>
+</tr>
+</tbody>
+</table>
+<p>Il flusso tipico è: si scarica una box da VagrantCloud, la si descrive nel Vagrantfile insieme a rete, cartelle condivise, risorse hardware e provisioning, e si avvia la VM con <code>vagrant up</code>.</p>
+<hr />
+<h2 id="11-il-vagrantfile">11. Il Vagrantfile</h2>
+<p>Il Vagrantfile è scritto in <strong>Ruby</strong> e segue la struttura seguente:</p>
+<pre><code class="language-ruby">Vagrant.configure(&quot;2&quot;) do |config|
+
+  # Box di partenza (da VagrantCloud)
+  config.vm.box = &quot;debian/bookworm64&quot;
+
+  # Configurazione di rete
+  config.vm.network &quot;private_network&quot;, ip: &quot;192.168.33.10&quot;
+  config.vm.network &quot;public_network&quot;
+  config.vm.network &quot;forwarded_port&quot;, guest: 80, host: 8080
+
+  # Cartelle condivise (host → guest)
+  config.vm.synced_folder &quot;code/&quot;, &quot;/app/code&quot;
+
+  # Configurazione del provider (VirtualBox)
+  config.vm.provider &quot;virtualbox&quot; do |vb|
+    vb.memory = 2048
+    vb.cpus   = 1
+    vb.linked_clone = true
+  end
+
+  # Provisioner: script shell eseguito al primo avvio
+  config.vm.provision &quot;shell&quot;, inline: &lt;&lt;-SHELL
+    apt-get update
+    apt-get install -y apache2
+    service apache2 start
+  SHELL
+
+end
+</code></pre>
+<p>Le sezioni principali sono:</p>
+<ul>
+<li><strong><code>vm.box</code></strong>: specifica la box da utilizzare; Vagrant la scarica automaticamente da VagrantCloud se non già presente localmente.</li>
+<li><strong><code>vm.network</code></strong>: configura le interfacce di rete (rete privata host-only, bridge sulla rete pubblica, o port forwarding).</li>
+<li><strong><code>vm.synced_folder</code></strong>: monta una directory dell'host all'interno del guest, mantenendo i file sincronizzati.</li>
+<li><strong><code>vm.provider</code></strong>: parametri specifici del backend di virtualizzazione (memoria, CPU, ecc.).</li>
+<li><strong><code>vm.provision</code></strong>: comandi o playbook eseguiti automaticamente al primo <code>vagrant up</code> per configurare il sistema.</li>
+</ul>
+<hr />
+<h2 id="12-operazioni-vagrant">12. Operazioni Vagrant</h2>
+<p>I comandi fondamentali per la gestione del ciclo di vita di una VM Vagrant sono:</p>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vagrant box add &lt;nome&gt;</code></td>
+<td>Scarica e installa una box da VagrantCloud (o da file locale).</td>
+</tr>
+<tr>
+<td><code>vagrant init [box]</code></td>
+<td>Crea un Vagrantfile nella directory corrente.</td>
+</tr>
+<tr>
+<td><code>vagrant up</code></td>
+<td>Crea e avvia la VM (esegue il provisioner al primo avvio).</td>
+</tr>
+<tr>
+<td><code>vagrant status</code></td>
+<td>Mostra lo stato corrente della VM.</td>
+</tr>
+<tr>
+<td><code>vagrant halt</code></td>
+<td>Spegne la VM (shutdown ordinato).</td>
+</tr>
+<tr>
+<td><code>vagrant destroy</code></td>
+<td>Elimina definitivamente la VM e le sue risorse.</td>
+</tr>
+</tbody>
+</table>
+<p>Una volta che il Vagrantfile è nella directory di progetto, tutti i comandi fanno riferimento implicitamente alla VM descritta in quel file.</p>
+<hr />
+<h2 id="13-vagrant-e-ssh">13. Vagrant e SSH</h2>
+<p>Al momento del primo <code>vagrant up</code>, Vagrant genera automaticamente una coppia di chiavi SSH dedicate e configura la VM per accettare connessioni con quella chiave. Questo consente l'accesso SSH senza password alla VM.</p>
+<h3 id="connessione-interattiva">Connessione interattiva</h3>
+<pre><code class="language-bash">vagrant ssh
+</code></pre>
+<p>Equivale a connettersi come utente <code>vagrant</code> (che dispone di privilegi <code>sudo</code> senza password) alla VM in esecuzione.</p>
+<h3 id="ispezione-della-configurazione-ssh">Ispezione della configurazione SSH</h3>
+<pre><code class="language-bash">vagrant ssh-config
+</code></pre>
+<p>Produce un output compatibile con il formato di <code>~/.ssh/config</code>:</p>
+<pre><code>Host default
+  HostName 127.0.0.1
+  User vagrant
+  Port 2222
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  IdentityFile /home/utente/.vagrant.d/boxes/.../private_key
+  IdentitiesOnly yes
+  LogLevel FATAL
+</code></pre>
+<p>Questo rivela l'equivalente esplicito del comando <code>vagrant ssh</code>:</p>
+<pre><code class="language-bash">ssh -p 2222 -i /home/utente/.vagrant.d/boxes/.../private_key vagrant@127.0.0.1
+</code></pre>
+<p>Vagrant utilizza il <strong>NAT con port forwarding</strong>: la porta 22 del guest è mappata sulla porta 2222 dell'host. Il parametro <code>StrictHostKeyChecking no</code> disabilita la verifica dell'host (accettabile in ambienti di sviluppo locali, ma da evitare in produzione).</p>
+<hr /></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

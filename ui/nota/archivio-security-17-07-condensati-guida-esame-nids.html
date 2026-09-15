@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_esame_NIDS.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">guida_esame_NIDS.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/04_network_intrusion_detection/guida_esame_NIDS.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="guida-esame-network-intrusion-detection-s10">Guida Esame — Network Intrusion Detection (S10)</h1>
+<blockquote>
+<p>File cockpit da aprire il giorno dell'esame appena riconosci un esercizio di questo tipo.
+Autosufficiente per la maggior parte dei casi — quando serve un esempio completo già risolto,
+rimanda a <code>modello_network_intrusion_detection.md</code>. Per l'algoritmo esteso passo-passo vedi
+<code>procedura_operativa_NIDS.md</code>; per la struttura del report <code>template_report_NIDS.md</code>.</p>
+<p><strong>Principio guida</strong>: se sei bloccato su come costruire un comando, la risposta è quasi sempre
+nella <strong>Sezione 4</strong> — non indovinare la sintassi, cercala lì.</p>
+</blockquote>
+<hr />
+<h2 id="0-i-due-gate-che-non-hai-il-permesso-di-saltare">0. I due gate che NON hai il permesso di saltare</h2>
+<p>Nei due esercizi risolti finora, l'errore più costoso non è mai stato un comando sbagliato — è
+stato <strong>saltare un passo</strong> pensando di aver già capito abbastanza. Prima di leggere il resto:</p>
+<ul>
+<li>⚠️ <strong>Gate A</strong>: hai guardato Protocol Hierarchy <strong>per intero</strong> (tutti i protocolli, non solo
+  quello che salta all'occhio)? Se no, torna alla Sezione 2, step 1.</li>
+<li>⚠️ <strong>Gate B</strong>: prima di scrivere la regola Suricata, hai isolato/verificato <strong>ogni</strong> gruppo di
+  traffico legittimo mostrato da Protocol Hierarchy — non solo quello sospetto? Se no, torna alla
+  Sezione 2, step 2-3. <strong>Questo è saltato in entrambi gli esercizi fatti finora</strong> — non fidarti
+  dell'istinto che dice "ho già capito tutto", verificalo.</li>
+</ul>
+<hr />
+<h2 id="1-triage-capire-in-1-minuto-che-tipo-di-esercizio-hai-davanti">1. Triage — capire in 1 minuto che tipo di esercizio hai davanti</h2>
+<p>Non tutti gli esercizi NIDS chiedono la stessa cosa. Guarda il testo della consegna e Protocol
+Hierarchy, poi usa questa tabella (costruita sui 6+ casi reali già visti nel pool d'esame):</p>
+<table>
+<thead>
+<tr>
+<th>Segnale (testo del compito o Protocol Hierarchy)</th>
+<th>Natura probabile</th>
+<th>Vai a</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Il testo dice "identificare protocollo/IP/porte", <strong>non</strong> "trovare l'attacco"</td>
+<td>Task di identificazione, non detection</td>
+<td>§ 3.4 — salta quasi tutto il resto</td>
+</tr>
+<tr>
+<td>Il testo chiede di classificare/elencare <strong>più tipi di interazione</strong> verso un host (non "trova l'attacco" singolo)</td>
+<td>Classificazione multi-tipo</td>
+<td>§ 3.7</td>
+</tr>
+<tr>
+<td>Il testo menziona esplicitamente una <strong>FLAG</strong> da recuperare + hint su <code>payload-printable</code></td>
+<td>Flag-extraction</td>
+<td>§ 3.5</td>
+</tr>
+<tr>
+<td>ARP molto sopra il rumore di fondo atteso (&gt;10-15% del totale)</td>
+<td>Scan e/o spoofing L2</td>
+<td>§ 3.1</td>
+</tr>
+<tr>
+<td>Molti TCP SYN verso una vittima, risposte quasi tutte RST tranne poche porte</td>
+<td>Port scan</td>
+<td>§ 3.2</td>
+</tr>
+<tr>
+<td>Un protocollo applicativo con richieste ripetute a distanza di <strong>millisecondi</strong>, payload con pattern di riempimento (fisso o crescente) + marcatore</td>
+<td>Buffer-overflow probe</td>
+<td>§ 3.3</td>
+</tr>
+<tr>
+<td>Nessuno dei precedenti salta all'occhio</td>
+<td>Segui il percorso standard dall'inizio</td>
+<td>§ 2</td>
+</tr>
+</tbody>
+</table>
+<p>Il triage non è definitivo — può convivere più di un pattern nello stesso pcap (es. ARP scan +
+port scan nello stesso attacco, caso reale del 10/09/2025). Non fermarti al primo che riconosci.</p>
+<hr />
+<h2 id="2-percorso-standard-checklist">2. Percorso standard (checklist)</h2>
+<p>Versione condensata di <code>procedura_operativa_NIDS.md</code> — apri quel file se serve il dettaglio di un
+singolo step.</p>
+<ul>
+<li>[ ] <strong>1. Apertura</strong>: <code>wireshark &lt;file&gt;</code> → ordina per Source → <strong>Statistics → Protocol Hierarchy</strong>,
+  espandi tutto, annota ogni protocollo e percentuale. <em>(Gate A qui.)</em></li>
+<li>[ ] <strong>2. Isola le conversazioni</strong>: <code>Statistics → Conversations</code> per ogni protocollo applicativo
+  visto in Protocol Hierarchy — <strong>anche quelli che sembrano ovviamente innocui</strong>. Se ti perdi tra
+  le schede (Ethernet/IPv4/TCP/UDP non hanno gli stessi nomi della gerarchia), vai a <strong>§ 2.1</strong>.</li>
+<li>[ ] <strong>3. Ispeziona il contenuto</strong>: Follow Stream su un campione di ciascun gruppo — sintassi
+  valida? contenuto anomalo? risposta attesa? confronto con un gruppo che sospetti legittimo. Se
+  Follow Stream non basta (es. capire se è passato davvero un dato o solo controllo), vedi § 4.7.</li>
+<li>[x] <strong>4. Verifica la frequenza</strong> se il contenuto da solo non basta (<code>View → Time Display Format
+  → Seconds Since Previously Displayed Packet</code>).</li>
+<li>[ ] <strong>5. ICMP e DNS</strong>: controllali sempre, anche se raramente contengono l'attacco — criteri
+  concreti per giudicarli (non solo l'istinto) in <strong>§ 3.8</strong>.</li>
+<li>[ ] <em>(Gate B qui — prima di procedere.)</em></li>
+<li>[ ] <strong>6. Scrivi ed esegui la regola Suricata</strong> (§ 4.3 per la sintassi — ricorda: <code>alert</code> <strong>logga
+  soltanto, non blocca nulla</strong>, specialmente girando offline su un pcap con <code>-r</code>).</li>
+<li>[ ] <strong>7. Verifica che generi alert</strong> (§ 4.6 — occhio a <code>signature_id</code> vs <code>sid</code>).</li>
+<li>[ ] <strong>8. Scrivi <code>report.txt</code></strong> seguendo <code>template_report_NIDS.md</code>.</li>
+<li>[ ] <strong>9. Confeziona la consegna</strong>: <code>report.txt</code>, <code>exam.rules</code>, <code>suricata.yaml</code>, <code>eve.json</code>.</li>
+</ul>
+<h3 id="21-da-protocol-hierarchy-a-conversations-la-mappa-che-manca">2.1 Da Protocol Hierarchy a Conversations — la mappa che manca</h3>
+<p>Le due finestre organizzano l'informazione in due modi diversi, ed è facilissimo perdersi
+passando dall'una all'altra (è successo entrambe le volte finora):</p>
+<ul>
+<li><strong>Protocol Hierarchy</strong> guarda <strong>in verticale</strong>, lungo lo stack: Ethernet → IP → TCP/UDP →
+  protocollo applicativo (SMTP, HTTP, DNS...). Ti dice <em>cosa c'è</em> e quanto.</li>
+<li><strong>Conversations</strong> guarda <strong>in orizzontale</strong>, per livello di indirizzamento: chi ha parlato con
+  chi, a quel livello. Non ha una scheda "SMTP" o "HTTP" — quei nomi non sono un livello di
+  indirizzamento, viaggiano <em>dentro</em> TCP, distinti solo dalla <strong>porta</strong>.</li>
+</ul>
+<p><strong>La mappatura</strong>: un protocollo applicativo visto in Protocol Hierarchy (es. "SMTP: 157
+pacchetti") si trova nella scheda <strong>TCP</strong> o <strong>UDP</strong> di Conversations, individuato dalla colonna
+<strong>Port A / Port B</strong> col numero di porta noto (25=SMTP, 80=HTTP, 53=DNS, 23=Telnet, 22=SSH...). Non
+cercare il nome del protocollo lì dentro, cerca la porta.</p>
+<p><strong>Le schede, dalla più grezza alla più fine, e a cosa serve ciascuna</strong>:
+- <strong>Ethernet</strong> — coppie di <strong>MAC</strong>. A differenza degli IP, i MAC vengono <strong>riscritti a ogni salto
+  di router</strong> (un router ha un MAC <em>diverso per ciascuna interfaccia/subnet</em>, non uno solo per
+  tutto il dispositivo). Utile per confermare la <strong>topologia</strong>: se vedi <em>N</em> righe con <em>2N</em> MAC
+  tutti diversi (nessuno ripetuto), hai <em>N</em> host ciascuno sulla propria subnet, ognuno che parla
+  con l'interfaccia del router a lui dedicata. Utile anche per attacchi di livello 2 (§ 3.1). Non
+  è dove si nasconde un attacco applicativo.
+- <strong>IPv4/IPv6</strong> — coppie di soli <strong>indirizzi IP</strong>, senza porta. A differenza dei MAC, gli IP <strong>non
+  vengono riscritti dal router</strong> — restano quelli reali end-to-end, indipendentemente da quanti
+  salti attraversano. Aggregazione più larga della scheda TCP/UDP: se due host parlano sia su
+  porta 25 che su porta 80, è <strong>una riga sola</strong> qui, ma <strong>due righe separate</strong> in TCP. Utile per
+  una vista macro (quante coppie di host distinte, quanto traffico totale) e per isolare l'ICMP
+  (vedi sotto).
+- <strong>TCP / UDP</strong> — coppie <strong>IP:porta</strong>, la granularità fine, dove trovi effettivamente SMTP/HTTP/
+  DNS/etc. distinti per porta.</p>
+<p><strong>ICMP non ha una scheda propria — non è un bug</strong>: non avendo porte, non ha il concetto di
+"conversazione" nello stesso senso di TCP/UDP. Il suo traffico finisce dentro la scheda <strong>IPv4</strong>,
+mescolato a qualsiasi altro traffico IP tra la stessa coppia di host. Per isolarlo: scrivi <code>icmp</code>
+nella barra filtri principale di Wireshark, poi in Conversations spunta <strong>"Limit to display
+filter"</strong> — la scheda IPv4 mostrerà solo le coppie con traffico ICMP tra loro.</p>
+<p><strong>Controllo di coerenza utile ad ogni passaggio</strong>: la somma dei pacchetti per riga in una scheda
+deve tornare col totale di quel livello in Protocol Hierarchy (es. le righe TCP sommate = il
+totale TCP della gerarchia). Se non torna, c'è un filtro attivo che non ricordavi o un gruppo che
+ti sei perso.</p>
+<hr />
+<h2 id="3-rami-speciali">3. Rami speciali</h2>
+<h3 id="31-arp-scan-eo-spoofing">3.1 ARP (scan e/o spoofing)</h3>
+<p>Non ha stream da seguire, non ha porte. Due mosse obbligatorie:
+1. <strong>Dividi per opcode</strong>: <code>arp.opcode==1</code> (request, "chi ha X?" → rischio scan/enumerazione) vs
+   <code>arp.opcode==2</code> (reply, "X è mio" → rischio spoofing, è un'affermazione creduta vera).
+2. <strong>Fai quadrare i numeri</strong>: se isoli N pacchetti ma Protocol Hierarchy ne segnalava M&gt;N per ARP,
+   la differenza va investigata (<code>arp and not (&lt;tuo filtro&gt;)</code>), non ignorata — request e reply
+   spesso convivono nello stesso pcap come <strong>fasi diverse dello stesso attacco</strong> (scan per scoprire
+   chi è vivo, poi spoofing mirato solo su quelli confermati).</p>
+<p>Per le reply, cerca la relazione <strong>1 MAC → molti IP</strong> (un host reale dichiara solo il proprio):</p>
+<pre><code>tshark -r &lt;file&gt; -Y &quot;arp.opcode==2&quot; -T fields -e arp.src.hw_mac -e arp.src.proto_ipv4 | sort | uniq -c | sort -rn
+</code></pre>
+<p>Esempio completo: <code>modello_network_intrusion_detection.md</code>, secondo caso (12/01/2026).</p>
+<h3 id="32-port-scan">3.2 Port scan</h3>
+<p>Firma: una sorgente manda <strong>SYN</strong> a una vittima su molte porte diverse, la maggioranza delle
+risposte è <strong>RST</strong> (chiuse) tranne un numero ristretto (aperte, si comportano diverso). Isola con:</p>
+<pre><code>tcp.flags.syn==1 &amp;&amp; tcp.flags.ack==0
+</code></pre>
+<p>poi confronta il volume di <code>tcp.flags.reset==1</code> in risposta dalla stessa vittima. Spesso preceduto
+da uno scan ARP della stessa sorgente (§ 3.1) — controlla sempre se convivono.
+Esempio completo: <code>modello_network_intrusion_detection.md</code>, quarto caso (10/09/2025).</p>
+<h3 id="33-buffer-overflow-probe-contenuto">3.3 Buffer-overflow probe (contenuto)</h3>
+<p>Payload con stringa di riempimento (<code>AAAA...</code>) seguita da un marcatore fisso (<code>BBBB</code>, <code>ABCD</code>...),
+a distanza di millisecondi tra i tentativi — stessa tecnica di ricerca dell'offset vista in S4.
+<strong>Due varianti osservate</strong>: marcatore su un'unica stringa lunga fissa (caso 1, HTTP), oppure
+padding che <strong>cresce di 1 byte per tentativo</strong> su più pacchetti consecutivi — in quel caso il
+segnale è nella sequenza, non in un singolo pacchetto isolato (caso 3, SMTP). La regola matcha
+quasi sempre solo sul marcatore finale (invariante), non serve intercettare ogni lunghezza.
+Esempi completi: <code>modello_network_intrusion_detection.md</code>, primo e terzo caso.</p>
+<h3 id="34-identificazione-di-protocollo-non-detection">3.4 Identificazione di protocollo (non detection)</h3>
+<p>Compito diverso: non "trova l'attacco", ma "identifica protocollo + IP + porte" di un traffico
+dato. <strong>Statistics → Protocol Hierarchy da solo di norma basta</strong> — non serve Follow Stream esteso
+né analisi di frequenza né necessariamente una regola di rilevamento (a volte sì, se richiesta:
+verifica la consegna). Esempio completo: <code>modello_network_intrusion_detection.md</code>, quinto caso
+(TELNET, 10/02/2023) — introduce anche <code>flowbits</code> (§ 4.3).</p>
+<h3 id="35-flag-extraction">3.5 Flag-extraction</h3>
+<p>Il testo chiede esplicitamente di recuperare una FLAG dal payload. Serve abilitare
+<code>payload-printable</code> nella sezione <code>eve-log</code> di <code>suricata.yaml</code> (di default disattivato), scrivere
+una regola che matchi il pattern noto, poi estrarre da <code>eve.json</code>:</p>
+<pre><code>jq -r 'select(.event_type==&quot;alert&quot;) | .payload_printable' &lt;dir_output&gt;/eve.json | grep -i flag
+</code></pre>
+<p><strong>Se <code>jq</code> non è installato</strong> (capitato su questa VM): prova <code>sudo apt install -y jq</code> se hai rete,
+altrimenti fallback senza installare nulla (Python è già presente):</p>
+<pre><code>python3 -c &quot;
+import json
+with open('&lt;dir_output&gt;/eve.json') as f:
+    for line in f:
+        e = json.loads(line)
+        if e.get('event_type') == 'alert':
+            print(e.get('payload_printable'))
+&quot;
+</code></pre>
+<p>Se la flag è frammentata su più pacchetti, va ricostruita manualmente dai frammenti estratti.
+Verificato hands-on con successo il 10/07/2026 (esercizio dell'11/01/2024, flag Telnet
+<code>FLAG{this_port_is_dangerous}</code> estratta al primo tentativo). Riferimenti: quinto caso in
+<code>modello_network_intrusion_detection.md</code>, compito MQTT in <code>esercizi/SICINF/COMPITI_security.md</code>.</p>
+<h3 id="36-attacco-sotto-il-livello-ip-suricata-non-lo-vede">3.6 Attacco sotto il livello IP — Suricata non lo vede</h3>
+<p>Se l'attacco vive sotto IP (es. ARP), Suricata non ha sintassi per condizionare un alert su un
+pacchetto ARP o un MAC address (i protocolli <code>ip</code>/<code>tcp</code>/<code>udp</code>/... richiedono un header IP che ARP
+non ha). Non inseguirlo: approssima con un elenco di indirizzi noti-buoni/noti-cattivi — dettaglio
+completo in § 4.3/4.4. Dichiara sempre questo limite esplicitamente nel report.</p>
+<h3 id="37-classificazione-multi-tipo-elenco-di-interazioni-non-un-solo-attacco">3.7 Classificazione multi-tipo (elenco di interazioni, non un solo attacco)</h3>
+<p>Alcuni esercizi non chiedono "trova l'attacco" ma "identifica N tipi di interazione verso l'host
+X, per ciascuno di' se è un attacco e di che tipo" — <strong>tutti</strong> i gruppi vanno classificati, non
+solo quello più sospetto (a differenza del percorso standard, dove di solito UN pattern è "quello
+vero" e il resto è rumore di fondo liquidabile in due righe).</p>
+<p>Metodo, per ciascun gruppo emerso da Conversations (§2 step 2):
+1. Follow Stream su un campione → verdetto dal contenuto letterale, non dal volume o dall'istinto.
+2. <strong>Scrivi subito un verdetto di una riga</strong> (benigno/malevolo, che tipo, porte/IP coinvolti) prima
+   di passare al gruppo successivo — giudicarli tutti insieme alla fine mischia le impressioni.
+3. Due gruppi con stessa porta/protocollo ma IP sorgente diversi non sono automaticamente "lo
+   stesso tipo di interazione": Follow Stream su <strong>entrambi</strong> e confronta il contenuto — potrebbero
+   essere, es., un login legittimo e un payload con marcatore, distinti.
+4. Un gruppo che "a prima vista non sembra malevolo" (poche connessioni, a distanza di secondi,
+   nessun payload sospetto) può comunque essere l'attacco se il pattern emerge solo aggregando —
+   non fermarti all'impressione del singolo stream preso isolatamente. Conta quante sorgenti
+   <strong>diverse</strong> colpiscono la <strong>stessa porta di destinazione</strong> sull'host:
+   <code>tshark -r &lt;file&gt; -Y "tcp.dstport==&lt;porta&gt;" -T fields -e ip.src | sort -u | wc -l</code>
+   Un numero alto di sorgenti distinte verso un solo servizio è la firma di un pattern volumetrico
+   anche se ogni singolo stream, preso da solo, sembra un dialogo 1:1 normale — è proprio questo
+   che lo rende difficile da vedere se lo guardi stream per stream invece che in aggregato.
+5. Solo <strong>dopo</strong> aver classificato tutti i gruppi, controlla quale (se richiesto dalla consegna)
+   necessita davvero una regola Suricata — di solito è solo quello nominato esplicitamente da
+   "intercettare/registrare" (es. il gruppo con la flag), non uno per ciascuno dei tipi trovati.</p>
+<p><strong>Nota su Protocol Hierarchy e pacchetti "TCP" senza protocollo applicativo</strong>: se la somma dei
+protocolli applicativi (Telnet, SSH, HTTP...) non copre il totale TCP/UDP (procedura, step 1), il
+residuo non è un errore di conteggio — sono pacchetti che Wireshark non è riuscito a dissezionare
+come un protocollo applicativo specifico, tipicamente perché non contengono uno scambio
+applicativo completo (SYN/RST di uno scan, pacchetti di un flood senza payload, connessioni mai
+stabilite). È spesso proprio lì che si nasconde lo scan/flood, non rumore da ignorare.</p>
+<h3 id="38-valutare-icmp-e-dns-i-gruppi-ovviamente-innocui-ma-vanno-verificati-lo-stesso">3.8 Valutare ICMP e DNS — i gruppi "ovviamente innocui" (ma vanno verificati lo stesso)</h3>
+<p>Sono i due gruppi più facili da liquidare come "sicuramente traffico normale" senza guardarli —
+esattamente il tipo di scorciatoia che Gate B vieta. Criteri concreti per giudicarli, non l'istinto:</p>
+<p><strong>ICMP</strong> — qui il criterio non è il contenuto, è <strong>l'accoppiamento richiesta/risposta</strong>:
+- Normale: ogni <strong>Echo Request</strong> (tipo 8) ha una <strong>Echo Reply</strong> (tipo 0) corrispondente dalla
+  stessa coppia di host, poco dopo — un dialogo 1:1 completo, anche se ravvicinato nel tempo (un
+  semplice <code>ping</code>, o un controllo di raggiungibilità automatico, sono normalissimi).
+- Sospetto: tante Echo Request <strong>senza</strong> le rispettive reply (il bersaglio non risponde quasi
+  mai), o un volume sproporzionato rispetto al resto del traffico — quello si avvicina a un
+  flood/DoS.</p>
+<p><strong>DNS</strong> — qui il criterio è la <strong>leggibilità dei nomi interrogati</strong>:
+- Normale: nomi di dominio brevi, leggibili, "umani" (es. <code>mail.esempio.com</code>); tipo di query per
+  lo più <code>A</code>/<code>AAAA</code> (a volte <code>MX</code>, <code>PTR</code> per risoluzione inversa); la risposta contiene un IP
+  plausibile.
+- Sospetto (segno tipico di <strong>DNS tunneling/exfiltration</strong>, dati nascosti dentro le query invece
+  di usarle solo per risolvere un nome): sottodomini <strong>lunghi e "casuali"</strong> che non si leggono
+  come parole (es. <code>bxnlcibwyxnzd3jk.attacker.xyz</code> invece di <code>www.attacker.xyz</code> — dati codificati
+  base32/64 travestiti da nome); query di tipo <strong>TXT</strong> frequenti (i record TXT portano più dati
+  arbitrari, strumento preferito per l'abuso); stesso dominio base con un sottodominio <strong>diverso
+  ogni volta</strong> (i dati da esfiltrare spezzati in tanti pezzi, una query ciascuno).</p>
+<p>Nota pratica: query <strong>PTR</strong> (risoluzione inversa, da IP a nome) ripetute verso lo stesso host sono
+spesso legate a un <strong>altro</strong> gruppo di traffico che hai già trovato altrove (es. un server che fa
+un controllo anti-spam sul client a ogni nuova connessione) — non trattarle come un fenomeno a
+parte se il pattern si spiega già con qualcos'altro nel pcap. Esempio completo:
+<code>modello_network_intrusion_detection.md</code>, terzo caso (10/07/2025).</p>
+<hr />
+<h2 id="4-riferimento-comandi-come-si-costruiscono-non-solo-cosa-copiare">4. Riferimento comandi — come si costruiscono, non solo cosa copiare</h2>
+<h3 id="41-costruire-un-filtro-wireshark-senza-sapere-il-nome-del-campo">4.1 Costruire un filtro Wireshark senza sapere il nome del campo</h3>
+<p>Non serve ricordare i nomi a memoria — Wireshark te li dà lui:
+1. Clicca il pacchetto, espandi il protocollo nel pannello dettagli (in basso).
+2. Sul campo che ti interessa: <strong>tasto destro → Apply as Filter → Selected</strong> → Wireshark scrive
+   lui il filtro nella barra in alto e lo applica (vedi subito se il risultato è giusto).
+3. Per il nome tecnico di un campo da estrarre via <code>tshark</code>: <strong>click singolo</strong> sul campo → il nome
+   appare in basso a sinistra nella barra di stato.</p>
+<h3 id="42-tshark-pezzo-per-pezzo">4.2 <code>tshark</code>, pezzo per pezzo</h3>
+<p>Le <strong>righe</strong> (una per pacchetto) le decide sempre <code>-r</code>+<code>-Y</code> — questo non cambia mai:
+- <strong><code>-r &lt;file&gt;</code></strong>: apri il file, come <code>File → Open</code> nella GUI.
+- <strong><code>-Y "&lt;filtro&gt;"</code></strong>: la stessa identica barra dei filtri della GUI (§ 4.1) — tra virgolette.
+- <strong><code>-T fields</code></strong>: cambia il <em>modello</em> di output — invece del riassunto fisso per pacchetto (No,
+  Time, Source, Destination, Protocol, Info), scegli tu quali campi vedere.
+- <strong><code>-e &lt;campo&gt;</code></strong>: dentro <code>-T fields</code>, ogni <code>-e</code> è una colonna. Ripetibile.</p>
+<p>Pattern riusabili:</p>
+<pre><code>tshark -r &lt;f&gt; -Y &quot;&lt;filtro&gt;&quot; -T fields -e &lt;campo&gt; | sort -u | wc -l          # conta valori unici
+tshark -r &lt;f&gt; -Y &quot;&lt;filtro&gt;&quot; -T fields -e &lt;c1&gt; -e &lt;c2&gt; | sort | uniq -c | sort -rn   # raggruppa e conta
+</code></pre>
+<p>Perché serve <code>-T fields</code> prima di <code>sort -u</code>/<code>uniq -c</code>: senza, ogni riga porta anche timestamp/numero
+pacchetto (sempre diversi), quindi <code>sort -u</code> non elimina mai nulla — con <code>-T fields -e</code> la riga
+contiene <em>solo</em> il valore su cui vuoi deduplicare/raggruppare.</p>
+<h3 id="43-anatomia-di-una-regola-suricata">4.3 Anatomia di una regola Suricata</h3>
+<pre><code>alert ip $GOOD_NET any &lt;&gt; $GOOD_NET any (msg:&quot;...&quot;; content:&quot;...&quot;; sid:1000001; rev:1;)
+  │    │  │         │   │  │         │   │
+  │    │  │         │   │  │         │   └─ opzioni (metadati/match aggiuntivi)
+  │    │  │         │   │  │         └───── destinazione: porta (&quot;any&quot; se non rilevante)
+  │    │  │         │   │  └─────────────── destinazione: IP/rete/variabile
+  │    │  │         │   └────────────────── direzione: &quot;-&gt;&quot; mono-direzionale, &quot;&lt;&gt;&quot; bidirezionale
+  │    │  │         └────────────────────── sorgente: porta
+  │    │  └──────────────────────────────── sorgente: IP/rete/variabile
+  │    └─────────────────────────────────── protocollo — vedi elenco sotto
+  └──────────────────────────────────────── azione: &quot;alert&quot; logga in eve.json, non blocca nulla
+</code></pre>
+<p><strong>Protocolli validi nell'header</strong>: <code>ip</code> (tutto ciò che ha un header IP), <code>tcp</code>, <code>udp</code>, <code>icmp</code>,
+<code>http</code>, <code>dns</code>, <code>smtp</code>, <code>tls</code>, <code>ssh</code>, <code>ftp</code>, e altri protocolli applicativi se il parser è abilitato.
+<strong><code>arp</code> NON è tra questi</strong> — vedi § 3.6/4.4 per come gestire attacchi ARP.</p>
+<p><strong>Keyword incontrate finora, cosa fanno</strong>:
+| Keyword | Significato |
+|---|---|
+| <code>content:"&lt;stringa&gt;"</code> | Match su una stringa/pattern nel payload |
+| <code>http_uri</code> | Restringe il <code>content</code> precedente all'URI HTTP (buffer keyword, subito dopo il content che modifica) |
+| <code>flow:from_client</code> | Matcha solo pacchetti nella direzione client→server della connessione |
+| <code>flowbits:set,&lt;nome&gt;</code> | Imposta un flag con nome sulla connessione, leggibile da altre regole con <code>flowbits:isset,&lt;nome&gt;</code> — per condizioni stateful su più pacchetti/regole |
+| <code>threshold: type threshold, track by_src, count N, seconds T</code> | Scatena l'alert solo se una sorgente supera N match in T secondi — utile per volumi/scan invece di un content specifico |
+| <code>sid:&lt;numero&gt;</code> | ID univoco della regola (usa numeri ≥1000000 per le tue) |
+| <code>rev:1</code> | Numero di revisione, incrementa se modifichi la stessa regola |</p>
+<h3 id="44-attacco-sotto-ip-pattern-good_netbad_net">4.4 Attacco sotto IP: pattern <code>$GOOD_NET</code>/<code>$BAD_NET</code></h3>
+<p>In <code>suricata.yaml</code>, sezione <code>vars: → address-groups:</code> (accanto a <code>HOME_NET</code>):</p>
+<pre><code class="language-yaml">    GOOD_NET: &quot;[ip1,ip2,...]&quot;   # host legittimi, verificati con § 2 step 2-3 — non assunti per simmetria
+    BAD_NET: &quot;ip_attaccante&quot;
+</code></pre>
+<p>Due regole standard:</p>
+<pre><code>alert ip $GOOD_NET any &lt;&gt; $GOOD_NET any (msg:&quot;Traffico lecito&quot;; sid:1000001; rev:1;)
+alert ip $BAD_NET any &lt;&gt; any any (msg:&quot;TRAFFICO SOSPETTO&quot;; sid:1000002; rev:1;)
+</code></pre>
+<p>La prima scatta solo se <strong>entrambi</strong> i lati sono in <code>GOOD_NET</code> (log di baseline). La seconda scatta
+se <strong>un lato qualunque</strong> è <code>BAD_NET</code> (approssima "l'attaccante è coinvolto", non l'attacco in sé —
+può includere falsi positivi su traffico innocuo dello stesso host, dichiaralo nel report).</p>
+<h3 id="45-suricatayaml-checklist-per-aggiungere-una-variabile-custom">4.5 <code>suricata.yaml</code> — checklist per aggiungere una variabile custom</h3>
+<p>Errore fatto in questa sessione, checklist per non ripeterlo:
+- [ ] <strong>Nessun <code>#</code> davanti</strong> alla riga — a differenza delle alternative <code>#HOME_NET: ...</code> già nel
+  file (quelle sono varianti disattivate tra cui scegliere), le tue variabili sono le uniche
+  definizioni che hai: se restano commentate, per Suricata non esistono.
+- [ ] <strong>Virgolette aperte E chiuse</strong>: <code>"[ip1,ip2]"</code> — controlla che non manchi la chiusura.
+- [ ] <strong>Nessun <code>;</code></strong> — YAML non lo usa.
+- [ ] <strong>Indentazione a spazi</strong>, stessa profondità delle righe vicine (<code>HOME_NET</code> sopra) — non tab.
+- [ ] Lancia poi Suricata con <strong><code>-c &lt;tuo-yaml&gt;</code></strong>, non quello di default: <code>suricata -r &lt;file&gt; -S exam.rules -c suricata.yaml -l &lt;dir_output&gt;</code>.</p>
+<h3 id="46-evejson-i-due-grep-che-servono">4.6 <code>eve.json</code> — i due grep che servono</h3>
+<pre><code>grep -c '&quot;event_type&quot;:&quot;alert&quot;' &lt;dir&gt;/eve.json         # 1. c'è ALMENO un alert di qualunque regola?
+grep -c '&quot;signature_id&quot;:&lt;N&gt;' &lt;dir&gt;/eve.json            # 2. quanti della regola N specifica?
+</code></pre>
+<p>⚠️ <strong>Mai <code>grep -c '"sid":&lt;N&gt;'</code></strong> — nel JSON il campo si chiama <code>signature_id</code>, annidato dentro
+<code>"alert":{...}</code>; <code>sid</code> è solo il nome usato nella sintassi della <em>regola</em>, non nel log. Se il
+comando 2 dà 0 ma il comando 1 dà &gt;0, il problema è il nome del campo nel grep, non la regola.</p>
+<h3 id="47-confermare-unipotesi-con-i-flag-tcp-grezzi-non-fidarti-del-colore-in-wireshark">4.7 Confermare un'ipotesi con i flag TCP grezzi (non fidarti del colore in Wireshark)</h3>
+<p>Il colore delle righe in Wireshark è solo un aiuto visivo (regole di colorazione secondarie) — il
+dato affidabile per capire cosa fa davvero una connessione è il campo <strong>Flags</strong> del pacchetto TCP,
+non il colore né i numeri seq/ack da soli (seq/ack relativi possono essere identici sia per
+un'accettazione che per un rifiuto — quello che li distingue è il flag, non il numero).</p>
+<p><strong>Decodifica flag</strong> (si sommano i bit): <code>SYN=0x02</code>, <code>ACK=0x10</code>, <code>PSH=0x08</code>, <code>FIN=0x01</code>, <code>RST=0x04</code>.
+Combinazioni comuni: <code>0x02</code>=SYN, <code>0x12</code>=SYN+ACK, <code>0x10</code>=ACK puro (nessun dato), <code>0x18</code>=PSH+ACK
+(<strong>pacchetto con dati applicativi reali</strong>), <code>0x11</code>=FIN+ACK (chiusura pulita), <code>0x14</code>=RST+ACK
+(chiusura brusca/rifiuto).</p>
+<p><strong>Comando per vedere la sequenza esatta di una connessione, pacchetto per pacchetto</strong>:</p>
+<pre><code>tshark -r &lt;file&gt; -Y &quot;ip.addr==&lt;hostA&gt; &amp;&amp; ip.addr==&lt;hostB&gt; &amp;&amp; tcp.port==&lt;porta&gt;&quot; -T fields -e frame.number -e ip.src -e tcp.flags -e tcp.len
+</code></pre>
+<p><code>tcp.len</code> è la lunghezza del payload TCP (byte di dati applicativi, escluso l'header) — se per
+ogni riga è <code>0</code>, quella connessione ha scambiato solo controllo (handshake/teardown), zero dati
+veri, <strong>anche se ha completato un handshake regolare</strong>. Se anche un solo pacchetto ha <code>tcp.len</code> &gt;
+0, lì dentro c'è payload — vai a leggerlo con Follow Stream.</p>
+<p>Questo distingue in modo affidabile, ad esempio, un <strong>probe di scan</strong> (connette, verifica, si
+disconnette con RST, zero payload) da un <strong>uso legittimo dello stesso servizio</strong> sulla stessa
+porta (handshake completo, PSH+ACK con dati reali, chiusura pulita con FIN+ACK) — due connessioni
+sulla stessa porta, stessa coppia di host anche, possono essere cose completamente diverse: <strong>non
+dare per scontato</strong> che "porta X aperta" significhi automaticamente "è tutto scan", né estendere
+per analogia la conclusione di una connessione simile senza verificarla.</p>
+<h3 id="48-prima-di-eseguire-un-file-scritto-a-mano">4.8 Prima di eseguire un file scritto a mano</h3>
+<pre><code>cat -A &lt;file&gt;
+</code></pre>
+<p>Controlla che ogni riga finisca esattamente dove dovrebbe (<code>$</code> di <code>cat -A</code> = fine riga, niente
+dopo). In questa sessione sono spariti caratteri digitando comandi lunghi (<code>any</code>→<code>an</code>, spazi
+mancanti) — sintomo di lag della VM, non errore di sintassi: se un parsing fallisce in modo
+strano, <strong>prima di rileggere la sintassi da capo, verifica che il file contenga davvero quello che
+pensi di aver scritto.</strong></p>
+<hr />
+<h2 id="5-riferimenti">5. Riferimenti</h2>
+<ul>
+<li><code>procedura_operativa_NIDS.md</code> — algoritmo esteso, passo per passo</li>
+<li><code>template_report_NIDS.md</code> — struttura di <code>report.txt</code></li>
+<li><code>modello_network_intrusion_detection.md</code> — 5 casi reali completi:
+  1. Port scan / DDoS / SSH legittimo / flag Telnet (11/01/2024) — anche il caso originale con <code>dump.pcap</code>
+  2. ARP spoofing in due fasi, <code>$GOOD_NET</code>/<code>$BAD_NET</code> (12/01/2026)
+  3. Buffer-overflow SMTP a padding incrementale (10/07/2025)
+  4. ARP scan + TCP port scan combinati (10/09/2025)
+  5. Identificazione protocollo TELNET + <code>flowbits</code> (10/02/2023)</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

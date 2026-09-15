@@ -251,6 +251,15 @@ mirato — ed è particolarmente adatto a `MATAP`, `CA`, `ELT`, `ELN` e `TLC`.
 
 ## 9. Struttura del progetto
 
+> **Cartella di lavoro unica: `~/UniCode`.** Le sessioni di studio si aprono da lì e solo da lì
+> (`cd ~/UniCode && claude`). È la condizione perché partano i due hook di questo progetto: il
+> briefing iniettato all'avvio e la traccia di fine sessione in `log/AAAA-MM.md`. Claude Code
+> legge `.claude/settings.json` della cartella da cui viene lanciato, non delle sottocartelle:
+> lanciarlo da `~/cockpit` lascia il progetto senza entrambi, ed è la ragione per cui
+> `log/2026-09.md` è rimasto vuoto fino al 2026-09-14. Il percorso `Vault/UniCode` dentro il
+> repo esiste per il versionamento e non va usato come cartella di lavoro.
+
+
 La radice **non è cablata da nessuna parte**: la risolve `scripts/paths.py` a runtime
 (`UNICODE_ROOT` → `~/.config/unicode/root` → risalita dallo script → candidati noti). Se
 l'albero si sposta, non si tocca nulla. `python3 scripts/doctor.py` stampa dove il sistema

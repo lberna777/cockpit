@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_modulo2C.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi</p>
+<h1 class="titolo-pagina">Appunti_modulo2C.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo2C.md">Apri il file originale</a></p>
+<article class="prosa"><p><strong>FIND</strong></p>
+<p><strong>find</strong> ci permette di esplorare il filesystem <strong>in tempo reale</strong> alla riceca di un file che rispetta <strong>determinati criteri</strong></p>
+<pre><code>find &lt;dove&gt; &lt;criteri&gt; &lt;azione&gt;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Esempio</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-name</code></td>
+<td><code>-name '*.log'</code></td>
+<td>Nome del file (wildcard tra apici)</td>
+</tr>
+<tr>
+<td><code>-type</code></td>
+<td><code>-type f</code> / <code>-type d</code></td>
+<td>Tipo: <code>f</code>\=file, <code>d</code>\=directory, <code>l</code>\=link</td>
+</tr>
+<tr>
+<td><code>-size</code></td>
+<td><code>-size +100k</code></td>
+<td>Dimensione: <code>+</code> maggiore di, <code>-</code>minore di</td>
+</tr>
+<tr>
+<td><code>-mtime</code></td>
+<td><code>-mtime -2</code></td>
+<td>Modificato negli ultimi 2 giorni (<code>-</code>\=entro, <code>+</code>\=più di)</td>
+</tr>
+<tr>
+<td><code>-user</code></td>
+<td><code>-user alice</code></td>
+<td>Proprietario specifico</td>
+</tr>
+<tr>
+<td><code>-nouser</code></td>
+<td><code>-nouser</code></td>
+<td>Nessun utente corrispondente (file “orfani”)</td>
+</tr>
+<tr>
+<td><code>-perm</code></td>
+<td><code>-perm -2000</code></td>
+<td>Permessi (es. SGID attivo)</td>
+</tr>
+</tbody>
+</table>
+<p>(aggiungi anche una tabella relativa alle &lt;azioni&gt; per completismo)</p>
+<p>la più importante &lt;azione&gt; relativa all'uso di find è <strong>-exec</strong> che ci permette di eseguire un comando per ogni file che viene trovato dalla ricerca</p>
+<pre><code>find /usr/src -name '*.c' -size +100k -exec cat {} \;
+                                            ^^  ^^
+                                             |    fine del comando
+                                              nome del file corrente
+</code></pre>
+<p><strong>LOCATE</strong></p>
+<p>locate è una scorciatoia rispetto a find, ma ha dei trade-off. esplora un database pre compilato attraverso il quale non è obbligato a muoversi manualmente dentro ogni directory del filesystem</p>
+<table>
+<thead>
+<tr>
+<th>        </th>
+<th> <code>find</code></th>
+<th><code>locate</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Velocità</td>
+<td>Lenta (esplora il filesystem)</td>
+<td>Istantanea (cerca nel db)</td>
+</tr>
+<tr>
+<td>Aggiornamento</td>
+<td>Sempre attuale</td>
+<td>Obsoleto tra un updatedb e l’altro</td>
+</tr>
+<tr>
+<td>Criteri</td>
+<td>Tutti (size, mtime, permessi…)</td>
+<td>Solo nome del file</td>
+</tr>
+<tr>
+<td>Uso tipico</td>
+<td>Ricerche precise e condizionali</td>
+<td>Trovare rapidamente dove si trova un file</td>
+</tr>
+</tbody>
+</table>
+<p>(per qualche motivo che non capisco il comando locate non funziona nella mia VM dice comando non riconosciuto)</p>
+<p><strong>FILE</strong></p>
+<p>Il comando file ci permette di capire il tipo di contenuto all'interno di un file. in linux le estensioni leggibili (.txt .jpeg ...) sono un costrutto umano, non contano niente a livello di macchina per distinguere un file (vero?), tramite il comando file abbiamo risposte concrete</p>
+<p>(non capisco gli esempi che mi hai fatto, cosa nel concreto estraggo da quegli output. non capisco neanche i tre livelli che sfrutta per risonderci)</p>
+<p><strong>TRASFERIMENTO DATI A BASSO LIVELLO - dd</strong></p>
+<p><strong>dd</strong> è uno strumento bruto che copia un determinato quantitativo di dati da un file a un altro, anche tra file speciali (.qualcosa) normalmente nascosti, e senza eseguire alcun filtraggio</p>
+<pre><code>dd if=&lt;sorgente&gt; of=&lt;destinazione&gt; bs=&lt;dimensione_blocco&gt; count=&lt;n_blocchi&gt;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Parametro</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if=</code></td>
+<td>Input file (sorgente)</td>
+</tr>
+<tr>
+<td><code>of=</code></td>
+<td>Output file (destinazione)</td>
+</tr>
+<tr>
+<td><code>bs=</code></td>
+<td>Block size — dimensione di ogni blocco</td>
+</tr>
+<tr>
+<td><code>count=</code></td>
+<td>Numero di blocchi da trasferire</td>
+</tr>
+<tr>
+<td><code>skip=</code></td>
+<td>Blocchi da saltare all’inizio della sorgente</td>
+</tr>
+<tr>
+<td><code>seek=</code></td>
+<td>Blocchi da saltare all’inizio della destinazione</td>
+</tr>
+</tbody>
+</table>
+<p>(non ho capito l'esempio che fai nella lezione, ho creato questo file.out e ho capito come ne determino le dimensioni, ma non capisco cosa sto copiando e da dove per metterlo dentro questo file.out)</p>
+<p><strong>FILE APERTI - fuser &amp; lsof</strong></p>
+<pre><code># v1 — apre e chiude il file a ogni iterazione
+[](#cb10-2)while sleep 1; do
+  [](#cb10-3)  dd if=/dev/zero bs=1k count=$(( $(echo $RANDOM | rev | cut -c1) + 1 )) &gt;&gt; output
+[](#cb10-4)done
+[](#cb10-5)
+[](#cb10-6)# v2 — il file viene aperto una sola volta, il redirect è fuori dal loop
+[](#cb10-7)while sleep 1; do
+  [](#cb10-8)  dd if=/dev/zero bs=1k count=$(( $(echo $RANDOM | rev | cut -c1) + 1 ))
+[](#cb10-9)done &gt;&gt; output
+</code></pre>
+<p>&nbsp;(non ho capito cosa faccio con questi due script, non c'è più la parte "of=" ma suppongo perchè c'è il redirect ora che in queste occasioni cambia da dentro a fuori il loop. non capisco comunque le condizioni del count in entrambi. di conseguenza non capisco cosa cambia tra un caso e l'altro)</p>
+<p>attraverso <strong>fuser</strong> <strong>&lt;file&gt;,</strong> posso stampare il PID (process id?) che hanno aperto un file </p>
+<p>(fuser non risulta un comando runnabile nella mia VM...)</p>
+<p>attraverso <strong>lsof</strong> posso mostrare tutti i file aperti o filtrati per file/processo</p>
+<p>(lsof funziona ma non ne capisco l'uso ne la sintassi, cosa gli do in pasto? e come lo processa? cosa significa l'output?)</p>
+<p><strong>TAR (archiviazione)</strong></p>
+<p>tar archivia in un unico archivio più file, conservandone tutti i metadati (permessi, proprietà, timestamp) non esegue compressione delle informazioni</p>
+<h3 id="comandi-principali">Comandi principali</h3>
+<table>
+<thead>
+<tr>
+<th>Opzione</th>
+<th>Azione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-c</code></td>
+<td><strong>C</strong>rea un nuovo archivio</td>
+</tr>
+<tr>
+<td><code>-x</code></td>
+<td>E<strong>x</strong>trae file da un archivio</td>
+</tr>
+<tr>
+<td><code>-t</code></td>
+<td>Elenco (<strong>t</strong>able of contents) senza estrarre</td>
+</tr>
+<tr>
+<td><code>-r</code></td>
+<td>Aggiunge file a un archivio esistente</td>
+</tr>
+</tbody>
+</table>
+<p>Questi comandi possono aggiungere precisazioni a tar, ma non sono strettamente necessarie. L'unico comando obbligatorio è <strong>-f</strong> per <strong>specificare il nome dell'archivio dove indirizzo i file</strong></p>
+<p><strong>ESEMPI PRATICI DI UTILIZZO</strong></p>
+<pre><code># Creare un archivio delle home di tutti gli utenti
+[](#cb12-2)tar cvpf users.tar /home/*       # a cosa serve cvpf? cosa significa?
+[](#cb12-3)# Nota: tar rimuove automaticamente lo slash iniziale dai path
+[](#cb12-4)# → i path nell'archivio sono relativi (es. home/alice/...) # cosa significa che i path sono relativi?
+[](#cb12-5)
+[](#cb12-6)# Elencare il contenuto senza estrarre
+[](#cb12-7)tar tf users.tar
+[](#cb12-8)
+[](#cb12-9)# Estrarre in una directory specifica    (questo comando non viene runnato poichè non riesce a trovare /newdisk, e nemmeno la crea. ancora non capisco questi codici, prima cvpf, ora -xvpf, questa volta vedo che ha il trattino davanti quindi sarà una &quot;regola&quot;?
+[](#cb12-10)tar -C /newdisk -xvpf users.tar
+[](#cb12-11)# → ricrea la struttura home/alice/... dentro /newdisk
+[](#cb12-12)
+[](#cb12-13)# Pipeline: copiare una gerarchia di file preservando tutto
+[](#cb12-14)tar cvpf - /home/* | tar -C /newdisk -xvpf -
+[](#cb12-15)#           ^                              ^
+[](#cb12-16)#           - = stdout                    - = stdin
+</code></pre>
+<p>come per "estrarre in una direcotry specifica" l'ultima pipeline non viene lanciata e produce i seguenti errori</p>
+<p>vagrant@bookworm:~\$ tar cvpf - /home/* | tar -C /newdisk -xvpf -<br />
+tar: Removing leading `/' from member names<br />
+/home/alice/<br />
+/home/alice/.bashrc<br />
+tar: Removing leading `/' from hard link targets<br />
+/home/alice/.bash_logout<br />
+/home/alice/.profile<br />
+tar: /home/alice/.bash_history: Cannot open: Permission denied<br />
+/home/bob/<br />
+/home/bob/.bashrc<br />
+/home/bob/.bash_logout<br />
+/home/bob/.profiletar: /newdisk: Cannot open: No such file or directory<br />
+tar: Error is not recoverable: exiting now</p>
+<p>tar: /home/bob/.bash_history: Cannot open: Permission denied<br />
+/home/maria/<br />
+/home/maria/.bashrc<br />
+/home/maria/.bash_logout<br />
+/home/maria/.profile</p>
+<p>inoltre non mi è chiara la struttra della pipe, ma perchè varia ancora il modo di utilizzo di tar, inoltre si includono riferimenti a stdin e stdout che non capisco e non riesco a collegare</p>
+<p><strong>COMPRESSIONE</strong></p>
+<p>Abbiamo detto come <strong>tar</strong> di per se non si occupi di comprimere i file, ma solo di archiviarli insieme. si può sfruttare in combo con un altro strumento per comprimere</p>
+<p><strong>principali metodi di compressione</strong></p>
+<table>
+<thead>
+<tr>
+<th>Estensione</th>
+<th>Comando</th>
+<th>Opzione tar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.gz</code></td>
+<td><code>gzip</code> / <code>gunzip</code></td>
+<td><code>-z</code></td>
+</tr>
+<tr>
+<td><code>.bz2</code></td>
+<td><code>bzip2</code> / <code>bunzip2</code></td>
+<td><code>-j</code></td>
+</tr>
+<tr>
+<td><code>.xz</code></td>
+<td><code>xz</code> / <code>unxz</code></td>
+<td><code>-J</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code># Creare archivio compresso
+[](#cb13-2)tar czf archivio.tar.gz /home/*     # gzip
+[](#cb13-3)tar cjf archivio.tar.bz2 /home/*   # bzip2           non capisco come viene composta la sintassi del # comando tar per la compressione, cosa sono czf, cjf e cJf?
+[](#cb13-4)tar cJf archivio.tar.xz /home/*    # xz
+[](#cb13-5)
+[](#cb13-6)# Estrarre archivio compresso (tar rileva il formato automaticamente)
+[](#cb13-7)tar xf archivio.tar.gz       # xf è il modificatore da inserire con tar per estrarre?
+[](#cb13-8)tar xf archivio.tar.bz2
+[](#cb13-9)tar xf archivio.tar.xz
+[](#cb13-10)
+[](#cb13-11)# Compressione come filtro (pipeline)
+[](#cb13-12)tar cf - * | xz -c &gt; archivio.tar.xz    # anche qua non capisco assolutamente cosa stia facendo visto che # l'output è vuoto, non dice nulla
+</code></pre>
+<p>anche la sezione alias utili del modulo non risulta utile perchè si lega a cose non affrontate come le interazioni con grep o il comando gzip</p>
+<p><strong>RSYNC sincronizzazione di file online e offline</strong></p>
+<p>è lo strumento principale per sincronizzare le directory </p>
+<h3 id="esercizio-5-copia-flat">Esercizio 5 — copia “flat”</h3>
+<p><strong>Obiettivo</strong>: copiare in una directory (secondo parametro) tutti i file contenuti in una directory (primo parametro) modificati da meno di N giorni (terzo parametro), senza preservare la struttura delle sottodirectory.</p>
+<pre><code>[](#cb19-1)#!/bin/bash
+[](#cb19-2)# Uso: ./copia_flat.sh &lt;sorgente&gt; &lt;destinazione&gt; &lt;giorni&gt;
+[](#cb19-3)
+[](#cb19-4)SRC=&quot;$1&quot;
+[](#cb19-5)DST=&quot;$2&quot;
+[](#cb19-6)GIORNI=&quot;$3&quot;
+[](#cb19-7)
+[](#cb19-8)# Verifica parametri
+[](#cb19-9)if [ -z &quot;$SRC&quot; ] || [ -z &quot;$DST&quot; ] || [ -z &quot;$GIORNI&quot; ]; then
+    [](#cb19-10)    echo &quot;Uso: $0 &lt;sorgente&gt; &lt;destinazione&gt; &lt;giorni&gt;&quot;
+    [](#cb19-11)    exit 1
+[](#cb19-12)fi
+[](#cb19-13)
+[](#cb19-14)mkdir -p &quot;$DST&quot; # cosa specifico con -p?
+[](#cb19-15)
+[](#cb19-16)find &quot;$SRC&quot; -maxdepth 1 -type f -mtime -&quot;$GIORNI&quot; -exec cp {} &quot;$DST&quot; \; #analizza nel dettaglio la  #
+# composizione della sintassi di quesa riga
+</code></pre>
+<h3 id="esercizio-6-copia-con-conservazione-della-struttura">Esercizio 6 — copia con conservazione della struttura</h3>
+<p><strong>Obiettivo</strong>: copiare in una directory (primo parametro) tutti i file del sistema modificati da meno di N giorni (secondo parametro) <strong>e</strong> tutti i file sotto <code>/home</code> appartenenti a UID senza utente valido, mantenendo la struttura originale delle directory.</p>
+<pre><code>[](#cb20-1)#!/bin/bash
+[](#cb20-2)# Uso: ./copia_struttura.sh &lt;destinazione&gt; &lt;giorni&gt;
+[](#cb20-3)
+[](#cb20-4)DST=&quot;$1&quot;
+[](#cb20-5)GIORNI=&quot;$2&quot;
+[](#cb20-6)
+[](#cb20-7)if [ -z &quot;$DST&quot; ] || [ -z &quot;$GIORNI&quot; ]; then
+    [](#cb20-8)    echo &quot;Uso: $0 &lt;destinazione&gt; &lt;giorni&gt;&quot;
+    [](#cb20-9)    exit 1
+[](#cb20-10)fi
+[](#cb20-11)
+[](#cb20-12)mkdir -p &quot;$DST&quot;
+[](#cb20-13)
+[](#cb20-14)# File recenti ovunque nel sistema
+[](#cb20-15)find / -type f -mtime -&quot;$GIORNI&quot; -exec cp --parents {} &quot;$DST&quot; \;
+[](#cb20-16)
+[](#cb20-17)# File orfani sotto /home
+[](#cb20-18)find /home -type f -nouser -exec cp --parents {} &quot;$DST&quot; \;
+</code></pre>
+<p>i dubbi che ho su questo script sono strettamente legati a quello del precedente, all'uso di specifiche nel mkdir sconosciute o alla sintassi di find qui utilizzata</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo2C_file_tar_rsync_backup]]</li>
+<li>[[lezione_modulo2C_file_tar_rsync_backup]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

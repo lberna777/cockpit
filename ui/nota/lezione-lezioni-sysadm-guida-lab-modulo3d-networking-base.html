@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_lab_modulo3D_networking_base.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">guida_lab_modulo3D_networking_base.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/guida_lab_modulo3D_networking_base.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="guida-lab-modulo-3d-networking-di-base">Guida Lab — Modulo 3D: Networking di Base</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T
+<strong>Fonte</strong>: <code>LAB_Configurazione_della_rete_delle_VM_21-28_aprile.html</code> (sezioni 1–2) [fonte: lab HTML]
+<strong>Lezione teorica di riferimento</strong>: <code>lezione_modulo3D_networking_base.md</code>
+<strong>Prerequisiti</strong>: 3A (systemd — i servizi di rete sono demoni), 3B (apt — qui si installano tcpdump e tracepath)</p>
+<blockquote>
+<p><strong>Scope</strong>: questa guida copre gli strumenti di diagnostica di rete su <strong>VM singola</strong> (Es. 1–6). La configurazione multi-machine (Client-Router-Server) è in 3E.</p>
+</blockquote>
+<hr />
+<h2 id="setup">Setup</h2>
+<pre><code class="language-bash">cd ~/cockpit/Vault/UniCode/ARCHIVIO/sysAdmin-lab-vagrant
+vagrant up --provider=virtualbox
+vagrant ssh
+</code></pre>
+<p><strong>Prima di iniziare</strong>: verifica di essere dentro la VM.</p>
+<pre><code class="language-bash">hostname        # bookworm
+whoami          # vagrant
+</code></pre>
+<p>Se <code>vagrant up</code> fallisce → controlla <code>~/UniCode/troubleshooting_vm.md</code>.</p>
+<hr />
+<h2 id="es-1-stato-della-rete-ip-a-e-ip-r">Es. 1 — Stato della rete: <code>ip a</code> e <code>ip r</code></h2>
+<h3 id="comando">Comando</h3>
+<pre><code class="language-bash">ip a
+</code></pre>
+<p><strong>Cosa fa</strong>: mostra tutte le interfacce di rete con i loro indirizzi. <code>ip</code> è lo strumento moderno per gestire indirizzi, routing e link (sostituisce <code>ifconfig</code>). <code>a</code> è abbreviazione di <code>address</code>.</p>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 ...
+    inet 127.0.0.1/8 scope host lo
+2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 ...
+    link/ether 08:00:27:XX:XX:XX brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic eth0
+</code></pre>
+<p><strong>Cosa leggere</strong>:
+- <code>lo</code> = loopback (127.0.0.1) — interfaccia virtuale, traffico locale alla macchina
+- <code>eth0</code> = interfaccia NAT di VirtualBox — <code>10.0.2.15/24</code>
+- <code>link/ether</code> = indirizzo MAC dell'interfaccia
+- <code>dynamic</code> = IP assegnato via DHCP (non statico)</p>
+<pre><code class="language-bash"># Mostra solo eth0
+ip a show eth0
+
+# Mostra la tabella di routing
+ip r
+</code></pre>
+<p><strong>Output <code>ip r</code> atteso</strong>:</p>
+<pre><code>default via 10.0.2.2 dev eth0
+10.0.2.0/24 dev eth0 proto kernel scope link src 10.0.2.15
+</code></pre>
+<p><strong>Cosa leggere</strong>:
+- <code>default via 10.0.2.2</code> = il gateway di default è <code>10.0.2.2</code> — qualsiasi pacchetto verso una destinazione sconosciuta viene inoltrato lì. È il NAT gateway di VirtualBox.
+- <code>10.0.2.0/24 dev eth0</code> = i pacchetti verso la subnet <code>10.0.2.0/24</code> escono da <code>eth0</code> direttamente (senza passare per il gateway)</p>
+<p><strong>Verifica Es. 1 ✅</strong>: vedi <code>eth0</code> con IP <code>10.0.2.15/24</code> e gateway <code>10.0.2.2</code>.</p>
+<hr />
+<h2 id="es-2-ping-testare-la-raggiungibilita">Es. 2 — Ping: testare la raggiungibilità</h2>
+<p>[fonte: lab HTML, sezione 2 — punto 2]</p>
+<p><code>ping</code> invia messaggi <strong>ICMP ECHO_REQUEST</strong> all'host di destinazione. Se l'host risponde, il percorso di rete tra te e lui è funzionante. È il primo strumento da usare quando una connessione non funziona.</p>
+<pre><code class="language-bash"># Test verso internet (DNS di Google)
+ping -c 4 8.8.8.8
+
+# Test verso il gateway VirtualBox
+ping -c 4 10.0.2.2
+
+# Test verso te stesso (loopback — dovrebbe sempre funzionare)
+ping -c 4 127.0.0.1
+</code></pre>
+<p><strong>Anatomia di <code>ping -c 4 8.8.8.8</code></strong>:
+- <code>ping</code> = invia ICMP ECHO_REQUEST e aspetta ECHO_REPLY
+- <code>-c 4</code> = count: invia esattamente 4 pacchetti poi si ferma (senza <code>-c</code> va in loop infinito — ferma con Ctrl+C)
+- <code>8.8.8.8</code> = IP di destinazione</p>
+<p><strong>Output atteso</strong> (<code>ping -c 4 8.8.8.8</code>):</p>
+<pre><code>PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=118 time=12.3 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=118 time=11.8 ms
+...
+4 packets transmitted, 4 received, 0% packet loss
+</code></pre>
+<p><strong>Cosa leggere</strong>:
+- <code>time=</code> = latenza round-trip in millisecondi
+- <code>ttl=</code> = Time To Live — quanti router il pacchetto ha attraversato (parte da 128 o 64, decresce di 1 per ogni router)
+- <code>0% packet loss</code> = nessuna perdita → connessione stabile
+- <code>100% packet loss</code> = host irraggiungibile</p>
+<p><strong>Punto di errore</strong>: <code>ping 8.8.8.8</code> funziona ma <code>ping google.com</code> fallisce → il problema è nel DNS, non nella connettività IP.</p>
+<p><strong>Verifica Es. 2 ✅</strong>: <code>ping -c 4 8.8.8.8</code> risponde con 0% packet loss.</p>
+<hr />
+<h2 id="es-3-ss-porte-in-ascolto">Es. 3 — ss: porte in ascolto</h2>
+<p><code>ss</code> (socket statistics) mostra lo stato dei socket di rete. È il sostituto moderno di <code>netstat</code>. Permette di vedere quali servizi stanno ascoltando su quali porte — fondamentale per capire la superficie esposta della macchina.</p>
+<pre><code class="language-bash">ss -tlnp
+</code></pre>
+<p><strong>Anatomia di <code>ss -tlnp</code></strong>:
+- <code>-t</code> = solo socket TCP (esclude UDP)
+- <code>-l</code> = solo socket in stato LISTEN (in ascolto, non connessioni già stabilite)
+- <code>-n</code> = numeric: non risolvere i numeri di porta in nomi (<code>22</code> invece di <code>ssh</code>)
+- <code>-p</code> = mostra il processo che ha aperto il socket (richiede root per processi altrui)</p>
+<p><strong>Output atteso</strong> (VM base Debian):</p>
+<pre><code>Netid State  Recv-Q Send-Q Local Address:Port  Peer Address:Port Process
+tcp   LISTEN 0      128    0.0.0.0:22           0.0.0.0:*        users:((&quot;sshd&quot;,...))
+tcp   LISTEN 0      128    [::]:22              [::]:*            users:((&quot;sshd&quot;,...))
+</code></pre>
+<p>Solo <code>sshd</code> in ascolto sulla porta 22 — è la VM di default senza servizi aggiuntivi.</p>
+<pre><code class="language-bash"># Installa un servizio e verifica che compaia
+sudo apt-get install -y nginx
+sudo systemctl start nginx
+ss -tlnp   # ora vedi anche la porta 80
+sudo systemctl stop nginx
+</code></pre>
+<p><strong>Connessione con 3A</strong>: <code>ss -tlnp</code> mostra i demoni in ascolto — la stessa lista che <code>systemctl list-units --type=service --state=running</code> mostra da un'altra prospettiva.</p>
+<p><strong>Verifica Es. 3 ✅</strong>: vedi <code>sshd</code> sulla porta 22.</p>
+<hr />
+<h2 id="es-4-etchosts-risoluzione-locale">Es. 4 — /etc/hosts: risoluzione locale</h2>
+<p><code>/etc/hosts</code> è il file di risoluzione dei nomi <strong>prima</strong> del DNS. Il sistema lo consulta per primo: se il nome è lì, non chiede al server DNS. Utile per dare nomi a host interni (es. le VM del lab multi-machine di 3E).</p>
+<pre><code class="language-bash">cat /etc/hosts
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>127.0.0.1       localhost
+127.0.1.1       bookworm
+::1             localhost ip6-localhost ip6-loopback
+ff02::1         ip6-allnodes
+ff02::2         ip6-allrouters
+</code></pre>
+<p><strong>Aggiungi una voce di test</strong>:</p>
+<pre><code class="language-bash">sudo sh -c 'echo &quot;10.0.2.2  gateway.lab&quot; &gt;&gt; /etc/hosts'
+ping -c 2 gateway.lab    # usa il nome invece dell'IP
+</code></pre>
+<p><strong>Verifica che funzioni</strong>:</p>
+<pre><code class="language-bash">cat /etc/hosts | grep gateway
+# → 10.0.2.2  gateway.lab
+</code></pre>
+<p><strong>Rimuovi la voce</strong> (pulisci):</p>
+<pre><code class="language-bash">sudo sed -i '/gateway.lab/d' /etc/hosts
+</code></pre>
+<p><strong>Punto di errore</strong>: modifiche a <code>/etc/hosts</code> hanno effetto immediato — nessun restart. Se il ping con il nome funziona ma prima non funzionava, hai confermato che era un problema DNS (non di routing).</p>
+<p><strong>Dove si usa in 3E</strong>: quando configuri Client-Router-Server, metti i loro IP in <code>/etc/hosts</code> così puoi usare <code>ping client</code> invece di <code>ping 10.1.1.1</code>.</p>
+<p><strong>Verifica Es. 4 ✅</strong>: <code>ping gateway.lab</code> risolve e risponde; dopo <code>sed</code> la voce è rimossa.</p>
+<hr />
+<h2 id="es-5-dig-query-dns-esplicite">Es. 5 — dig: query DNS esplicite</h2>
+<p><code>dig</code> fa query DNS e mostra la risposta completa. Differenza rispetto a <code>ping hostname</code>: <code>ping</code> risolve il nome silenziosamente; <code>dig</code> ti mostra <em>come</em> avviene la risoluzione e qual è la risposta del server DNS.</p>
+<pre><code class="language-bash"># Installa se non presente
+sudo apt-get install -y dnsutils
+
+# Query A record (IPv4) di google.com
+dig google.com A
+
+# Query verso un DNS specifico (bypassa quello di sistema)
+dig @8.8.8.8 google.com A
+
+# Solo la risposta, senza header
+dig +short google.com
+
+# Reverse lookup: da IP a nome
+dig -x 8.8.8.8
+</code></pre>
+<p><strong>Anatomia di <code>dig @8.8.8.8 google.com A</code></strong>:
+- <code>dig</code> = DNS lookup tool
+- <code>@8.8.8.8</code> = usa questo server DNS (non quello di <code>/etc/resolv.conf</code>)
+- <code>google.com</code> = nome da risolvere
+- <code>A</code> = tipo di record (A = IPv4; AAAA = IPv6; MX = mail; NS = nameserver)</p>
+<p><strong>Output atteso</strong> (parti rilevanti):</p>
+<pre><code>;; ANSWER SECTION:
+google.com.     207     IN      A       142.250.180.46
+
+;; Query time: 12 msec
+;; SERVER: 8.8.8.8#53(8.8.8.8)
+</code></pre>
+<p><strong>Cosa leggere</strong>:
+- <code>ANSWER SECTION</code> = la risposta vera del DNS
+- <code>207</code> = TTL in secondi (tra 207 secondi il record scade dalla cache)
+- <code>A 142.250.180.46</code> = l'IP che risolve google.com
+- <code>Query time</code> = latenza della query DNS</p>
+<p><strong>Diagnosi con dig</strong>: se <code>ping 8.8.8.8</code> funziona ma <code>ping google.com</code> fallisce, <code>dig google.com</code> ti dice se il problema è nel DNS (nessuna risposta / SERVFAIL) o nel routing.</p>
+<p><strong>Verifica Es. 5 ✅</strong>: <code>dig +short google.com</code> restituisce uno o più IP.</p>
+<hr />
+<h2 id="es-6-tracepath-tcpdump-percorso-e-cattura-pacchetti">Es. 6 — tracepath + tcpdump: percorso e cattura pacchetti</h2>
+<h3 id="tracepath">tracepath</h3>
+<p>[fonte: lab HTML, sezione 2 — punto 3]</p>
+<p><code>tracepath</code> mostra il percorso che i pacchetti fanno per raggiungere una destinazione, hop per hop. Utile quando <code>ping</code> fallisce: ti dice a quale router si interrompe il percorso.</p>
+<pre><code class="language-bash"># Installa
+sudo apt-get install -y iputils-tracepath
+
+# Traccia il percorso verso 8.8.8.8
+tracepath 8.8.8.8
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code> 1?: [LOCALHOST]                      pmtu 1500
+ 1:  10.0.2.2                         0.343ms
+ 1:  10.0.2.2                         0.252ms
+ 2:  [primo router dell'ISP]           ...
+...
+</code></pre>
+<p><strong>Cosa leggere</strong>: ogni riga è un hop (router). Il numero è la posizione nel percorso. Se una riga mostra <code>no reply</code> il router non risponde ai pacchetti di tracepath (normale per molti router).</p>
+<p><strong>In 3E</strong>: <code>tracepath 10.2.2.2</code> da Client deve mostrare il salto attraverso Router (<code>10.1.1.254</code>) prima di arrivare al Server.</p>
+<h3 id="tcpdump">tcpdump</h3>
+<p>[fonte: lab HTML, sezione 2 — punto 4]</p>
+<p><code>tcpdump</code> cattura e mostra i pacchetti che transitano su un'interfaccia di rete in tempo reale. È l'equivalente di Wireshark da riga di comando.</p>
+<pre><code class="language-bash"># Installa
+sudo apt-get install -y tcpdump
+
+# Cattura i primi 10 pacchetti su eth0
+sudo tcpdump -i eth0 -c 10
+
+# In un'altra sessione (o aspetta che qualcosa generi traffico)
+# oppure genera traffico tu stesso in background:
+ping -c 5 8.8.8.8 &amp;
+sudo tcpdump -i eth0 icmp -c 10
+</code></pre>
+<p><strong>Anatomia di <code>sudo tcpdump -i eth0 icmp -c 10</code></strong>:
+- <code>sudo</code> = necessario per leggere i pacchetti raw dall'interfaccia
+- <code>tcpdump</code> = cattura pacchetti
+- <code>-i eth0</code> = interfaccia da monitorare
+- <code>icmp</code> = filtro: cattura solo pacchetti ICMP (quelli di ping)
+- <code>-c 10</code> = cattura 10 pacchetti poi si ferma</p>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>13:45:01.123456 IP 10.0.2.15 &gt; 8.8.8.8: ICMP echo request, id 42, seq 1
+13:45:01.135678 IP 8.8.8.8 &gt; 10.0.2.15: ICMP echo reply, id 42, seq 1
+</code></pre>
+<p><strong>Lettura di una riga</strong>:
+- <code>13:45:01.123456</code> = timestamp
+- <code>IP 10.0.2.15 &gt; 8.8.8.8</code> = sorgente → destinazione
+- <code>ICMP echo request</code> = tipo di pacchetto (request = ping inviato, reply = risposta ricevuta)</p>
+<p><strong>Filtri utili</strong>:</p>
+<pre><code class="language-bash"># Solo traffico verso/da un host
+sudo tcpdump -i eth0 host 8.8.8.8 -c 10
+
+# Solo traffico su porta 22 (SSH)
+sudo tcpdump -i eth0 port 22 -c 10
+
+# Salva su file (apribile con Wireshark)
+sudo tcpdump -i eth0 -w /tmp/capture.pcap -c 50
+</code></pre>
+<p><strong>In 3E</strong>: <code>sudo tcpdump -i eth1</code> su Router mentre fai <code>ping 10.2.2.2</code> da Client — vedi i pacchetti che transitano attraverso il Router.</p>
+<p><strong>Verifica Es. 6 ✅</strong>: <code>sudo tcpdump -i eth0 icmp -c 10</code> mentre esegui <code>ping -c 5 8.8.8.8</code> mostra le coppie request/reply.</p>
+<hr />
+<h2 id="riepilogo-comandi">Riepilogo comandi</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Scopo</th>
+<th>Quando usarlo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ip a</code></td>
+<td>Interfacce e indirizzi</td>
+<td>Primo controllo: "che IP ho?"</td>
+</tr>
+<tr>
+<td><code>ip r</code></td>
+<td>Tabella di routing</td>
+<td>"Dove mandano i pacchetti?"</td>
+</tr>
+<tr>
+<td><code>ping -c N host</code></td>
+<td>Test raggiungibilità</td>
+<td>"L'host risponde?"</td>
+</tr>
+<tr>
+<td><code>ss -tlnp</code></td>
+<td>Porte in ascolto</td>
+<td>"Quali servizi girano?"</td>
+</tr>
+<tr>
+<td><code>cat /etc/hosts</code></td>
+<td>Risoluzione locale</td>
+<td>"Nomi → IP senza DNS"</td>
+</tr>
+<tr>
+<td><code>dig host</code></td>
+<td>Query DNS esplicita</td>
+<td>"Come risolve il nome?"</td>
+</tr>
+<tr>
+<td><code>tracepath host</code></td>
+<td>Percorso hop-per-hop</td>
+<td>"Dove si rompe la rete?"</td>
+</tr>
+<tr>
+<td><code>sudo tcpdump -i eth0</code></td>
+<td>Cattura pacchetti</td>
+<td>"Che traffico c'è?"</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="dopo-il-lab">Dopo il lab</h2>
+<p>Scrivi i tuoi output negli appunti grezzi (<code>APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo3D.md</code>) e poi esegui <code>/appunti 3D</code>.</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo3D]]</li>
+<li>[[appunti_modulo3D_networking_base]]</li>
+<li>[[lezione_modulo3D_networking_base]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

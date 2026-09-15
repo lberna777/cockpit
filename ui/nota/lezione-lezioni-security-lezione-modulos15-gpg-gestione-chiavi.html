@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_moduloS15_gpg_gestione_chiavi.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_moduloS15_gpg_gestione_chiavi.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SECURITY/lezione_moduloS15_gpg_gestione_chiavi.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-s15-gpg-proprieta-e-gestione-delle-chiavi">Lezione — Modulo S15: GPG, proprietà e gestione delle chiavi</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Materiale</strong>: <code>Proprietà_e_gestione_delle_chiavi_15_maggio.pdf</code> (teoria, Prandini — "Chiavi crittografiche"), <code>LAB_gpg_13_maggio.pdf</code> (lab, Melis/Prandini), più due artefatti di lab: <code>Chiave_pubblica_Marco_Prandini.pdf</code> (in realtà un blocco <code>PGP PUBLIC KEY BLOCK</code>, chiave Ed25519 di Prandini) e <code>File_firmato.pdf</code> (in realtà un file <code>setup_ipt.sh</code> firmato con quella chiave).
+<strong>Prerequisiti</strong>: <strong>S14 (Crittografia — simmetrica/asimmetrica, hash, firma digitale, cifrari ibridi)</strong>. Questa lezione <em>presuppone</em> S14 e non ne ripete i fondamenti: qui si dà per acquisito cosa sono una chiave pubblica/privata, cos'è un hash, e che <em>firma digitale = hash del documento cifrato con la chiave privata</em>. Se il verso firma/cifratura non è ancora solido, rileggere S14 §14 prima.</p>
+<hr />
+<h2 id="obiettivo">Obiettivo</h2>
+<p>S14 ha spiegato <em>cos'è</em> una chiave e <em>come funziona</em> la matematica (RSA, DH, hash, firma). Questo modulo affronta il problema pratico che S14 lasciava aperto: <strong>una chiave è un oggetto che nasce, va custodito, va distribuito e prima o poi muore — e ognuna di queste fasi ha i suoi attacchi</strong>. È il "ciclo di vita delle chiavi".</p>
+<p>Al termine Lorenzo deve saper rispondere da esame teorico a: perché generare una chiave asimmetrica è diverso dal generarne una simmetrica; cosa distingue un TRNG da un PRNG; perché una chiave di firma <strong>non va salvata in backup</strong> mentre una chiave di decifrazione <strong>sì</strong>; perché il problema delle chiavi pubbliche non è la riservatezza ma l'<strong>autenticità</strong>; la differenza tra <strong>web of trust</strong> e <strong>PKI infrastrutturale</strong>; e — parte pratica del lab — cosa fanno esattamente i comandi <code>gpg</code> per generare, importare/esportare, cifrare, firmare e verificare, e con <em>quale chiave</em> ognuno lavora.</p>
+<blockquote>
+<p>⚠️ Questo modulo non aveva mai avuto lezione né appunti: si parte da zero. È l'ultimo tassello del blocco crittografico (S12→S13→S14→S15). L'esame teorico (40%, vero/falso e scelta multipla con penalità) chiede sia la teoria della gestione chiavi sia i <strong>comandi/flag gpg</strong> visti in laboratorio.</p>
+</blockquote>
+<hr />
+<h2 id="1-il-ciclo-di-vita-delle-chiavi-la-mappa-del-modulo">1. Il ciclo di vita delle chiavi — la mappa del modulo</h2>
+<p>Una chiave crittografica non è un dato statico: attraversa tre fasi, e la sicurezza complessiva è quella della fase più debole. Le tre fasi (che scandiscono anche questa lezione) sono:</p>
+<ol>
+<li><strong>Generazione</strong> — con la sua qualità fondamentale, la <strong>robustezza</strong> (§2).</li>
+<li><strong>Memorizzazione</strong> — dove custodirla, con requisiti contrastanti a seconda che sia una chiave di cifratura o di firma (§3).</li>
+<li><strong>Distribuzione</strong> — come farla arrivare a chi deve usarla, senza che un attaccante la sostituisca (§5).</li>
+</ol>
+<p>A queste si aggancia il problema trasversale della <strong>gestione</strong> (quante chiavi, quali standard, §4) e la domanda che tiene insieme tutto: <em>come faccio a fidarmi che una chiave pubblica appartenga davvero a chi dice di appartenere?</em> → <strong>certificazione</strong> (§6).</p>
+<p><strong>Visione</strong>: S14 assumeva la chiave come un dato già presente e fidato. Nel mondo reale quell'assunzione è il punto più fragile. La crittografia "pura" quasi non si rompe più (S14: brute force e fattorizzazione sono infattibili con parametri adeguati); ciò che si rompe è la <strong>gestione</strong> — chiavi deboli perché generate male, rubate perché custodite male, o sostituite perché distribuite male.</p>
+<hr />
+<h2 id="2-generazione-delle-chiavi">2. Generazione delle chiavi</h2>
+<h3 id="21-simmetriche-vs-asimmetriche-due-generazioni-diverse">2.1 Simmetriche vs asimmetriche — due generazioni diverse</h3>
+<p>Il modo di generare una chiave dipende dal tipo:</p>
+<ul>
+<li><strong>Chiavi simmetriche</strong> (e in generale nonce, vettori di inizializzazione, padding): <strong>basta un buon generatore di numeri casuali</strong>. Una chiave AES-256 è semplicemente 256 bit casuali — non deve avere nessuna struttura particolare, deve solo essere imprevedibile.</li>
+<li><strong>Chiavi asimmetriche</strong>: servono <strong>numeri primi</strong> (S14: RSA parte da due primi <code>p</code> e <code>q</code>). Il procedimento è: si parte da numeri random, e si applica un <strong>test di primalità</strong> per verificare che siano primi. Generare una chiave RSA è quindi più costoso — non basta il caso, serve caso <em>filtrato</em> attraverso la primalità.</li>
+</ul>
+<p><strong>Meccanismo</strong>: in entrambi i casi il cuore è un generatore di numeri casuali; la differenza è che per l'asimmetrico quel numero casuale è solo il punto di partenza di una ricerca (il primo candidato-primo). <strong>Visione</strong>: è per questo che <code>gpg --gen-key</code> "ci mette un po'" e talvolta chiede di muovere il mouse o digitare — sta raccogliendo entropia per generare i primi.</p>
+<h3 id="22-che-cose-la-casualita-randomness-vs-unpredictability">2.2 Che cos'è la casualità — randomness vs unpredictability</h3>
+<p>La casualità è la materia prima di ogni chiave, e non è un concetto unico ma due proprietà distinte:</p>
+<ul>
+<li><strong>Randomness (casualità statistica)</strong> — due sotto-requisiti:</li>
+<li><strong>Uniform distribution</strong>: la frequenza di 0 e 1 dev'essere approssimativamente uguale.</li>
+<li><strong>Independence</strong>: nessuna sottosequenza deve poter essere dedotta dalle altre.</li>
+<li><strong>Unpredictability (imprevedibilità)</strong>: anche conoscendo i valori generati <em>finora</em>, non si deve poter prevedere il prossimo.</li>
+</ul>
+<p>Una sequenza può essere statisticamente "casuale" (supera i test di distribuzione) ma <strong>prevedibile</strong> — ed è proprio la trappola dei generatori algoritmici. La distinzione tra i due tipi di generatore ruota attorno a questo:</p>
+<ul>
+<li><strong>TRUE random (TRNG)</strong>: perfetta indipendenza → garantisce l'imprevedibilità. Ma è <strong>difficile e inefficiente</strong> da ottenere.</li>
+<li><strong>PSEUDO random (PRNG)</strong>: è algoritmico → bisogna fare attenzione extra per rendere gli elementi difficili da prevedere conoscendo i precedenti.</li>
+</ul>
+<h3 id="23-trng-generatori-veri-dalla-fisica">2.3 TRNG — generatori veri, dalla fisica</h3>
+<p>Un <strong>True Random Number Generator</strong> attinge a <strong>sorgenti fisiche di entropia</strong>:
+- elementi <em>ad hoc</em>: rumore termico, processi dinamici caotici (l'esempio celebre è <strong>LavaRand</strong> di Cloudflare, una parete di lampade di lava filmate);
+- eventi "imprevedibili" nel calcolatore: es. gli intervalli di arrivo degli <strong>interrupt</strong> dai dispositivi.</p>
+<p>Poi c'è una fase di <strong>elaborazione</strong>: conversione <strong>A/D</strong> (analogico→digitale) e <strong>condizionamento</strong> (rimozione del bias, perché una sorgente fisica raramente produce 0 e 1 perfettamente bilanciati).</p>
+<p><strong>Visione</strong>: il TRNG è l'unico modo di produrre imprevedibilità <em>vera</em>, perché la sua sorgente è un fenomeno fisico non deterministico. Il prezzo è che è lento e ingombrante.</p>
+<h3 id="24-prng-generatori-algoritmici-veloci-ma-deterministici">2.4 PRNG — generatori algoritmici, veloci ma deterministici</h3>
+<p>Un <strong>Pseudo Random Number Generator</strong> è un <strong>algoritmo</strong> → per definizione <strong>deterministico</strong>. Se supera i test statistici è accettabile come PRNG, <em>ma sempre con attenzione all'imprevedibilità</em>. Il punto cruciale è il <strong>seme (seed)</strong>:
+- tipicamente l'input è un seme prodotto da un TRNG;
+- <strong>noto il seme → nota tutta la sequenza generata!</strong> (questa è la vulnerabilità strutturale: un PRNG con seme prevedibile o trapelato produce chiavi prevedibili);
+- se l'algoritmo è robusto, conoscere una sequenza di valori intermedi non deve permettere di risalire al seme né di prevedere i valori futuri.</p>
+<p><strong>Meccanismo</strong>: TRNG (lento, imprevedibile) genera un seme corto → PRNG (veloce, deterministico) lo espande in tutta la casualità di cui si ha bisogno. <strong>Visione</strong>: è lo stesso pattern del cifrario a flusso di S14 (seme corto → keystream lungo): si baratta l'imprevedibilità assoluta con l'efficienza, e la sicurezza si concentra tutta nel proteggere il seme.</p>
+<h3 id="25-test-di-casualita-nist-sp-800-22">2.5 Test di casualità — NIST SP 800-22</h3>
+<p>Come si stabilisce se un generatore è buono? Con una batteria di test statistici. Lo standard di riferimento è <strong>NIST SP 800-22</strong>, che comprende <strong>15 test</strong>. I tre citati:
+- <strong>Frequency test</strong>: il più basilare, deve essere in ogni suite — verifica che il numero di 1 e 0 sia circa quello atteso da una sequenza davvero casuale.
+- <strong>Runs test</strong>: conta i "run" (sequenze ininterrotte di bit identici) e verifica che la loro numerosità/lunghezza sia quella attesa.
+- <strong>Maurer's universal statistical test</strong>: verifica se la sequenza può essere significativamente <strong>compressa senza perdita</strong> — una sequenza comprimibile contiene ridondanza, quindi <strong>non è casuale</strong> (una sequenza davvero random è incomprimibile).</p>
+<h3 id="26-robustezza-1-resistenza-alla-forza-bruta">2.6 Robustezza (1): resistenza alla forza bruta</h3>
+<p>Generare bene la chiave serve a poco se la chiave è corta. La <strong>robustezza</strong> contro l'attacco più banale — provare tutte le chiavi — dipende dalla <strong>lunghezza in bit</strong>. La tabella delle slide (tempo per testare l'intero spazio DES/AES con tecnologie recenti):</p>
+<table>
+<thead>
+<tr>
+<th>Budget</th>
+<th>56 bit</th>
+<th>128 bit</th>
+<th>256 bit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 K€ (individuo)</td>
+<td>16 anni</td>
+<td>10²² anni</td>
+<td>10⁶¹ anni</td>
+</tr>
+<tr>
+<td>1 M€ (impresa)</td>
+<td>6 giorni</td>
+<td>10¹⁹ anni</td>
+<td>10⁵⁸ anni</td>
+</tr>
+<tr>
+<td>1 G€ (NSA)</td>
+<td>8 minuti</td>
+<td>10¹⁶ anni</td>
+<td>10⁵⁵ anni</td>
+</tr>
+</tbody>
+</table>
+<p>Da leggere così: <strong>56 bit (DES) sono forzabili</strong> — 8 minuti per un budget statale; <strong>128 bit e oltre no</strong>, con margini astronomici. Ecco perché S14 insisteva: DES-56 è morto, AES-128/256 è sicuro.</p>
+<p><strong>Il limite invalicabile — la termodinamica</strong>: anche se la legge di Moore proseguisse all'infinito, c'è un muro fisico. Il <strong>limite di Landauer</strong>: cambiare 1 bit costa almeno <code>k·T·ln(2)</code> (≈ 3×10⁻²³ J a 3°K). Facendo i conti: tutta l'energia emessa dal Sole in un anno (1.2×10³⁴ J) basterebbe per ~4×10⁵⁶ bit flip = contare fino a 2¹⁸⁸; l'energia di una supernova (2×10⁴⁴ J) per ~7×10⁶⁶ bit flip = contare fino a 2²²². <strong>Visione</strong>: una chiave da 256 bit non è "molto difficile" da forzare a forza bruta — è <strong>fisicamente impossibile</strong>, non basta l'energia dell'universo. La sicurezza computazionale (S14) qui prende un significato letterale.</p>
+<blockquote>
+<p>Attenzione al trabocchetto delle slide: occhio alle "ricerche con tempo di calcolo gratis" (botnet/virus che rubano CPU, "lotteria cinese" = tanti computer che tentano in parallelo) e alla <strong>sfortuna</strong> (la forza bruta <em>in media</em> è metà spazio, ma con fortuna la chiave giusta è il primo tentativo). Il muro termodinamico resta comunque invalicabile per 256 bit.</p>
+</blockquote>
+<h3 id="27-robustezza-2-resistenza-alla-fattorizzazione-asimmetrico">2.7 Robustezza (2): resistenza alla fattorizzazione (asimmetrico)</h3>
+<p>Per gli asimmetrici il discorso cambia: <strong>il miglior attacco a RSA NON è la forza bruta ma la ricerca dei fattori del modulo</strong> (S14: fattorizzare <code>n</code> per ritrovare <code>p</code> e <code>q</code> → ricavare la privata). Quindi la robustezza di RSA non si misura come per una chiave simmetrica.
+- Le stime sono difficili (riferimento: keylength.com); indicativamente <strong>3000 bit robusti fino al 2026</strong>.
+- Stato dell'arte: nel <strong>2020 Boudot et al. hanno fattorizzato RSA-250 (829 bit)</strong> usando ~2700 anni-core di calcolo.</p>
+<p><strong>Visione da esame</strong>: una chiave RSA di 829 bit è già stata rotta; per questo (S14) i moduli RSA devono essere <strong>≥ 2048 bit</strong>, e il lab (§8) impone <code>&gt;= 2048</code>. Non confondere: <strong>256 bit sono tantissimi per una chiave simmetrica AES, ma pochissimi per un modulo RSA</strong> — perché l'attacco è diverso (brute force vs fattorizzazione).</p>
+<hr />
+<h2 id="3-memorizzazione-dove-e-come-custodire-la-chiave">3. Memorizzazione — dove e come custodire la chiave</h2>
+<p>Custodire una chiave privata pone requisiti <strong>contrastanti</strong>, e la lezione centrale del modulo è che <strong>dipende da cosa serve la chiave</strong>.</p>
+<h3 id="31-la-chiave-di-decifrazione-backup-obbligatorio">3.1 La chiave di decifrazione — backup obbligatorio</h3>
+<p>Una chiave usata per <strong>decifrare</strong> ha due requisiti in tensione:
+- <strong>la perdita è devastante</strong> → se la perdi, tutto ciò che era cifrato per te diventa illeggibile per sempre → serve un <strong>backup</strong>;
+- <strong>la segretezza è fondamentale</strong> → non deve diffondersi → <strong>non diffusione</strong>.</p>
+<p>Backup e non-diffusione tirano in direzioni opposte (ogni copia è un rischio in più, ma zero copie è un rischio di perdita). Gli <strong>accorgimenti di memorizzazione</strong> che bilanciano i due:
+- <strong>Cifratura con passphrase</strong>: la chiave privata è salvata cifrata; per usarla serve la passphrase (è esattamente ciò che fa <code>gpg</code> quando chiede la passphrase, §8).
+- <strong>Hardware Security Module (HSM)</strong>: un dispositivo dedicato che custodisce la chiave e la usa <em>senza mai esporla</em> — le operazioni crittografiche avvengono dentro l'HSM.
+- <strong>Key escrow</strong>: la chiave (o una copia) è depositata presso una terza parte fidata, recuperabile in caso di necessità.
+- <strong>Secret sharing</strong>: la chiave è spezzata in più parti distribuite a soggetti diversi, e ne serve un quorum per ricostruirla (nessun singolo detentore può usarla da solo).</p>
+<h3 id="32-la-chiave-di-firma-nessun-backup">3.2 La chiave di firma — NESSUN backup</h3>
+<p>Qui sta la distinzione più chiesta del modulo. Una chiave usata per <strong>firmare</strong> ha requisiti diversi:
+- <strong>se compromessa, si sostituisce</strong>: nessuno ha bisogno di recuperarla in assenza del titolare → <strong>nessun backup!</strong> Se la perdi, semplicemente ne generi una nuova e comunichi che la vecchia non vale più (revoca). Il "valore" di una firma sta nel poterla produrre <em>d'ora in avanti</em>, non nel recuperare la chiave passata.
+- <strong>non deve essere usata contro la volontà del titolare</strong> → protezione con <strong>cifratura con passphrase</strong> o <strong>HSM</strong>.</p>
+<p><strong>Perché la differenza è profonda</strong> (meccanismo): una chiave di <em>decifrazione</em> protegge dati che <em>esistono già</em> (il cifrato archiviato); perderla significa perdere l'accesso a quei dati → backup necessario. Una chiave di <em>firma</em> non custodisce nulla — serve solo a produrre firme future; perderla non distrugge le firme già emesse (quelle restano verificabili con la vecchia chiave pubblica), quindi basta rimpiazzarla → backup inutile e anzi dannoso (una copia in più della chiave di firma = una possibilità in più che qualcuno firmi a tuo nome).</p>
+<blockquote>
+<p><strong>Regola-esame da inchiodare</strong>: chiave di <strong>decifrazione</strong> → <strong>backup sì</strong> (la perdita è irreversibile); chiave di <strong>firma</strong> → <strong>backup no</strong> (basta sostituirla). Sono simmetriche solo in apparenza; il <em>perché</em> le separa nettamente.</p>
+</blockquote>
+<hr />
+<h2 id="4-gestione-il-problema-del-numero-e-degli-standard">4. Gestione — il problema del numero e degli standard</h2>
+<p>Oltre a generarle e custodirle, le chiavi vanno <em>gestite</em> nel tempo. Parametri che complicano la gestione:</p>
+<ul>
+<li><strong>Numero delle chiavi in gioco</strong> — la differenza è enorme tra i due modelli:</li>
+<li><strong>sistemi asimmetrici</strong>: <strong>una chiave pubblica per ogni soggetto</strong> → il numero cresce <strong>linearmente</strong> (N soggetti = N chiavi pubbliche).</li>
+<li><strong>sistemi simmetrici</strong>: <strong>una chiave segreta per ogni coppia di soggetti</strong> = <strong>N(N-1)/2 chiavi</strong> → cresce <strong>quadraticamente</strong>. Con 1000 utenti servono ~500.000 chiavi segrete condivise.</li>
+</ul>
+<p><strong>Visione</strong>: questo è uno dei grandi vantaggi pratici dell'asimmetrico (già emerso in S14 come "risoluzione del problema della distribuzione"): non solo la chiave pubblica può viaggiare in chiaro, ma ne basta <em>una per persona</em> invece di una per ogni coppia. Il salto da O(N²) a O(N) è ciò che rende la crittografia a chiave pubblica scalabile a Internet.</p>
+<ul>
+<li><strong>Aderenza a standard e policy</strong>: frequenza di sostituzione (rotazione periodica delle chiavi), compatibilità di formato tra sistemi diversi.</li>
+<li><strong>Standard di gestione</strong>: <strong>OASIS KMIP</strong> (Key Management Interoperability Protocol) è lo standard che permette a prodotti diversi di gestire chiavi in modo interoperabile.</li>
+</ul>
+<hr />
+<h2 id="5-distribuzione-far-arrivare-la-chiave-senza-farla-sostituire">5. Distribuzione — far arrivare la chiave senza farla sostituire</h2>
+<h3 id="51-chiavi-simmetriche-mai-in-chiaro">5.1 Chiavi simmetriche — mai in chiaro</h3>
+<p>Una chiave simmetrica <strong>non deve mai essere esposta in chiaro</strong> (chi la vede, la usa). Modi per distribuirla:
+- <strong>scambio manuale</strong> (di persona, canale fuori banda);
+- <strong>KDC (Key Distribution Center)</strong>: ogni utente condivide <em>una</em> chiave con un centro fidato; per parlare con un altro utente, i due negoziano una chiave di sessione attraverso connessioni cifrate col KDC (è l'idea alla base di Kerberos);
+- <strong>scambio di Diffie-Hellman</strong> (S14/S13): i due concordano una chiave condivisa su canale pubblico senza mai trasmetterla.</p>
+<h3 id="52-chiavi-asimmetriche-il-vero-problema-e-lautenticita-non-la-riservatezza">5.2 Chiavi asimmetriche — il vero problema è l'autenticità, non la riservatezza</h3>
+<p>Questo è il concetto-cardine della distribuzione, e ribalta l'intuizione. Una chiave pubblica <strong>è pubblica</strong>: un <strong>attaccante passivo</strong> (che si limita ad ascoltare) <strong>non apprende nulla</strong> vedendo una chiave pubblica o intercettando i parametri di un DH — non c'è riservatezza da proteggere. Il pericolo è l'<strong>attaccante attivo</strong>, che può <strong>sostituire</strong> i valori inviati da una parte all'altra con i propri. È il <strong>Man-in-the-Middle</strong> applicato alle chiavi pubbliche:</p>
+<ul>
+<li><strong>Attacco MITM su RSA</strong>: l'attaccante ha una propria coppia (<code>PRIV_I</code>, <code>PUB_I</code>). Quando A e B cercano la chiave pubblica l'uno dell'altro, ricevono invece <code>PUB_I</code>. Conseguenze:</li>
+<li>quando il mittente cifra un messaggio (credendo di usare la pubblica del destinatario, in realtà <code>PUB_I</code>), <strong>l'attaccante può decifrarlo</strong> con <code>PRIV_I</code>; poi lo ri-cifra con la vera pubblica del destinatario legittimo (magari alterato) per non insospettire nessuno;</li>
+<li>l'attaccante può <strong>firmare messaggi con <code>PRIV_I</code></strong>, e il destinatario, verificandoli con <code>PUB_I</code> (che crede del mittente legittimo), <strong>si convince che siano autentici</strong>.</li>
+<li><strong>Attacco MITM su Diffie-Hellman</strong>: l'attaccante stabilisce <strong>due chiavi separate</strong>, una con A e una con B, e continua a fare da <strong>"passacarte"</strong> (decifra da un lato, ri-cifra dall'altro) senza che nessuno se ne accorga.</li>
+</ul>
+<p><strong>La conclusione da memorizzare</strong> (compare spesso all'esame): <em>per i sistemi asimmetrici il problema non è la </em><em>riservatezza</em><em> dei dati pubblici, ma la loro </em><em>autenticità</em>** — cioè avere la certezza che la chiave pubblica ricevuta appartenga davvero al soggetto giusto e non a un impostore che si è messo in mezzo.</p>
+<p><strong>Visione</strong>: la crittografia asimmetrica risolve il problema di <em>scambiare</em> segreti tra sconosciuti, ma ne apre un altro: <em>come faccio a sapere che questa chiave pubblica è tua e non di chi sta fingendo di essere te?</em> Tutto il §6 è la risposta a questa domanda.</p>
+<hr />
+<h2 id="6-certificazione-delle-chiavi-pubbliche-di-chi-mi-fido">6. Certificazione delle chiavi pubbliche — di chi mi fido?</h2>
+<p>Serve un modo per <strong>associare con certezza una chiave pubblica al suo legittimo titolare</strong> (l'unico possessore della corrispondente chiave privata). Ci sono due modelli, ed è la distinzione teorica più importante del modulo insieme a firma-vs-cifratura.</p>
+<h3 id="61-web-of-trust-fiducia-distribuita">6.1 Web of trust — fiducia distribuita</h3>
+<p>Nel <strong>modello web of trust</strong> (rete di fiducia, il modello nativo di PGP/GPG):
+- l'autenticità di una chiave pubblica è <strong>testimoniata da altri utenti</strong> (che la firmano);
+- l'utente che riceve una chiave da uno sconosciuto può decidere di <strong>accettarla come autentica se è firmata da qualcuno di cui si fida</strong>;
+- <strong>Vantaggio</strong>: <strong>nessuna entità "super partes"</strong> di cui doversi fidare per forza — la fiducia nasce dal basso, dalle relazioni tra utenti;
+- <strong>Svantaggio</strong>: <strong>pessima scalabilità</strong> — funziona in comunità in cui le persone si conoscono e firmano le reciproche chiavi (i "key signing party"), non su scala Internet dove miliardi di sconosciuti dovrebbero fidarsi a vicenda.</p>
+<p>Questo modello è concretamente ciò che fa il comando <code>gpg --sign-key</code> (§8.9): firmare la chiave pubblica di qualcuno significa <em>testimoniare</em> che quella chiave è davvero sua.</p>
+<h3 id="62-modello-infrastrutturale-pki-e-certificati">6.2 Modello infrastrutturale — PKI e certificati</h3>
+<p>Nel <strong>modello infrastrutturale</strong>:
+- esiste una <strong>terza parte fidata</strong> (Certification Authority, CA) che documenta l'associazione chiave↔titolare;
+- questa associazione, attestata dalla CA, prende la forma di un <strong>certificato di chiave pubblica</strong>, standardizzato come <strong>ITU-T X.509v3</strong>.</p>
+<p>Un <strong>certificato</strong> è, in sostanza, la chiave pubblica del titolare + i suoi dati identificativi, il tutto <strong>firmato dalla CA</strong> (S14: firma = hash + cifratura con la privata <em>della CA</em>). L'insieme di CA, certificati, procedure e ruoli è la <strong>Public Key Infrastructure (PKI)</strong>.</p>
+<p><strong>Verifica di un certificato</strong> (l'iter che risponde alla domanda "di chi mi fido?"):
+1. Ricevo un messaggio firmato → mi procuro il <strong>certificato del mittente</strong>;
+2. con la chiave (pubblica) del certificato <strong>verifico la firma</strong> del messaggio → se ok, messaggio integro e autentico;
+3. <strong>ma il certificato stesso è integro e autentico?</strong> → è <strong>firmato dalla CA</strong>;
+4. mi procuro il <strong>certificato della CA</strong>, con la sua chiave verifico la firma del certificato del mittente → se ok, il certificato è integro e autentico.</p>
+<p>Ma allora <em>quando finisce questo iter</em>? Il certificato della CA è firmato da un'altra CA, e così via: si forma una <strong>certificate chain</strong> (catena di certificati). La catena termina in una <strong>root CA</strong>, che <strong>firma il proprio certificato</strong> (certificato <em>self-signed</em>): la fiducia nella root CA non deriva da nessun altro, è <strong>preinstallata</strong> e assunta come radice (i browser e i sistemi operativi arrivano con un elenco di root CA fidate).</p>
+<blockquote>
+<p><strong>Web of trust vs PKI — la disambiguazione da esame</strong> (facile invertirle):
+- <strong>Web of trust</strong>: fiducia <strong>orizzontale/distribuita</strong>, gli utenti si firmano le chiavi a vicenda, <strong>nessuna autorità centrale</strong>. Pro: niente ente super partes. Contro: non scala.
+- <strong>PKI infrastrutturale</strong>: fiducia <strong>verticale/gerarchica</strong>, una <strong>CA</strong> (terza parte fidata) firma i certificati, catena che risale a una <strong>root CA</strong> self-signed. Pro: scala (è il modello di TLS/HTTPS, S13). Contro: devi fidarti per forza delle root CA.</p>
+</blockquote>
+<hr />
+<h2 id="7-uno-sguardo-al-futuro-quantum-key-distribution-bb84">7. Uno sguardo al futuro — Quantum Key Distribution (BB84)</h2>
+<p>Le slide chiudono la parte teorica con una prospettiva futura sulla <strong>distribuzione delle chiavi</strong> sfruttando la fisica quantistica. (Attenzione a non confondere: S14 parlava di quantum computing come <em>minaccia</em> — Shor rompe RSA; qui il quantum è invece uno <em>strumento difensivo</em> per distribuire chiavi in modo intrinsecamente sicuro.)</p>
+<h3 id="71-qubit-e-misura-lingrediente-fisico">7.1 Qubit e misura — l'ingrediente fisico</h3>
+<p>Un <strong>qubit</strong> è un sistema quantistico a due stati (es. la polarizzazione di un fotone). Può trovarsi in una <strong>sovrapposizione</strong> <code>|v⟩ = a|0⟩ + b|1⟩</code> (con <code>|a|² + |b|² = 1</code>). I fatti che servono a BB84:
+- <strong>misurare un qubit ha senso solo rispetto a una base</strong> (quella del dispositivo di misura);
+- <strong>l'atto di misura cambia lo stato</strong> del qubit: misurando <code>|v⟩</code> ottieni <code>|0⟩</code> con probabilità <code>|a|²</code> (e lo stato <em>diventa</em> <code>|0⟩</code>) oppure <code>|1⟩</code> con probabilità <code>|b|²</code>;
+- se misuri nella base "giusta" (quella in cui il fotone è stato preparato) ottieni un risultato <strong>deterministico</strong>; se misuri nella base "sbagliata", il risultato è <strong>casuale (50-50)</strong> e — cruciale — <strong>hai alterato irreversibilmente il fotone</strong>;
+- <strong>un qubit non può essere clonato</strong> (no-cloning) → non puoi fare tante misure su copie.</p>
+<h3 id="72-il-protocollo-bb84-bennett-brassard-1984">7.2 Il protocollo BB84 (Bennett &amp; Brassard, 1984)</h3>
+<p>Obiettivo: stabilire una <strong>chiave segreta condivisa</strong> tra Alice e Bob (una sequenza casuale di 0 e 1). Scenario: un <strong>canale quantistico</strong> (per i fotoni) + un <strong>canale classico</strong> (pubblico, per confrontarsi). L'origliatrice è Eve.</p>
+<ol>
+<li>Alice sceglie a caso una stringa di bit <strong>e</strong> una base per ciascuno (base standard <code>S={↑,→}</code> o base di Hadamard <code>H={↗,↖}</code>), codifica ogni bit nella sua base e invia i fotoni a Bob.</li>
+<li>Bob, per ogni fotone, <strong>sceglie a caso una base</strong> con cui misurarlo. Ha il 50% di probabilità di indovinare la stessa base di Alice (→ bit corretto), 50% di sbagliarla (→ bit casuale).</li>
+<li>Sul <strong>canale classico</strong> Alice e Bob si rivelano <em>quali basi</em> hanno usato (non i bit): <strong>tengono solo i bit in cui le basi coincidono</strong>, scartano gli altri. Quei bit formano la chiave.</li>
+</ol>
+<h3 id="73-perche-e-sicuro-eve-si-tradisce">7.3 Perché è sicuro — Eve si tradisce</h3>
+<p>Se Eve intercetta un fotone deve misurarlo, ma <strong>non conosce la base di Alice</strong> → indovina la base col 50%. Quando sbaglia base <strong>altera la polarizzazione</strong> del fotone, e quel disturbo si propaga a Bob. Risultato: la manomissione di Eve introduce <strong>errori</strong> nei bit di Alice e Bob (circa il 25% di probabilità che Bob misuri un bit diverso da quello inviato, per i bit toccati da Eve). Confrontando pubblicamente un campione di <code>n</code> bit, Alice e Bob hanno una probabilità <code>1/2²ⁿ</code> che l'intercettazione di Eve passi inosservata → <strong>con abbastanza bit, l'origliamento è rilevabile con certezza pratica</strong>.</p>
+<p><strong>Visione</strong>: BB84 non nasconde la chiave con la difficoltà computazionale (come RSA/DH), ma con una <strong>legge fisica</strong> — misurare disturba, quindi ogni intercettazione lascia tracce. Non garantisce il <em>successo</em> (l'attacco può far fallire lo scambio), ma garantisce che una chiave scambiata con successo è <em>segreta</em>.</p>
+<hr />
+<h2 id="8-lab-gpg-in-pratica">8. LAB — GPG in pratica</h2>
+<p>Questa è la parte operativa: <strong>GnuPG (gpg)</strong> è l'implementazione con cui si toccano con mano tutti i concetti visti (generazione, custodia con passphrase, distribuzione via keyserver, cifratura ibrida, firma, web of trust). Per ogni comando: cosa fa (meccanismo) e a cosa serve nel flusso (visione).</p>
+<h3 id="81-gpg-vs-pgp-cosa-sono">8.1 GPG vs PGP — cosa sono</h3>
+<ul>
+<li><strong>PGP</strong> (Pretty Good Privacy): nato negli anni '90, oggi proprietà di <strong>Symantec</strong>. Soluzione <strong>proprietaria</strong>, storicamente lo standard <em>de facto</em> per la crittografia dei file.</li>
+<li><strong>GPG</strong> (GnuPG, GNU Privacy Guard): implementazione <strong>open source</strong> dello standard <strong>OpenPGP</strong>, definita da <strong>RFC 4880</strong>. Alternativa libera a PGP; <strong>può aprire/decifrare file cifrati da PGP</strong> (interoperabile).</li>
+</ul>
+<p><strong>Da esame</strong>: PGP proprietario (Symantec) vs GPG open source (GnuPG), ma <strong>funzionalmente equivalenti</strong>, entrambi conformi a OpenPGP.</p>
+<h3 id="82-generare-una-chiave-gpg-gen-key">8.2 Generare una chiave — <code>gpg --gen-key</code></h3>
+<pre><code class="language-bash">gpg --gen-key
+</code></pre>
+<p>Il comando è interattivo e chiede:
+- <strong>identità</strong> (nome + email — sarà lo <em>user ID</em> associato alla chiave);
+- <strong>grandezza della chiave</strong>: <strong>&gt;= 2048 bit</strong> (§2.7: sotto i 2048 il modulo RSA è troppo debole);
+- <strong>data di scadenza</strong> (importante!) — una chiave con scadenza si "auto-revoca" nel tempo, limitando i danni se un giorno venisse compromessa senza che tu te ne accorga;
+- <strong>passphrase</strong> — cifra la chiave privata a riposo (§3.1: "cifratura con passphrase").</p>
+<p><strong>Meccanismo</strong>: gpg genera la coppia (per un asimmetrico servono primi + test di primalità, §2.1 — da cui la raccolta di entropia). Il risultato è una coppia chiave pubblica/privata legata al tuo user ID. <strong>Visione</strong>: questo unico comando compie in un colpo generazione (§2) e memorizzazione protetta (§3, via passphrase).</p>
+<blockquote>
+<p>Nota sui default moderni: le slide del lab mostrano un esempio a <strong>RSA-2048</strong>, ma le versioni recenti di gpg tendono a generare per default chiavi a <strong>curva ellittica Ed25519</strong> — infatti la chiave reale di Prandini fornita come artefatto di lab (<code>Chiave_pubblica_Marco_Prandini.pdf</code>) è proprio una <strong>Ed25519</strong> (algoritmo di firma EdDSA). Concettualmente non cambia nulla: è sempre una coppia pubblica/privata asimmetrica; cambia solo il problema matematico difficile sottostante (curve ellittiche invece di fattorizzazione).</p>
+</blockquote>
+<h3 id="83-dove-vivono-le-chiavi-la-cartella-gnupg">8.3 Dove vivono le chiavi — la cartella <code>~/.gnupg/</code></h3>
+<pre><code class="language-bash">cd ~
+cd .gnupg/
+ls -l
+</code></pre>
+<p>Contenuto:
+- <strong><code>pubring.kbx</code></strong> → il <strong>portachiavi pubblico</strong> (keyring): tutte le chiavi pubbliche che conosci (la tua + quelle importate).
+- <strong><code>private-keys.d/</code></strong> → directory con le <strong>chiavi private</strong>, ogni file con estensione <strong><code>.key</code></strong> (cifrate con la passphrase).
+- <strong><code>gpg.conf</code></strong> → file di configurazione (default, preferenze).</p>
+<p><strong>Visione</strong>: questa è la memorizzazione (§3) resa concreta. Le pubbliche stanno insieme in un keyring condivisibile; le private stanno separate, una per file, cifrate. Rubare <code>pubring.kbx</code> non serve a nulla (sono dati pubblici); rubare <code>private-keys.d/</code> senza la passphrase nemmeno (sono cifrate).</p>
+<h3 id="84-importare-una-chiave-gpg-import">8.4 Importare una chiave — <code>gpg --import</code></h3>
+<pre><code class="language-bash">gpg --import                          # poi incolli il blocco della chiave pubblica da terminale
+gpg --import vostrachiavepubblica.pub  # oppure importi direttamente il file
+</code></pre>
+<p>All'import viene stampato il <strong>Key-ID</strong> della chiave. Per visualizzare:</p>
+<pre><code class="language-bash">gpg --list-keys Key-ID    # una chiave specifica
+gpg --list-keys           # senza Key-ID: tutte le chiavi importate
+</code></pre>
+<p><strong>Visione</strong>: importare la chiave pubblica di qualcuno significa aggiungerla al tuo <code>pubring.kbx</code> per poterla usare (cifrare per lui, o verificarne le firme). È il primo passo per verificare il file firmato di Prandini (§8.10).</p>
+<h3 id="85-esportare-la-chiave-pubblica-gpg-export">8.5 Esportare la chiave <strong>pubblica</strong> — <code>gpg --export</code></h3>
+<pre><code class="language-bash">gpg --output public.pgp --armor --export identita@email
+</code></pre>
+<p>Anatomia:
+- <code>--output public.pgp</code> → scrive su file invece che a schermo;
+- <code>--armor</code> → <strong>ASCII armor</strong>: codifica la chiave in testo base64 (il blocco <code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code>) invece che in binario, così è incollabile in una mail o su un sito. È esattamente il formato dell'artefatto <code>Chiave_pubblica_Marco_Prandini.pdf</code>;
+- <code>--export identita@email</code> → esporta la pubblica di quello user ID.</p>
+<p><strong>Visione</strong>: la chiave pubblica <strong>va distribuita</strong> (§5.2: distribuirla è l'obiettivo, il pericolo è solo che qualcuno la sostituisca). Esportarla e pubblicarla è normale e desiderabile.</p>
+<h3 id="86-esportare-la-chiave-privata-export-secret-key-da-non-fare">8.6 Esportare la chiave <strong>privata</strong> — <code>--export-secret-key</code> (da NON fare)</h3>
+<pre><code class="language-bash">gpg --output private.pgp --armor --export-secret-key vostraidentita@email
+</code></pre>
+<p><strong>Ma è fortemente sconsigliato</strong>: non ci sono situazioni in cui sia strettamente necessario e <strong>non deve MAI essere distribuita</strong>. L'unica eccezione legittima è un <strong>backup</strong> della chiave privata, per cui esiste l'opzione dedicata:</p>
+<pre><code class="language-bash">gpg --output backupkeys.pgp --armor --export-secret-keys \
+    --export-options export-backup vostraidentita@email
+</code></pre>
+<p><strong>Visione — il legame con la teoria</strong>: qui si vede in pratica la tensione del §3.1 (backup vs non-diffusione). La chiave privata si esporta <em>solo</em> per backup, mai per condividerla. E ricorda il §3.2: se è una chiave <em>di sola firma</em>, nemmeno il backup serve (basta rigenerarla).</p>
+<blockquote>
+<p><strong>Il verso, tradotto nei comandi</strong> (contro la confusione tipica): la <strong>pubblica</strong> si esporta <em>per distribuirla a tutti</em> (<code>--export</code>); la <strong>privata</strong> <em>non esce mai</em>, se non per un backup personale (<code>--export-secret-key(s)</code>). Chi cifra per te usa la tua <strong>pubblica</strong>; solo tu decifri con la tua <strong>privata</strong>. Chi verifica le tue firme usa la tua <strong>pubblica</strong>; solo tu firmi con la tua <strong>privata</strong>.</p>
+</blockquote>
+<h3 id="87-pubblicare-e-recuperare-chiavi-i-keyserver">8.7 Pubblicare e recuperare chiavi — i keyserver</h3>
+<p>I <strong>keyserver</strong> sono server dove pubblicare le proprie chiavi pubbliche e recuperare quelle altrui. Prima serve il <strong>Key-ID</strong> in formato lungo:</p>
+<pre><code class="language-bash">gpg --keyid-format LONG --list-keys a.melis@unibo.it
+# pub   rsa2048/9D6A4A7849845D01 2018-04-01 [SC] [expires: 2023-03-31]
+#       AD54A494EF4F97AF54E9FDC59D6A4A7849845D01
+# uid   [ unknown] Andrea Melis &lt;a.melis@unibo.it&gt;
+</code></pre>
+<p>Poi:</p>
+<pre><code class="language-bash"># pubblicare la propria chiave sul keyserver
+gpg --keyserver pgp.mit.edu --send-keys 9D6A4A7849845D01
+
+# recuperare la chiave pubblica di un target (dato il suo Key-ID, ottenuto es. dalla sua mail)
+gpg --keyserver pgp.mit.edu --recv-keys 49845D01
+</code></pre>
+<p>Keyserver disponibili: <strong>pgp.mit.edu</strong>, <strong>keys.openpgp.org</strong>, e alternativi <strong>hkp://keyserver.ubuntu.com</strong>, <strong>hkp://keys.gnupg.net</strong>.</p>
+<p><strong>Visione</strong>: il keyserver è l'infrastruttura di <strong>distribuzione</strong> (§5) delle chiavi pubbliche su scala Internet. Ma attenzione: un keyserver <strong>non certifica</strong> l'autenticità — chiunque può caricare una chiave con qualunque nome/email. È di nuovo il problema del §5.2/§6: il keyserver risolve <em>far arrivare</em> la chiave, non <em>fidarsi</em> che sia autentica (per quello servono web of trust o PKI).</p>
+<h3 id="88-cifrare-cifrarefirmare-decifrare">8.8 Cifrare, cifrare+firmare, decifrare</h3>
+<p><strong>Cifrare</strong> un file con la chiave pubblica di un destinatario:</p>
+<pre><code class="language-bash">gpg --encrypt --armor -r identita@mail file_da_crittare
+</code></pre>
+<ul>
+<li><code>-r</code> (recipient) → destinatario; <strong>con più <code>-r</code> si cifra per più destinatari</strong> (ognuno potrà decifrare con la propria privata — è il cifrario ibrido di S14 §14.3: il file è cifrato una volta con una chiave di sessione simmetrica, e quella chiave è cifrata separatamente con la pubblica di ciascun destinatario);</li>
+<li><code>--armor</code> → output in testo ASCII.</li>
+</ul>
+<p><strong>Cifrare <em>e</em> firmare</strong> — basta aggiungere <code>--sign</code>:</p>
+<pre><code class="language-bash">gpg --encrypt --armor --sign -r identita@mail file_da_crittare
+</code></pre>
+<p>Così il file è insieme <strong>riservato</strong> (cifrato per il destinatario) <strong>e autenticato</strong> (firmato con la <em>tua</em> privata → il destinatario, decifrando, verifica anche che venga da te e sia integro).</p>
+<p><strong>Decifrare</strong> con la propria chiave privata:</p>
+<pre><code class="language-bash">gpg --decrypt file_da_crittare
+</code></pre>
+<p><strong>Il verso, ancora una volta</strong> (meccanismo): cifrare usa la <strong>pubblica del destinatario</strong> (<code>-r destinatario</code>); decifrare usa la <strong>tua privata</strong> (implicita: gpg cerca nella tua keyring la privata giusta e chiede la passphrase). Firmare usa la <strong>tua privata</strong>; verificare userà la <strong>pubblica del firmatario</strong>.</p>
+<h3 id="89-firmare-una-chiave-gpg-sign-key-il-web-of-trust-in-pratica">8.9 Firmare una chiave — <code>gpg --sign-key</code> (il web of trust in pratica)</h3>
+<pre><code class="language-bash">gpg --sign-key identita@mail
+</code></pre>
+<p>Firma la <strong>chiave pubblica di qualcun altro</strong>: con questo atto <strong>testimoni</strong> (col peso della tua chiave) che quella chiave pubblica appartiene davvero a quella persona. È il <strong>web of trust</strong> del §6.1 reso operativo: la tua firma sulla chiave di X aiuta un terzo, che si fida di te, a fidarsi anche di X.</p>
+<p><strong>Attenzione a non confondere <code>--sign</code> con <code>--sign-key</code></strong>: <code>--sign</code> (§8.8) firma <strong>un file/messaggio</strong> (autenticità del contenuto); <code>--sign-key</code> firma <strong>una chiave</strong> (certificazione dell'identità del titolare). Scopi diversi.</p>
+<h3 id="810-esercizio-concreto-verificare-il-file-firmato-di-prandini">8.10 Esercizio concreto — verificare il file firmato di Prandini</h3>
+<p>I due artefatti del lab compongono un esercizio reale di verifica:
+1. <strong>Importi</strong> la chiave pubblica di Prandini: <code>gpg --import Chiave_pubblica_Marco_Prandini.pdf</code> (è un <code>PGP PUBLIC KEY BLOCK</code>, user ID <code>Marco Prandini (SIC2026) &lt;marco.prandini@unibo.it&gt;</code>, Ed25519).
+2. <strong>Verifichi</strong> il file firmato: <code>File_firmato.pdf</code> è in realtà <code>setup_ipt.sh</code> firmato (firma <em>one-pass</em>, compressa) con quella chiave.
+   <code>bash
+   gpg --decrypt File_firmato.pdf     # estrae il file e riporta l'esito della firma
+   # oppure, se fosse una firma staccata, gpg --verify</code>
+   gpg ricalcola l'hash del contenuto, verifica la firma con la pubblica di Prandini appena importata, e stampa <strong>"Good signature from Marco Prandini..."</strong> se tutto torna.</p>
+<p><strong>Visione</strong>: questo è l'intero modulo in tre righe — distribuzione della pubblica (§5), verifica di autenticità/integrità (S14 §14.2: si verifica con la <strong>pubblica</strong> del firmatario), e la fiducia che quella pubblica sia davvero di Prandini (§6, che nel mondo reale confermeresti confrontando il <em>fingerprint</em> per un canale fidato).</p>
+<hr />
+<h2 id="9-threat-model-del-modulo">9. Threat model del modulo</h2>
+<h3 id="91-firma-vs-cifratura-cosa-garantisce-ciascuna">9.1 Firma vs cifratura — cosa garantisce ciascuna</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Firma digitale</strong></th>
+<th><strong>Cifratura</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Proprietà garantita</td>
+<td><strong>Integrità + Autenticità</strong> (il documento non è alterato ed è del firmatario dichiarato)</td>
+<td><strong>Confidenzialità</strong> (solo il destinatario legge)</td>
+</tr>
+<tr>
+<td>Chi la produce, con quale chiave</td>
+<td>Il <strong>mittente</strong>, con la <strong>propria chiave PRIVATA</strong></td>
+<td>Il <strong>mittente</strong>, con la chiave <strong>PUBBLICA del destinatario</strong></td>
+</tr>
+<tr>
+<td>Chi la "annulla"/verifica, con quale chiave</td>
+<td>Chiunque, con la <strong>chiave PUBBLICA del mittente</strong></td>
+<td>Il <strong>destinatario</strong>, con la <strong>propria chiave PRIVATA</strong></td>
+</tr>
+<tr>
+<td>Cosa NON garantisce</td>
+<td>Non nasconde il contenuto (il documento resta leggibile)</td>
+<td>Non prova chi l'ha mandato né che sia integro</td>
+</tr>
+</tbody>
+</table>
+<p>Le due sono <strong>ortogonali</strong> e spesso combinate (<code>--encrypt --sign</code>): si ottiene un messaggio che è insieme riservato <em>e</em> autenticato.</p>
+<h3 id="92-il-verso-corretto-la-trappola-numero-uno">9.2 Il verso corretto — la trappola numero uno</h3>
+<p>Da fissare in modo indelebile (è l'errore che l'esame cerca di indurre invertendo i termini):</p>
+<blockquote>
+<ul>
+<li><strong>FIRMA</strong>: si firma con la <strong>propria chiave PRIVATA</strong>, si verifica con la <strong>chiave PUBBLICA altrui</strong>.</li>
+<li><strong>CIFRATURA</strong>: si cifra con la <strong>chiave PUBBLICA del destinatario</strong>, si decifra con la <strong>propria chiave PRIVATA</strong>.</li>
+</ul>
+</blockquote>
+<p>Regola mnemonica: <strong>la chiave privata fa sempre l'operazione che "solo tu puoi fare"</strong> (firmare a tuo nome, decifrare ciò che è destinato a te); <strong>la chiave pubblica fa sempre l'operazione che "chiunque può fare"</strong> (verificare la tua firma, cifrare qualcosa per te). Se in una domanda leggi "firma con la chiave pubblica" o "decifra con la chiave pubblica" → <strong>è falso</strong>.</p>
+<h3 id="93-se-una-chiave-privata-e-compromessa">9.3 Se una chiave privata è compromessa</h3>
+<p>Dipende — di nuovo — da <em>quale</em> chiave (§3):
+- <strong>Chiave privata di firma compromessa</strong>: l'attaccante può firmare a tuo nome (impersonarti) <em>finché la revoca non si propaga</em>. Rimedio: <strong>revocare</strong> la chiave e <strong>sostituirla</strong> (nessun backup da recuperare, §3.2). Le firme legittime già emesse <em>prima</em> della compromissione restano problematiche solo se non c'è marca temporale che le collochi prima dell'evento.
+- <strong>Chiave privata di decifrazione compromessa</strong>: <strong>tutto ciò che è mai stato cifrato per te diventa leggibile dall'attaccante</strong> (danno retroattivo su tutto il cifrato archiviato che riesce a intercettare/recuperare). Rimedio: sostituire la chiave per il futuro, ma il passato è irrimediabilmente esposto. Questo è il motivo per cui la protezione a riposo (passphrase/HSM) è così critica per le chiavi di decifrazione.</p>
+<h3 id="94-attaccante-sulla-distribuzione-mitm-e-difese">9.4 Attaccante sulla distribuzione (MITM) e difese</h3>
+<p>Il §5.2 mostrava l'attacco attivo che <strong>sostituisce le chiavi pubbliche</strong>. Le difese sono i modelli di certificazione del §6:
+- <strong>web of trust</strong>: la firma di terzi fidati sulla chiave (verificabile con <code>--sign-key</code>) rende una chiave sostituita non fidata (l'impostore non ha le firme giuste);
+- <strong>PKI/certificati X.509</strong>: la firma della CA lega chiave e identità; una chiave sostituita non ha un certificato valido firmato dalla CA.</p>
+<p>In entrambi i casi, la difesa pratica dell'utente è <strong>verificare il fingerprint</strong> della chiave su un canale indipendente prima di fidarsene.</p>
+<hr />
+<h2 id="10-domande-di-autoverifica-stile-quiz-teorico-40">10. Domande di autoverifica — stile quiz teorico (40%)</h2>
+<blockquote>
+<p>Rispondi <em>prima</em> di leggere le soluzioni negli appunti. Stile dell'esame: vero/falso e scelta multipla con <strong>penalità sulle sbagliate</strong> — se non sei sicuro, ragiona sul meccanismo.</p>
+</blockquote>
+<p><strong>Vero o Falso:</strong>
+1. Per generare una chiave simmetrica robusta è sufficiente un buon generatore di numeri casuali.
+2. Un PRNG, noto il seme, produce una sequenza prevedibile.
+3. Un TRNG è più veloce ed efficiente di un PRNG.
+4. Una chiave di firma, se compromessa, va recuperata da un backup.
+5. Una chiave di decifrazione richiede un backup perché la sua perdita è irreversibile.
+6. In un sistema simmetrico con N soggetti servono N chiavi segrete.
+7. Il problema principale nella distribuzione delle chiavi pubbliche è la loro riservatezza.
+8. Un attaccante passivo che intercetta una chiave pubblica ne compromette la sicurezza.
+9. Nel modello web of trust esiste un'autorità centrale (CA) che certifica le chiavi.
+10. Una root CA possiede un certificato firmato da se stessa (self-signed).
+11. Si firma un documento con la propria chiave pubblica.
+12. Si cifra un messaggio per Bob usando la chiave pubblica di Bob.
+13. Una chiave RSA di 256 bit è robusta come una chiave simmetrica AES di 256 bit.
+14. Il comando <code>gpg --export-secret-key</code> va usato normalmente per condividere la propria chiave con altri.
+15. In BB84, se Eve misura un fotone nella base sbagliata ne altera lo stato e può essere rilevata.
+16. Il flag <code>--armor</code> di gpg produce output binario compatto.
+17. Una firma digitale garantisce la confidenzialità del documento.
+18. DES, con i suoi 56 bit di chiave, è oggi forzabile a forza bruta.</p>
+<p><strong>Scelta multipla:</strong></p>
+<ol start="19">
+<li>
+<p>Quale opzione elenca correttamente le tre fasi del ciclo di vita di una chiave?
+    a) cifratura, firma, verifica
+    b) generazione, memorizzazione, distribuzione
+    c) confusione, diffusione, permutazione
+    d) import, export, revoke</p>
+</li>
+<li>
+<p>In un sistema simmetrico con N soggetti, il numero di chiavi segrete necessarie è:
+    a) N   b) N-1   c) N(N-1)/2   d) 2ᴺ</p>
+</li>
+<li>
+<p>Per verificare la firma su un messaggio ricevuto da Alice si usa:
+    a) la chiave privata di Alice   b) la chiave pubblica di Alice   c) la propria chiave privata   d) la propria chiave pubblica</p>
+</li>
+<li>
+<p>Quale comando gpg cifra un file per il destinatario <code>bob@x.it</code> in formato testo?
+    a) <code>gpg --sign -r bob@x.it file</code>
+    b) <code>gpg --decrypt bob@x.it file</code>
+    c) <code>gpg --encrypt --armor -r bob@x.it file</code>
+    d) <code>gpg --export bob@x.it file</code></p>
+</li>
+<li>
+<p>Il modello di certificazione delle chiavi pubbliche <strong>privo di un'autorità centrale</strong>, basato sulle firme reciproche degli utenti, è:
+    a) PKI X.509   b) KDC   c) web of trust   d) key escrow</p>
+</li>
+<li>
+<p>Rispetto a GPG, PGP è:
+    a) uno standard open source definito da RFC 4880
+    b) una soluzione proprietaria (Symantec)
+    c) un algoritmo di hash
+    d) un keyserver</p>
+</li>
+<li>
+<p>La distinzione corretta tra <code>gpg --sign</code> e <code>gpg --sign-key</code> è:
+    a) sono sinonimi
+    b) <code>--sign</code> firma un file/messaggio, <code>--sign-key</code> firma (certifica) la chiave pubblica di qualcuno
+    c) <code>--sign</code> firma una chiave, <code>--sign-key</code> cifra un file
+    d) <code>--sign</code> è per RSA, <code>--sign-key</code> per Ed25519</p>
+</li>
+</ol>
+<hr />
+<h2 id="11-connessioni-con-altri-moduli">11. Connessioni con altri moduli</h2>
+<p><strong>Con S14 (Crittografia) — il legame diretto e portante</strong>:
+- S14 spiegava la <em>matematica</em> (RSA <code>c=mᵉ mod n</code>, hash, firma = hash cifrato con la privata, cifrari ibridi); S15 spiega il <em>ciclo di vita</em> di quelle chiavi e le rende operative con gpg. Fare S14 prima di S15 è ciò che rende i comandi gpg comprensibili invece che magici (lo diceva già la §19 di S14).
+- La <strong>firma digitale</strong> di S14 §14.2 è ciò che <code>gpg --sign</code> / <code>--verify</code> eseguono; il <strong>cifrario ibrido</strong> di S14 §14.3 è <em>esattamente</em> ciò che fa <code>gpg --encrypt -r</code> (chiave di sessione simmetrica + chiave cifrata con la pubblica di ogni <code>-r</code>).
+- <strong>Non ripetiamo, costruiamo sopra</strong>: S14 assumeva la chiave "già data e fidata"; S15 mostra che generarla (§2), custodirla (§3) e soprattutto <em>fidarsi</em> della pubblica altrui (§5-6) è il vero problema aperto. Il §9.2 (verso firma/cifratura) rafforza la tabella di S14 §14 perché è la confusione più a rischio.</p>
+<p><strong>Con S13 (Protezione delle comunicazioni, TLS/OpenSSL) e la PKI</strong>:
+- I <strong>certificati X.509</strong> e la <strong>catena fino alla root CA</strong> (§6.2) sono la stessa PKI su cui poggia HTTPS/TLS. Il "di chi mi fido?" che qui risolviamo con web of trust <em>o</em> CA è ciò che in TLS è sempre risolto con le <strong>CA</strong> (il browser ha le root CA preinstallate).
+- La <strong>distribuzione con MITM sulle chiavi pubbliche</strong> (§5.2) è la minaccia che i certificati TLS neutralizzano.</p>
+<p><strong>Con S2 (Autenticazione)</strong>:
+- La <strong>cifratura della chiave privata con passphrase</strong> (§3.1, e la passphrase di <code>gpg --gen-key</code>) è lo stesso principio del proteggere un segreto derivandolo da una password.
+- Il <strong>challenge-response asimmetrico</strong> di SSH (S2) usa la stessa coppia pubblica/privata: si autentica dimostrando il possesso della privata — stesso verso del §9.2.</p>
+<p><strong>Con S5 (Firewall)</strong> — curiosità dal lab: l'artefatto <code>File_firmato.pdf</code> è in realtà <code>setup_ipt.sh</code> firmato, cioè uno script di configurazione <strong>iptables</strong> (il tema di S5) distribuito con firma per garantirne l'integrità/autenticità prima di eseguirlo. È l'uso reale di gpg: firmare uno script perché chi lo scarica sia certo che non sia stato manomesso.</p>
+<hr />
+<h2 id="12-riepilogo">12. Riepilogo</h2>
+<ul>
+<li><strong>Ciclo di vita</strong> delle chiavi: <strong>generazione → memorizzazione → distribuzione</strong>, più gestione e certificazione. La crittografia pura non si rompe; si rompe la gestione.</li>
+<li><strong>Generazione</strong>: simmetriche = buon RNG; asimmetriche = numeri primi (random + test di primalità). <strong>TRNG</strong> (fisico, imprevedibile, lento) genera il seme; <strong>PRNG</strong> (algoritmico, deterministico, veloce, noto-il-seme-nota-la-sequenza) lo espande. Test di casualità: <strong>NIST SP 800-22, 15 test</strong>. Robustezza: contro forza bruta serve lunghezza (<strong>56 bit forzabili, 128+ no</strong>, muro termodinamico di Landauer); contro fattorizzazione (RSA) servono <strong>moduli grandi ≥ 2048 bit</strong>.</li>
+<li><strong>Memorizzazione</strong>: chiave di <strong>decifrazione → backup SÌ</strong> (perdita irreversibile) + non-diffusione; chiave di <strong>firma → backup NO</strong> (basta sostituirla). Accorgimenti: passphrase, HSM, key escrow, secret sharing.</li>
+<li><strong>Gestione/numero chiavi</strong>: asimmetrico <strong>O(N)</strong> (una pubblica per soggetto) vs simmetrico <strong>O(N²) = N(N-1)/2</strong>.</li>
+<li><strong>Distribuzione</strong>: simmetriche mai in chiaro (scambio manuale, KDC, DH). Asimmetriche: passivo non fa danni, <strong>attivo (MITM) sostituisce le chiavi</strong> → il problema non è riservatezza ma <strong>autenticità</strong>.</li>
+<li><strong>Certificazione</strong>: <strong>web of trust</strong> (firme reciproche tra utenti, no autorità, non scala) vs <strong>PKI infrastrutturale</strong> (CA + certificati <strong>X.509v3</strong> + catena fino alla <strong>root CA</strong> self-signed, scala).</li>
+<li><strong>BB84 (QKD)</strong>: distribuisce una chiave sfruttando che misurare un qubit nella base sbagliata lo altera → l'origliatrice Eve è <strong>rilevabile</strong>. (Il quantum qui difende; in S14 con Shor attaccava.)</li>
+<li><strong>GPG</strong>: OpenPGP/RFC 4880 open source (vs PGP proprietario). <code>--gen-key</code> (size ≥2048, scadenza, passphrase); chiavi in <code>~/.gnupg/</code> (<code>pubring.kbx</code>, <code>private-keys.d/*.key</code>); <code>--import</code>/<code>--export</code> (pubblica sì, privata mai se non backup); keyserver <code>--send-keys</code>/<code>--recv-keys</code>; <code>--encrypt --armor -r</code> (cifra con la <strong>pubblica del destinatario</strong>); <code>--sign</code>/<code>--decrypt</code>; <code>--sign-key</code> (web of trust).</li>
+<li><strong>Verso da inchiodare</strong>: <strong>firma</strong> = privata propria (produci) / pubblica altrui (verifichi); <strong>cifratura</strong> = pubblica del destinatario (cifri) / privata propria (decifri). La <strong>privata</strong> fa ciò che solo tu puoi fare; la <strong>pubblica</strong> ciò che chiunque può fare.</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_modulo3C.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi</p>
+<h1 class="titolo-pagina">Appunti_modulo3C.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo3C.md">Apri il file originale</a></p>
+<article class="prosa"><p>GESTIONE DEI PROCESSI</p>
+<p>lanciare processi in background</p>
+<p>monitorarne lo stato</p>
+<p>ucciderli</p>
+<p>sincronizzarli</p>
+<hr />
+<p>Comando nella shell --&gt; processo        ogni processo ha:</p>
+<ul>
+<li>PID (Process ID) - Univoco globale assegnato dal kernel</li>
+<li>Job ID - Id locale alla shell corrente, solo per la sessione</li>
+</ul>
+<p>Il processo sa che utente lo ha lanciato e agisce in suo nome, agendo con i suoi permessi.Solo un processo lanciato da Root può declassarsi a un altro utente ma senza poter poi tornare indietro</p>
+<p>quando lancio un comando nella shell, la shell chiama fork() [copia il processo] e exec() [sostituisce il codice con il programma da eseguire (SPIEGATI MEGLIO??)]</p>
+<p>Ogni processo figlio eredita i file descriptor del padre (cosa sono i file descriptor?)</p>
+<hr />
+<p>PROCESSI in FOREGROUND e BACKGROUND</p>
+<p>Per lanciare un processo in background:        aggiungo &amp;</p>
+<pre><code class="language-bash">sleep 1000 &amp;
+</code></pre>
+<p>Usando &amp; la shell sponde con il JOB ID tra [ ] e il PID del processo</p>
+<p>N.B.        esiste \$! e si usa per catturare e salvare in variabile il PID dell'ultimo processo lanciato in background (vale anche per processi lanciati non in background?</p>
+<p>Un processo in background:</p>
+<ul>
+<li>non riceve più input dal terminale</li>
+<li>continua a scrivere su STDOUT e STDERR quindi l'output appare a schermo (e può essere reindirizzato)</li>
+</ul>
+<p>(non ho capito la modifica da foreground a background nel pratico come si fa, non so come usare quel codice accennato)</p>
+<hr />
+<p>SEGNALI</p>
+<p>i segnali sono eventi asincroni (cioè?) che vengono mandati dal kernel a un determinato processo. servono a controllare i processi dall'esterno</p>
+<p>Un processo quando riceve un segnale può:</p>
+<ul>
+<li>terminare (cosa significa con o senza core dump?)</li>
+<li>ignorarlo</li>
+<li>sospendersi (come si cambia lo stato nel pratico?)</li>
+<li>riprendersi dallo stop (cosa significa cont?)</li>
+</ul>
+<p>Ogni processo può designare un HANDLER personalizzato in grado di gestire il segnale come vuole lui. tranne per SIGKILL e SIGSTOP, unici segnali hce non possono essere bloccati, ignorati o intercettati</p>
+<p>(non capisco come usare nel pratico le tabelle segnali importanti e invio segnali con kill. la prima non mi spiega come invio i segnali nel pratico, la seconda sembra che si faccia tutto con kill, ma non penso dal nome, i segnali normali saranno diversi e kill solo per uccidere o sospendere il processo?)</p>
+<p>posso usare il codice del segnale in negativo in relazione a un PID di un process group (PGID) per agire su un appunto un gruppo di processi</p>
+<p>la nota critica sulla non ereditarietà dei processi figli è linkata solo con i pseudo segnali bash o ale per tutti i segnali? dovrò creare un handler per ogni processo figli inclusi? non posso dargli lo stesso handler?)</p>
+<hr />
+<p>COMANDI DI MONITORAGGIO</p>
+<p>ps         ----&gt;        crea snapshot dei processi in esecuzione</p>
+<p>ES:        </p>
+<pre><code class="language-bash">ps                  # processi della shell corrente
+ps $PID             # processo specifico (vuoto se non esiste)
+ps aux              # tutti i processi del sistema
+ps hp $PID          # output senza header, utile negli script
+</code></pre>
+<p>(spiega meglio le colonne di ps)</p>
+<p>(chi restituisce questi codici di stato?)</p>
+<p>jobs        ---&gt;        lista dei job della shell corrente        (cosa cambia tra processo e job?)</p>
+<p>fg        ----&gt;           riporta un job in foreground        (è il contrario di lanciarlo con &amp;?)</p>
+<p>watch        ----&gt;        esegue un comando periodicamente e mostra l'output aggiornato</p>
+<pre><code class="language-bash">watch &quot;ps aux | grep sleep | grep -v grep&quot;
+</code></pre>
+<p>(chiarisci meglio come lo hai costruito)</p>
+<p>senza ulteriori specifiche aggiorna ogni 2 secondi, utile per osservare un processo che cambia nel tempo (come cambio tempo di aggiornamento?)</p>
+<hr />
+<p>WAIT</p>
+<p>wait blocca l'esecuzione dello script fino al completamento dei job in background</p>
+<pre><code class="language-bash">sleep 30 &amp;
+sleep 40 &amp;
+wait         # attende entrambi
+echo &quot;Tutti terminati&quot;
+</code></pre>
+<p>posso aspettare un solo job specifico:</p>
+<pre><code class="language-bash">wait $PID    # aspetta solo quel PID
+</code></pre>
+<p>(ricordami cosa faceva trap perchè non ho capito come funziona il suo legame con wait)</p>
+<hr />
+<p>MODIFICATORI PER PROCESSI IN BACKGROUND</p>
+<p>immunità alla chiusura della shell</p>
+<p>quando chiudo la shell il kernel invia SIGHUP (hangup) a tutti i job in background (e foreground immagino?) terminandoli. nohup lo evita:</p>
+<pre><code class="language-bash">nohup sleep 1000 &amp;          # sopravvive alla chiusura della shell
+</code></pre>
+<p>lo STDOUT viene rediretto su NOHUP.OUT (come faccio a non farlo?)</p>
+<p>rimuovere un job dalla job table della shell</p>
+<pre><code class="language-bash">sleep 1000 &amp; disown         # lancia e rimuove subito dalla job table
+disown %1                   # rimuove il job 1 già in background
+disown -h %1                # implementa anche l'immunità a SIGHUP
+</code></pre>
+<p>(non ho capito proprio a cosa serve, lo confornti a nohup ma non mi sembra faccia una cosa simile)</p>
+<p>priorità di scheduling</p>
+<p>con nice posso impostare la priorità di un comando, da -20(max) a +19(min) solo root può usare valori negativi. il valore default è 10</p>
+<pre><code class="language-bash">nice -n 10 comando          # lancia con niceness +10 (priorità più bassa)
+nice nohup long_calc &amp;      # combinazione comune
+</code></pre>
+<p>(spiega questa combinazione comune)</p>
+<hr />
+<p>ARRAY BASH PER TRACCIARE I PROGRESSI</p>
+<pre><code class="language-bash">COMANDO1=&quot;sleep 10&quot;
+COMANDO2=&quot;sleep 20&quot;
+
+$COMANDO1 &amp; PID[$!]=&quot;$COMANDO1&quot;
+$COMANDO2 &amp; PID[$!]=&quot;$COMANDO2&quot;
+
+echo ${!PID[@]}    # stampa gli indici (= i PID)
+echo ${PID[@]}     # stampa i valori (= i comandi)
+echo ${PID[1234]}  # valore associato al PID 1234
+</code></pre>
+<p>non ho capito l'esempio e neanche quindi a cosa sia utile che gli array possano avere indici non consecutivi, che cos'è poi l'indice di un array?</p>
+<hr />
+<p>MKTEMP</p>
+<p>essenziale per creare file temporanei su cui far scrivere output a processi separati che non possono condividere lo stesso file senza sincronizzazione</p>
+<pre><code class="language-bash">FA=$(mktemp)    # crea /tmp/tmp.XXXXXX e restituisce il path
+FB=$(mktemp)
+# ... usare $FA e $FB come destinazioni separate ...
+rm -f &quot;$FA&quot; &quot;$FB&quot;   # pulizia obbligatoria
+</code></pre>
+<p><code>mktemp</code> risolve il problema della race condition (due processi che creano contemporaneamente un file con lo stesso nome).</p>
+<hr />
+<h2 id="comandi-di-riferimento">Comandi di Riferimento</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Sintassi</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&amp;</code></td>
+<td><code>comando &amp;</code></td>
+<td>Lancia in background</td>
+</tr>
+<tr>
+<td><code>$!</code></td>
+<td><code>echo $!</code></td>
+<td>PID dell'ultimo processo in background</td>
+</tr>
+<tr>
+<td><code>jobs</code></td>
+<td><code>jobs [-l]</code></td>
+<td>Lista job della shell corrente (altri -?)</td>
+</tr>
+<tr>
+<td><code>fg</code></td>
+<td><code>fg %job_id</code></td>
+<td>Riporta in foreground</td>
+</tr>
+<tr>
+<td><code>bg</code></td>
+<td><code>bg %job_id</code></td>
+<td>Manda/riavvia in background (manda o riavvia?)</td>
+</tr>
+<tr>
+<td><code>kill</code></td>
+<td><code>kill [-segnale] PID</code></td>
+<td>Invia segnale a processo</td>
+</tr>
+<tr>
+<td><code>ps</code></td>
+<td><code>ps [aux] [PID]</code></td>
+<td>Mostra processi (cosa fa aux?)</td>
+</tr>
+<tr>
+<td><code>wait</code></td>
+<td><code>wait [PID]</code></td>
+<td>Aspetta terminazione job</td>
+</tr>
+<tr>
+<td><code>watch</code></td>
+<td><code>watch "comando"</code></td>
+<td>Esegue comando periodicamente (sintassi completa?)</td>
+</tr>
+<tr>
+<td><code>nohup</code></td>
+<td><code>nohup cmd &amp;</code></td>
+<td>Lancia immune a SIGHUP</td>
+</tr>
+<tr>
+<td><code>disown</code></td>
+<td><code>disown [%job]</code></td>
+<td>Rimuove job dalla job table</td>
+</tr>
+<tr>
+<td><code>nice</code></td>
+<td><code>nice [-n N] cmd</code></td>
+<td>Lancia con priorità modificata</td>
+</tr>
+<tr>
+<td><code>trap</code></td>
+<td><code>trap "codice" SEGNALE</code></td>
+<td>Definisce handler per segnale (come è strutturato? fai un esempio a parte)</td>
+</tr>
+<tr>
+<td><code>mktemp</code></td>
+<td><code>FA=$(mktemp)</code></td>
+<td>Crea file temporaneo sicuro</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;                                                                                                                                                                                                       </p>
+<hr />
+<p>ES 1</p>
+<p>❯ sleep 1000 &amp;<br />
+[1] 12516</p>
+<p>~<br />
+✦ ❯ A=\$!</p>
+<p>~<br />
+✦ ❯ echo \$A<br />
+12516</p>
+<p>✦ ❯ ps \$A<br />
+    PID TTY STAT TIME COMMAND<br />
+  12516 pts/2 SN 0:00 sleep 1000</p>
+<p>~        cosa ottengo da questa lettura? il pid ok ma cosa sono tty stat time e command?</p>
+<p>✦ ❯ jobs<br />
+[1] + running sleep 1000</p>
+<p>~<br />
+✦ ❯ jobs -l<br />
+[1] + 12516 running sleep 1000</p>
+<p>~        quindi -l serve solo per vedere il PID, che altre specifiche posso dargli?</p>
+<p>✦ ❯ kill -STOP \$A<br />
+[1] + 12516 suspended (signal) sleep 1000</p>
+<p>~</p>
+<p>✦ ❯ ps \$A<br />
+    PID TTY STAT TIME COMMAND<br />
+  12516 pts/2 TN 0:00 sleep 1000</p>
+<p>~        noto che ora da SN sta a TN, per cosa stanno?</p>
+<p>✦ ❯ kill \$A</p>
+<p>~<br />
+✦ ❯ ps \$A<br />
+    PID TTY STAT TIME COMMAND<br />
+  12516 pts/2 TN 0:00 sleep 1000</p>
+<p>~        a me sembra ancora attivo....</p>
+<p>✦ ❯ kill -TERM \$A</p>
+<p>~<br />
+✦ ❯ ps \$A<br />
+    PID TTY STAT TIME COMMAND<br />
+  12516 pts/2 TN 0:00 sleep 1000</p>
+<p>~        ho provato anche così ma uguale</p>
+<p>✦ ❯ jobs<br />
+[1] + suspended (signal) sleep 1000</p>
+<p>~        resta questo</p>
+<hr />
+<p>ES 2</p>
+<p>vagrant@bookworm:~\$ sleep 1000 &amp;<br />
+[1] 1249<br />
+vagrant@bookworm:~\$ sleep 1000 &amp; disown<br />
+[2] 1250<br />
+vagrant@bookworm:~\$ nohup spleep 1000 &amp;<br />
+[2] 1255<br />
+vagrant@bookworm:~\$ nohup: ignoring input and appending output to 'nohup.out'<br />
+nohup: failed to run command 'spleep': No such file or directory<br />
+^C<br />
+[2]+ Exit 127 nohup spleep 1000<br />
+vagrant@bookworm:~\$ jobs<br />
+[1]+ Running sleep 1000 &amp;<br />
+vagrant@bookworm:~\$ nohup sleep 1000 &amp;<br />
+[2] 1258<br />
+vagrant@bookworm:~\$ nohup: ignoring input and appending output to 'nohup.out'<br />
+jobs<br />
+[1]- Running sleep 1000 &amp;<br />
+[2]+ Running nohup sleep 1000 &amp;<br />
+vagrant@bookworm:~\$ exit<br />
+logout</p>
+<p>// ho fatto un errore di battitutra ma non credo di aver causato problemi</p>
+<p>vagrant@bookworm:~\$ ps<br />
+    PID TTY TIME CMD<br />
+   1270 pts/1 00:00:00 bash<br />
+   1274 pts/1 00:00:00 ps<br />
+vagrant@bookworm:~\$ ps aux | grep sleep | grep -v grep<br />
+vagrant 1249 0.0 0.1 2904 876 ? S 12:24 0:00 sleep 1000<br />
+vagrant 1250 0.0 0.1 2904 888 ? S 12:24 0:00 sleep 1000<br />
+vagrant 1258 0.0 0.1 2904 876 ? S 12:25 0:00 sleep 1000</p>
+<p>//perchè con ps e basta non vedo un processo? e perchè ci sono 3 processi? dovrei averne 2 no?</p>
+<hr />
+<p>ES 3</p>
+<p>vagrant@bookworm:~\$ sleep 30 &amp;<br />
+[1] 1305<br />
+vagrant@bookworm:~\$ sleep 40 &amp;<br />
+[2] 1308<br />
+vagrant@bookworm:~\$ wait<br />
+echo "tutti terminati"<br />
+[1]- Done sleep 30<br />
+[2]+ Done sleep 40<br />
+vagrant@bookworm:~\$ echo "tutti terminati"<br />
+tutti terminati<br />
+vagrant@bookworm:~\$</p>
+<p>//        questo è il primo terminale e funziona come dovrebbe no? aspetta entrambi e poi stampa</p>
+<p>vagrant@bookworm:~\$ watch "ps auxw | grep sleep | grep -v grep"<br />
+Error opening terminal: xterm-kitty.</p>
+<p>//        questo è il secondo terminale e penso che questo errore non fosse previsto</p>
+<hr />
+<p>ES 4</p>
+<p>vagrant@bookworm:~\$ COMANDO1="sleep 10"<br />
+vagrant@bookworm:~\$ COMANDO2="sleep 20"<br />
+vagrant@bookworm:~\$ \$COMANDO1<br />
+vagrant@bookworm:~\$ \$COMANDO1 &amp; PID[\$!]="\$COMANDO1"<br />
+[1] 1390      <br />
+vagrant@bookworm:~\$ \$COMANDO2 &amp; PID[\$!]="\$COMANDO2"<br />
+[2] 1393<br />
+[1] Done \$COMANDO1<br />
+vagrant@bookworm:~\$ echo \${!PID[@]}<br />
+1390 1393<br />
+vagrant@bookworm:~\$ echo \${!PID[@]}<br />
+1390 1393<br />
+vagrant@bookworm:~\$ echo \${PID[@]}<br />
+sleep 10 sleep 20<br />
+vagrant@bookworm:~\$ echo \${PID[1390]}<br />
+sleep 10<br />
+[2]+ Done \$COMANDO2<br />
+vagrant@bookworm:~\$</p>
+<p>// ho capito come fare tutto ma non cosa sto facendo, commenta il testo spiegando come si abbina cio che scrivo in ogni riga a quello che faccio/succede</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo3C_gestione_processi]]</li>
+<li>[[lezione_modulo3C_gestione_processi]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

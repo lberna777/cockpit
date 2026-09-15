@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_moduloS3_web_security.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_moduloS3_web_security.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SECURITY/lezione_moduloS3_web_security.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-s3-web-security-owasp-top-ten-2021">Lezione — Modulo S3: Web Security (OWASP Top Ten 2021)</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Materiale</strong>: Web_security_6_marzo.pdf (45 pp.) + LAB_web_security_11_marzo.pdf (42 pp.)
+<strong>Prerequisiti</strong>: S1 ✅ (nmap, enumeration, surface d'attacco), S2 ✅ (autenticazione, sessioni)
+<strong>Nota esame</strong>: S3 è una delle 5 tipologie d'esame ⭐ (<strong>Web vulnerabilities</strong>). Conta sia per il quiz teorico (40%) — con penalità per risposta sbagliata — sia per la prova pratica (60%). Le vulnerabilità OWASP compaiono sia come domande teoriche V/F sia come esercizi da eseguire su DVWA.</p>
+<hr />
+<h2 id="come-leggere-questa-lezione">Come leggere questa lezione</h2>
+<p>Il materiale di S3 ruota attorno a una domanda sola: <em>cosa succede quando un'applicazione web si fida dell'input che riceve?</em> Quasi tutto ciò che OWASP classifica nasce da questa fiducia mal riposta. I ganci concreti sono i payload che incontrerai su DVWA — <code>' OR 'a'='a</code>, <code>&lt;script&gt;alert("XSS")&lt;/script&gt;</code>, <code>; ls</code> — e gli header HTTP che il server può (o non può) impostare per difendersi. Leggi questa lezione capendo <em>perché</em> ogni tecnica funziona; la sequenza passo-passo su DVWA è nella guida-lab (<code>/lab S3</code>).</p>
+<hr />
+<h2 id="la-visione-dinsieme-threat-model">La visione d'insieme — threat model</h2>
+<p>Un'applicazione web è un sistema che riceve input dall'esterno (parametri URL, form, cookie, header, file XML) e li usa per costruire query, comandi, pagine HTML, chiamate ad API. L'<strong>attaccante</strong> sfrutta il fatto che l'applicazione non distingue tra <em>dato</em> e <em>istruzione</em>: se l'input dell'utente finisce dentro una query SQL senza essere sanificato, l'utente può scrivere SQL. Se finisce dentro una pagina HTML senza escaping, può scrivere JavaScript. Se finisce in una chiamata di sistema, può scrivere comandi bash.</p>
+<p>La prospettiva del <strong>difensore</strong> è speculare: ogni punto dove l'input esterno influenza un interprete (database, shell, browser, parser XML) è una superficie d'attacco che va trattata con zero fiducia. Il principio è <em>validate input, escape output</em> — valida quello che entra, codifica tutto quello che esce verso un interprete. OWASP Top Ten 2021 cataloga le famiglie di errori più frequenti: non sono dieci cose separate, sono dieci facce dello stesso problema di trust mal gestito.</p>
+<p>Il <strong>lab</strong> di S3 usa DVWA (Damn Vulnerable Web Application) su Docker, avviato con <code>pentestlab.sh</code>. DVWA espone intenzionalmente tutte le vulnerabilità OWASP, impostate al livello "low" (zero filtri). Questo ti permette di vedere la vulnerabilità nella sua forma più pura, capire il meccanismo, e poi alzare il livello per vedere come i filtri cambiano la superficie.</p>
+<p>⚠️ <strong>Pattern errore da errori_frequenti.md</strong>: prima di qualsiasi test su DVWA, costruisci la catena mentale — <em>che informazione voglio ottenere → quale vulnerabilità la espone → quale payload la sfrutta</em>. Perdere il filo ("cosa sto facendo?") è il pattern "narrativa vs comandi" che hai già mostrato in S1. Ancòrati sempre all'obiettivo.</p>
+<hr />
+<h2 id="a1-broken-access-control-idor-e-path-traversal">A1 — Broken Access Control: IDOR e Path Traversal</h2>
+<p><strong>Insecure Direct Object Reference (IDOR)</strong> è il caso in cui una risorsa è referenziata direttamente da un identificatore (un numero, un nome file) che l'applicazione accetta senza verificare se l'utente che lo richiede ne abbia il diritto. L'attaccante non "buca" nulla in senso crittografico — cambia semplicemente <code>?id=42</code> in <code>?id=43</code> e legge i dati di qualcun altro. Il sistema di controllo accessi è assente o ignorato.</p>
+<p>Il <strong>File Disclosure / Path Traversal</strong> è IDOR applicato a file: invece di un ID numerico, il parametro è un percorso. Se <code>?page=about.php</code> viene gestito includendo direttamente il file nominato, un attaccante può provare <code>?page=../../../../etc/passwd</code> e il server servirà il file delle password di sistema. La sequenza <code>../</code> sale di una directory — quanti <code>../</code> bastano dipende da dove si trova il web root, ma l'attaccante li accumula finché funziona.</p>
+<p><strong>LFI (Local File Inclusion)</strong> e <strong>RFI (Remote File Inclusion)</strong> sono la stessa vulnerabilità in due varianti: LFI include un file locale al server, RFI (disabilitato di default su DVWA) include un file remoto. Per RFI, l'attaccante serve un file PHP malevolo dalla propria macchina con <code>python3 -m http.server 8081</code> e punta il parametro <code>page=</code> verso quell'URL. Se il server PHP esegue il file incluso, l'attaccante ottiene esecuzione di codice remoto.</p>
+<p>Dal lato difensore: non accettare mai percorsi di file come input utente. Se serve, usare una whitelist di pagine consentite e mai concatenare l'input direttamente in una chiamata al filesystem.</p>
+<hr />
+<h2 id="a2-cryptographic-failures">A2 — Cryptographic Failures</h2>
+<p>Questa categoria copre i dati sensibili (PII, credenziali, dati finanziari) che circolano o vengono conservati senza protezione crittografica adeguata. Non è solo "usare HTTP invece di HTTPS" — è anche trasmettere le password in chiaro nei log, usare algoritmi deboli (MD5 per le password, come vedrai su DVWA dove le password sono hash MD5 craccabili banalmente), o non proteggere il database at rest.</p>
+<p>Il <strong>meccanismo</strong> che ti interessa per l'esame: un hash MD5 come <code>5f4dcc3b5aa765d61d8327deb882cf99</code> (che è l'hash di "password") si cracca con una ricerca su qualunque rainbow table online. MD5 non è adatto alle password — manca di salt e di key stretching. Funzioni corrette sono bcrypt, scrypt, Argon2.</p>
+<hr />
+<h2 id="a3-injection-il-cuore-del-lab">A3 — Injection: il cuore del lab</h2>
+<p>L'injection è la famiglia più ampia e quella su cui si concentra il lab pratico. Il principio è sempre lo stesso: dati non fidati vengono interpretati come codice da un interprete.</p>
+<h3 id="sql-injection">SQL Injection</h3>
+<p>L'applicazione DVWA costruisce la query così (dal sorgente PHP):</p>
+<pre><code>$getid = &quot;SELECT first_name, last_name FROM users WHERE user_id = '$id'&quot;;
+</code></pre>
+<p>Il parametro <code>$id</code> viene inserito direttamente nella stringa SQL, senza prepared statement. Se digiti <code>1</code> ottieni il record con ID 1. Se digiti <code>' OR 'a'='a</code>, la query diventa:</p>
+<pre><code class="language-sql">SELECT First_Name,Last_Name FROM users WHERE ID='' OR 'a'='a';
+</code></pre>
+<p>La condizione <code>'a'='a'</code> è sempre vera, quindi vengono restituiti tutti i record. Hai appena violato la logica di autorizzazione del database.</p>
+<p>La tecnica <strong>Union Based</strong> porta questo più lontano. <code>UNION</code> in SQL permette di concatenare i risultati di due SELECT — ma richiede che le due SELECT abbiano lo stesso numero di colonne. La prima cosa da scoprire è quindi quante colonne ha la query originale. Si usa la tecnica dei NULL progressivi:</p>
+<pre><code>' union select NULL #      → errore (numero colonne sbagliato)
+' union select NULL,NULL # → risultato! → la query ha 2 colonne
+</code></pre>
+<p>Una volta noto il numero di colonne, si può estrarre qualsiasi informazione dal database. I <strong>metadati di sistema</strong> si leggono con funzioni built-in di MySQL/MariaDB:</p>
+<pre><code>' union select NULL,@@version #    → versione del database
+' union select NULL,@@hostname #   → hostname della macchina
+' union select NULL,database() #   → nome del database corrente
+</code></pre>
+<p>La struttura del database si esplora attraverso <code>information_schema</code>, un database speciale di MySQL che contiene la mappa di tutti gli altri database, tabelle e colonne:</p>
+<pre><code>' union select null,schema_name from information_schema.schemata #
+→ lista di tutti i database (dvwa, mysql, information_schema, ...)
+
+' union select null,table_name from information_schema.tables where table_schema='dvwa' #
+→ tabelle nel database dvwa: guestbook, users
+
+' union select null,column_name from information_schema.columns where table_name='users' #
+→ colonne della tabella users: user_id, first_name, last_name, user, password, avatar
+
+' union select user,password from users #
+→ estrae username e hash password di tutti gli utenti
+</code></pre>
+<p>Nota il <code>#</code> finale: in MySQL <code>#</code> è un commento che "tronca" il resto della query originale. Questo serve perché la query originale spesso ha ancora un <code>'</code> di chiusura dopo <code>$id</code> — senza il commento, la sintassi risultante sarebbe invalida.</p>
+<p>⚠️ <strong>Visione attaccante</strong>: con Union Based SQL injection hai accesso a tutto il database — non solo alla tabella originale, ma a qualsiasi schema presente nel DBMS. Le password sono hash MD5 su DVWA, craccabili offline. In un sistema reale questo è data breach completo.</p>
+<p>⚠️ <strong>Nota DBMS</strong>: la sintassi di <code>information_schema</code> è specifica di MySQL/MariaDB. PostgreSQL e SQLite hanno schemi equivalenti ma sintassi diversa. Su DVWA usi MySQL.</p>
+<h3 id="command-injection">Command Injection</h3>
+<p>DVWA ha una pagina che accetta un IP e lo passa a <code>ping</code>. Il codice PHP usa <code>exec()</code> senza filtrare l'input. In bash, il carattere <code>;</code> permette di concatenare comandi: <code>cmd1; cmd2</code> esegue <code>cmd2</code> sempre. <code>&amp;&amp;</code> esegue <code>cmd2</code> solo se <code>cmd1</code> ha avuto successo (exit code 0).</p>
+<p>Inserendo <code>127.0.0.1; ls</code> nella form del ping, ottieni sia l'output del ping sia il contenuto della directory corrente del server. La differenza tra <code>;</code> e <code>&amp;&amp;</code> nel contesto di command injection è pratica: con <code>&amp;&amp;</code> se l'IP inserito è invalido e ping fallisce, il secondo comando non gira; con <code>;</code> gira sempre. Per l'attaccante, <code>;</code> è più affidabile.</p>
+<p>⚠️ <strong>Visione</strong>: command injection è RCE — Remote Code Execution. Con <code>; cat /etc/passwd</code>, <code>; id</code>, <code>; whoami</code> puoi esplorare il sistema con i privilegi del webserver (tipicamente www-data). Con <code>;</code> e i comandi giusti puoi risalire a una reverse shell.</p>
+<h3 id="xss-cross-site-scripting">XSS — Cross-Site Scripting</h3>
+<p>XSS sposta la prospettiva dal server al browser: l'iniezione non colpisce un interprete lato server (database, shell) ma l'interprete lato client (il motore JavaScript del browser della vittima).</p>
+<p>Il payload classico è <code>&lt;script&gt;alert("XSS")&lt;/script&gt;</code>. Se la pagina web non esegue escaping sull'output, questo tag viene interpretato come HTML dal browser e lo script viene eseguito. La prova di concetto con <code>alert()</code> è innocua, ma la stessa superficie permette payload molto più gravi: furto di cookie di sessione (<code>document.cookie</code>), keylogging, redirect verso siti di phishing, azioni per conto dell'utente.</p>
+<p>Le <strong>tre tipologie</strong> hanno storie di vita diverse:</p>
+<ul>
+<li>
+<p><strong>Reflected XSS</strong>: il payload viaggia nell'URL, il server lo echo-a nella risposta, il browser lo esegue. Non viene salvato — il vettore è convincere la vittima a cliccare su un link costruito. Tipicamente: link in email di phishing.</p>
+</li>
+<li>
+<p><strong>Stored XSS</strong>: il payload viene salvato nel database (commento in un forum, campo nome utente, post). Chiunque visiti la pagina che mostra quel dato esegue il codice malevolo. È il più pericoloso perché si propaga automaticamente a tutte le vittime che visitano la pagina infetta.</p>
+</li>
+<li>
+<p><strong>DOM-based XSS</strong>: il payload non passa dal server — la pagina JavaScript legge un parametro dall'URL o dal DOM e lo inserisce nella pagina senza sanitizzazione, lato client. La risposta HTTP non contiene il codice malevolo (difficile da rilevare con WAF server-side).</p>
+</li>
+</ul>
+<p>Il <strong>difensore</strong> risponde con: encoding dell'output (convertire <code>&lt;</code> in <code>&amp;lt;</code>, <code>&gt;</code> in <code>&amp;gt;</code> prima di inserire dati in HTML), Content Security Policy (header <code>Content-Security-Policy: default-src 'self'</code> che impedisce al browser di eseguire script da origini esterne), e header <code>X-XSS-Protection: 1; mode=block</code>.</p>
+<hr />
+<h2 id="a4-insecure-design">A4 — Insecure Design</h2>
+<p>Vulnerabilità che non derivano da un bug implementativo ma dalla progettazione stessa del sistema. L'esempio del PDF: un sistema che permette password reset tramite domande di sicurezza prevedibili. Non è una SQLi, non è XSS — è una scelta architetturale sbagliata che non c'è patch che tenga.</p>
+<hr />
+<h2 id="a5-security-misconfiguration-lerrore-di-configurazione-come-vettore">A5 — Security Misconfiguration: l'errore di configurazione come vettore</h2>
+<p>A5 è la categoria più ampia: raccoglie tutti gli errori di configurazione a tutti i livelli dello stack (servizi di rete, server web, application server, database, framework, codice custom, VM, container, storage). Non è un tipo di attacco specifico — è la condizione che rende possibili gli altri.</p>
+<h3 id="credenziali-di-default">Credenziali di default</h3>
+<p>Il caso più ovvio: un'applicazione installata con le credenziali di default dell'installer. Su internet esistono database pubblici di credenziali di default per ogni dispositivo hardware, ogni DBMS, ogni immagine VM. Il lab usa proprio credenziali di default di DVWA (<code>admin</code>/<code>password</code>) come punto di partenza per il brute force — che poi scopre credenziali di default su un sistema esposto è esattamente questo scenario.</p>
+<h3 id="cifrari-tls-deboli">Cifrari TLS deboli</h3>
+<p>Scegliere versioni di protocollo o cifrari obsoleti espone la comunicazione anche se il sistema non ha bug applicativi. I protocolli da evitare: SSL, TLSv1.0, TLSv1.1. I cifrari da evitare: RC2, RC4, DES, Export, Client-Initiated Renegotiation. Da preferire: TLSv1.2+, cifrari a 128+ bit, Forward Secrecy (PFS — compromissione della chiave privata non svela le sessioni passate), chiavi asimmetriche 2048+ bit, SHA-2. Gli strumenti ssllabs.com e htbridge.com analizzano la configurazione TLS di un server e assegnano un rating (A = sicuro, F = vulnerabile).</p>
+<h3 id="http-security-headers">HTTP Security Headers</h3>
+<p>Il server può istruire il browser a comportarsi in modo sicuro attraverso header HTTP di risposta. Sono la difesa in profondità lato client: anche se un attacco riesce a iniettare del contenuto, gli header possono limitarne l'esecuzione.</p>
+<ul>
+<li><strong><code>X-Frame-Options</code></strong>: <code>DENY</code> o <code>SAMEORIGIN</code> — impedisce che la pagina sia caricata in un iframe da un sito esterno, mitigando clickjacking.</li>
+<li><strong><code>X-XSS-Protection: 1; mode=block</code></strong>: attiva il filtro XSS del browser (legacy, ma ancora utile).</li>
+<li><strong><code>Content-Security-Policy: default-src 'self'</code></strong>: blocca il caricamento di risorse (script, immagini, font) da origini diverse dall'origine della pagina. Mitiga XSS stored e DOM-based.</li>
+<li><strong><code>X-Content-Type-Options: nosniff</code></strong>: impedisce al browser di indovinare il MIME type della risposta — previene attacchi dove uno script viene mascherato da immagine.</li>
+<li><strong><code>Cache-Control: no-store</code></strong> + <code>Pragma: no-cache</code> + <code>Expires: 0</code>: impedisce al browser di memorizzare risposte contenenti dati sensibili.</li>
+<li><strong><code>Strict-Transport-Security: max-age=&lt;expire&gt;</code></strong> (HSTS): obbliga il browser a usare HTTPS per quel dominio, prevenendo HTTP stripping.</li>
+<li><strong><code>Public-Key-Pins</code></strong>: lega la chiave pubblica di un dominio a un certificato specifico, prevenendo falsi certificati X.509.</li>
+</ul>
+<h3 id="sop-e-cors">SOP e CORS</h3>
+<p><strong>Same Origin Policy (SOP)</strong>: il browser impone che uno script caricato da <code>domain-a.com</code> non possa leggere risorse di <code>domain-b.com</code>. Senza SOP, un script iniettato dal dominio A potrebbe leggere i cookie di sessione del dominio B. È la difesa di base contro XSS cross-site.</p>
+<p><strong>CORS (Cross-Origin Resource Sharing)</strong> è il meccanismo per <em>rilassare</em> SOP in modo controllato quando due siti legittimi devono comunicare. Il browser aggiunge l'header <code>Origin: domain-a.com</code> alla richiesta cross-origin; il server di <code>domain-b.com</code> risponde con <code>Access-Control-Allow-Origin: domain-a.com</code> (o <code>*</code> per tutti). Se l'ACAO non include l'origine richiedente, il browser blocca la risposta. CORS mal configurato (ACAO: <code>*</code> + credenziali) è una vulnerabilità, non una soluzione.</p>
+<h3 id="xxe-xml-external-entities">XXE — XML External Entities</h3>
+<p>XML permette di dichiarare "entità esterne" tramite DTD (Document Type Definition). Un parser XML "disattento" che non disabilita questa funzionalità può essere ingannato per leggere file dal filesystem del server. Il payload classico:</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE foo [ &lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot;&gt; ]&gt;
+&lt;stockCheck&gt;&lt;productId&gt;&amp;xxe;&lt;/productId&gt;&lt;/stockCheck&gt;
+</code></pre>
+<p>Il parser de-referenzia <code>&amp;xxe;</code> come il contenuto di <code>/etc/passwd</code> e lo inserisce nella risposta — leak diretto del file. Con <code>SYSTEM</code> e un URI HTTP invece di <code>file://</code>, l'attacco diventa SSRF (il server fa richieste HTTP verso indirizzi interni che l'attaccante non può raggiungere direttamente). La variante DoS è la <strong>Billion Laughs Attack</strong>: entità annidate che si espandono esponenzialmente.</p>
+<p>Mitigazioni: preferire JSON a XML dove possibile, usare parser aggiornati con external entity disabilitata per default, sanitizzare l'input XML consentendo solo elementi necessari.</p>
+<hr />
+<h2 id="a6-vulnerable-and-outdated-components">A6 — Vulnerable and Outdated Components</h2>
+<p>Librerie, framework, OS con vulnerabilità note non patchate. Non è un errore di codice applicativo — è manutenzione mancata. I casi famosi sono istruttivi: <strong>Heartbleed</strong> (CVE-2014-0160, OpenSSL) permetteva di leggere memoria del server; <strong>ShellShock</strong> (CVE-2014-6271, Bash) permetteva RCE via variabili d'ambiente; <strong>GHOST</strong> (CVE-2015-0235, Linux glibc) era un buffer overflow nella risoluzione DNS. L'impatto potenziale è qualsiasi cosa — RCE, violazioni AAA — perché il componente vulnerabile può essere ovunque nello stack.</p>
+<hr />
+<h2 id="a7-identification-and-authentication-failures">A7 — Identification and Authentication Failures</h2>
+<p>Il session management è il meccanismo che mantiene lo stato di autenticazione tra una request HTTP e l'altra (HTTP è stateless). Dopo il login, il server assegna un token (tipicamente un cookie) che il browser include automaticamente in ogni richiesta successiva.</p>
+<h3 id="session-fixation">Session Fixation</h3>
+<p>L'attaccante ottiene un token di sessione <em>prima</em> che la vittima si autentichi (ad esempio aprendo una sessione anonima). Convince poi la vittima a usare quel token — magari tramite phishing con link che include <code>?sessionID=123XYZ</code>. Quando la vittima si autentica, il server associa quella sessione autenticata al token noto all'attaccante, che ora può usarlo per impersonarla.</p>
+<p>Un token di sessione è vulnerabile se: è prevedibile (sequenziale), è intercettabile (trasmesso in HTTP invece di HTTPS), non è legato al client specifico, non scade dopo inattività, non viene invalidato al logout.</p>
+<h3 id="csrf-cross-site-request-forgery">CSRF — Cross-Site Request Forgery</h3>
+<p>Il browser include automaticamente i cookie di sessione in <em>ogni</em> richiesta verso un dominio, anche se la richiesta è generata da un altro sito. Un attaccante che controlla <code>attacker.com</code> può costruire una pagina con un form nascosto che punta a <code>mybank.com/transfer.jsp</code>, con i parametri precompilati (<code>recipient=attacker&amp;amount=1000</code>). Quando la vittima, autenticata su mybank, visita attacker.com, il suo browser invia automaticamente la richiesta di bonifico con i cookie di mybank — il server non distingue la richiesta legittima da quella forgiata.</p>
+<p>La <strong>mitigazione</strong> principale è il <strong>CSRF token</strong>: il server include in ogni form un segreto univoco, non falsificabile, non nell'URL (altrimenti è intercettabile nel Referer). Il form contiene <code>&lt;input type="hidden" value="23a3af01b&gt;</code>. Al submit, il server verifica che il token sia valido — un sito esterno non può conoscerlo e non può forgiare una richiesta valida.</p>
+<p>⚠️ <strong>Distinzione critica per l'esame (errori_frequenti.md)</strong>: CSRF sfrutta l'<em>autenticazione</em> già esistente (il cookie di sessione) — non è una vulnerabilità di autorizzazione. La domanda "cosa fa CSRF?" ha risposta: sfrutta il fatto che il browser autentica automaticamente le richieste al dominio, non che i permessi siano configurati male.</p>
+<hr />
+<h2 id="a8-software-and-data-integrity-failures">A8 — Software and Data Integrity Failures</h2>
+<p>Vulnerabilità da insufficiente tutela dell'integrità del codice e dei dati dell'infrastruttura. Il caso più eclatante è <strong>SolarWinds Orion</strong> (2020): aggiornamenti legittimi del software di monitoraggio IT venivano firmati da SolarWinds ma contenevano codice malevolo iniettato durante il processo di build. 18.000 organizzazioni scaricarono l'aggiornamento; circa 100 furono compromesse seriamente, tra cui Microsoft, Intel, Cisco, agenzie governative USA.</p>
+<p>La sottocategoria <strong>Insecure Deserialization</strong> (era A8 OWASP 2017, ora confluita qui) riguarda la serializzazione — il processo di convertire un oggetto in memoria in uno stream di byte per trasmetterlo (cookie, API, message broker) e poi ricostruirlo. Se il deserializzatore accetta stream non fidati senza verificarne l'integrità, un attaccante può costruire uno stream che, quando deserializzato, esegue codice arbitrario (Java, .NET) o eleva i propri privilegi (cookie con ruolo "admin"). Mitigazioni: non deserializzare dati non fidati, usare librerie con strict type checking, sandboxing.</p>
+<hr />
+<h2 id="a9-security-logging-and-monitoring-failures">A9 — Security Logging and Monitoring Failures</h2>
+<p>Non è una vulnerabilità che permette un attacco diretto, ma l'assenza di logging adeguato trasforma un attacco che avrebbe potuto essere rilevato e bloccato in uno che non viene scoperto per settimane. Errori comuni: non tracciare accessi falliti (il brute force passa inosservato), non dettagliare gli eventi loggati, non proteggere i log stessi da alterazione, non definire procedure di risposta agli incidenti. L'effetto: non si rileva il brute force, non si riesce a ricostruire la catena di compromissione, non si può stimare il danno subito.</p>
+<hr />
+<h2 id="a10-server-side-request-forgery-ssrf-new-in-2021">A10 — Server-Side Request Forgery (SSRF) — new in 2021</h2>
+<p>Un'applicazione web riceve una URL dall'utente (es. "carica questa immagine", "controlla questo feed RSS") e la usa per fare una richiesta HTTP interna senza validarla adeguatamente. L'attaccante sostituisce l'URL con <code>http://169.254.169.254/</code> (metadata service di cloud AWS) o <code>http://192.168.1.1/</code> (router interno) — risorse non direttamente accessibili dall'esterno ma raggiungibili dal server. Risultato: enumerazione della rete interna, accesso a servizi interni protetti da firewall, potenzialmente RCE su sistemi non esposti. SSRF era già menzionato come effetto di XXE — la differenza è che qui è la logica applicativa stessa, non il parser XML, a fare la richiesta.</p>
+<hr />
+<h2 id="connessioni">Connessioni</h2>
+<p><strong>Con SysAdmin (3D — networking)</strong>: molte vulnerabilità web dipendono da configurazioni di rete errate che SSRF e XXE sfruttano — un firewall mal configurato che espone i servizi interni amplifica enormemente il danno. La comprensione di <code>iptables</code> (S5) è direttamente connessa alla mitigazione di SSRF.</p>
+<p><strong>Con S1 (enumerazione)</strong>: gobuster e nmap che hai usato in S1 sono i primi strumenti del lab S3. La fase di enumeration (trovare <code>/vulnerabilities/</code>, <code>/dvwa/</code>, directory nascoste) precede ogni exploit web. La catena S1→S3 è: scopro la superficie → identifico le vulnerabilità → le sfrutto.</p>
+<p><strong>Con S2 (autenticazione)</strong>: A7 è direttamente il rovescio di S2. Quello che hai visto come "come funziona l'autenticazione corretta" in S2 corrisponde a "cosa succede quando l'autenticazione è rotta" in A7. Session fixation e CSRF sono gli attacchi a cui i meccanismi di S2 (token FIDO, sessioni robuste) rispondono.</p>
+<p><strong>Con S5 (firewall/iptables)</strong> e <strong>S10 (IDS Suricata)</strong>: le difese lato rete contro i pattern di attacco web — rilevare port scanning, bloccare payload malevoli, loggare le anomalie — sono il contesto in cui A9 (Logging) diventa operativo.</p>
+<hr />
+<h2 id="domande-di-autoverifica-stile-quiz-teorico">Domande di autoverifica (stile quiz teorico)</h2>
+<blockquote>
+<p>⚠️ All'esame c'è penalità per risposta sbagliata su domande V/F e a scelta multipla. Se non sei sicuro, non rispondere — il silenzio vale zero, la risposta sbagliata vale negativo.</p>
+</blockquote>
+<p><strong>1.</strong> Un attacco SQL Injection Union Based richiede di conoscere il numero di colonne della query originale prima di poter usare <code>UNION SELECT</code>. <em>(Vero/Falso)</em></p>
+<details><summary>Risposta</summary>
+
+**Vero.** `UNION` in SQL richiede che le due SELECT abbiano lo stesso numero di colonne e tipi compatibili. Si usa la tecnica dei NULL progressivi per scoprire il numero: `' union select NULL #` (errore), `' union select NULL,NULL #` (successo → 2 colonne).
+
+</details>
+
+<hr />
+<p><strong>2.</strong> In DVWA con difficulty "low", inserire <code>' OR 'a'='a</code> nel campo User ID della sezione SQL Injection restituisce tutti i record della tabella users perché:</p>
+<p>a) Bypassa il sistema di autenticazione del web server<br />
+b) La condizione <code>'a'='a'</code> è sempre vera e la query restituisce tutti i record<br />
+c) SQL interpreta <code>OR</code> come un operatore di shell e esegue il comando <code>a</code><br />
+d) Il parametro viene troncato e la query diventa una full table scan per default  </p>
+<details><summary>Risposta</summary>
+
+**b.** Il parametro `$id` viene inserito direttamente nella stringa SQL: `WHERE user_id = '$id'`. Con input `' OR 'a'='a`, la query diventa `WHERE user_id = '' OR 'a'='a'` — la seconda condizione è sempre vera, quindi tutti i record passano il filtro.
+
+</details>
+
+<hr />
+<p><strong>3.</strong> CSRF (Cross-Site Request Forgery) sfrutta principalmente una debolezza nel sistema di <em>autorizzazione</em> dell'applicazione target. <em>(Vero/Falso)</em></p>
+<details><summary>Risposta</summary>
+
+**Falso.** CSRF sfrutta il meccanismo di *autenticazione* — il fatto che il browser include automaticamente i cookie di sessione in ogni richiesta verso quel dominio, anche se la richiesta proviene da un sito terzo. L'applicazione target non ha difetti di autorizzazione: il problema è che non distingue le richieste legittime dell'utente da quelle forgiate da un sito malevolo.
+
+</details>
+
+<hr />
+<p><strong>4.</strong> Un attaccante usa il payload XML:</p>
+<pre><code class="language-xml">&lt;!DOCTYPE foo [ &lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot;&gt; ]&gt;
+</code></pre>
+<p>Cosa ottiene se l'attacco ha successo?</p>
+<p>a) Esecuzione di codice arbitrario sul server<br />
+b) Il contenuto del file <code>/etc/passwd</code> del server nella risposta HTTP<br />
+c) Un redirect verso <code>/etc/passwd</code> nel browser<br />
+d) Un attacco DoS per espansione esponenziale delle entità  </p>
+<details><summary>Risposta</summary>
+
+**b.** XXE con `SYSTEM "file://..."` istruisce il parser XML a de-referenziare l'entità come il contenuto del file locale. Il server restituisce il contenuto di `/etc/passwd` nella risposta (come mostrato nell'esempio del PDF). La risposta d) descrive la Billion Laughs Attack, che è una variante XXE diversa.
+
+</details>
+
+<hr />
+<p><strong>5.</strong> Quale delle seguenti affermazioni su DOM-based XSS è corretta?</p>
+<p>a) Il payload viene salvato nel database del server e colpisce tutti gli utenti che visitano la pagina<br />
+b) La risposta HTTP del server contiene il codice malevolo<br />
+c) Il payload viene eseguito nel browser della vittima senza che sia presente nella risposta HTTP del server<br />
+d) È il tipo di XSS più facile da rilevare con un Web Application Firewall lato server  </p>
+<details><summary>Risposta</summary>
+
+**c.** DOM-based XSS agisce interamente lato client: JavaScript nella pagina legge un parametro dall'URL o da un'altra sorgente DOM e lo inserisce nel DOM senza sanitizzazione. La risposta HTTP non cambia — l'attacco non passa per il server, quindi i WAF server-side non lo vedono (risposta d è falsa).
+
+</details>
+
+<hr />
+<h2 id="riepilogo">Riepilogo</h2>
+<p>I dieci item OWASP sono manifestazioni dello stesso problema di fiducia mal gestita: A3 (Injection) è l'input che viene interpretato come codice; A1 è l'input che bypassa il controllo degli accessi; A5 è la configurazione che lascia porte aperte. Sulla VM DVWA le vulnerabilità sono visibili nella loro forma più pura (difficulty "low") — l'obiettivo del lab non è "sbloccare il punteggio" ma capire il meccanismo di ognuna abbastanza da saper riconoscere e sfruttare la stessa classe di vulnerabilità in un contesto diverso all'esame.</p>
+<!-- AUTO-LINKS -->
+<h2 id="connessioni-al-grafo">Connessioni al grafo</h2>
+<ul>
+<li>[[lezione_moduloS1_offensive_security_enumerazione]] — prerequisito: nmap, enumeration, superficie d'attacco</li>
+<li>[[lezione_moduloS2_autenticazione]] — prerequisito: sessioni, token, autenticazione vs autorizzazione</li>
+<li>[[guida_lab_moduloS1_enumerazione_nmap]] — tecnica di enumeration usata come primo step del lab S3</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_moduloS3_web_security]]</li>
+<li>[[guida_lab_moduloS3_web_security]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_modulo3D.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi</p>
+<h1 class="titolo-pagina">Appunti_modulo3D.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo3D.md">Apri il file originale</a></p>
+<article class="prosa"><p>Internet è una composizione di reti connesse tra di loro, ognuna di queste reti si chiama <strong>network IP</strong>. vari network ip sono connessi tra di loro tramite <strong>router</strong> (tipo il modem del wifi?) o <strong>gateway</strong> (cosa sono?) che servono a far comunicare reti tra di loro.</p>
+<p>ogni <strong>host</strong> (dispositivo collegato in rete) ha un <strong>indirizzo IP</strong> e un <strong>indirizzo MAC</strong></p>
+<ol>
+<li>L'indirizzo IP identifica l'host globalmente ed è univoco su tutto l'internet</li>
+<li>l'indrizzo MAC identifica il dispositivo fisico nella rete locale (LAN)
+non capisco bene però la distinzione tra il chi e il dove che fai tra i due indirizzi, a me sembrano solo un modo di identificarsi globalmente e localmente.</li>
+</ol>
+<p>A cosa serve nel pratico il protocollo ARP? capisco che a un interrogazione che chiede l'identificazione mediante IP faccia rispondere all'interessato il suo MAC, ma non capisco come funziona e che scopo abbia.
+forse non mi è chiaro come funziona l'invio e ricezione di pacchetti, quando avviene, per cosa?</p>
+<p><strong>COMPOSIZIONE INDIRIZZO IP</strong></p>
+<p>il formato attuale è l'IPv4 e comprende 32 bit, divisi in due parti:
+- <strong>net id</strong>: identifica la rete (a cui l'host è connesso?)
+- <strong>host-id</strong> identifica l'host all'interno della rete (non lo fa già il MAC?)
+non capisco come funziona questa netmask e come sia rappresentata nel concreto. fammi un esempio con del codice vero uscito da un terminale. stessa cosa per il CIDR che è collegato e i due indirizzi speciali di ogni subnet. cos'è una subnet? una rete gestita da un router? e sti indirizzi cosa sono?</p>
+<p>cosa significa che un indirizzo è riservato alle reti interne e non instradato su internet? poi visto che parli di di indirizzi ip immagino sia una cosa che vale a livello internet, quindi mondiale e che questi indirizzi siano riservati per qualche motivo</p>
+<p><strong>PORTE E SERVIZI - Gestione delle applicazioni da parte dell'host</strong>
+l'host è identificato globalmente dal suo indirizzo ip. ma su un host girano molteplici applicazioni contemporaneamente che hanno bisogno di mandare e inviare pacchetti in rete.</p>
+<p>l'host connette le applicazioni alla rete tramite le <strong>porte</strong></p>
+<p>ogni connessione tramite porta è identificato da questa <strong>quintupla</strong></p>
+<ul>
+<li>protocollo<ul>
+<li>protocollo della rete, regole, come funziona la comunicazione</li>
+</ul>
+</li>
+<li>IP_sorgente<ul>
+<li>da quale IP appartiene la porta da cui parte la comunicazione</li>
+</ul>
+</li>
+<li>porta_sorgente<ul>
+<li>da quale porta di quell'ip parte</li>
+</ul>
+</li>
+<li>IP_destinazione<ul>
+<li>a quale IP appartiene la porta a cui arriva la comunicazione</li>
+</ul>
+</li>
+<li>porta_destinazione<ul>
+<li>a quale porta di quell'ip arriva</li>
+</ul>
+</li>
+</ul>
+<p>ma nel pratico cosa viene comunicato? solo pacchetti? dati diversi che si mettono sempre in questi pacchetti? altre cose al posto dei pacchetti? il termine pacchetti mi confonde.</p>
+<p><strong>TCP - come si apre una connessione?</strong></p>
+<p>il TCP è un <strong>protocollo</strong> orientato alla connessione (cioè?)</p>
+<p>Viene usato per sincronizzare due host e successivamente fargli scambiare dati</p>
+<p>riporta il disegno fatto per spiegarlo, ma identifica meglio chi sta parlando in ogni momento oltre a cosa dicono</p>
+<p><strong>three-way perchè?</strong>
+prima i due host si sincronizzano (<strong>SYN</strong>) quando il pacchetto inizia la connessione, poi dall'altro lato si conferma l'arrivo del pacchetto (<strong>ACK</strong>) e infine si stabilisce la connessione <strong>ESTABLISHMENT</strong></p>
+<p>non capiso quando effettivamente si invia il pacchetto, io direi alla fine quando la connessione viene stabilita, ma dici che in fase <strong>ACK</strong> si conferma già l'arrivo del pacchetto. inoltre dalle tue parole sembra che sia il pacchetto a svolgere questo lavoro, è così?</p>
+<p><strong>NAT - Network Address Translation</strong></p>
+<p>non ho capito il problema che poni. perchè gli ip pubblici sono scarsi? in che senso? </p>
+<p>capisco che gli host in una sottorete abbiano e comunichino con un indirizzo locale, ma mi sembrava di aver capito che questo era il ruolo dell'indizzo MAC</p>
+<p>qual'è il ruolo dell'indirizzo NAT? come si relaziona agli altri tipi di indirizzo che abbiamo visto?</p>
+<p><strong>VBox - tipi di interfaccia di rete</strong></p>
+<p>carina e utile la tabella, ma troppo scarna, come funzionano nel pratico le varie interfacce di rete, che pro e contro hanno?</p>
+<p>usi termini che non sono scontati come SNAT, port forwarding, LAN, internal network, gruppi, che non capisco cosa intendono.</p>
+<p><strong>Configurazione di rete su Linux</strong></p>
+<p>ip a - vedo le varie interfacce di rete e i loro indirizzi, quindi come si connette la VM a internet e con quale nome? che tipo di indirizzo mostra?</p>
+<p><code>vagrant@bookworm:~$ ip a</code>
+<code>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</code>
+    <code>link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</code>
+    <code>inet 127.0.0.1/8 scope host lo</code>
+       <code>valid_lft forever preferred_lft forever</code>
+    <code>inet6 ::1/128 scope host noprefixroute</code> 
+       <code>valid_lft forever preferred_lft forever</code>
+<code>2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000</code>
+    <code>link/ether 08:00:27:8d:c0:4d brd ff:ff:ff:ff:ff:ff</code>
+    <code>altname enp0s3</code>
+    <code>inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic eth0</code>
+       <code>valid_lft 86313sec preferred_lft 86313sec</code>
+    <code>inet6 fd17:625c:f037:2:a00:27ff:fe8d:c04d/64 scope global dynamic mngtmpaddr</code> 
+       <code>valid_lft 86313sec preferred_lft 14313sec</code>
+    <code>inet6 fe80::a00:27ff:fe8d:c04d/64 scope link</code> 
+       <code>valid_lft forever preferred_lft forever</code>
+<code>vagrant@bookworm:~$ ip a</code>
+<code>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</code>
+    <code>link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</code>
+    <code>inet 127.0.0.1/8 scope host lo</code>
+       <code>valid_lft forever preferred_lft forever</code>
+    <code>inet6 ::1/128 scope host noprefixroute</code> 
+       <code>valid_lft forever preferred_lft forever</code>
+<code>2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000</code>
+    <code>link/ether 08:00:27:8d:c0:4d brd ff:ff:ff:ff:ff:ff</code>
+    <code>altname enp0s3</code>
+    <code>inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic eth0</code>
+       <code>valid_lft 83200sec preferred_lft 83200sec</code>
+    <code>inet6 fd17:625c:f037:2:a00:27ff:fe8d:c04d/64 scope global dynamic mngtmpaddr</code> 
+       <code>valid_lft 86373sec preferred_lft 14373sec</code>
+    <code>inet6 fe80::a00:27ff:fe8d:c04d/64 scope link</code> 
+       <code>valid_lft forever preferred_lft forever</code></p>
+<p>con <code>show</code> posso specificare una sola interfaccia da visualizzare</p>
+<p><code>vagrant@bookworm:~$ ip a show eth0</code>
+<code>2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000</code>
+    <code>link/ether 08:00:27:8d:c0:4d brd ff:ff:ff:ff:ff:ff</code>
+    <code>altname enp0s3</code>
+    <code>inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic eth0</code>
+       <code>valid_lft 83104sec preferred_lft 83104sec</code>
+    <code>inet6 fd17:625c:f037:2:a00:27ff:fe8d:c04d/64 scope global dynamic mngtmpaddr</code> 
+       <code>valid_lft 86277sec preferred_lft 14277sec</code>
+    <code>inet6 fe80::a00:27ff:fe8d:c04d/64 scope link</code> 
+       <code>valid_lft forever preferred_lft forever</code></p>
+<p>leggo il nome della interfaccia <strong>eth0</strong>, il suo indirizzo IP fisso (credo) <strong>10.0.2.15</strong>, non capisco come recupero la sua versione IPv6 però. </p>
+<p>con <code>ip r</code> posso vedere la tabella di routing</p>
+<p><code>vagrant@bookworm:~$ ip r</code>
+<code>default via 10.0.2.2 dev eth0</code> 
+<code>10.0.2.0/24 dev eth0 proto kernel scope link src 10.0.2.15</code> </p>
+<p><code>default via 10.0.2.2 dev eth0</code> 
+<strong>default gateway</strong>: ogni cosa che non conosco (in che senso?) va qui</p>
+<p>non riesco a riconoscere le altre informazioni però</p>
+<p>gli esercizi successivi credo richiedano delle chiarificazioni e avere ben chiaro di cosa stiamo parlando prima di affrontarli</p>
+<hr />
+<blockquote>
+<p><strong>⚠️ NOTA 2026-06-23</strong>: appunti grezzi parziali (teoria + Es.1 ip a/ip r). Es. 2-6 da eseguire. La guida-lab completa Es.1–6 è in <code>guida_lab_modulo3D_networking_base.md</code>. Dopo aver eseguito tutti gli esercizi, aggiungere qui gli output e le osservazioni, poi <code>/appunti 3D</code>.</p>
+</blockquote>
+<h2 id="es-26-da-completare-dopo-il-lab">Es. 2–6 (da completare dopo il lab)</h2>
+<!-- Dopo aver eseguito ping, ss, /etc/hosts, dig, tracepath, tcpdump: aggiungi qui i tuoi output e le domande che emergono -->
+
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo3D_networking_base]]</li>
+<li>[[guida_lab_modulo3D_networking_base]]</li>
+<li>[[lezione_modulo3D_networking_base]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -129,7 +129,8 @@ Poi invoca `lorenzo-skills:unicode-output-gate` per la verifica finale.
 
 **8. Collega la nota al grafo**
 
-Invoca `lorenzo-skills:unicode-link-note` per il blocco AUTO-LINKS dei nuovi appunti.
+Invoca `lorenzo-skills:unicode-link-note`: la nota riceve in testa il frontmatter
+`tags: [<COD>, appunti]`, e se è la prima nota del corso si aggiunge il suo gruppo colore in Obsidian.
 
 ---
 

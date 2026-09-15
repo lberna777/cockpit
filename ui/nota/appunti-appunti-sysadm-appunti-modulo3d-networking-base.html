@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_modulo3D_networking_base.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_modulo3D_networking_base.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SYSADM/appunti_modulo3D_networking_base.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-3d-networking-di-base">Appunti — Modulo 3D: Networking di Base</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Stato</strong>: 🔄 Teoria + ip a/ip r eseguiti; esercizi 2–6 (ping, ss, DNS, hosts, tcpdump) da completare<br />
+<strong>Riferimento</strong>: <code>claudeLezioni/LEZIONI SYSADM/lezione_modulo3D_networking_base.md</code></p>
+<hr />
+<h2 id="1-modello-concettuale-internet-e-reti-ip">1. Modello concettuale — Internet e reti IP</h2>
+<p>Internet è una rete di reti: ogni sottorete IP è un'isola connessa alle altre da <strong>router</strong> (o <strong>gateway</strong>).</p>
+<pre><code>[Network IP A] --- Router --- [Network IP B] --- Router --- [Network IP C]
+</code></pre>
+<blockquote>
+<p><strong>Router vs gateway</strong> — sono quasi sinonimi in questo contesto. <em>Router</em> è il nome del dispositivo fisico che invia (routes) i pacchetti tra reti. <em>Gateway</em> è il nome logico del "punto di uscita" di una rete verso le altre: quando la VM deve mandare un pacchetto fuori dalla sua subnet, lo consegna al gateway. Il modem wifi di casa è entrambe le cose: è un router che connette la LAN domestica alla rete dell'ISP, ed è il gateway della LAN domestica. In VirtualBox NAT, il gateway è <code>10.0.2.2</code>.</p>
+</blockquote>
+<p>Ogni host ha due tipi di indirizzo:
+- <strong>IP</strong> — identifica l'host a livello logico, univoco su Internet
+- <strong>MAC</strong> — identifica l'interfaccia fisica, valido solo all'interno della LAN locale</p>
+<blockquote>
+<p><strong>La distinzione chi/dove</strong> — La confusione è comprensibile perché sembrano ridondanti. La differenza è il <em>livello</em> a cui operano.<br />
+- L'IP dice "questa macchina si chiama 82.1.2.3" — e questo è valido ovunque nel mondo, su qualunque rete.<br />
+- Il MAC dice "questa scheda di rete ha il seriale 08:00:27:8d:c0:4d" — ma funziona solo sul tratto di cavo (o wifi) a cui la scheda è fisicamente collegata.<br />
+Analogia: l'IP è il tuo numero di telefono (unico nel mondo), il MAC è il numero di posto in un'aula specifica (utile solo in quell'aula).</p>
+</blockquote>
+<h3 id="come-funziona-linvio-di-un-pacchetto-il-ruolo-di-arp">Come funziona l'invio di un pacchetto — il ruolo di ARP</h3>
+<p>Quando vuoi mandare dati a <code>192.168.1.76</code> sulla stessa LAN:
+1. Sai l'IP di destinazione, ma Ethernet richiede un MAC per consegnare il frame sulla rete locale
+2. Il tuo host manda in <strong>broadcast</strong> (a tutti): <em>"chi ha l'IP 192.168.1.76?"</em>
+3. L'host con quell'IP risponde in unicast con il suo MAC
+4. Tutti gli host che hanno sentito la risposta la salvano nella loro <strong>ARP cache</strong> per evitare di richiedere ogni volta</p>
+<blockquote>
+<p><strong>A cosa serve ARP nel pratico</strong> — I pacchetti IP devono attraversare reti fisiche (Ethernet, WiFi) che usano indirizzi MAC, non IP. ARP è il traduttore tra i due livelli. Succede ogni volta che mandi dati, ma è invisibile: il kernel gestisce tutto automaticamente. Per vederlo: <code>arp -n</code> sulla VM mostra la cache ARP corrente.<br />
+Il concetto di "pacchetto" è semplicemente l'unità di dati che viaggia su IP: un blocco di byte con un'intestazione (IP sorgente, IP destinazione, protocollo) e un payload (i dati veri, che siano una richiesta HTTP, un chunk di file, una risposta DNS...). Tutto il traffico di rete è fatto di pacchetti.</p>
+</blockquote>
+<hr />
+<h2 id="2-indirizzi-ip-netmask-cidr">2. Indirizzi IP, netmask, CIDR</h2>
+<p>Un indirizzo IPv4 è 32 bit divisi in:
+- <strong>net-id</strong> — identifica la rete (i bit a sinistra della netmask)
+- <strong>host-id</strong> — identifica l'host all'interno di quella rete (i bit a destra)</p>
+<blockquote>
+<p><strong>host-id vs MAC</strong> — Il MAC identifica il dispositivo fisico sulla LAN locale. L'host-id è parte dell'indirizzo IP e serve ai <em>router</em> per instradare i pacchetti tra reti diverse. Quando un router riceve un pacchetto diretto a <code>10.0.2.15/24</code>, guarda il net-id (<code>10.0.2.0</code>) per sapere su quale interfaccia/rete deve spedirlo, poi ARP risolve il MAC finale. MAC e host-id operano a livelli diversi dello stack.</p>
+</blockquote>
+<p>La <strong>netmask</strong> separa i due campi. Esempio con l'output reale della VM:</p>
+<pre><code>inet 10.0.2.15/24
+     ─────────── → indirizzo IP completo
+              /24 → CIDR: i primi 24 bit sono net-id, gli ultimi 8 sono host-id
+
+net-id:   10.0.2      (24 bit → i tre ottetti di sinistra)
+host-id:  15          (8 bit → l'ottetto di destra)
+netmask:  255.255.255.0   (24 uni seguiti da 8 zeri)
+
+Network address: 10.0.2.0    (host-id tutti a 0 → identifica la rete, non assegnabile)
+Broadcast:       10.0.2.255  (host-id tutti a 1 → raggiunge tutti gli host della subnet)
+</code></pre>
+<blockquote>
+<p><strong>Cos'è una subnet</strong> — È semplicemente l'insieme di tutti gli indirizzi che condividono lo stesso net-id. La VM è nella subnet <code>10.0.2.0/24</code>, che comprende gli indirizzi da <code>10.0.2.1</code> a <code>10.0.2.254</code> (255 escluso = broadcast, 0 escluso = network address). Il router gestisce il confine tra una subnet e l'altra — la tua intuizione è corretta.</p>
+</blockquote>
+<h3 id="ip-privati-perche-non-instradati-su-internet">IP privati — perché "non instradati su Internet"</h3>
+<p>Range riservati alle reti interne (RFC 1918):
+- <code>10.0.0.0/8</code>
+- <code>172.16.0.0/12</code>
+- <code>192.168.0.0/16</code></p>
+<blockquote>
+<p><strong>Cosa significa "non instradato"</strong> — Tutti i router della dorsale Internet sono configurati per scartare i pacchetti con questi indirizzi come sorgente o destinazione. È una convenzione globale: qualunque organizzazione può usare <code>192.168.x.x</code> internamente senza coordinarsi con nessuno, proprio perché quei pacchetti non usciranno mai da quella rete. Sono come i numeri di interno di un centralino: validi dentro l'ufficio, ma non raggiungibili dall'esterno senza passare dal centralino (= il NAT).</p>
+</blockquote>
+<hr />
+<h2 id="3-porte-e-servizi">3. Porte e servizi</h2>
+<p>L'IP identifica l'host, ma su un host girano più applicazioni contemporaneamente. Le <strong>porte</strong> le distinguono.</p>
+<p>Una connessione è identificata dalla <strong>quintupla</strong>:</p>
+<pre><code>(protocollo, IP_sorgente, porta_sorgente, IP_destinazione, porta_destinazione)
+</code></pre>
+<p>Porte standard (well-known, 0–1023):</p>
+<table>
+<thead>
+<tr>
+<th>Porta</th>
+<th>Servizio</th>
+<th>Protocollo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>22</td>
+<td>SSH</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>80</td>
+<td>HTTP</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>443</td>
+<td>HTTPS</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>53</td>
+<td>DNS</td>
+<td>UDP/TCP</td>
+</tr>
+<tr>
+<td>25</td>
+<td>SMTP</td>
+<td>TCP</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Cosa viaggia nei pacchetti</strong> — I pacchetti IP trasportano nel payload qualunque tipo di dato: richieste HTTP, frammenti di file, query DNS, messaggi SSH... Il protocollo (TCP/UDP) nel livello di trasporto garantisce o non garantisce l'ordine e la consegna. Il "pacchetto" è solo il contenitore.</p>
+</blockquote>
+<h3 id="tcp-three-way-handshake">TCP — three-way handshake</h3>
+<p>TCP è <strong>orientato alla connessione</strong>: i due host si sincronizzano prima di scambiarsi dati.</p>
+<blockquote>
+<p><strong>"Orientato alla connessione" significa</strong> — TCP tiene traccia dello stato della comunicazione: apertura, trasferimento, chiusura. Prima di inviare dati, i due host stabiliscono un accordo (il three-way handshake) e si sincronizzano sui numeri di sequenza. UDP non fa nulla di tutto questo: manda pacchetti e basta, senza sapere se arrivano.</p>
+</blockquote>
+<pre><code>Client                    Server (porta 80)
+  │──── SYN ────────────►│   &quot;voglio connettermi, parto dalla sequenza X&quot;
+  │◄─── SYN+ACK ─────────│   &quot;ok, ricevuto il tuo X (ACK) — la mia sequenza è Y (SYN)&quot;
+  │──── ACK ─────────────►│   &quot;ricevuto il tuo Y&quot;
+  │                       │
+  │   [qui inizia lo scambio dati]
+</code></pre>
+<blockquote>
+<p><strong>Quando arriva il pacchetto? Confusione sul SYN+ACK</strong> — Non arriva nessun dato durante il three-way handshake. Il handshake serve solo a sincronizzare i numeri di sequenza (meccanismo che TCP usa per riordinare i pacchetti e rilevare quelli persi). La sequenza è:<br />
+1. SYN: client manda un pacchetto vuoto di controllo con il flag SYN settato<br />
+2. SYN+ACK: server risponde con due flag: ACK (ho ricevuto il tuo SYN) + SYN (propongo il mio numero di sequenza)<br />
+3. ACK: client conferma il SYN del server<br />
+Solo dopo questo scambio inizia il trasferimento dati reale. Il "pacchetto" che svolge questo lavoro è un pacchetto TCP di controllo, senza payload utile.</p>
+</blockquote>
+<hr />
+<h2 id="4-nat-network-address-translation">4. NAT — Network Address Translation</h2>
+<p><strong>Il problema</strong>: IPv4 ha ~4 miliardi di indirizzi. Sono già esauriti — assegnati ad aziende, università, ISP negli anni '90 prima che Internet esplodesse.</p>
+<p><strong>La soluzione</strong>: un solo IP pubblico per l'intera rete domestica/aziendale; il router <em>traduce</em> gli indirizzi.</p>
+<pre><code>[Host 10.0.0.5:11111] → Router (IP pubblico 82.1.2.3) → [Server 137.204.1.15:80]
+                         ↑ sostituisce l'IP sorgente con 82.1.2.3 + memorizza la traduzione
+</code></pre>
+<blockquote>
+<p><strong>Il ruolo del NAT rispetto agli altri indirizzi</strong> — Riassumendo i tre livelli:<br />
+- <strong>MAC</strong>: consegna un frame Ethernet <em>all'interno di un singolo tratto di LAN fisica</em> (da switch a switch, massimo)<br />
+- <strong>IP privato</strong>: identifica l'host <em>all'interno della rete privata</em> (valido solo lì)<br />
+- <strong>IP pubblico (NAT)</strong>: identifica il <em>router</em> che rappresenta l'intera rete privata verso Internet<br />
+Il MAC non c'entra con il NAT: il MAC non attraversa mai un router, viene sostituito ad ogni hop. Il NAT opera a livello IP, non MAC.</p>
+</blockquote>
+<ul>
+<li><strong>SNAT</strong> (Source NAT): sostituisce l'IP sorgente → usato quando un host privato vuole raggiungere Internet</li>
+<li><strong>DNAT</strong> (Destination NAT): sostituisce l'IP destinazione → usato per rendere raggiungibile dall'esterno un server interno su una porta specifica (es. port forwarding)</li>
+</ul>
+<hr />
+<h2 id="5-virtualbox-tipi-di-interfaccia-di-rete">5. VirtualBox — tipi di interfaccia di rete</h2>
+<table>
+<thead>
+<tr>
+<th>Modalità</th>
+<th>La VM raggiunge</th>
+<th>La VM è raggiungibile da</th>
+<th>Uso tipico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NAT</strong></td>
+<td>Internet (via SNAT)</td>
+<td>Solo con port forwarding esplicito</td>
+<td>Default Vagrant — navigazione</td>
+</tr>
+<tr>
+<td><strong>Bridged</strong></td>
+<td>LAN fisica + Internet</td>
+<td>Tutti nella LAN (come un host fisico)</td>
+<td>VM visibile in rete reale</td>
+</tr>
+<tr>
+<td><strong>Host-only</strong></td>
+<td>Solo l'host</td>
+<td>Solo l'host</td>
+<td>Lab isolato host↔VM</td>
+</tr>
+<tr>
+<td><strong>Internal</strong></td>
+<td>Solo altre VM dello stesso gruppo</td>
+<td>Solo VM dello stesso gruppo</td>
+<td>Lab VM↔VM senza host</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>NAT in VirtualBox nel pratico</strong> — VirtualBox crea un mini-router software interno. La VM ha sempre IP <code>10.0.2.15</code>, il gateway è sempre <code>10.0.2.2</code> (il router virtuale di VirtualBox). Quando la VM fa una richiesta verso internet, VirtualBox fa SNAT: sostituisce <code>10.0.2.15</code> con l'IP reale del tuo Mac/PC, manda la richiesta, e quando arriva la risposta la gira alla VM. Per raggiungere la VM dall'host si usa il port forwarding (DNAT): <code>vagrant ssh</code> funziona perché Vagrant ha configurato il forwarding da <code>localhost:2222</code> a <code>VM:22</code>.</p>
+<p><strong>Host-only nel pratico</strong> — VirtualBox crea un'interfaccia di rete virtuale sull'host (tipo un secondo adattatore ethernet, ma virtuale). Host e VM condividono una subnet <code>192.168.56.0/24</code>. L'host prende <code>.1</code>, la VM prende l'IP configurato. Non c'è accesso a internet da questa interfaccia — è un canale diretto host↔VM. Usato per comunicare con la VM in modo stabile (IP fisso) indipendentemente dal NAT.</p>
+<p><strong>Internal network nel pratico</strong> — Come host-only ma l'host non partecipa. Solo le VM con lo stesso nome di rete interna si vedono. Usato per simulare reti isolate tra VM (es. un server web e un database che non devono essere raggiungibili dall'esterno).</p>
+<p><strong>LAN</strong> = Local Area Network — la rete locale (casa, ufficio, VM dello stesso gruppo). <strong>Port forwarding</strong> = DNAT: reindirizza il traffico che arriva su una porta dell'host verso una porta della VM.</p>
+</blockquote>
+<hr />
+<h2 id="6-configurazione-di-rete-su-linux">6. Configurazione di rete su Linux</h2>
+<h3 id="ip-a-lettura-delloutput-reale-dalla-vm"><code>ip a</code> — lettura dell'output reale dalla VM</h3>
+<pre><code>vagrant@bookworm:~$ ip a
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 ...
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+    inet6 ::1/128 scope host noprefixroute
+
+2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 ...
+    link/ether 08:00:27:8d:c0:4d brd ff:ff:ff:ff:ff:ff    ← MAC address
+    altname enp0s3
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic eth0    ← IPv4
+    inet6 fd17:625c:f037:2:a00:27ff:fe8d:c04d/64 scope global dynamic mngtmpaddr  ← IPv6 globale
+    inet6 fe80::a00:27ff:fe8d:c04d/64 scope link                                  ← IPv6 link-local
+</code></pre>
+<blockquote>
+<p><strong>Interfaccia <code>lo</code> (loopback)</strong> — Non è una scheda di rete reale. È un'interfaccia virtuale del kernel usata dai processi per comunicarsi internamente (es. un'app che parla con un database locale usa <code>127.0.0.1</code>). È sempre UP anche senza hardware di rete. <code>00:00:00:00:00:00</code> come MAC è fittizio.</p>
+<p><strong>L'IP è fisso o dinamico?</strong> — La parola <code>dynamic</code> nell'output di <code>ip a</code> dice che l'IP è stato assegnato via DHCP (Dynamic Host Configuration Protocol), non configurato staticamente. Il <code>valid_lft 86313sec</code> è la durata del lease DHCP — dopo quel tempo va rinnovato. In pratica VirtualBox assegna sempre <code>10.0.2.15</code> alla prima VM NAT, ma tecnicamente potrebbe cambiare.</p>
+<p><strong>Come leggere gli IPv6</strong> — Ci sono due indirizzi IPv6 per eth0:<br />
+1. <code>fd17:625c:f037:2:.../64</code> con <code>scope global</code> — IPv6 globale (instradabile, equivale all'IP pubblico IPv6)<br />
+2. <code>fe80::a00:27ff:fe8d:c04d/64</code> con <code>scope link</code> — IPv6 link-local: prefisso <code>fe80::/10</code>, valido solo sulla LAN locale, presente su ogni interfaccia IPv6 sempre<br />
+Per ora è sufficiente sapere che <code>fe80:...</code> è locale, <code>fd17:...</code> (o <code>2001:...</code> per IP veri) è globale.</p>
+</blockquote>
+<h3 id="ip-r-lettura-della-tabella-di-routing"><code>ip r</code> — lettura della tabella di routing</h3>
+<pre><code>vagrant@bookworm:~$ ip r
+default via 10.0.2.2 dev eth0
+10.0.2.0/24 dev eth0 proto kernel scope link src 10.0.2.15
+</code></pre>
+<blockquote>
+<p><strong>Come leggere ogni riga</strong>:<br />
+- <code>default via 10.0.2.2 dev eth0</code> → regola default: qualunque pacchetto diretto a un IP che non conosco, mandalo a <code>10.0.2.2</code> (il gateway NAT di VirtualBox) tramite l'interfaccia eth0<br />
+- <code>10.0.2.0/24 dev eth0 proto kernel scope link src 10.0.2.15</code> → regola per la subnet locale: i pacchetti diretti a qualunque IP in <code>10.0.2.0/24</code> vengono consegnati direttamente su eth0 (senza passare da un gateway), usando <code>10.0.2.15</code> come IP sorgente. <code>proto kernel</code> = aggiunta automaticamente dal kernel quando l'IP è stato assegnato all'interfaccia.</p>
+</blockquote>
+<p>Con <code>ip a show eth0</code> puoi filtrare l'output a una sola interfaccia — già eseguito ✅.</p>
+<hr />
+<h2 id="7-strumenti-di-monitoraggio">7. Strumenti di monitoraggio</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi — gli esercizi 2–6 non sono stati eseguiti. Contenuto dalla lezione di riferimento.</p>
+</blockquote>
+<h3 id="ping-verifica-connettivita"><code>ping</code> — verifica connettività</h3>
+<pre><code class="language-bash">ping -c 3 10.0.2.2       # gateway NAT (deve rispondere)
+ping -c 3 8.8.8.8        # DNS Google (verifica uscita internet)
+ping -c 3 192.168.56.1   # host fisico (se hai interfaccia host-only)
+</code></pre>
+<p>Output: <code>time=12.3 ms</code> è la latenza round-trip; <code>ttl=117</code> è il numero di router attraversabili prima che il pacchetto venga scartato.</p>
+<h3 id="ss-porte-in-ascolto-e-connessioni-attive"><code>ss</code> — porte in ascolto e connessioni attive</h3>
+<pre><code class="language-bash">ss -tlnp    # TCP, Listen, Numeric, con Processo → mostra servizi esposti
+ss -tnap    # tutte le connessioni TCP attive (inclusa la sessione SSH)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-t</code></td>
+<td>Solo TCP</td>
+</tr>
+<tr>
+<td><code>-u</code></td>
+<td>Solo UDP</td>
+</tr>
+<tr>
+<td><code>-l</code></td>
+<td>Solo LISTEN</td>
+</tr>
+<tr>
+<td><code>-a</code></td>
+<td>Tutti gli stati</td>
+</tr>
+<tr>
+<td><code>-n</code></td>
+<td>No risoluzione nomi</td>
+</tr>
+<tr>
+<td><code>-p</code></td>
+<td>Mostra il processo</td>
+</tr>
+</tbody>
+</table>
+<p>Lettura output:</p>
+<pre><code>State   Recv-Q  Send-Q  Local Address:Port  Peer Address:Port
+LISTEN  0       128     0.0.0.0:22          0.0.0.0:*          sshd
+</code></pre>
+<ul>
+<li><code>0.0.0.0:22</code> = SSH in ascolto su <em>tutte</em> le interfacce, porta 22 → raggiungibile dall'esterno</li>
+<li><code>127.0.0.1:3306</code> (esempio) = MySQL in ascolto solo su loopback → non raggiungibile dall'esterno</li>
+</ul>
+<h3 id="traceroute-percorso-dei-pacchetti"><code>traceroute</code> — percorso dei pacchetti</h3>
+<pre><code class="language-bash">traceroute 8.8.8.8    # mostra ogni router (hop) con latenza
+</code></pre>
+<h3 id="tcpdump-cattura-pacchetti-in-tempo-reale"><code>tcpdump</code> — cattura pacchetti in tempo reale</h3>
+<pre><code class="language-bash">sudo tcpdump -i eth0 icmp           # cattura solo ICMP (ping)
+sudo tcpdump -i eth0 port 80        # solo HTTP
+sudo tcpdump -i eth0 host 10.0.2.2  # solo traffico verso/da gateway
+</code></pre>
+<hr />
+<h2 id="8-risoluzione-dei-nomi-dns">8. Risoluzione dei nomi (DNS)</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi — esercizi 4–5 non eseguiti.</p>
+</blockquote>
+<p>La sequenza quando scrivi <code>ping google.com</code>:</p>
+<ol>
+<li>Il kernel consulta <code>/etc/nsswitch.conf</code> → <code>hosts: files dns</code> → prima <code>/etc/hosts</code>, poi DNS</li>
+<li><code>/etc/hosts</code> — file locale, editabile, ha priorità:
+   <code>127.0.0.1   localhost</code></li>
+<li><code>/etc/resolv.conf</code> — server DNS da interrogare:
+   <code>nameserver 10.0.2.3    # DNS di VirtualBox (in modalità NAT)</code></li>
+</ol>
+<p>Strumenti:</p>
+<pre><code class="language-bash">getent hosts www.unibo.it      # usa NSS (rispetta /etc/hosts)
+host www.unibo.it              # DNS diretto
+dig www.unibo.it               # DNS con dettagli tecnici
+cat /etc/hosts
+cat /etc/resolv.conf
+</code></pre>
+<hr />
+<h2 id="stato-esercizi">Stato esercizi</h2>
+<table>
+<thead>
+<tr>
+<th>Esercizio</th>
+<th>Contenuto</th>
+<th>Stato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Es. 1</td>
+<td><code>ip a</code>, <code>ip r</code> — lettura interfacce e routing</td>
+<td>✅ Eseguito</td>
+</tr>
+<tr>
+<td>Es. 2</td>
+<td><code>ping</code> verso gateway, internet, host</td>
+<td>⬜ Da eseguire</td>
+</tr>
+<tr>
+<td>Es. 3</td>
+<td><code>ss -tlnp</code>, <code>ss -tnap</code> — porte in ascolto</td>
+<td>⬜ Da eseguire</td>
+</tr>
+<tr>
+<td>Es. 4</td>
+<td>DNS: <code>/etc/hosts</code>, <code>/etc/resolv.conf</code>, <code>getent</code>, <code>dig</code></td>
+<td>⬜ Da eseguire</td>
+</tr>
+<tr>
+<td>Es. 5</td>
+<td>Aggiungere alias in <code>/etc/hosts</code></td>
+<td>⬜ Da eseguire</td>
+</tr>
+<tr>
+<td>Es. 6</td>
+<td><code>tcpdump</code> + ping (opzionale)</td>
+<td>⬜ Da eseguire</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Prossimo step</strong>: riprendere dalla VM con Es. 2–6 nell'ordine. Le domande aperte qui sopra sono già risolte — leggi le risposte prima di eseguire, poi esegui e scrivi eventuali nuovi dubbi.</p>
+<hr />
+<h2 id="connessione-con-security-s1">Connessione con Security S1</h2>
+<ul>
+<li><code>ss -tlnp</code> e Nmap vedono le stesse porte, da prospettive opposte (difensore vs attaccante)</li>
+<li>Il three-way handshake spiega la differenza tra <code>-sT</code> (handshake completo) e <code>-sS</code> (SYN scan, non completa)</li>
+<li><code>0.0.0.0:22</code> = superficie d'attacco esposta; <code>127.0.0.1:3306</code> = non raggiungibile dall'esterno</li>
+<li>L'interfaccia <code>lo</code> risponde ai ping locali ma non è visibile da altre macchine</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo3D]]</li>
+<li>[[guida_lab_modulo3D_networking_base]]</li>
+<li>[[lezione_modulo3D_networking_base]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

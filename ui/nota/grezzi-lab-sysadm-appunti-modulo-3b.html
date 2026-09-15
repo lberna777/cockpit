@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_modulo 3B.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi · 3B</p>
+<h1 class="titolo-pagina">Appunti_modulo 3B.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo 3B.md">Apri il file originale</a></p>
+<article class="prosa"><p>Modulo 3B        28/03/26</p>
+<p>Le fasi che attraversa un programma sono l'installazione, l'aggiornamento e la disinstallazione. ovviamente ciascuna fase ha delle dipendenze che lo legano a prerequisiti hardware o di sistema, o a altri componente software da installare.</p>
+<p>lo standard più basico per l'installazione è quella manuale, che vede l'installazione direttamente dai binari del programma, inseriti manualmente nei posti corretti a nostro rischio e pericolo (bisogna saper constatare i prerequisiti). </p>
+<p>Si può invece installare tramite sorgente (tipicamente un archivio compresso) che una volta reperito si estrae e permette di configurare i sorgenti a nostro piacimento per poi proseguire con l'installazione (sempre guidata nel caso dei sorgenti?)</p>
+<h3 id="autenticita-del-software-scaricato">Autenticità del software scaricato</h3>
+<p>Prima di estrarre un archivio, verificarne l’autenticità:</p>
+<pre><code>[](#cb3-1)gpg --verify FILE.asc FILE.tar.gz    # (mostra key id)
+[](#cb3-2)gpg --keyserver pgpkeys.mit.edu --recv-key &lt;KEY_ID&gt;
+[](#cb3-3)gpg --verify FILE.asc FILE.tar.gz    # ripetere
+[](#cb3-4)
+[](#cb3-5)# Alternativa con fingerprint:
+[](#cb3-6)sha256 -c FILE.sha256
+</code></pre>
+<p>l'installazione tramite sorgente risulta utile nel momento in cui eseguiamo queste verifiche che però nella pratica spesso non si sfruttano. ma risulta anche più difficile da manutenere e richiede molti componenti ausiliari che potrebbero ritorcerci contro come vettori di attacco da un malintenzionato. (cosa si intende per distribuzione e pacchetti? non sono i pacchetti compressi di cui parlavamo prima come sorgenti? come funzionano? esempi pratici?)</p>
+<hr />
+<p>PACCHETTO</p>
+<p>un pacchetto è un file singolo che contiene in forma compatta un software precompilato, con procedure di pre e post installazione delineate e check per la compatibilità dei prerequisiti</p>
+<p>Criteri per la scelta di una distribuzione</p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Architetture supportate</strong></td>
+<td>Quasi tutte supportano amd64; per architetture esotiche verificare</td>
+</tr>
+<tr>
+<td><strong>Stabilità vs aggiornamento</strong></td>
+<td>Distro “stabili” includono solo sw collaudato; altre preferiscono novità anche a costo di minor robustezza</td>
+</tr>
+<tr>
+<td><strong>Versioned vs rolling</strong></td>
+<td>Versioned: aggiornamenti correttivi solo durante il ciclo; rolling: sempre all’ultima versione</td>
+</tr>
+<tr>
+<td><strong>LTS</strong></td>
+<td>Per server: supporto 5/7 anni con solo security backport</td>
+</tr>
+<tr>
+<td><strong>Ampiezza pacchetti</strong></td>
+<td>Da 1500 (minimali) a 26000+ (Debian)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Debian</strong> (la nostra VM): versioned, orientata alla stabilità, ~26000 pacchetti.</p>
+<h2 id="3-due-famiglie-debian-e-red-hat">3. Due Famiglie: Debian e Red Hat</h2>
+<p>Quasi tutte le distro Linux derivano da una di queste due.</p>
+<p>Entrambe usano una struttura a tre livelli: 1. <strong>Tool di basso livello</strong> per gestire singoli pacchetti (<code>dpkg</code> / <code>rpm</code>) 2. <strong>Tool intermedi</strong> per gestione coordinata di pacchetti e dipendenze (<code>apt</code> / <code>yum</code>/<code>dnf</code>) 3. <strong>Tool per il reperimento automatico</strong> da repository</p>
+<p>DIPENDENZE (si intendono dipendenze tra software che  magari ne richiedono un altro preinstallato?)</p>
+<p>queste dipendenze possono essere logiche: uno strumento non serve (inutile) se non ho (uso)  l'altro. o fisiche: uno serve all'altro per poter funzionare</p>
+<p>lo strumento chiamato package manager conosce l'intero grafo che relaziona i programmi attraverso queste dipendenze e risolve automaticamente le dipendenze al momento dell'installazione e della rimozione</p>
+<p>PACCHETTI BASE E PACCHETTI -dev</p>
+<p>i pacchetti -dev sono opzionali e inutili per sistemi non usati per lo sviluppo. contengono le parti necessarie a compilare programmi che usano il software che stiamo installando e non solo ad eseguirlo come i pacchetti base</p>
+<hr />
+<p>REPOSITORY</p>
+<p>le repository sono sostanzialmente raccolte indicizzate di pacchetti. il package manager legge per ogni repo l'indice e i metadati, rendendogli possibile conoscere le dipendenze tra pacchetti</p>
+<p>(non ho capito la parte subito sotto, configurazione repo in debian apt, ho installato pacchetti su debian ma non mi sembra di aver fatto cosi)</p>
+<p>COMANDI DPKG E APT SU DEBIAN</p>
+<h3 id="tabella-comandi-principali">Tabella comandi principali</h3>
+<table>
+<thead>
+<tr>
+<th>Operazione</th>
+<th>Comando dpkg</th>
+<th>Comando apt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Update indice repo</td>
+<td>—</td>
+<td><code>apt update</code></td>
+</tr>
+<tr>
+<td>Cercare pacchetto</td>
+<td>—</td>
+<td><code>apt search &lt;keyword&gt;</code></td>
+</tr>
+<tr>
+<td>Installare da repo</td>
+<td>—</td>
+<td><code>apt install &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Installare da file .deb</td>
+<td><code>dpkg -i file.deb</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Aggiornare tutto</td>
+<td>—</td>
+<td><code>apt upgrade</code></td>
+</tr>
+<tr>
+<td>Aggiornare un pacchetto</td>
+<td>—</td>
+<td><code>apt upgrade &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Rimuovere (mantieni config)</td>
+<td><code>dpkg -r &lt;nome&gt;</code></td>
+<td><code>apt remove &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Rimuovere (+ config)</td>
+<td><code>dpkg -P &lt;nome&gt;</code></td>
+<td><code>apt purge &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Rimuovere dipendenze orfane</td>
+<td>—</td>
+<td><code>apt autoremove</code></td>
+</tr>
+<tr>
+<td>Info pacchetto</td>
+<td><code>dpkg -s &lt;nome&gt;</code></td>
+<td><code>apt show &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Lista file installati</td>
+<td><code>dpkg -L &lt;nome&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>A quale pkg appartiene un file</td>
+<td><code>dpkg -S /path/file</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Lista pacchetti installati</td>
+<td><code>dpkg -l</code></td>
+<td><code>apt list --installed</code></td>
+</tr>
+<tr>
+<td>Lista aggiornabili</td>
+<td>—</td>
+<td><code>apt list --upgradable</code></td>
+</tr>
+<tr>
+<td>Provenienza pacchetto</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>n.B. remove rispetto a purge non rimuove i file di configurazione, essenziali da rimuovere se vogliamo reinstallare lo stesso pacchetto da zero</p>
+<p>7/8)  (come funziona questa autenticazione dei pacchetti? anche se non credo sia essenziale per l'esame. non ho mai autenticato un pacchetto e non capisco come si garantisce che la chiave non sia recapitata da malintenzionati)</p>
+<p>9 - installare aggiornare e disinstallare un software presenta dei rischi...</p>
+<p>10- non mi sembra importante per il mio esame</p>
+<hr />
+<p>ESERCIZII</p>
+<p>ho acceso la vm</p>
+<p>ES 1</p>
+<pre><code># Aggiorna l'indice dei repository
+[](#cb13-2)sudo apt update
+</code></pre>
+<p>non ha risultato programmi da aggiornare</p>
+<pre><code># Quanti pacchetti sono aggiornabili?
+[](#cb13-5)apt list --upgradable 2&gt;/dev/null | wc -l
+</code></pre>
+<p>nessuno, giustamente, ma non ho capito che cosa fa 2&gt;/dev/null | wc -l</p>
+<pre><code># Quanti pacchetti sono installati?
+[](#cb13-8)dpkg -l | wc -l
+</code></pre>
+<p>325, e | wc -l conta le righe vero?</p>
+<p>ES 2</p>
+<pre><code># Installa tree (visualizza filesystem ad albero)
+[](#cb14-2)sudo apt install tree
+</code></pre>
+<p>installazione a buon fine</p>
+<pre><code># Dove sono stati installati i suoi file?
+[](#cb14-5)dpkg -L tree
+</code></pre>
+<p>mi da le directory, ma come funziona dpkg? cosa fa -L?</p>
+<pre><code># Cosa fa esattamente?
+[](#cb14-8)apt show tree
+</code></pre>
+<p>descrizione completa del pacchetto ok</p>
+<pre><code># Prova:
+[](#cb14-11)tree /etc/systemd/system/
+</code></pre>
+<p>funziona!</p>
+<p>ES 3</p>
+<pre><code># Cerca pacchetti correlati a htop
+[](#cb15-2)apt search htop
+</code></pre>
+<p>mi fa vedere dei pacchetti ma non capisco se sono installati ne in che modo sono "correlati", ma poi perchè vedo dei correlati a un programma con search che voldire cerca</p>
+<pre><code># Vedi i metadati (dipendenze, dimensione, descrizione)
+[](#cb15-5)apt show htop
+</code></pre>
+<p>non lo avevamo già visto sto comando?</p>
+<pre><code># Installa
+[](#cb15-8)sudo apt install htop
+</code></pre>
+<p>ha funzionato ma mi ha chiesto un autorizzazione Y/n che per tree non mi ha chiesto  </p>
+<pre><code># Verifica da quale repository viene
+[](#cb15-11)apt-cache showpkg htop
+</code></pre>
+<p>bello ma non capisco come sono strutturate le info che mi vengono date da questo comando</p>
+<p>ES 4</p>
+<pre><code># A quale pacchetto appartiene /bin/ls?
+[](#cb16-2)dpkg -S /bin/ls
+</code></pre>
+<p>mi ha risposto coreutils: /bin/ls ma non capisco che significa</p>
+<pre><code># Quali file ha installato quel pacchetto?
+[](#cb16-8)dpkg -L openssh-client
+</code></pre>
+<p>elencone di un sacco di file, ci sta</p>
+<p>ES 5</p>
+<pre><code># Quali librerie usa sshd?
+[](#cb17-2)ldd /usr/sbin/sshd
+[](#cb17-3)
+[](#cb17-4)# Conta quante librerie dinamiche usa
+[](#cb17-5)ldd /usr/sbin/sshd | wc -l
+[](#cb17-6)
+[](#cb17-7)# Confronta con un binario più semplice
+[](#cb17-8)ldd /bin/ls
+</code></pre>
+<p>pacchetti ampli avranno più dipendenze da librerie mentre i binari meno, ma cosa cambia tra libreria dinamica e non?</p>
+<p>ES 6</p>
+<pre><code># Rimuovi tree mantenendo config (se esistesse)
+[](#cb18-2)sudo apt remove tree
+[](#cb18-3)
+[](#cb18-4)# Verifica che sia andato via
+[](#cb18-5)which tree    # deve dare errore
+[](#cb18-6)
+[](#cb18-7)# Rimuovi le dipendenze orfane
+[](#cb18-8)sudo apt autoremove
+</code></pre>
+<p>direi tutto chiaro</p>
+<p>ES 7</p>
+<pre><code>cat /etc/apt/sources.list
+[](#cb19-2)ls /etc/apt/sources.list.d/
+[](#cb19-3)ls /etc/apt/trusted.gpg.d/
+</code></pre>
+<p>ho letto ma non capisco la sources.list cosa mi restituisce, gli altri due comandi sotto stampano solo che sono directory</p>
+<p>&nbsp;</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo3B_gestione_pacchetti]]</li>
+<li>[[lezione_modulo3B_gestione_pacchetti]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

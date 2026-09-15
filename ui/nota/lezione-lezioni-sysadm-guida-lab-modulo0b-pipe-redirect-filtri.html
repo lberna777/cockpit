@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_lab_modulo0B_pipe_redirect_filtri.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">guida_lab_modulo0B_pipe_redirect_filtri.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/guida_lab_modulo0B_pipe_redirect_filtri.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modulo-0b-pipe-redirect-e-filtri">Modulo 0B — Pipe, Redirect e Filtri</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Prerequisito</strong>: Modulo 0A completato (filesystem, permessi)<br />
+<strong>VM</strong>: Vagrant + Debian 12 (<code>cd ~/sysAdmin-lab &amp;&amp; vagrant up --provider=virtualbox &amp;&amp; vagrant ssh</code>)</p>
+<hr />
+<h2 id="il-concetto-fondamentale-flussi-di-dati">Il concetto fondamentale: flussi di dati</h2>
+<p>Su Linux ogni processo lavora con tre flussi di dati:</p>
+<table>
+<thead>
+<tr>
+<th>Flusso</th>
+<th>Numero</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>stdin</strong></td>
+<td>0</td>
+<td>Input standard — da tastiera per default</td>
+</tr>
+<tr>
+<td><strong>stdout</strong></td>
+<td>1</td>
+<td>Output standard — verso il terminale per default</td>
+</tr>
+<tr>
+<td><strong>stderr</strong></td>
+<td>2</td>
+<td>Output degli errori — verso il terminale per default</td>
+</tr>
+</tbody>
+</table>
+<p>Redirect e pipe servono a <strong>ridirigere questi flussi</strong>: invece di leggere da tastiera puoi leggere da file, invece di stampare a schermo puoi scrivere su file, invece di passare l'output all'utente puoi passarlo a un altro comando.</p>
+<hr />
+<h2 id="parte-1-redirect">Parte 1 — Redirect</h2>
+<h3 id="11-creare-materiale-di-lavoro">1.1 Creare materiale di lavoro</h3>
+<p>Prima di tutto, crea i file che useremo in questa lezione:</p>
+<pre><code class="language-bash">mkdir ~/lab0B &amp;&amp; cd ~/lab0B
+
+cat &gt; frutta.txt &lt;&lt; 'EOF'
+mela
+banana
+pera
+mela
+arancia
+banana
+mela
+kiwi
+pera
+EOF
+</code></pre>
+<p>Verifica il contenuto:</p>
+<pre><code class="language-bash">cat frutta.txt
+</code></pre>
+<p><strong>Output atteso</strong>: le 9 righe con i nomi dei frutti, nell'ordine in cui le hai scritte.</p>
+<hr />
+<h3 id="12-redirect-output">1.2 Redirect output: <code>&gt;</code></h3>
+<p>L'operatore <code>&gt;</code> prende lo stdout di un comando e lo scrive in un file, <strong>sovrascrivendo</strong> il contenuto esistente.</p>
+<pre><code class="language-bash">echo &quot;primo contenuto&quot; &gt; output.txt
+cat output.txt
+</code></pre>
+<p><strong>Output atteso</strong>: <code>primo contenuto</code></p>
+<pre><code class="language-bash">echo &quot;secondo contenuto&quot; &gt; output.txt
+cat output.txt
+</code></pre>
+<p><strong>Output atteso</strong>: <code>secondo contenuto</code> — il primo è sparito. <code>&gt;</code> sovrascrive sempre.</p>
+<hr />
+<h3 id="13-redirect-in-append">1.3 Redirect in append: <code>&gt;&gt;</code></h3>
+<p>L'operatore <code>&gt;&gt;</code> aggiunge in coda senza sovrascrivere.</p>
+<pre><code class="language-bash">echo &quot;riga uno&quot; &gt; log.txt
+echo &quot;riga due&quot; &gt;&gt; log.txt
+echo &quot;riga tre&quot; &gt;&gt; log.txt
+cat log.txt
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>riga uno
+riga due
+riga tre
+</code></pre>
+<p>Questo è il comportamento usato dai sistemi di logging: ogni evento viene aggiunto in coda al file di log senza cancellare la storia precedente.</p>
+<hr />
+<h3 id="14-redirect-input">1.4 Redirect input: <code>&lt;</code></h3>
+<p>L'operatore <code>&lt;</code> fornisce il contenuto di un file come stdin a un comando.</p>
+<pre><code class="language-bash">wc -l &lt; frutta.txt
+</code></pre>
+<p><strong>Output atteso</strong>: <code>9</code> — il numero di righe nel file.</p>
+<p><code>wc</code> (word count) con il flag <code>-l</code> conta le righe. Senza redirect avresti dovuto passargli il nome del file come argomento (<code>wc -l frutta.txt</code>); con <code>&lt;</code> gli passi lo stesso contenuto tramite stdin. In questo caso il risultato è identico, ma la distinzione diventa importante quando lavori con output di altri comandi.</p>
+<hr />
+<h3 id="15-redirect-degli-errori-2">1.5 Redirect degli errori: <code>2&gt;</code></h3>
+<p><code>stderr</code> ha numero 2. Se vuoi catturare i messaggi di errore in un file:</p>
+<pre><code class="language-bash">cat file_che_non_esiste.txt 2&gt; errori.txt
+cat errori.txt
+</code></pre>
+<p><strong>Output atteso nel file</strong>: <code>cat: file_che_non_esiste.txt: No such file or directory</code></p>
+<p>Per ridirigere sia stdout che stderr nello stesso file:</p>
+<pre><code class="language-bash">cat frutta.txt file_inesistente.txt &gt; tutto.txt 2&gt;&amp;1
+cat tutto.txt
+</code></pre>
+<p><code>2&gt;&amp;1</code> significa "manda stderr dove sta andando stdout". Vedrai nel file sia il contenuto di <code>frutta.txt</code> che il messaggio di errore per il file inesistente.</p>
+<hr />
+<h2 id="parte-2-pipe">Parte 2 — Pipe</h2>
+<h3 id="21-il-concetto">2.1 Il concetto</h3>
+<p>Il carattere <code>|</code> connette lo <strong>stdout di un comando</strong> allo <strong>stdin del successivo</strong>. Invece di scrivere output intermedi su file, i dati fluiscono direttamente da un programma all'altro in memoria.</p>
+<pre><code>comando1 | comando2 | comando3
+</code></pre>
+<p>L'output di <code>comando1</code> entra in <code>comando2</code>, il cui output entra in <code>comando3</code>.</p>
+<hr />
+<h3 id="22-prime-pipe">2.2 Prime pipe</h3>
+<pre><code class="language-bash">cat frutta.txt | wc -l
+</code></pre>
+<p><strong>Output atteso</strong>: <code>9</code></p>
+<p>Equivale a <code>wc -l frutta.txt</code>, ma ora capisci il meccanismo: <code>cat</code> manda il contenuto su stdout, <code>wc -l</code> lo riceve su stdin e conta le righe.</p>
+<pre><code class="language-bash">cat frutta.txt | sort
+</code></pre>
+<p><strong>Output atteso</strong>: i frutti in ordine alfabetico.</p>
+<pre><code class="language-bash">cat frutta.txt | sort | uniq
+</code></pre>
+<p><strong>Output atteso</strong>: i frutti in ordine alfabetico, <strong>senza duplicati</strong>. <code>uniq</code> rimuove le righe consecutive identiche — per questo funziona correttamente solo dopo <code>sort</code>.</p>
+<hr />
+<h3 id="23-contare-elementi-unici">2.3 Contare elementi unici</h3>
+<pre><code class="language-bash">cat frutta.txt | sort | uniq | wc -l
+</code></pre>
+<p><strong>Output atteso</strong>: <code>6</code> — ci sono 6 frutti distinti nella lista.</p>
+<p>Questa è una pipeline tipica: ordina → rimuovi duplicati → conta. La userai spesso per analizzare log e output di tool.</p>
+<hr />
+<h3 id="24-uniq-c-conta-le-occorrenze">2.4 <code>uniq -c</code> — conta le occorrenze</h3>
+<pre><code class="language-bash">cat frutta.txt | sort | uniq -c
+</code></pre>
+<p><strong>Output atteso</strong> (l'ordine può variare leggermente):</p>
+<pre><code>  1 arancia
+  2 banana
+  1 kiwi
+  3 mela
+  2 pera
+</code></pre>
+<p>Il numero a sinistra indica quante volte ogni elemento appare. Utile per trovare gli indirizzi IP che compaiono più spesso in un log di accessi, ad esempio.</p>
+<hr />
+<h3 id="25-head-e-tail-prime-e-ultime-righe">2.5 <code>head</code> e <code>tail</code> — prime e ultime righe</h3>
+<pre><code class="language-bash">cat frutta.txt | head -3
+cat frutta.txt | tail -3
+</code></pre>
+<p><strong>Output atteso</strong>: le prime 3 e le ultime 3 righe del file rispettivamente.</p>
+<pre><code class="language-bash">tail -f /var/log/syslog
+</code></pre>
+<p>Il flag <code>-f</code> (follow) tiene il file aperto e mostra le nuove righe in tempo reale — fondamentale per monitorare log di sistema mentre accade qualcosa. Premi <code>Ctrl+C</code> per uscire.</p>
+<hr />
+<h2 id="parte-3-grep">Parte 3 — grep</h2>
+<p><code>grep</code> è lo strumento di ricerca per testo. Cerca righe che corrispondono a un pattern e le stampa su stdout.</p>
+<h3 id="31-ricerca-base">3.1 Ricerca base</h3>
+<pre><code class="language-bash">grep &quot;mela&quot; frutta.txt
+</code></pre>
+<p><strong>Output atteso</strong>: tutte le righe che contengono la parola "mela".</p>
+<pre><code class="language-bash">grep -c &quot;mela&quot; frutta.txt
+</code></pre>
+<p><strong>Output atteso</strong>: <code>3</code> — il flag <code>-c</code> conta le corrispondenze invece di stamparle.</p>
+<pre><code class="language-bash">grep -i &quot;MELA&quot; frutta.txt
+</code></pre>
+<p><strong>Output atteso</strong>: stesse righe di prima — il flag <code>-i</code> rende la ricerca case-insensitive.</p>
+<hr />
+<h3 id="32-grep-su-output-di-altri-comandi">3.2 grep su output di altri comandi</h3>
+<pre><code class="language-bash">ls /etc | grep &quot;cron&quot;
+</code></pre>
+<p><strong>Output atteso</strong>: tutte le voci di <code>/etc</code> che contengono "cron" nel nome (<code>cron.d</code>, <code>cron.daily</code>, <code>crontab</code>, ecc.).</p>
+<pre><code class="language-bash">cat /etc/passwd | grep &quot;vagrant&quot;
+</code></pre>
+<p><strong>Output atteso</strong>: la riga del file <code>/etc/passwd</code> relativa all'utente vagrant. <code>/etc/passwd</code> contiene la lista di tutti gli utenti del sistema.</p>
+<hr />
+<h3 id="33-grep-con-flag-utili">3.3 grep con flag utili</h3>
+<pre><code class="language-bash">grep -n &quot;mela&quot; frutta.txt
+</code></pre>
+<p><strong>Output atteso</strong>: le righe con "mela" precedute dal numero di riga. <code>-n</code> è utile quando lavori su file grandi e devi localizzare un match.</p>
+<pre><code class="language-bash">grep -v &quot;mela&quot; frutta.txt
+</code></pre>
+<p><strong>Output atteso</strong>: tutte le righe che <strong>non</strong> contengono "mela". <code>-v</code> inverte il filtro — fondamentale per escludere rumore dai log.</p>
+<hr />
+<h2 id="parte-4-pipeline-avanzate">Parte 4 — Pipeline avanzate</h2>
+<h3 id="41-analisi-del-file-passwd">4.1 Analisi del file passwd</h3>
+<pre><code class="language-bash">cat /etc/passwd | cut -d: -f1 | sort
+</code></pre>
+<p><code>cut</code> estrae colonne da testo strutturato: <code>-d:</code> usa il carattere <code>:</code> come delimitatore, <code>-f1</code> prende il primo campo. In <code>/etc/passwd</code> il primo campo è il nome utente. Il risultato è la lista alfabetica di tutti gli utenti del sistema.</p>
+<hr />
+<h3 id="42-trova-i-processi-in-esecuzione">4.2 Trova i processi in esecuzione</h3>
+<pre><code class="language-bash">ps aux | grep &quot;bash&quot;
+</code></pre>
+<p><code>ps aux</code> mostra tutti i processi in esecuzione. Passato a <code>grep "bash"</code> filtra solo quelli che contengono la parola bash. Questa pipeline è usata continuamente per verificare se un servizio è attivo.</p>
+<hr />
+<h3 id="43-conta-i-file-per-tipo-in-etc">4.3 Conta i file per tipo in /etc</h3>
+<pre><code class="language-bash">ls /etc | grep &quot;\.conf$&quot; | wc -l
+</code></pre>
+<p><code>\.conf$</code> è un'espressione regolare: <code>\.</code> cerca un punto letterale, <code>conf</code> il testo, <code>$</code> indica fine riga. Il risultato è il numero di file <code>.conf</code> in <code>/etc</code>.</p>
+<hr />
+<h2 id="esercizio-finale">Esercizio finale</h2>
+<p>Senza guardare le soluzioni, costruisci le pipeline che rispondono a queste domande usando i comandi della lezione:</p>
+<ol>
+<li>Quante righe contiene il file <code>/etc/passwd</code>?</li>
+<li>Quanti utenti distinti sono nel file <code>/etc/passwd</code> (primo campo, separatore <code>:</code>)?</li>
+<li>Quali righe di <code>/var/log/syslog</code> contengono la parola "error"? (maiuscolo o minuscolo)</li>
+<li>Mostra solo le ultime 5 righe di <code>/var/log/auth.log</code></li>
+</ol>
+<hr />
+<h2 id="riepilogo-operatori-e-comandi">Riepilogo operatori e comandi</h2>
+<table>
+<thead>
+<tr>
+<th>Comando/Operatore</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&gt;</code></td>
+<td>Redirect stdout su file (sovrascrive)</td>
+</tr>
+<tr>
+<td><code>&gt;&gt;</code></td>
+<td>Redirect stdout su file (aggiunge in coda)</td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>Fornisce file come stdin</td>
+</tr>
+<tr>
+<td><code>2&gt;</code></td>
+<td>Redirect stderr su file</td>
+</tr>
+<tr>
+<td><code>2&gt;&amp;1</code></td>
+<td>Redirect stderr su stdout</td>
+</tr>
+<tr>
+<td><code>\|</code></td>
+<td>Pipe: stdout di sinistra → stdin di destra</td>
+</tr>
+<tr>
+<td><code>grep pattern</code></td>
+<td>Filtra righe che contengono il pattern</td>
+</tr>
+<tr>
+<td><code>grep -v</code></td>
+<td>Filtra righe che NON contengono il pattern</td>
+</tr>
+<tr>
+<td><code>grep -i</code></td>
+<td>Case-insensitive</td>
+</tr>
+<tr>
+<td><code>grep -n</code></td>
+<td>Mostra numeri di riga</td>
+</tr>
+<tr>
+<td><code>grep -c</code></td>
+<td>Conta le corrispondenze</td>
+</tr>
+<tr>
+<td><code>sort</code></td>
+<td>Ordina righe alfabeticamente</td>
+</tr>
+<tr>
+<td><code>uniq</code></td>
+<td>Rimuove righe duplicate consecutive</td>
+</tr>
+<tr>
+<td><code>uniq -c</code></td>
+<td>Conta occorrenze di ogni riga unica</td>
+</tr>
+<tr>
+<td><code>wc -l</code></td>
+<td>Conta le righe</td>
+</tr>
+<tr>
+<td><code>head -N</code></td>
+<td>Prime N righe</td>
+</tr>
+<tr>
+<td><code>tail -N</code></td>
+<td>Ultime N righe</td>
+</tr>
+<tr>
+<td><code>tail -f</code></td>
+<td>Segue il file in tempo reale</td>
+</tr>
+<tr>
+<td><code>cut -d: -f1</code></td>
+<td>Estrae il primo campo usando <code>:</code> come delimitatore</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="connessione-con-security">Connessione con Security</h2>
+<p>Tutto quello che hai imparato qui è la base operativa dei lab di Sicurezza:
+- <code>nmap -sV target | grep "open"</code> — filtri le porte aperte dall'output di Nmap
+- <code>cat auth.log | grep "Failed password" | wc -l</code> — conti i tentativi di login falliti
+- <code>cat access.log | cut -d" " -f1 | sort | uniq -c | sort -rn | head -10</code> — trovi i 10 IP che hanno fatto più richieste al server web</p>
+<p>Il pattern è sempre lo stesso: produci output grezzo → filtra → analizza.</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo0B_pipe_redirect_filtri]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

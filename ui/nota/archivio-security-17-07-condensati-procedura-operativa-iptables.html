@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>procedura_operativa_iptables.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">procedura_operativa_iptables.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/03_iptables_nftables/procedura_operativa_iptables.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="procedura-operativa-iptablesnftables">Procedura Operativa — Iptables/NFTables</h1>
+<blockquote>
+<p>Algoritmo esteso passo-passo per qualunque esercizio di questa famiglia (regole di filtraggio, e
+talvolta NAT, per una topologia di rete multi-host). Non contiene teoria di base sul networking —
+solo l'algoritmo operativo e la sintassi comparata. Per il triage rapido e i rami per scenario
+vedi <code>guida_esame_iptables.md</code>; per 7 esempi completi già risolti (tutti con soluzione ufficiale
+del docente), <code>modello_iptables_nftables.md</code>.</p>
+<p>⚠️ <strong>Regola d'oro: il file di consegna richiesto (<code>iptables.txt</code>, <code>ipt.sh</code>, <code>*.nft</code>...) è quasi
+sempre l'unico deliverable — non ci sono screenshot o report da scrivere in questa tipologia,</strong>
+a differenza di privesc/NIDS. Verifica comunque la consegna specifica: se dovesse chiedere
+qualcos'altro (è raro nel pool ma non impossibile), segnalalo, non inventare un formato.</p>
+</blockquote>
+<hr />
+<h2 id="0-prima-di-scrivere-qualunque-regola">0. Prima di scrivere qualunque regola</h2>
+<ul>
+<li>[ ] <strong>Leggi tutta la consegna prima di scrivere la prima riga.</strong> Il pool premia esplicitamente
+  questo comportamento: l'11 giugno 2021 lo dice testualmente ("si consiglia di leggere prima tutta
+  la lista"), perché un punto successivo (l'ordine delle regole, o un'esclusione) cambia come vanno
+  scritti i punti precedenti.</li>
+<li>[ ] <strong>Identifica quanti file/host la consegna chiede davvero.</strong> Non è sempre "un file per ogni
+  host della topologia": alcuni esercizi chiedono solo il Router (8 feb 2024), altri Router+Server
+  senza il Client (13 giu 2024), altri ancora ogni host coinvolto (13 set 2023, 12 gen 2026). Conta
+  i nomi di file richiesti nel testo, non presumerli dal disegno.</li>
+<li>[ ] <strong>Identifica la sintassi richiesta</strong>: <code>iptables</code> (legacy) o <code>nftables</code>. Nel pool osservato,
+  gli esercizi fino al 13 giugno 2024 sono in <code>iptables</code>; dal 10 luglio 2025 in poi sono tutti in
+  <code>nftables</code> — ma non affidarti solo alla data, la consegna/l'estensione del file richiesto
+  (<code>.sh</code>/<code>.txt</code> vs <code>.nft</code>) lo dice sempre esplicitamente.</li>
+<li>[ ] <strong>Individua se serve NAT</strong> (vedi §2) prima di iniziare a scrivere le regole di filtro — cambia
+  la struttura del file (tabella/catena NAT separata) e a volte l'indirizzo da usare nei match del
+  filtro (vedi §2, "matcha l'indirizzo dopo la traduzione").</li>
+</ul>
+<hr />
+<h2 id="05-da-dove-viene-ogni-pezzo-di-una-regola-le-tre-fonti">0.5 Da dove viene ogni pezzo di una regola (le tre fonti)</h2>
+<p>Prima di scrivere qualunque riga, sappi che ogni regola si <strong>assembla</strong> pescando informazioni da
+tre posti distinti, sempre gli stessi. Sapere <em>quale fonte</em> dà <em>quale pezzo</em> elimina il "dove lo
+trovo?" da ogni esercizio: niente in una regola è "da indovinare".</p>
+<table>
+<thead>
+<tr>
+<th>Pezzo della regola</th>
+<th>Da dove si legge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>protocollo (<code>-p tcp/udp</code>)</td>
+<td><strong>consegna (testo)</strong> — il servizio nominato o la porta ("porta TCP 443", "UDP 53")</td>
+</tr>
+<tr>
+<td>numero di porta (<code>--dport</code>/<code>--sport</code>)</td>
+<td><strong>consegna (testo)</strong> — esplicito, o porta standard del servizio nominato (SSH 22, DNS 53, SMTP 25, IMAPS 993...)</td>
+</tr>
+<tr>
+<td>chi parla con chi, concettualmente</td>
+<td><strong>consegna (testo)</strong> — "il client accede a...", "il server è raggiungibile da..."</td>
+</tr>
+<tr>
+<td>nome esatto delle interfacce (<code>-i</code>/<code>-o</code>)</td>
+<td><strong>disegno (topologia)</strong> — mai inventato, <strong>mai preso da un altro host</strong> (vedi §1, i nomi <code>eth*</code> sono locali a ciascuna macchina)</td>
+</tr>
+<tr>
+<td>quante interfacce ha l'host, quale rete/IP sta dietro ciascuna</td>
+<td><strong>disegno (topologia)</strong></td>
+</tr>
+<tr>
+<td>indirizzo/rete da matchare (<code>-s</code>/<code>-d</code>)</td>
+<td><strong>disegno (topologia)</strong> — gli IP e le subnet scritti accanto agli host</td>
+</tr>
+<tr>
+<td>ogni interazione = <strong>2 righe</strong> (richiesta + risposta)</td>
+<td><strong>metodo fisso</strong> — sempre, mai da "cercare"</td>
+</tr>
+<tr>
+<td><code>--dport</code> sulla richiesta / <code>--sport</code> sulla risposta</td>
+<td><strong>metodo fisso</strong> — automatico dalla direzione, il numero di porta è lo stesso (cambia solo quale flag lo tiene)</td>
+</tr>
+<tr>
+<td><code>-m state --state ESTABLISHED</code> <strong>solo</strong> sulla risposta</td>
+<td><strong>metodo fisso</strong> — mai sulla richiesta</td>
+</tr>
+<tr>
+<td><code>-j ACCEPT</code> come target</td>
+<td><strong>metodo fisso</strong> — quasi sempre; la policy <code>DROP</code> di default fa il resto</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Il punto pratico</strong>: protocollo/porta/chi-con-chi li <strong>detta la consegna</strong>; interfacce/reti/indirizzi
+li <strong>detta il disegno</strong>; la struttura (2 righe, dport-richiesta/sport-risposta, ESTABLISHED sulla
+risposta, ACCEPT) è <strong>sempre identica</strong> e non dipende dall'esercizio. Se ti manca un pezzo mentre
+scrivi una riga, sai esattamente in quale delle tre fonti cercarlo — non è mai "creatività".</p>
+<hr />
+<h2 id="1-leggere-la-topologia-e-classificare-ogni-flusso-per-ogni-host">1. Leggere la topologia e classificare ogni flusso per ogni host</h2>
+<p>Per <strong>ogni host</strong> della topologia e <strong>ogni interazione di rete</strong> richiesta dalla consegna, chiediti:
+questo host è <strong>sorgente/destinazione finale</strong> del traffico, o lo <strong>attraversa</strong> soltanto?</p>
+<table>
+<thead>
+<tr>
+<th>L'host è...</th>
+<th>Catena</th>
+<th>Esempio dal pool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>endpoint che risponde a una richiesta (server di un servizio)</td>
+<td>INPUT (richiesta) + OUTPUT (risposta)</td>
+<td>Server SMTP riceve da Internet (13 set 2023)</td>
+</tr>
+<tr>
+<td>endpoint che inizia una richiesta (client di un servizio)</td>
+<td>OUTPUT (richiesta) + INPUT (risposta)</td>
+<td>Client interroga DNS (tutti i casi)</td>
+</tr>
+<tr>
+<td>né sorgente né destinazione, il traffico passa da lui</td>
+<td>FORWARD (in entrambe le direzioni)</td>
+<td>Router tra Client e Internet</td>
+</tr>
+<tr>
+<td>un solo collegamento fisico verso "tutto il resto" (single-homed dietro un router)</td>
+<td>INPUT/OUTPUT, MAI FORWARD, distinzione per indirizzo non per interfaccia</td>
+<td>Bastion (10 lug 2025), webserver verso Internet (30 ott 2025)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>L'errore concettuale più comune del pool</strong>: mettere in <code>FORWARD</code> un servizio che gira sull'host
+stesso (o viceversa). Non funziona mai, perché quel traffico non passa mai per la catena sbagliata —
+verifica sempre "chi risponde effettivamente a questa richiesta?" prima di scegliere la catena.</p>
+<p><strong>Caso speciale — host con un solo link verso l'esterno (Bastion, webserver dietro un router)</strong>:
+se un host ha una singola interfaccia che porta sia il traffico locale al proprio segmento sia
+quello che continua oltre (verso/da Internet attraverso il router), non puoi distinguere le due
+direzioni con <code>-i</code>/<code>-o</code> — usa un match sull'indirizzo: in nftables, un insieme con negazione
+(<code>ip saddr != {rete1, rete2}</code> = "non nelle mie reti private note" = "da fuori"); non c'è un
+equivalente altrettanto compatto in iptables legacy, andrebbe simulato con più regole <code>-s</code>/<code>! -s</code>.</p>
+<hr />
+<h2 id="2-quando-serve-nat-e-come-deciderlo-dalla-consegna">2. Quando serve NAT, e come deciderlo dalla consegna</h2>
+<p><strong>Segnali testuali che implicano NAT</strong> (in ordine di forza del segnale):
+1. La parola <strong>"indiretto"/"indirettamente"</strong> riferita a un servizio raggiungibile dall'esterno →
+   il server ha IP privato, serve <strong>DNAT</strong> per pubblicarlo dietro l'IP pubblico del router (12 gen
+   2026, 10 lug 2025, 30 ott 2025 sono tutti così).
+2. Un host con <strong>IP privato</strong> deve raggiungere una rete che <strong>non ha instradamento di ritorno</strong>
+   verso quella privata (anche senza la parola "indiretto" esplicita) → serve <strong>SNAT/MASQUERADE</strong>
+   sul router che fa da confine, altrimenti le risposte non saprebbero tornare (13 giu 2024, punti
+   1 e 3: nessuna delle due consegne dice "indiretto", ma la topologia — client su rete privata che
+   deve raggiungere un segmento "pubblico" diverso, o Internet — lo richiede comunque).
+3. La consegna dice esplicitamente che <strong>le reti private non sono instradate automaticamente</strong>
+   nemmeno tra loro (12 gen 2026) → praticamente ogni comunicazione che attraversa il confine
+   pubblico/privato richiede NAT in una direzione o nell'altra.</p>
+<p><strong>Quando NON serve NAT</strong>: se l'host di destinazione ha già un indirizzo instradabile pubblicamente
+(anche se la consegna lo chiama semplicemente "il server", senza dire "IP pubblico" esplicitamente
+— guarda il disegno: se l'indirizzo è del tipo di quelli su Internet/rete dichiarata pubblica, il
+FORWARD puro basta, 13 set 2023 punto 2 e 13 giu 2024 punto 2 sono così).</p>
+<p><strong>Discriminante decisivo per il segnale 2 — c'è o no una rotta di ritorno?</strong> Il segnale 2 non è
+"sono reti diverse?" ma "<strong>il segmento di destinazione sa come rispedire indietro verso la
+sorgente?</strong>". Una rete privata che raggiunge un altro segmento richiede SNAT <strong>solo se quel segmento
+non ha rotta di ritorno</strong> verso di lei. Confronta due casi reali del pool, che sembrano simili ma
+si decidono in modo opposto:
+- <strong>13 giu 2024</strong>: i client privati (<code>172.20.0.0/20</code>) raggiungono un server sulla rete "pubblica"
+  <code>1.1.1.0/28</code>; quel segmento <strong>non ha rotta</strong> verso la rete privata dei client → <strong>serve SNAT</strong>
+  (senza, le risposte del server non saprebbero tornare a un IP privato che lì non esiste).
+- <strong>10 lug 2025</strong>: Bastion e Server stanno su <strong>due reti private diverse</strong>, eppure <strong>niente SNAT</strong> —
+  perché la consegna dice esplicitamente che <strong>il Router è il default gateway di entrambe</strong>: chi
+  riceve un pacchetto da una rete "sconosciuta" lo rispedisce al proprio default gateway, che sa
+  dove trovarla. La rotta di ritorno esiste, quindi mascherare sarebbe superfluo.</p>
+<p>Regola operativa: privato→pubblico/Internet quasi sempre SNAT; privato→privato <strong>dipende</strong> dal fatto
+che esista un gateway comune / routing dichiarato che chiuda il giro di ritorno. Leggi la consegna
+per capire se quella rotta c'è.</p>
+<p><strong>Regola pratica per non sbagliare la direzione</strong>:
+- <strong>DNAT</strong> cambia la <strong>destinazione</strong> — vive in <strong>PREROUTING</strong> (iptables) o in una catena con hook
+  <code>prerouting</code>/priority <code>dstnat</code> (nftables), perché deve agire <em>prima</em> che il kernel decida come
+  instradare il pacchetto.
+- <strong>SNAT/MASQUERADE</strong> cambia la <strong>sorgente</strong> — vive in <strong>POSTROUTING</strong> (iptables) o hook
+  <code>postrouting</code>/priority <code>srcnat</code> (nftables), perché agisce <em>dopo</em> che tutto il resto è deciso,
+  appena prima che il pacchetto lasci il sistema.
+- Occhio all'opzione: <code>SNAT</code> accetta solo <code>--to-source</code>; <code>DNAT</code> accetta solo <code>--to-destination</code>.
+  Scambiarle (visto realmente nel pool, 13 set 2023) fa fallire il caricamento della regola.</p>
+<p><strong>Conseguenza sul filtro, da non dimenticare mai</strong>: se una catena NAT traduce un indirizzo <em>prima</em>
+di <code>FORWARD</code>/<code>filter</code>, le regole di filtro successive devono guardare l'indirizzo <strong>dopo</strong> la
+traduzione, non quello originale — es. dopo un DNAT che pubblica un server privato dietro un IP
+pubblico, la regola <code>FORWARD</code> guarda l'IP <strong>privato reale</strong> del server (perché il DNAT prerouting
+è già avvenuto), non l'IP pubblico con cui l'ha contattato Internet. Questo vale anche per l'host
+finale (server/webserver): il suo filtro locale vede il pacchetto già tradotto, quindi filtra
+sull'indirizzo post-NAT che gli arriva davvero (visto in 3 casi del pool: 12 gen 2026, 13 giu 2024,
+30 ott 2025).</p>
+<p><strong>Generalizzazione (vale per SNAT come per DNAT)</strong> — l'host "dall'altra parte" del NAT filtra
+<strong>sull'indirizzo come gli arriva davvero</strong>, cioè quello già tradotto:
+- dietro un <strong>DNAT</strong>: il server pubblicato vede la propria <strong>destinazione tradotta</strong> (il suo IP
+  privato reale) ma la <strong>sorgente originale</strong> del richiedente esterno — il DNAT tocca solo la
+  destinazione. (es. 12 gen 2026: <code>server.nft</code> accetta <code>ip saddr != &lt;rete_locale&gt;</code>, non un IP
+  pubblico specifico).
+- dietro un <strong>SNAT</strong>: il server contattato vede come <strong>sorgente l'IP del router</strong> su quel segmento,
+  non l'IP reale del client — il SNAT tocca solo la sorgente. Quindi se la consegna limita l'accesso
+  "dai client", sull'host finale filtri sull'IP <strong>tradotto</strong> del router, non su un range di client
+  che non vedrai mai (es. 13 giu 2024: <code>ipt-server.sh</code> filtra <code>-s 1.1.1.1</code>, l'IP del router, per la
+  porta 993).</p>
+<p>⚠️ Questo riguarda <strong>solo</strong> i flussi che hanno effettivamente subito NAT. Gli altri flussi verso lo
+stesso host <strong>restano come sono</strong>: se un flusso non passa per SNAT/DNAT e la consegna dice "da
+qualsiasi host", non aggiungi nessun <code>-s</code>/<code>-d</code> per quel flusso (sempre 13 giu 2024: SMTP "da
+qualsiasi host di Internet" <strong>non</strong> ha SNAT, quindi <code>ipt-server.sh</code> non mette alcun <code>-s</code> per la
+porta 25). Non applicare la restrizione dell'IP tradotto a tappeto su tutte le righe dell'host:
+riga per riga, chiediti "questo specifico flusso ha subito NAT?".</p>
+<h3 id="traccia-pacchetto-per-pacchetto-perche-una-sola-riga-snat-basta">Traccia pacchetto per pacchetto: perché UNA sola riga SNAT basta</h3>
+<p>Dubbio ricorrente: "ho scritto una riga SNAT per l'andata — e la risposta? non serve una seconda
+regola NAT per ritradurre al ritorno?". <strong>No</strong>, e conviene vederlo letteralmente. Esempio 13 giu
+2024: client <code>172.20.0.5</code> (rete privata) contatta il server <code>1.1.1.14:993</code>; il router fa
+<code>-t nat -A POSTROUTING -s 172.20.0.0/20 -d 1.1.1.14 -j SNAT --to-source 1.1.1.1</code>.</p>
+<p><strong>Senza SNAT — cosa si rompe:</strong>
+1. Client manda: <code>src=172.20.0.5  dst=1.1.1.14</code>. Il router lo inoltra invariato.
+2. Il server riceve <code>src=172.20.0.5</code> e prova a rispondere verso <code>dst=172.20.0.5</code>. Ma
+   <code>172.20.0.0/20</code> è una rete <strong>privata non instradabile</strong> dal segmento del server → la risposta non
+   sa dove andare, muore lì. Connessione mai completata.</p>
+<p><strong>Con SNAT — passo per passo dell'header:</strong>
+1. Client manda: <code>src=172.20.0.5  dst=1.1.1.14</code>.
+2. Router, in <code>POSTROUTING</code> (appena prima di far uscire il pacchetto), <strong>riscrive la sorgente</strong>:
+   <code>src=1.1.1.1  dst=1.1.1.14</code>. <strong>E annota la traduzione in conntrack</strong> (la tabella di stato del
+   kernel): "la connessione 172.20.0.5 ↔ 1.1.1.14:993 sta uscendo mascherata come 1.1.1.1".
+3. Il server riceve <code>src=1.1.1.1</code> — un indirizzo <strong>del suo stesso segmento pubblico</strong>, raggiungibile.
+   Risponde: <code>src=1.1.1.14  dst=1.1.1.1</code>.
+4. La risposta torna al router. Il router <strong>non ha bisogno di una seconda regola NAT</strong>: conntrack
+   riconosce che questo pacchetto appartiene alla connessione annotata al passo 2 e <strong>ritraduce
+   automaticamente</strong> la destinazione da <code>1.1.1.1</code> a <code>172.20.0.5</code>. Il pacchetto arriva al client come
+   se nulla fosse successo.</p>
+<p><strong>Da qui ci si fida della singola riga SNAT</strong>: la traduzione di ritorno la fa il <strong>conntrack</strong>, non
+una regola che scrivi tu. La tua unica riga SNAT descrive solo l'andata; il ritorno è gestito dallo
+stato di connessione. ⚠️ Attenzione a non confondere due meccanismi diversi che convivono: sul
+<strong>filtro</strong> (<code>FORWARD</code>/<code>INPUT</code>) la risposta va comunque abilitata <strong>esplicitamente</strong> con la riga
+<code>-m state --state ESTABLISHED</code> — ma quello è <em>filtro</em>, non <em>NAT</em>. Il conntrack serve entrambi (traccia
+la connessione), ma la riga ESTABLISHED la scrivi tu, la ritraduzione NAT no.</p>
+<hr />
+<h2 id="3-pattern-fisso-default-drop-loopback">3. Pattern fisso: default-drop + loopback</h2>
+<p>In quasi tutti i casi del pool (unica eccezione nota: 11 giugno 2021, dove <code>FORWARD</code> resta
+<code>ACCEPT</code> per un motivo dedotto dal testo — vedi <code>modello_iptables_nftables.md</code> caso 1), lo scheletro
+è identico su ogni host:</p>
+<p><strong>iptables:</strong></p>
+<pre><code>iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+iptables -t nat -F        # solo se l'host fa NAT
+
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# ... qui le regole di servizio ...
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+</code></pre>
+<p><strong>nftables</strong> (schema minimo, una tabella <code>inet</code>/<code>ip</code> per famiglia):</p>
+<pre><code>flush ruleset      # oppure flush chain &lt;tabella&gt; &lt;catena&gt; per catena, se preferisci essere selettivo
+
+table inet filter {
+    chain input   { type filter hook input   priority filter; policy drop; iif &quot;lo&quot; accept  ...regole... }
+    chain output  { type filter hook output  priority filter; policy drop; oif &quot;lo&quot; accept  ...regole... }
+    chain forward { type filter hook forward priority filter; policy drop;                   ...regole... }
+}
+</code></pre>
+<p><strong>Perché il default-drop semplifica tutto</strong>: realizza da solo il requisito quasi universale
+"qualsiasi altro pacchetto deve essere scartato" — non serve una regola finale di DROP esplicita.
+Scrivi <strong>solo</strong> le regole di ciò che deve passare. Le regole di policy vanno <strong>sempre per ultime</strong>
+nello script (in iptables la policy si applica comunque indipendentemente dall'ordine di scrittura,
+ma per chiarezza e per coerenza con <code>nft</code>, mettile in fondo).</p>
+<p><strong>Loopback</strong>: sempre permesso, sempre per primo per convenzione (anche se l'ordine relativo non
+conta quando policy e match sono disgiunti — vedi §4 sull'ordine).</p>
+<hr />
+<h2 id="4-pattern-fisso-richiestarisposta-simmetrica">4. Pattern fisso: richiesta/risposta simmetrica</h2>
+<p>Ogni interazione di rete "vera" (non locale all'host) coinvolge due parti: chi <strong>inizia</strong> la
+connessione (client, verso una porta di <strong>destinazione</strong> nota) e chi <strong>risponde</strong> (server, da quella
+stessa porta come <strong>sorgente</strong>). Per questo motivo, ogni servizio genera <strong>due righe per ogni host
+coinvolto</strong>, mai una sola:</p>
+<p><strong>iptables:</strong></p>
+<pre><code># lato client (chi inizia)
+iptables -A OUTPUT -p &lt;proto&gt; --dport &lt;porta&gt; -j ACCEPT
+iptables -A INPUT  -p &lt;proto&gt; --sport &lt;porta&gt; -m state --state ESTABLISHED -j ACCEPT
+
+# lato server (chi risponde)
+iptables -A INPUT  -p &lt;proto&gt; --dport &lt;porta&gt; -j ACCEPT
+iptables -A OUTPUT -p &lt;proto&gt; --sport &lt;porta&gt; -m state --state ESTABLISHED -j ACCEPT
+</code></pre>
+<p><strong>nftables</strong> (equivalente):</p>
+<pre><code># lato client
+oif &lt;if&gt; &lt;proto&gt; dport &lt;porta&gt; accept
+iif &lt;if&gt; &lt;proto&gt; sport &lt;porta&gt; ct state established accept
+
+# lato server
+iif &lt;if&gt; &lt;proto&gt; dport &lt;porta&gt; accept
+oif &lt;if&gt; &lt;proto&gt; sport &lt;porta&gt; ct state established accept
+</code></pre>
+<p><strong>Perché <code>ESTABLISHED</code>/<code>ct state established</code> e non aprire anche la porta sorgente in permanenza</strong>:
+una regola che matcha solo <code>--sport &lt;porta&gt;</code> senza <code>ESTABLISHED</code> accetterebbe <strong>qualunque</strong>
+pacchetto con quella porta sorgente, anche non in risposta a nulla — un uso improprio che un
+attaccante potrebbe sfruttare (spoofing della porta sorgente). Il match sullo stato di connessione
+restringe l'accettazione alle sole risposte di connessioni <strong>già avviate legittimamente</strong> da questo
+host, tracciate da <code>conntrack</code>.</p>
+<p><strong>Eccezione da conoscere: NTP</strong>. A differenza della maggioranza dei servizi (porta client effimera,
+porta server nota), NTP usa la porta <strong>123 su entrambi i lati</strong> — quindi la regola FORWARD/router
+per NTP ha <strong>sia</strong> <code>--dport 123</code> <strong>sia</strong> <code>--sport 123</code> nella stessa riga (visto nel caso 8 feb 2024
+del modello). Non generalizzare lo schema dport-richiesta/sport-risposta a occhi chiusi: verifica
+sempre se il servizio in questione è simmetrico.</p>
+<p><strong>Altri servizi a porte fisse (stesso principio dell'NTP): DHCP</strong>. Anche DHCP non usa porte effimere
+lato client — <strong>server sulla 67, client sulla 68</strong>, entrambe fisse (non identiche come NTP, ma
+entrambe note). La richiesta ha quindi <code>--sport 68 --dport 67</code> e la risposta <code>--sport 67 --dport 68</code>,
+con <strong>entrambe</strong> le porte esplicite su ogni riga (visto nel caso 8 feb 2024, dove il router è server
+DHCP per le tre reti). <strong>Regola pratica</strong>: per DNS/HTTP/HTTPS/SSH/SMTP/IMAPS/... la porta client è
+effimera → ometti <code>--sport</code> sulla richiesta; per NTP (123/123) e DHCP (67/68) <strong>entrambe</strong> le porte
+sono note e vanno scritte su ogni riga.</p>
+<hr />
+<h2 id="5-cheatsheet-sintassi-comparata-iptables-legacy-nftables">5. Cheatsheet sintassi comparata — iptables legacy ↔ nftables</h2>
+<h3 id="struttura-del-comando">Struttura del comando</h3>
+<table>
+<thead>
+<tr>
+<th>Concetto</th>
+<th>iptables</th>
+<th>nftables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tabelle/catene predefinite</td>
+<td>Sì (<code>filter</code>/<code>nat</code>/<code>mangle</code>/<code>raw</code>, <code>INPUT</code>/<code>OUTPUT</code>/<code>FORWARD</code>/...)</td>
+<td><strong>No</strong> — tabella e catena vanno dichiarate esplicitamente</td>
+</tr>
+<tr>
+<td>Creare una tabella</td>
+<td>(implicita)</td>
+<td><code>table &lt;famiglia&gt; &lt;nome&gt; { ... }</code> — famiglia tipica: <code>ip</code> (solo IPv4), <code>inet</code> (IPv4+IPv6)</td>
+</tr>
+<tr>
+<td>Creare una catena builtin</td>
+<td>(implicita)</td>
+<td><code>chain &lt;nome&gt; { type &lt;tipo&gt; hook &lt;hook&gt; priority &lt;valore&gt;; policy &lt;accept\|drop&gt;; }</code></td>
+</tr>
+<tr>
+<td>Aggiungere una regola</td>
+<td><code>iptables -A &lt;catena&gt; &lt;match&gt; -j &lt;target&gt;</code></td>
+<td>scrivi direttamente <code>&lt;match&gt; &lt;verdetto&gt;</code> dentro il blocco <code>chain { }</code></td>
+</tr>
+<tr>
+<td>Svuotare</td>
+<td><code>iptables -F [&lt;catena&gt;]</code></td>
+<td><code>flush ruleset</code> (tutto) oppure <code>flush chain &lt;tabella&gt; &lt;catena&gt;</code></td>
+</tr>
+<tr>
+<td>Policy di default</td>
+<td><code>iptables -P &lt;catena&gt; &lt;ACCEPT\|DROP&gt;</code></td>
+<td><code>policy accept;</code>/<code>policy drop;</code> dentro la dichiarazione della catena</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hooktipo-di-catena-dove-si-aggancia-nel-percorso-del-pacchetto">Hook/tipo di catena (dove si aggancia nel percorso del pacchetto)</h3>
+<table>
+<thead>
+<tr>
+<th>Hook (nftables)</th>
+<th>Catena equivalente (iptables)</th>
+<th>Quando scatta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prerouting</code></td>
+<td><code>PREROUTING</code></td>
+<td>Appena il pacchetto entra, <strong>prima</strong> della decisione di instradamento</td>
+</tr>
+<tr>
+<td><code>input</code></td>
+<td><code>INPUT</code></td>
+<td>Pacchetto destinato al sistema locale</td>
+</tr>
+<tr>
+<td><code>forward</code></td>
+<td><code>FORWARD</code></td>
+<td>Pacchetto da inoltrare altrove (non locale)</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td><code>OUTPUT</code></td>
+<td>Pacchetto generato localmente</td>
+</tr>
+<tr>
+<td><code>postrouting</code></td>
+<td><code>POSTROUTING</code></td>
+<td>Appena prima che il pacchetto lasci il sistema</td>
+</tr>
+</tbody>
+</table>
+<p>Priorità standard per gli hook NAT (nftables): <strong><code>dstnat</code></strong> per <code>prerouting</code> (valore -100),
+<strong><code>srcnat</code></strong> per <code>postrouting</code> (valore 100). Per <code>filter</code>/<code>forward</code>/<code>input</code>/<code>output</code> la priorità
+tipica è <code>filter</code> (valore 0). ⚠️ Un errore reale visto nel pool (30 ottobre 2025): scrivere
+<code>type filter hook prerouting priority nat;</code> invece di <code>type nat hook prerouting priority dstnat;</code>
+— <code>dnat to</code>/<code>snat to</code> sono statement validi <strong>solo</strong> dentro catene <code>type nat</code>, e <code>nat</code> non è un
+nome di priorità riconosciuto.</p>
+<h3 id="match">Match</h3>
+<table>
+<thead>
+<tr>
+<th>Concetto</th>
+<th>iptables</th>
+<th>nftables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Interfaccia entrata/uscita</td>
+<td><code>-i &lt;if&gt;</code> / <code>-o &lt;if&gt;</code></td>
+<td><code>iif &lt;if&gt;</code> / <code>oif &lt;if&gt;</code> (anche <code>iifname</code>/<code>oifname</code> per nome, utile con wildcard)</td>
+</tr>
+<tr>
+<td>IP sorgente/destinazione</td>
+<td><code>-s &lt;addr&gt;</code> / <code>-d &lt;addr&gt;</code></td>
+<td><code>ip saddr &lt;addr&gt;</code> / <code>ip daddr &lt;addr&gt;</code></td>
+</tr>
+<tr>
+<td>Protocollo</td>
+<td><code>-p tcp\|udp\|icmp</code></td>
+<td><code>tcp</code>/<code>udp</code>/<code>icmp</code> in testa al match (es. <code>tcp dport 80</code>)</td>
+</tr>
+<tr>
+<td>Porta sorgente/destinazione</td>
+<td><code>--sport &lt;p&gt;</code> / <code>--dport &lt;p&gt;</code></td>
+<td><code>&lt;proto&gt; sport &lt;p&gt;</code> / <code>&lt;proto&gt; dport &lt;p&gt;</code></td>
+</tr>
+<tr>
+<td>Negazione</td>
+<td><code>! -s &lt;addr&gt;</code></td>
+<td><code>ip saddr != &lt;addr&gt;</code></td>
+</tr>
+<tr>
+<td>Insieme di valori (set)</td>
+<td>serve <code>-m multiport --dports p1,p2</code> o più regole</td>
+<td><code>{ v1, v2, ... }</code> inline, es. <code>tcp dport { 80, 443 }</code></td>
+</tr>
+<tr>
+<td>Stato connessione</td>
+<td><code>-m state --state NEW,ESTABLISHED,RELATED</code></td>
+<td><code>ct state new,established,related</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="nat">NAT</h3>
+<table>
+<thead>
+<tr>
+<th>Concetto</th>
+<th>iptables</th>
+<th>nftables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cambiare destinazione</td>
+<td><code>-j DNAT --to-destination &lt;ip&gt;[:&lt;porta&gt;]</code> (in <code>PREROUTING</code>/<code>OUTPUT</code>)</td>
+<td><code>dnat to &lt;ip&gt;[:&lt;porta&gt;]</code> (in catena <code>type nat hook prerouting</code>)</td>
+</tr>
+<tr>
+<td>Cambiare sorgente (fissa)</td>
+<td><code>-j SNAT --to-source &lt;ip&gt;</code> (in <code>POSTROUTING</code>)</td>
+<td><code>snat to &lt;ip&gt;</code> (in catena <code>type nat hook postrouting</code>)</td>
+</tr>
+<tr>
+<td>Mascherare con IP dinamico dell'interfaccia</td>
+<td><code>-j MASQUERADE</code> (solo <code>POSTROUTING</code>)</td>
+<td><code>masquerade</code></td>
+</tr>
+<tr>
+<td>Dirottare alla macchina locale</td>
+<td><code>-j REDIRECT</code></td>
+<td><code>redirect to :&lt;porta&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="verdettitarget">Verdetti/target</h3>
+<table>
+<thead>
+<tr>
+<th>Concetto</th>
+<th>iptables</th>
+<th>nftables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Accetta</td>
+<td><code>-j ACCEPT</code></td>
+<td><code>accept</code></td>
+</tr>
+<tr>
+<td>Scarta</td>
+<td><code>-j DROP</code></td>
+<td><code>drop</code></td>
+</tr>
+<tr>
+<td>Salta a catena custom (torna dopo)</td>
+<td><code>-j &lt;CATENA&gt;</code></td>
+<td><code>jump &lt;catena&gt;</code></td>
+</tr>
+<tr>
+<td>Salta a catena custom (non torna)</td>
+<td>— (non esiste equivalente diretto)</td>
+<td><code>goto &lt;catena&gt;</code></td>
+</tr>
+<tr>
+<td>Termina lo scorrimento della catena custom / applica la default policy se in una builtin</td>
+<td><code>-j RETURN</code></td>
+<td><code>return</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-errori-comuni-da-evitare-dedotti-dai-gotcha-reali-del-pool">6. Errori comuni da evitare (dedotti dai gotcha reali del pool)</h2>
+<ul>
+<li><strong>Confondere <code>FORWARD</code> con <code>INPUT</code>/<code>OUTPUT</code></strong> per un servizio che gira sull'host stesso (o
+  viceversa, per traffico che lo attraversa soltanto): la regola non farà mai match. Prima di
+  scrivere, rispondi "chi risponde davvero a questa richiesta?" per ogni host.</li>
+<li><strong>Scambiare <code>SNAT</code>/<code>DNAT</code></strong> o le rispettive opzioni (<code>--to-source</code> vs <code>--to-destination</code>): visto
+  realmente in una soluzione ufficiale del pool (13 set 2023) — <code>-j SNAT --to-destination</code> non è
+  una combinazione valida, <code>iptables</code> rifiuta la regola al caricamento.</li>
+<li><strong>Dimenticare <code>-j SNAT</code>/<code>-j DNAT</code></strong> prima di <code>--to-source</code>/<code>--to-destination</code>: senza il target
+  esplicito, l'opzione non è riconosciuta (visto in 13 giu 2024).</li>
+<li><strong>Usare <code>-i</code>/<code>-o</code> in catene dove non sono ammessi</strong>: <code>iptables</code> non accetta <code>-o</code> in
+  <code>PREROUTING</code>/<code>INPUT</code>, né <code>-i</code> in <code>OUTPUT</code>/<code>POSTROUTING</code> — l'interfaccia di uscita non è ancora
+  nota così presto nel percorso del pacchetto (o, simmetricamente, quella di entrata non ha più
+  senso così tardi).</li>
+<li><strong>Sbagliare protocollo su una regola NAT</strong> (es. <code>-p tcp</code> su una SNAT pensata per traffico UDP):
+  la regola non fa mai match sul traffico che dovrebbe tradurre, ma non dà errore — è un bug
+  silenzioso, verifica sempre che il <code>-p</code>/protocollo nella riga NAT corrisponda a quello del
+  servizio che stai abilitando.</li>
+<li><strong>Dimenticare che dopo un DNAT il filtro va scritto sull'indirizzo tradotto</strong>, non su quello
+  originale — la regola <code>FORWARD</code>/<code>forward</code> (e il filtro dell'host finale) vedono il pacchetto
+  <strong>dopo</strong> <code>prerouting</code>, che accade prima.</li>
+<li><strong><code>type filter</code> invece di <code>type nat</code>, o <code>priority nat</code> invece di <code>dstnat</code>/<code>srcnat</code></strong> in nftables:
+  gli statement <code>dnat to</code>/<code>snat to</code> richiedono una catena dichiarata <code>type nat</code>.</li>
+<li><strong>Usare <code>-I</code> quando l'ordine delle regole è esplicitamente richiesto dalla consegna</strong> (11 giu
+  2021): <code>-I</code> inserisce in testa, quindi una sequenza di <code>-I</code> produce l'ordine <strong>inverso</strong> di
+  scrittura — usa <code>-A</code> quando l'ordine conta.</li>
+<li><strong>Assumere che "un file per host" sia sempre richiesto</strong>: verifica quanti/quali file la consegna
+  nomina esplicitamente — non tutti gli esercizi del pool chiedono le regole per ogni host della
+  topologia.</li>
+<li><strong>Non rileggere la consegna per dedurre eccezioni implicite</strong> alla policy di default (es. 11 giu
+  2021: il fatto che un punto della consegna non sia richiamato nell'elenco finale "blocca tutto il
+  resto" è un indizio che quella catena ha una policy diversa dalle altre).</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

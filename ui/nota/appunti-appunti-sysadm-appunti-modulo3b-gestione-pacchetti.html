@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_modulo3B_gestione_pacchetti.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_modulo3B_gestione_pacchetti.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SYSADM/appunti_modulo3B_gestione_pacchetti.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-3b-gestione-dei-pacchetti-software">Appunti — Modulo 3B: Gestione dei Pacchetti Software</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T
+<strong>Data pratica</strong>: 28/04/2026
+<strong>Stato</strong>: ✅ Completato — tutti gli esercizi eseguiti sulla VM</p>
+<hr />
+<h2 id="1-il-problema-della-gestione-del-software">1. Il Problema della Gestione del Software</h2>
+<p>Ogni software ha un <strong>ciclo di vita</strong>: installazione → aggiornamento → disinstallazione.</p>
+<p>Le problematiche che rendono non banale questo ciclo:
+- <strong>Prerequisiti hardware/SO</strong>: il software deve girare sull'architettura giusta
+- <strong>Dipendenze da altri componenti software</strong>: librerie, tool di sistema
+- <strong>Configurazione</strong>: ogni software ha parametri specifici</p>
+<h3 id="installazione-manuale">Installazione manuale</h3>
+<p><strong>Da binari</strong>: copia manuale nei percorsi corretti, verifica manuale compatibilità architettura e dipendenze.</p>
+<p><strong>Da sorgente</strong> (caso tipico: archivio <code>.tar.gz</code>, codice C, build via autoconf):</p>
+<pre><code class="language-bash">cd /usr/local/src
+tar tvzf net-snmp-5.4.tar.gz    # lista contenuti prima di estrarre
+tar xvzf net-snmp-5.4.tar.gz    # estrae
+cd net-snmp-5.4/
+./configure --help               # esplora opzioni disponibili
+./configure [opzioni scelte]     # configura (genera Makefile)
+make                             # compila — NON come root
+sudo make install                # installa — qui serve root
+</code></pre>
+<blockquote>
+<p><strong>Regola di sicurezza</strong>: solo <code>sudo make install</code> richiede root. Compilare come root è cattiva prassi: esistono casi di malware che sfruttano sorgenti malevoli scaricati ed eseguiti come root.</p>
+</blockquote>
+<h3 id="autenticita-del-software-scaricato">Autenticità del software scaricato</h3>
+<p>Prima di estrarre un archivio, verificarne l'autenticità:</p>
+<pre><code class="language-bash">gpg --verify FILE.asc FILE.tar.gz    # mostra il key id della firma
+gpg --keyserver pgpkeys.mit.edu --recv-key &lt;KEY_ID&gt;
+gpg --verify FILE.asc FILE.tar.gz    # ripetere con la chiave recuperata
+
+# Alternativa con fingerprint:
+sha256 -c FILE.sha256
+</code></pre>
+<h3 id="riflessioni-sullinstallazione-da-sorgente">Riflessioni sull'installazione da sorgente</h3>
+<p>L'installazione da sorgente è utile in teoria (puoi verificare il codice), ma nella pratica:
+- Più difficile da manutenere
+- Richiede molti componenti ausiliari (header, librerie, compilatori) che <strong>possono essere vettori di attacco</strong></p>
+<blockquote>
+<p><strong>Questo è il motivo per cui esistono distribuzioni e pacchetti</strong>: le chiavi di verifica si installano una volta sola, le dipendenze si risolvono automaticamente, la compatibilità binaria tra tutti gli elementi del set è garantita.</p>
+</blockquote>
+<hr />
+<h2 id="2-distribuzioni-e-pacchetti">2. Distribuzioni e Pacchetti</h2>
+<blockquote>
+<p><strong>Domanda: cosa si intende per "distribuzione e pacchetti"? Sono gli stessi archivi compressi di cui si parlava prima come sorgenti?</strong></p>
+<p>No — sono cose diverse. Un <strong>pacchetto</strong> (<code>.deb</code> su Debian, <code>.rpm</code> su Red Hat) contiene il software già <strong>precompilato</strong>: non devi compilare nulla. È un file singolo che include:
+- i binari pronti all'uso
+- metadati: dipendenze, architettura supportata, versione del pacchetto
+- script di pre e post-installazione (es. creare un utente di sistema, generare una chiave)</p>
+<p>Una <strong>distribuzione</strong> (Debian, Ubuntu, Fedora…) è una raccolta curata di migliaia di questi pacchetti, firmati dai maintainer, compatibili tra loro per una data versione. Scegliere Debian significa affidarsi a questa curatela — non compilare nulla da sorgente.</p>
+</blockquote>
+<h3 id="cose-un-pacchetto">Cos'è un pacchetto</h3>
+<p>Un file singolo che contiene in forma compatta:
+- Software precompilato
+- Criteri per la verifica della compatibilità e dei prerequisiti
+- Procedure di pre/post-installazione</p>
+<p>La garanzia di compatibilità richiede di vincolare tre parametri:
+- <strong>Architettura</strong> (amd64, i386, arm64, …)
+- <strong>Versione della distribuzione</strong> (es. bookworm, jammy, …)
+- <strong>Versione del software</strong> contenuto</p>
+<h3 id="formato-dei-nomi">Formato dei nomi</h3>
+<p><strong>Debian/Ubuntu</strong> → formato <code>.deb</code>:</p>
+<pre><code>aptitude-0.2.15.9-2_i386.deb
+  ↑nome    ↑ver.sw  ↑ver.pkg ↑arch
+</code></pre>
+<p><strong>RedHat/CentOS/Fedora</strong> → formato <code>.rpm</code>:</p>
+<pre><code>httpd-2.4.6-45.el7.centos.x86_64.rpm
+</code></pre>
+<h3 id="criteri-per-la-scelta-di-una-distribuzione">Criteri per la scelta di una distribuzione</h3>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Architetture supportate</strong></td>
+<td>Quasi tutte supportano amd64; per architetture esotiche verificare</td>
+</tr>
+<tr>
+<td><strong>Stabilità vs aggiornamento</strong></td>
+<td>Distro "stabili" includono solo sw collaudato; altre preferiscono novità anche a costo di minor robustezza</td>
+</tr>
+<tr>
+<td><strong>Versioned vs rolling</strong></td>
+<td>Versioned: aggiornamenti correttivi solo durante il ciclo; rolling: sempre all'ultima versione</td>
+</tr>
+<tr>
+<td><strong>LTS</strong></td>
+<td>Per server: supporto 5/7 anni con solo security backport</td>
+</tr>
+<tr>
+<td><strong>Ampiezza pacchetti</strong></td>
+<td>Da 1500 (minimali) a 26000+ (Debian)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Debian</strong> (la nostra VM): versioned, orientata alla stabilità, ~26000 pacchetti.</p>
+<hr />
+<h2 id="3-due-famiglie-debian-e-red-hat">3. Due Famiglie: Debian e Red Hat</h2>
+<p>Quasi tutte le distro Linux derivano da una di queste due.</p>
+<p>Entrambe usano una struttura a tre livelli:
+1. <strong>Tool di basso livello</strong> per gestire singoli pacchetti (<code>dpkg</code> / <code>rpm</code>)
+2. <strong>Tool intermedi</strong> per gestione coordinata di pacchetti e dipendenze (<code>apt</code> / <code>yum</code>/<code>dnf</code>)
+3. <strong>Tool per il reperimento automatico</strong> da repository</p>
+<hr />
+<h2 id="4-dipendenze-il-grafo">4. Dipendenze: il Grafo</h2>
+<blockquote>
+<p><strong>Domanda: "DIPENDENZE" — si intendono dipendenze tra software che ne richiedono un altro preinstallato?</strong></p>
+<p>Esatto. Le dipendenze possono essere di due tipi:
+- <strong>Logiche</strong>: un software non ha senso senza un altro (es. un'estensione PHP non serve senza un web server)
+- <strong>Fisiche</strong>: un binario è compilato usando una libreria e non può girare senza di essa (linking dinamico)</p>
+<p>Il package manager conosce l'<strong>intero grafo</strong> di queste relazioni e lo risolve automaticamente: quando installi A, installa anche B e C se necessari; quando rimuovi A, segnala o rimuove B e C se sono diventati orfani.</p>
+</blockquote>
+<h3 id="pacchetti-base-e-pacchetti-dev">Pacchetti base e pacchetti <code>-dev</code></h3>
+<p>Per ogni libreria esistono due pacchetti distinti:</p>
+<table>
+<thead>
+<tr>
+<th>Pacchetto</th>
+<th>Contiene</th>
+<th>Usato per</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>zlib1g</code></td>
+<td><code>.so</code> (linking dinamico)</td>
+<td><strong>Eseguire</strong> programmi che usano zlib</td>
+</tr>
+<tr>
+<td><code>zlib1g-dev</code></td>
+<td><code>.a</code> + header <code>.h</code> (linking statico)</td>
+<td><strong>Compilare</strong> programmi che usano zlib</td>
+</tr>
+</tbody>
+</table>
+<p>Su sistemi deb: suffisso <code>-dev</code>. Su sistemi rpm: suffisso <code>-devel</code>.
+I sistemi non usati per sviluppo non installano i <code>-dev</code>.</p>
+<h3 id="verificare-le-dipendenze-dinamiche-di-un-binario">Verificare le dipendenze dinamiche di un binario</h3>
+<pre><code class="language-bash">ldd /usr/sbin/sshd
+# output: lista di librerie .so con path e indirizzo in memoria
+# es: libz.so.1 =&gt; /usr/lib/libz.so.1 (0xb7d63000)
+</code></pre>
+<blockquote>
+<p><strong>Domanda: cosa cambia tra libreria dinamica e statica?</strong></p>
+<ul>
+<li><strong>Statica</strong> (<code>.a</code>): il codice della libreria viene copiato dentro il binario al momento della compilazione. Il binario è autosufficiente ma più grande.</li>
+<li><strong>Dinamica</strong> (<code>.so</code>): il codice della libreria rimane separato. Il binario, quando viene eseguito, la carica in memoria dal path indicato da <code>ldd</code>. Più leggero, ma richiede che la libreria sia presente sul sistema.</li>
+</ul>
+<p>Su Linux quasi tutti i programmi usano linking dinamico — per questo <code>ldd /usr/sbin/sshd</code> mostra un elenco di <code>.so</code>. Se una di quelle librerie viene rimossa o aggiornata a versione incompatibile, <code>sshd</code> smette di funzionare.</p>
+</blockquote>
+<hr />
+<h2 id="5-repository">5. Repository</h2>
+<p>I pacchetti vengono distribuiti tramite <strong>repository</strong>: raccolte indicizzate di pacchetti, online o su filesystem locali.</p>
+<p>Il package manager legge per ogni repo l'indice e i metadati:
+- conosce quali versioni sono disponibili
+- conosce le dipendenze tra pacchetti</p>
+<h3 id="configurazione-repo-in-debianapt">Configurazione repo in Debian/apt</h3>
+<blockquote>
+<p><strong>Domanda: "non ho capito la configurazione repo in Debian/apt, ho installato pacchetti su Debian ma non mi sembra di aver fatto così"</strong></p>
+<p>La configurazione è già presente nella VM e non l'hai dovuta toccare — per questo non ti sembra di averla fatta. I file sono già lì e <code>apt</code> li legge silenziosamente ogni volta che usi <code>apt update</code>. La riga <code>deb http://... bookworm main</code> dice ad apt: <em>vai a questo URL, cercami i pacchetti per la versione bookworm, nel componente "main"</em>. In pratica la tocchi solo quando aggiungi un repository esterno (es. Docker, VirtualBox) o quando configuri un server che deve usare un mirror locale.</p>
+</blockquote>
+<p>File principale: <code>/etc/apt/sources.list</code>
+Frammenti aggiuntivi: <code>/etc/apt/sources.list.d/*.list</code></p>
+<p>Formato di una riga:</p>
+<pre><code>deb http://archive.ubuntu.com/ubuntu bionic-updates universe
+</code></pre>
+<p>Per aggiungere un repository di terze parti:</p>
+<pre><code class="language-bash"># Creare il file:
+# /etc/apt/sources.list.d/virtualbox.list
+deb http://download.virtualbox.org/virtualbox/debian xenial contrib
+</code></pre>
+<p>Il database locale di apt/dpkg è in <code>/var/lib/dpkg/</code> e <code>/var/lib/apt/</code>.</p>
+<hr />
+<h2 id="6-comandi-dpkg-e-apt-su-debian">6. Comandi <code>dpkg</code> e <code>apt</code> su Debian</h2>
+<h3 id="tabella-comandi-principali">Tabella comandi principali</h3>
+<table>
+<thead>
+<tr>
+<th>Operazione</th>
+<th>Comando dpkg</th>
+<th>Comando apt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Update indice repo</td>
+<td>—</td>
+<td><code>apt update</code></td>
+</tr>
+<tr>
+<td>Cercare pacchetto</td>
+<td>—</td>
+<td><code>apt search &lt;keyword&gt;</code></td>
+</tr>
+<tr>
+<td>Installare da repo</td>
+<td>—</td>
+<td><code>apt install &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Installare da file .deb</td>
+<td><code>dpkg -i file.deb</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Aggiornare tutto</td>
+<td>—</td>
+<td><code>apt upgrade</code></td>
+</tr>
+<tr>
+<td>Aggiornare un pacchetto</td>
+<td>—</td>
+<td><code>apt upgrade &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Rimuovere (mantieni config)</td>
+<td><code>dpkg -r &lt;nome&gt;</code></td>
+<td><code>apt remove &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Rimuovere (+ config)</td>
+<td><code>dpkg -P &lt;nome&gt;</code></td>
+<td><code>apt purge &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Rimuovere dipendenze orfane</td>
+<td>—</td>
+<td><code>apt autoremove</code></td>
+</tr>
+<tr>
+<td>Info pacchetto</td>
+<td><code>dpkg -s &lt;nome&gt;</code></td>
+<td><code>apt show &lt;nome&gt;</code></td>
+</tr>
+<tr>
+<td>Lista file installati</td>
+<td><code>dpkg -L &lt;nome&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>A quale pkg appartiene un file</td>
+<td><code>dpkg -S /path/file</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Lista pacchetti installati</td>
+<td><code>dpkg -l</code></td>
+<td><code>apt list --installed</code></td>
+</tr>
+<tr>
+<td>Lista aggiornabili</td>
+<td>—</td>
+<td><code>apt list --upgradable</code></td>
+</tr>
+<tr>
+<td>Provenienza pacchetto</td>
+<td>—</td>
+<td><code>apt-cache showpkg &lt;nome&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="apt-remove-vs-apt-purge"><code>apt remove</code> vs <code>apt purge</code></h3>
+<ul>
+<li><code>apt remove</code>: rimuove i binari, <strong>mantiene</strong> i file di configurazione in <code>/etc/</code></li>
+<li><code>apt purge</code>: rimuove tutto inclusi i file di configurazione</li>
+<li><code>apt autoremove</code>: rimuove i pacchetti installati come dipendenze che non servono più</li>
+</ul>
+<blockquote>
+<p><strong>Nota pratica</strong>: se vuoi reinstallare un pacchetto da zero (es. server con configurazione corrotta), usa <code>purge</code>, non <code>remove</code>. Con <code>remove</code> la vecchia configurazione rimane e influenzerà la nuova installazione.</p>
+</blockquote>
+<hr />
+<h2 id="7-autenticita-dei-pacchetti-sistema-distribuzioni">7. Autenticità dei Pacchetti (sistema distribuzioni)</h2>
+<blockquote>
+<p><strong>Domanda: "come funziona questa autenticazione dei pacchetti? come si garantisce che la chiave non sia recapitata da malintenzionati?"</strong></p>
+<p>Nelle distribuzioni il problema della distribuzione sicura delle chiavi è risolto <strong>una volta sola al momento dell'installazione del sistema operativo</strong>: il media di installazione (ISO, USB) contiene già le chiavi pubbliche dei maintainer, verificate fuori banda (es. scaricando la ISO da un mirror ufficiale e verificandone il checksum sha256). Da quel momento:
+1. Il repo distribuisce i pacchetti firmati con la propria chiave privata
+2. <code>apt</code> verifica ogni pacchetto scaricato con la chiave pubblica già presente in <code>/etc/apt/trusted.gpg.d/</code>
+3. Se la firma non quadra, <code>apt</code> rifiuta il pacchetto</p>
+<p>Il rischio residuo è quello che descrivi: un attaccante che compromette il repo <strong>e</strong> sostituisce la chiave pubblica sul tuo sistema. Per questo <code>/etc/apt/trusted.gpg.d/</code> è accessibile solo da root. La cosa più importante è non aggiungere repo di terze parti senza verificare la provenienza della chiave.</p>
+</blockquote>
+<p>I keyring <code>.deb</code> vanno in <code>/etc/apt/trusted.gpg.d/</code>:</p>
+<pre><code class="language-bash"># Aggiungere la chiave pubblica di un repo (metodo moderno):
+gpg -o /etc/apt/trusted.gpg.d/mio-repo.gpg --dearmor pubkey.txt
+</code></pre>
+<blockquote>
+<p><strong>Nota</strong>: <code>apt-key</code> (il vecchio metodo) è <strong>deprecato</strong> — non usarlo.</p>
+</blockquote>
+<hr />
+<h2 id="8-gestire-la-provenienza-dei-pacchetti-software-injection">8. Gestire la Provenienza dei Pacchetti (Software Injection)</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi.</p>
+</blockquote>
+<p><strong>Rischio</strong>: se un repo di terze parti contiene un pacchetto con lo stesso nome di un pacchetto di sistema e lo dichiara a versione più recente, <code>apt</code> lo installerà al posto di quello ufficiale → <strong>software injection</strong> (rilevante per Security, Supply Chain Attacks).</p>
+<pre><code class="language-bash"># Verificare da quale repo proviene un pacchetto installato:
+apt-cache showpkg &lt;nome&gt;
+</code></pre>
+<p><strong>Version pinning</strong> (bloccare un pacchetto a una versione specifica):
+- Editare <code>/etc/apt/preferences.d/*</code></p>
+<hr />
+<h2 id="9-problematiche-di-aggiornamento-e-disinstallazione">9. Problematiche di Aggiornamento e Disinstallazione</h2>
+<blockquote>
+<p>⚠️ Questa sezione era accennata negli appunti grezzi ("presentano dei rischi") senza dettaglio.</p>
+</blockquote>
+<p>Aggiornare un pacchetto può causare problemi su:
+1. <strong>Prerequisiti</strong>: i pacchetti-dipendenza potrebbero dover essere aggiornati a loro volta, rompendo altri software
+2. <strong>Configurazione</strong>: nuove versioni possono introdurre format incompatibili con le config già presenti
+3. <strong>Dipendenze di altri software</strong>: modifiche alle interfacce rompono software terzi
+4. <strong><code>PATH</code></strong>: l'ordine di ricerca degli eseguibili può selezionare la versione sbagliata
+5. <strong>Loader dinamico</strong>: <code>/etc/ld.so.conf</code> controlla quali librerie <code>.so</code> vengono caricate; <code>ldconfig</code> aggiorna la cache</p>
+<pre><code class="language-bash"># Verificare quale libreria viene caricata effettivamente:
+ldd /usr/sbin/sshd | grep libz
+
+# Forzare una versione alternativa:
+export LD_LIBRARY_PATH=/usr/local/lib
+ldd /usr/sbin/sshd | grep libz    # ora punta a /usr/local/lib/libz.so.1
+</code></pre>
+<p>Questi rischi esistono anche per la disinstallazione. Il <strong>grafo delle dipendenze</strong> è il valore aggiunto principale del sistema a pacchetti: rende prevedibili gli effetti a cascata.</p>
+<hr />
+<h2 id="10-snapflatpak-e-container">10. Snap/Flatpak e Container</h2>
+<blockquote>
+<p>⚠️ Lorenzo ha annotato "non mi sembra importante per il mio esame" — incluso per completezza, non è oggetto di esercizi pratici.</p>
+</blockquote>
+<p><strong>Snap/Flatpak</strong>: pacchetti indipendenti dalla distribuzione, con tutte le dipendenze incluse. Utili per software particolarmente longevo o basato su funzioni non standard.</p>
+<p><strong>Container</strong> (Docker, LXC): invece di isolare solo il pacchetto, si isola l'intero ambiente di esecuzione di un processo. Il kernel Linux fornisce tre meccanismi che i container combinano:
+- <strong>cgroups</strong>: misurano e limitano le risorse (CPU, RAM, I/O, rete)
+- <strong>namespaces</strong>: ogni processo vede istanze virtuali delle risorse (mnt, pid, net, ipc, uts, user)
+- <strong>union-capable filesystems</strong>: combinano layer di filesystem (base dei container)</p>
+<hr />
+<h2 id="esercizi-sulla-vm-risultati">Esercizi sulla VM — Risultati</h2>
+<h3 id="es-1-esplorazione-base">Es. 1 — Esplorazione base ✅</h3>
+<pre><code class="language-bash">sudo apt update
+apt list --upgradable 2&gt;/dev/null | wc -l
+dpkg -l | wc -l    # → 325 pacchetti installati
+</code></pre>
+<blockquote>
+<p><strong>Domanda: cosa fa <code>2&gt;/dev/null | wc -l</code>?</strong></p>
+<p>Sono due pezzi distinti:
+- <code>2&gt;/dev/null</code>: redirige lo stderr (file descriptor 2) verso <code>/dev/null</code>, che scarta tutto. <code>apt list --upgradable</code> stampa un messaggio di warning su stderr ("WARNING: apt does not have a stable CLI interface"); con <code>2&gt;/dev/null</code> lo eliminiamo per non contare quella riga.
+- <code>| wc -l</code>: conta le righe dello stdout. Sì — <code>wc -l</code> conta le righe.</p>
+<p>Senza <code>2&gt;/dev/null</code> il conteggio sarebbe sfalsato di 1 dal warning.</p>
+</blockquote>
+<h3 id="es-2-installare-e-ispezionare">Es. 2 — Installare e ispezionare ✅</h3>
+<pre><code class="language-bash">sudo apt install tree
+dpkg -L tree          # → lista file installati
+apt show tree         # → descrizione completa
+tree /etc/systemd/system/
+</code></pre>
+<blockquote>
+<p><strong>Domanda: come funziona <code>dpkg</code>? Cosa fa <code>-L</code>?</strong></p>
+<p><code>dpkg</code> è il <strong>tool di basso livello</strong> per la gestione dei pacchetti Debian — opera direttamente sul database locale in <code>/var/lib/dpkg/</code>. <code>apt</code> si appoggia a <code>dpkg</code> sotto il cappello.</p>
+<p>Il flag <code>-L</code> (List) mostra tutti i file che un pacchetto ha installato sul filesystem. È utile per sapere dove si trovano i binari, le configurazioni e i man page di un programma. Altri flag utili:
+- <code>-s &lt;nome&gt;</code>: mostra lo stato del pacchetto (installato, versione, dipendenze)
+- <code>-S /path/file</code>: risale dal file al pacchetto che lo ha installato (inverso di <code>-L</code>)
+- <code>-i file.deb</code>: installa un pacchetto da file locale</p>
+</blockquote>
+<h3 id="es-3-cercare-e-ispezionare-prima-di-installare">Es. 3 — Cercare e ispezionare prima di installare ✅</h3>
+<pre><code class="language-bash">apt search htop
+apt show htop
+sudo apt install htop
+apt-cache showpkg htop
+</code></pre>
+<blockquote>
+<p><strong>Domanda: <code>apt search</code> mostra risultati "correlati" — non capisco cosa sono e perché li vede.</strong></p>
+<p><code>apt search &lt;keyword&gt;</code> cerca la keyword nel <strong>nome</strong> e nella <strong>descrizione</strong> di tutti i pacchetti nell'indice locale. Se cerchi "htop" trovi sia <code>htop</code> sia <code>iotop</code>, <code>atop</code>, <code>btop</code> ecc. — non perché siano dipendenze di htop, ma perché le loro descrizioni contengono "htop" o un termine correlato. Non sono installati: <code>apt search</code> mostra solo pacchetti disponibili nel repo.</p>
+<p><strong>Domanda: <code>apt show htop</code> — non lo avevamo già visto?</strong></p>
+<p>Sì, l'hai usato su <code>tree</code> nell'Es. 2. È lo stesso comando — qui lo stai applicando su <code>htop</code> prima di installarlo, come buona prassi per verificare dipendenze e dimensione prima di procedere.</p>
+<p><strong>Domanda: htop ha chiesto autorizzazione Y/n, tree no — perché?</strong></p>
+<p>Caso leggermente diverso: <code>tree</code> probabilmente era stato già installato in precedenza (o aveva zero dipendenze nuove). <code>htop</code> ha dipendenze aggiuntive che non erano presenti — <code>apt</code> chiede conferma prima di scaricare e installare pacchetti extra. Con <code>apt install -y</code> si bypassa la domanda (utile negli script).</p>
+<p><strong>Domanda: <code>apt-cache showpkg htop</code> — non capisco la struttura dell'output.</strong></p>
+<p>L'output ha tre sezioni:
+1. <strong>Package:</strong> — nome e versioni disponibili
+2. <strong>Versions:</strong> — versioni con le dipendenze fisiche di ciascuna
+3. <strong>Reverse Depends:</strong> — quali altri pacchetti dipendono da htop (chi lo usa come dipendenza)
+4. <strong>Dependencies:</strong> — le dipendenze nella versione installata
+5. <strong>Provides:</strong> — nomi alternativi con cui il pacchetto si presenta</p>
+<p>Quello che ti interessa di solito è la sezione <strong>Reverse Depends</strong> (per capire cosa si rompe se rimuovi il pacchetto) e il repo di origine (visibile nella riga delle versioni).</p>
+</blockquote>
+<h3 id="es-4-risalire-dal-file-al-pacchetto">Es. 4 — Risalire dal file al pacchetto ✅</h3>
+<pre><code class="language-bash">dpkg -S /bin/ls         # → coreutils: /bin/ls
+dpkg -S /usr/bin/ssh    # → openssh-client: /usr/bin/ssh
+dpkg -L openssh-client  # → elenco file del pacchetto
+</code></pre>
+<blockquote>
+<p><strong>Domanda: <code>dpkg -S /bin/ls</code> ha risposto <code>coreutils: /bin/ls</code> — cosa significa?</strong></p>
+<p>Significa che il file <code>/bin/ls</code> è stato installato dal pacchetto <code>coreutils</code>. Il formato è <code>&lt;nome-pacchetto&gt;: &lt;path-file&gt;</code>. <code>coreutils</code> (Core Utilities) è il pacchetto che contiene i comandi Unix fondamentali: <code>ls</code>, <code>cp</code>, <code>mv</code>, <code>rm</code>, <code>cat</code>, <code>echo</code>, <code>mkdir</code> ecc. — tutti in un unico pacchetto.</p>
+</blockquote>
+<h3 id="es-5-dipendenze-dinamiche-con-ldd">Es. 5 — Dipendenze dinamiche con <code>ldd</code> ✅</h3>
+<pre><code class="language-bash">ldd /usr/sbin/sshd          # lista librerie dinamiche
+ldd /usr/sbin/sshd | wc -l  # quante
+ldd /bin/ls                 # confronto con binario semplice
+</code></pre>
+<h3 id="es-6-rimozione">Es. 6 — Rimozione ✅</h3>
+<pre><code class="language-bash">sudo apt remove tree
+which tree          # → errore (non trovato)
+sudo apt autoremove
+</code></pre>
+<h3 id="es-7-esplora-etcaptsourceslist">Es. 7 — Esplora <code>/etc/apt/sources.list</code> ✅</h3>
+<pre><code class="language-bash">cat /etc/apt/sources.list
+ls /etc/apt/sources.list.d/
+ls /etc/apt/trusted.gpg.d/
+</code></pre>
+<blockquote>
+<p><strong>Domanda: cosa mi restituisce <code>sources.list</code>?</strong></p>
+<p>Il file contiene le righe di configurazione dei repository abilitati. Ogni riga attiva inizia con <code>deb</code> e ha questa struttura:
+<code>deb http://deb.debian.org/debian bookworm main contrib non-free-firmware</code>
+- <code>deb</code>: tipo (pacchetti binari; <code>deb-src</code> sarebbe sorgenti)
+- URL: indirizzo del mirror
+- <code>bookworm</code>: nome in codice della versione Debian (la nostra VM)
+- <code>main contrib non-free-firmware</code>: componenti abilitati (main = solo software libero; contrib = dipende da non-libero; non-free = software proprietario)</p>
+<p>Le righe commentate con <code>#</code> sono disabilitate. <code>sources.list.d/</code> contiene frammenti aggiuntivi — di solito aggiunti da software di terze parti. <code>trusted.gpg.d/</code> contiene le chiavi GPG che firmano i repo.</p>
+</blockquote>
+<hr />
+<h2 id="riepilogo">Riepilogo</h2>
+<ul>
+<li>Un <strong>pacchetto</strong> è un file che contiene binari precompilati + metadati (dipendenze, versione, architettura) + script di pre/post-installazione. Debian usa <code>.deb</code>; RedHat usa <code>.rpm</code>.</li>
+<li>Il <strong>repository</strong> è una raccolta indicizzata di pacchetti; <code>apt update</code> sincronizza l'indice locale. La lista dei repo è in <code>/etc/apt/sources.list</code> e <code>/etc/apt/sources.list.d/</code>.</li>
+<li><code>dpkg</code> opera sul singolo file <code>.deb</code>; <code>apt</code> gestisce il ciclo completo incluse le dipendenze automaticamente.</li>
+<li>Il <strong>grafo delle dipendenze</strong> è il valore aggiunto principale: rende prevedibile cosa si installa, cosa si rompe all'aggiornamento, cosa rimane orfano alla rimozione.</li>
+<li>L'<strong>autenticità</strong> è garantita da firme GPG: le chiavi di verifica dei repo vanno in <code>/etc/apt/trusted.gpg.d/</code>. Un repo non firmato è un rischio di <em>software injection</em>.</li>
+</ul>
+<hr />
+<h2 id="connessioni">Connessioni</h2>
+<ul>
+<li><strong>Con 3A (systemd)</strong>: i servizi avviati da systemd sono programmi installati tramite pacchetti. <code>apt install nginx</code> crea automaticamente la unit systemd; <code>dpkg -L nginx</code> mostra dove è finito il file unit.</li>
+<li><strong>Con Security (S1 — Enumerazione)</strong>: Nmap identifica i servizi in ascolto; ogni servizio è un pacchetto installato. <code>dpkg -l</code> e <code>apt list --installed</code> sono fondamentali per l'inventario della superficie d'attacco. La <em>software injection</em> è direttamente rilevante per supply chain attacks.</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo 3B]]</li>
+<li>[[lezione_modulo3B_gestione_pacchetti]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

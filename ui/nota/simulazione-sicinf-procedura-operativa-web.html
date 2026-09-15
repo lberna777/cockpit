@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>procedura_operativa_web.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">procedura_operativa_web.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/procedura_operativa_web.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="procedura-operativa-web-vulnerabilities">Procedura Operativa — Web Vulnerabilities</h1>
+<blockquote>
+<p>Algoritmo esteso passo-passo per qualunque esercizio di questa famiglia (una web app in container
+docker da testare con browser/curl, obiettivo tipico: <code>alert()</code> o esfiltrare una flag). Non contiene
+teoria di base su HTTP/HTML — solo l'algoritmo operativo e i bivi. Per il triage rapido e i rami per
+famiglia vedi <code>guida_esame_web.md</code>; per i 5 casi reali già risolti,
+<code>modello_web_vulnerabilities.md</code>; per il template del <code>web.txt</code>, <code>template_report_web.md</code>.</p>
+<p>⚠️ <strong>Regola d'oro: i deliverable sono screenshot + <code>web.txt</code>, e il *livello di dettaglio della
+descrizione È il voto.</strong> Non basta "far partire l'exploit": va documentato il <strong>ragionamento</strong>
+(come hai classificato la vuln, quali ostacoli hai incontrato, come li hai aggirati). Scrivi il
+<code>web.txt</code> <em>mentre</em> procedi, non alla fine a memoria.</p>
+</blockquote>
+<hr />
+<h2 id="0-prima-di-toccare-lapp-setup-lettura">0. Prima di toccare l'app (setup + lettura)</h2>
+<ul>
+<li>[ ] <strong>Avvia il container</strong> come indicato nella predisposizione (<code>zcat X.tar.gz | sudo docker load</code>
+      poi <code>sudo docker run --rm -p PORTA:PORTA nome</code>; oppure <code>gpg -d union.sh.gpg &gt; union.sh</code>,
+      <code>chmod +x</code>, <code>./union.sh</code>). Nota la <strong>porta</strong> (5000, 8000...) e l'<strong>indirizzo</strong> (<code>127.0.0.1</code> o
+      l'IP del container da <code>ip a</code>).</li>
+<li>[ ] <strong>Gate scanner/bruteforce</strong>: NON usare sqlmap/nikto/dirb/gobuster/hydra. Vietato su tutto il
+      tipo d'esame. Solo browser, DevTools (inspector), curl, e Burp/proxy per comporre richieste a mano.</li>
+<li>[ ] <strong>LEGGI tutta la pagina prima di iniettare.</strong> Cerca indizi che l'app regala: la command line
+      eseguita, un link alla doc dello schema, un suggerimento sul formato dell'input, un testo di
+      istruzioni. Segna i <strong>parametri controllabili</strong> (URL <code>?x=</code>, campi POST, ricerca, dropdown).</li>
+<li>[ ] <strong>Rileggi la consegna</strong> per capire: (a) qual è l'<strong>obiettivo</strong> (alert? leggere un file? flag
+      nel DB?), (b) la consegna <strong>nomina o esclude</strong> una famiglia? (c) cosa esattamente va
+      consegnato (uno <code>payload.png</code> o più <code>exploitN.png</code>? cosa deve contenere il <code>web.txt</code>?).</li>
+</ul>
+<hr />
+<h2 id="1-classificazione-sonda-linput-guarda-linterprete">1. Classificazione — sonda l'input, guarda l'interprete</h2>
+<p>Individua l'input più promettente e mandagli, <strong>uno alla volta</strong>, le sonde. Ogni sonda rompe un
+interprete diverso; la reazione rivela la famiglia. <strong>Parti dallo scenario più rapido da escludere.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Sonda</th>
+<th>Reazione che conferma</th>
+<th>Famiglia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>&lt;b&gt;x&lt;/b&gt;</code> / <code>&lt;img src=x onerror=alert(1)&gt;</code></td>
+<td>grassetto interpretato / alert parte</td>
+<td>XSS (output riflesso in HTML)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>'</code></td>
+<td>errore SQL / cambia n. righe</td>
+<td>SQL Injection</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>;</code> <code>\|</code> <code>`</code> <code>#</code></td>
+<td>errore shell / output di comando / command line mostrata cambia</td>
+<td>Command Injection</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>../</code> / <code>/etc/passwd</code></td>
+<td>contenuto file / errore con un path</td>
+<td>Path Traversal / LFI</td>
+</tr>
+</tbody>
+</table>
+<p>Scorciatoie di classificazione dalla consegna/contesto (spesso decidono senza sonda):
+- "Client Side" / "eseguire alert o prompt" → <strong>XSS</strong>.
+- "siti che interrogano database" / "flag nel database" → <strong>SQLi</strong>.
+- "Server Side, non sono coinvolti database" → <strong>Path Traversal</strong> (se l'app <em>legge file</em>) o
+  <strong>Command Injection</strong> (se l'app <em>esegue e mostra un comando</em>).
+- "identificare il tipo di vulnerabilità" → non te la dice: usa le sonde.
+- Nome immagine docker: <code>vuln-decoder</code>→XSS, <code>vuln-finder</code>→CI, <code>vuln-file-browser</code>→traversal, <code>union.sh</code>→SQLi.</p>
+<p><strong>Scrivi subito nel <code>web.txt</code> il "processo logico" di classificazione</strong>: quali sonde hai provato,
+quali errori/reazioni hai visto, e perché concludi per una certa famiglia. È esattamente ciò che il
+Caso 4 chiede ("il processo logico col quale si è dedotta la vulnerabilità") e che il web.txt
+ufficiale del Caso 3 mostra come modello.</p>
+<hr />
+<h2 id="2-sfruttamento-per-famiglia-i-quattro-algoritmi">2. Sfruttamento per famiglia (i quattro algoritmi)</h2>
+<p>Dettaglio passo-passo nei rami §2–§5 di <code>guida_esame_web.md</code>. Sintesi operativa:</p>
+<ul>
+<li><strong>XSS</strong> → conferma riflessione (<code>&lt;b&gt;</code>) → <code>&lt;script&gt;alert()</code> → se filtrato, <code>&lt;img src=x onerror=alert(1)&gt;</code>
+  → bypassa ostacoli client (<code>maxlength</code> via inspector/POST) e involucri (base64) → screenshot alert.</li>
+<li><strong>SQLi UNION</strong> → <code>' OR '1'='1</code> (conferma) → conta colonne (<code>UNION select NULL,...</code> / <code>ORDER BY n</code>) →
+  trova colonne visibili → enumera tabelle (<code>sqlite_schema</code>) → <code>UNION select * from &lt;tab&gt;</code> → screenshot flag.</li>
+<li><strong>SQLi BLIND</strong> (se l'output NON è riflesso: solo "trovato/non trovato", pagina diversa, o solo il
+  tempo) → conferma oracolo <code>' AND 1=1--</code> vs <code>' AND 1=2--</code> (risposte diverse) → lunghezza con
+  <code>length()</code> (bisezione) → estrai char-per-char con <code>substr()</code>+<code>unicode()</code>/<code>ascii()</code> (bisezione sul
+  codice ASCII, ~7 richieste/char) → se manca pure la risposta binaria, <strong>time-based</strong> (<code>sleep()</code> su
+  MySQL; su <strong>SQLite niente SLEEP</strong> → heavy query <code>randomblob</code>). Dettaglio in §3-bis di
+  <code>guida_esame_web.md</code>. <strong>Preferisci sempre il boolean</strong> al time-based (a mano il time-based è
+  impraticabile).</li>
+<li><strong>Command Injection</strong> → guarda dove finisce l'input nella command line → <code>#</code> per tagliare la coda →
+  <code>;</code>/<code>&amp;&amp;</code>/<code>|</code> per concatenare → due tempi (scopri il path, poi <code>cat</code>) → screenshot output.</li>
+<li><strong>Path Traversal</strong> → trova il parametro-file → <code>../../../../../tmp/flag.txt</code> (aumenta i <code>../</code>) o path
+  assoluto → se <code>../</code> filtrato: <code>%2e%2e%2f</code>, <code>....//</code>, path assoluto → screenshot contenuto file.</li>
+</ul>
+<hr />
+<h2 id="3-conferma-di-aver-trovato-il-vettore-giusto-non-un-falso-positivo">3. Conferma di aver trovato IL vettore giusto (non un falso positivo)</h2>
+<ul>
+<li><strong>XSS</strong>: la prova è <strong>codice che esegue</strong>, non testo che appare. <code>&lt;b&gt;x&lt;/b&gt;</code> che diventa grassetto
+  conferma la <em>riflessione senza encoding</em> (necessaria) ma NON è ancora esecuzione JS: devi vedere
+  un <strong>alert/prompt nativo del browser</strong>. Un <code>&lt;script&gt;</code> che compare <em>come testo</em> nella pagina =
+  encodato = NON sfruttabile da lì.</li>
+<li><strong>SQLi</strong>: <code>' OR '1'='1</code> che restituisce <strong>più righe</strong> del normale è la conferma. Un semplice
+  errore 500 su <code>'</code> indica che l'input tocca SQL ma <strong>non</strong> che UNION funzionerà: devi arrivare fino
+  a estrarre dati reali (le flag) — il conteggio colonne è il vero gate.</li>
+<li><strong>Command Injection</strong>: la prova è l'<strong>output di un comando tuo</strong> (es. <code>id</code>, <code>cat</code>), non solo un
+  errore. Vedere la command line cambiare con il tuo <code>;</code> è il segnale; l'output del comando iniettato
+  è la conferma.</li>
+<li><strong>Path Traversal</strong>: la prova è il <strong>contenuto di un file di sistema/target</strong> (la flag, <code>root:x:0:0</code>
+  di <code>/etc/passwd</code>). Un errore "file not found" con un path conferma solo che l'input è un path reale.</li>
+</ul>
+<p><strong>Falsi positivi / vicoli ciechi tipici:</strong>
+- Un tag che compare <strong>come testo</strong> (HTML-encoded) → l'app <em>è</em> difesa lì, cerca un altro punto di input.
+- <code>'</code> che dà errore ma nessuna UNION possibile → forse è filtrato/parametrizzato solo in parte, o il
+  conteggio colonne è sbagliato (ricontrollalo, è la causa n.1 di "sembra non vulnerabile").
+- Il <code>maxlength</code> che tronca il payload fa sembrare l'XSS "non funzionante" → è un ostacolo client, non
+  l'assenza della vuln (vedi §4 zona grigia).</p>
+<hr />
+<h2 id="4-4-zone-grigie-e-bivi-lo-spirito-del-05-di-iptables-dove-si-sbaglia-strada">4. §4 — Zone grigie e bivi (lo spirito del §0.5 di iptables: dove si sbaglia strada)</h2>
+<p>Questi sono i punti dove, sotto stress d'esame, si perde il filo o si confonde una famiglia con
+un'altra. Nati risolvendo davvero i 5 casi del pool.</p>
+<h3 id="41-script-non-funziona-non-niente-xss">4.1 "<code>&lt;script&gt;</code> non funziona" ⇒ NON "niente XSS"</h3>
+<p>Il bivio più costoso. Nei Casi 1 e 3 il primo payload <code>&lt;script&gt;alert()</code> viene <strong>filtrato</strong> e l'app
+risponde "error". Lo studente inesperto conclude "non è XSS" e cambia pista. <strong>Sbagliato</strong>: il filtro
+copre quasi sempre solo la stringa letterale <code>script</code>. La mossa corretta è provare <strong>subito</strong> un
+vettore script-less (<code>&lt;img src=x onerror=...&gt;</code>, <code>&lt;svg onload=...&gt;</code>). Regola: <em>un blocco su <code>&lt;script&gt;</code>
+è la conferma che c'è un filtro, quindi che c'è qualcosa da bypassare, non che la vuln non esista.</em></p>
+<h3 id="42-difesa-client-side-vs-filtro-server-side-sono-due-ostacoli-distinti">4.2 Difesa client-side vs filtro server-side: sono due ostacoli distinti</h3>
+<p>Nel Caso 3 ci sono <strong>due</strong> ostacoli indipendenti: (a) <code>maxlength=20</code> sul campo, (b) filtro server su
+<code>script</code>. Confonderli fa girare a vuoto ("il mio payload non funziona" — ma è troncato, non filtrato;
+oppure "è troppo lungo" — ma il problema era il filtro). <strong>Procedura</strong>: prima manda un payload
+qualunque <em>lungo</em> per verificare che il <code>maxlength</code> è bypassato (inspector o POST diretto), <strong>poi</strong>
+lavora sul contenuto per il filtro. Un ostacolo alla volta.</p>
+<h3 id="43-path-traversal-command-injection-entrambe-server-side-no-db">4.3 Path Traversal ⇄ Command Injection: entrambe "server-side, no DB"</h3>
+<p>I Casi 2 e 4 hanno <strong>la stessa frase di consegna</strong> ("Server Side, non sono coinvolti database"). Il
+bivio: quale delle due? <strong>Discriminante</strong>: cosa fa l'app con l'input. <em>Apre/mostra un file</em> per nome
+→ <strong>path traversal</strong> (payload <code>../</code>). <em>Esegue un comando e ne mostra l'output</em> (spesso mostra la
+"Command run:") → <strong>command injection</strong> (payload <code>;</code>/<code>#</code>). Il nome dell'immagine aiuta
+(<code>file-browser</code> vs <code>finder</code>). Se resti in dubbio, <strong>provale entrambe</strong>: una delle due sonde
+(<code>../../../../tmp/flag.txt</code> vs <code>flag.txt ; cat ... #</code>) reagirà.</p>
+<h3 id="44-command-injection-perche-serve-e-i-due-tempi">4.4 Command Injection: perché serve <code>#</code>, e i due tempi</h3>
+<p>Nel Caso 4 il template del server appende <code>*.pem 2&gt;/dev/null</code> <strong>dopo</strong> il tuo input. Se inietti solo
+<code>; cat flag</code>, quella coda si attacca al tuo comando e lo rompe. Serve <code>#</code> (commento shell) per
+<strong>tagliare la coda</strong>. E l'attacco è in <strong>due tempi</strong>: il percorso della flag è randomizzato →
+mossa 1 <code>flag.txt #</code> (scopri il path), mossa 2 <code>flag.txt ; cat &lt;path&gt; #</code> (leggi). Saltare la mossa 1
+= tirare a indovinare il path = perdere tempo.</p>
+<h3 id="45-sqli-union-il-conteggio-colonne-e-il-collo-di-bottiglia">4.5 SQLi UNION: il conteggio colonne è il collo di bottiglia</h3>
+<p>Nel Caso 5, se sbagli il numero di colonne, <code>UNION</code> dà errore e l'app <strong>sembra non vulnerabile</strong>.
+Non abbandonare: ricontrolla il conteggio (<code>UNION select NULL,NULL,... --</code> aumentando i NULL, oppure
+<code>ORDER BY n</code>). Secondo sotto-bivio: <strong>quali</strong> colonne sono visibili a schermo — non tutte. Metti dati
+di test al posto dei NULL per scoprire le posizioni visibili prima di piazzarci i dati veri.</p>
+<h3 id="46-sqli-la-tabella-di-metadati-dipende-dal-dbms">4.6 SQLi: la tabella di metadati dipende dal DBMS</h3>
+<p><code>sqlite_schema</code> funziona <strong>solo</strong> su SQLite. Su MySQL è <code>information_schema.tables</code>; PostgreSQL idem;
+Oracle <code>all_tables</code>. Usare la tabella di metadati del DBMS sbagliato = query che fallisce = falso
+"non enumerabile". Riconosci il DBMS dagli indizi ("formato sqlite" nel Caso 5), dai messaggi
+d'errore, dalla sintassi che funziona. Questo è un bivio silenzioso: non dà un errore "ovvio", solo
+"nessun risultato".</p>
+<h3 id="47-commento-sql-e-lo-spazio">4.7 Commento SQL <code>--</code> e lo spazio</h3>
+<p><code>--</code> in molti motori deve essere seguito da uno spazio (o fine riga) per essere trattato come
+commento. Nell'URL può servire <code>-- -</code> o <code>--%20</code>. Se l'iniezione "quasi funziona" ma dà errore di
+sintassi sulla coda, il colpevole è spesso il commento non terminato correttamente.</p>
+<h3 id="48-sqli-cieca-blind-union-non-serve-se-loutput-non-e-riflesso">4.8 SQLi cieca (blind): UNION non serve se l'output non è riflesso</h3>
+<p>Bivio silenzioso e costoso. Se <code>'</code> tocca SQL ma la pagina <strong>non stampa mai i dati</strong> (solo "utente
+trovato/non trovato", una pagina che c'è o non c'è, un redirect), insistere con <code>UNION select ...</code> è
+inutile: la seconda query gira ma il suo output <strong>non viene mostrato</strong>. Il test che scioglie il dubbio:
+<code>' UNION select 'AAAA',... --</code> → se <strong><code>AAAA</code> non compare</strong> ma la pagina reagisce lo stesso, sei in
+<strong>blind</strong>. Da lì l'app è un <strong>oracolo booleano</strong>: <code>' AND 1=1--</code> (vero) vs <code>' AND 1=2--</code> (falso) danno
+risposte diverse, e la flag si estrae <strong>carattere per carattere</strong> con <code>substr()</code> + bisezione sul codice
+ASCII (<code>unicode()</code> su SQLite, <code>ascii()</code>/<code>ord()</code> su MySQL). Solo se manca <strong>anche</strong> la risposta binaria
+si passa al <strong>time-based</strong> — e su <strong>SQLite non esiste <code>SLEEP()</code></strong>: serve una <em>heavy query</em>
+(<code>randomblob(...)</code> dentro <code>hex()</code>+<code>like()</code>) per bruciare tempo. A mano il time-based è lentissimo:
+prima cerca meglio un segnale booleano, quasi sempre c'è. Algoritmo completo ed esempio lavorato in
+§3-bis di <code>guida_esame_web.md</code>. <strong>Deliverable diverso dal ramo UNION</strong>: non uno screenshot di "flag
+stampata", ma la <strong>sequenza richiesta/risposta</strong> che prova il canale booleano (i due esiti diversi di
+<code>AND 1=1</code> vs <code>AND 1=2</code>, qualche passo di estrazione, la stringa ricostruita).</p>
+<h3 id="49-codifica-nellurl-e-negli-involucri">4.9 Codifica nell'URL e negli involucri</h3>
+<ul>
+<li>Nell'URL, spazi → <code>%20</code> (o <code>+</code>), <code>&amp;</code>/<code>#</code> vanno encodati se fanno parte del payload.</li>
+<li>Se l'app decodifica base64 prima di usare l'input (Caso 3), <strong>codifica</strong> il payload in base64; e
+  ricorda che nella POST i caratteri base64 <code>+ / =</code> vanno a loro volta URL-encoded (<code>+</code>→<code>%2B</code>,
+  <code>=</code>→<code>%3D</code>) — nel web.txt ufficiale il <code>+</code> finale è comparso come <code>%2B</code>.</li>
+</ul>
+<hr />
+<h2 id="5-deliverable-cosa-consegnare">5. Deliverable — cosa consegnare</h2>
+<ul>
+<li>[ ] <strong>Screenshot</strong> numerati (<code>payload.png</code> singolo, o <code>exploit1.png..N</code> / <code>query1.png..N</code>): coprire
+      <strong>classificazione → ostacolo → bypass → successo</strong>, non solo il risultato. Se la VM fa revert,
+      salvali sull'host mano a mano.</li>
+<li>[ ] <strong><code>web.txt</code></strong> con struttura <strong>VULNERABILITÀ / PASSI ESEGUITI / MITIGAZIONE</strong> (+ contenuto/posizione
+      flag se richiesto). Usa <code>template_report_web.md</code>. Includi il <strong>ragionamento</strong> di
+      classificazione e il <strong>perché</strong> dei bypass — è il criterio di voto.</li>
+<li>[ ] <strong>Rileggi la consegna specifica</strong>: alcune chiedono esplicitamente "posizione e contenuto della
+      flag" (Caso 4), o "l'errore di progetto del sito" (Caso 5). Rispondi a ogni punto richiesto.</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

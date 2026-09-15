@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>modello_web_vulnerabilities.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">modello_web_vulnerabilities.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/modello_web_vulnerabilities.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modello-risolto-web-vulnerabilities">Modello Risolto — Web Vulnerabilities</h1>
+<blockquote>
+<p>Fonte: <code>SIMULAZIONI ESAMI/SICINF/web_vulnerabilities.html</code> (Virtuale) — <strong>5 esercizi d'esame reali</strong>
+(13 giugno 2024 → 12 gennaio 2026), in ordine cronologico in questo file.</p>
+<p><strong>Nota tecnica sull'estrazione (aggiornamento 16/07/2026)</strong>: come nel pool Iptables, le soluzioni
+ufficiali del docente non sono testo visibile scorrendo la pagina — sono allegate come <strong>data URI
+in base64</strong> dietro i link "SOLUZIONE" (<code>href="data:application/zip;base64,..."</code>,
+<code>data:application/g-zip;base64,...</code>, <code>data:text/plain;base64,...</code>). Vanno decodificate
+esplicitamente. Con questo metodo, <strong>4 dei 5 esercizi del pool hanno soluzione ufficiale del
+docente recuperabile e trascritta fedelmente qui</strong> (13 giu 2024, 10 lug 2025, 30 ott 2025, 12 gen
+2026). L'unico senza soluzione ufficiale embedded è il <strong>27 giugno 2025</strong> (vuln-file-browser): nel
+suo thread HTML non c'è alcun link/allegato SOLUZIONE (verificato: gli unici 6 data-URI del file
+appartengono agli altri esercizi). Per quel caso la soluzione qui sotto è <strong>ricostruita</strong> ed
+etichettata esplicitamente come tale (ancorata al lab S3 e al tipo di vulnerabilità dichiarato),
+non spacciata per ufficiale.</p>
+<p><strong>Correzione rispetto alla versione precedente di questo file</strong>: la nota finale della prima
+stesura affermava che le soluzioni di SQLi/path-traversal "non sono recuperabili dall'export HTML".
+Era <strong>sbagliato</strong>: erano recuperabili con la decodifica base64 (stesso meccanismo del pool
+iptables). Sono state recuperate e sono qui sotto.</p>
+</blockquote>
+<hr />
+<h2 id="come-leggere-questo-file">Come leggere questo file</h2>
+<p>Per ciascuno dei 5 casi: <strong>data</strong>, <strong>consegna</strong> trascritta dall'HTML, <strong>famiglia di vulnerabilità</strong>,
+la <strong>soluzione ufficiale</strong> (testo <code>web.txt</code> del docente + descrizione degli screenshot reali) e una
+sezione <strong>"Perché funziona"</strong> (meccanismo, non solo comandi). Alla fine di ogni caso, un blocco
+<strong>"⚠️ Bivio / zona grigia"</strong> segnala dove uno studente sotto stress rischia di imboccare la strada
+sbagliata (es. scambiare due famiglie che si somigliano). I 5 casi coprono <strong>4 famiglie distinte</strong>:
+XSS riflesso (2 casi, con difese diverse), Command Injection, SQL Injection UNION-based, e Path
+Traversal/LFI.</p>
+<h3 id="indice-dei-casi">Indice dei casi</h3>
+<ol>
+<li><strong>13 giugno 2024</strong> — XSS riflesso (filtro debole su <code>&lt;script&gt;</code>, bypass con <code>&lt;img onerror&gt;</code>) — <em>soluzione ufficiale</em></li>
+<li><strong>27 giugno 2025</strong> — Path Traversal / LFI (vuln-file-browser, esfiltrare <code>/tmp/flag.txt</code>) — <em>ricostruito, no soluzione ufficiale embedded</em></li>
+<li><strong>10 luglio 2025</strong> — XSS riflesso via decoder base64 (vuln-decoder; limiti input + filtro <code>script</code>) — <em>soluzione ufficiale</em></li>
+<li><strong>30 ottobre 2025</strong> — Command Injection (vuln-finder; injection nel pattern di <code>find</code>) — <em>soluzione ufficiale</em></li>
+<li><strong>12 gennaio 2026</strong> — SQL Injection UNION-based (union.sh; estrazione tabella <code>flags</code> via <code>sqlite_schema</code>) — <em>soluzione ufficiale</em></li>
+</ol>
+<hr />
+<h2 id="caso-1-13-giugno-2024-xss-riflesso-filtro-script-bypassabile">Caso 1 — 13 giugno 2024 (XSS riflesso, filtro <code>script</code> bypassabile)</h2>
+<h3 id="consegna-originale">Consegna originale</h3>
+<blockquote>
+<p>Predisposizione: importare/lanciare il container docker fornito, collegarsi via browser
+all'indirizzo IP del container.</p>
+<p><strong>Challenge</strong>: vulnerabilità Cross-Site Scripting (Client Side, vista a lezione). Obiettivo:
+sfruttare la XSS ed eseguire un <code>alert</code> o <code>prompt</code> JavaScript. <strong>Non è possibile usare tool di
+scansione automatica, non è consentito alcun bruteforce.</strong></p>
+</blockquote>
+<p><strong>Modalità di consegna</strong>:
+1. Un file <code>payload.(png|jpg)</code> che mostra l'esecuzione del payload e il relativo alert.
+2. Un file <code>web.txt</code> che descrive: i passi che hanno portato a scoprire la vulnerabilità, e — dal
+   punto di vista del sysadmin — come mitigarla/risolverla.</p>
+<blockquote>
+<p>Il livello di dettaglio della descrizione è criterio di valutazione.</p>
+</blockquote>
+<h3 id="soluzione-modello">Soluzione modello</h3>
+<h3 id="payloadpng-screenshot-reale-trascrizione"><code>payload.png</code> (screenshot reale — trascrizione)</h3>
+<p>URL nella barra degli indirizzi:</p>
+<pre><code>http://172.17.0.2/xss/xss_exam.php?name=&lt;img src=&quot;x&quot; onerror=&quot;alert()&quot;&gt;
+</code></pre>
+<p>Risultato: un dialog JavaScript nativo del browser compare sopra la pagina "ULISSE Research Team",
+con intestazione <code>172.17.0.2</code> — prova che il codice JavaScript iniettato è stato eseguito dal
+browser nel contesto della pagina.</p>
+<h3 id="webtxt"><code>web.txt</code></h3>
+<pre><code>VULNERABILITÀ: Cross-Site Scripting (XSS) Riflesso
+
+PASSI ESEGUITI:
+1. Navigata l'applicazione e individuato il parametro GET &quot;name&quot; nella
+   pagina xss_exam.php: il suo valore viene restituito (riflesso) nel
+   corpo della risposta HTML (es. &quot;Hello &lt;valore&gt;&quot;).
+2. Verificato che i caratteri speciali &lt; &gt; &quot; non vengono codificati
+   (HTML-encoded) nell'output: provando name=&lt;b&gt;test&lt;/b&gt; il tag &lt;b&gt;
+   viene interpretato dal browser invece di essere mostrato come
+   testo — conferma l'assenza di sanitizzazione/escaping in output.
+3. Costruito un payload che sfrutta un tag &lt;img&gt; con attributo
+   onerror, che si attiva automaticamente perché src=&quot;x&quot; non è
+   un'immagine valida (non serve alcuna interazione dell'utente):
+   &lt;img src=&quot;x&quot; onerror=&quot;alert()&quot;&gt;
+4. Iniettato il payload nel parametro GET tramite URL:
+   http://172.17.0.2/xss/xss_exam.php?name=&lt;img src=&quot;x&quot; onerror=&quot;alert()&quot;&gt;
+5. Il browser esegue il JavaScript iniettato, mostrando l'alert:
+   prova dell'esecuzione arbitraria di codice lato client nel
+   contesto (origin) dell'applicazione vulnerabile.
+
+MITIGAZIONE (punto di vista sysadmin/sviluppatore):
+- Effettuare l'escaping HTML di ogni input utente riflesso in output
+  (convertire &lt; &gt; &quot; ' &amp; nelle rispettive HTML entity) prima di
+  inserirlo nel markup della risposta — è il fix specifico per questo
+  bug.
+- Impostare una Content-Security-Policy (CSP) restrittiva che vieti
+  script inline e limiti le fonti di script consentite: riduce
+  l'impatto anche se in futuro un altro punto di input sfugge alla
+  sanitizzazione.
+- Validare/whitelistare il formato atteso del parametro lato server
+  (es. solo caratteri alfanumerici per un campo &quot;nome&quot;), rifiutando
+  input contenenti metacaratteri HTML come &lt; e &gt;.
+</code></pre>
+<h3 id="perche-funziona-meccanismo-non-solo-comandi">Perché funziona (meccanismo, non solo comandi)</h3>
+<p>La causa è la mancanza di <strong>output encoding</strong>: il server prende il valore del parametro <code>name</code> e lo
+inserisce <strong>letteralmente</strong> nell'HTML della risposta, senza convertire i caratteri speciali HTML
+nelle entity corrispondenti. Il browser quindi non vede più una stringa di testo "nome utente", ma un
+vero tag <code>&lt;img&gt;</code> da interpretare. L'attributo <code>onerror</code> è un <em>event handler</em> HTML: si attiva quando il
+browser fallisce nel caricare la risorsa indicata da <code>src</code> — qui <code>src="x"</code> è deliberatamente non
+valida, per garantire che l'errore (e quindi l'esecuzione del JS) scatti sempre, senza bisogno di
+alcuna azione dell'utente (a differenza di un <code>onclick</code>, che richiederebbe un click).</p>
+<p>Questo è <strong>XSS riflesso</strong> (reflected): il payload non viene salvato sul server (a differenza dello
+XSS <em>stored</em>), ma viaggia nell'URL stesso e viene "riflesso" indietro nella risposta immediata — per
+questo la prova di sfruttamento è un URL, non un'azione persistente sul sito.</p>
+<h3 id="webtxt-testo-ufficiale-verbatim-del-docente-recuperato-dal-data-uri-16072026"><code>web.txt</code> — testo ufficiale VERBATIM del docente (recuperato dal data-URI, 16/07/2026)</h3>
+<p>Il blocco <code>web.txt</code> più sopra era una <strong>riformulazione pulita</strong> (struttura VULNERABILITÀ/PASSI/
+MITIGAZIONE) fatta nella prima stesura. Per fedeltà, ecco il testo <strong>verbatim</strong> dell'allegato
+ufficiale (è prosa discorsiva, non a punti — utile perché mostra il <em>ragionamento</em> del docente, non
+solo il risultato):</p>
+<pre><code>La challenge si presenta con una pagina dove viene mostrato un link ad una &quot;XSS CHALLENGE&quot;.
+Navigando sul link, si osserva come sulla pagina venga mostrato il testo &quot;Hello SEC_EXAM&quot;.
+Guardando l'URL, si nota come ci sia un parametro name che abbia come valore SEC_EXAM.
+Provando a cambiare il parametro name, ci si accorge che questo viene cambiato anche nella pagina.
+Si potrebbe quindi avere una XSS Reflected. Si prova un payload classico: &lt;script&gt;alert(&quot;ciao&quot;)&lt;/script&gt;
+Il sito restituisce &quot;error&quot;. Forse è presente qualche meccanismo contro gli XSS o il payload è stato filtrato.
+Proviamo ad utilizzare qualche variazione di script, come ScRiPT. A quanto pare nessuna variazione di
+script permette di fare XSS. Si scopre però che &lt;a&gt; funziona, quindi si prova ad utilizzare altri tag.
+Si scopre che il tag &lt;img&gt; non è filtrato. Quindi si procede ad utilizzare una classica XSS con img, ovvero:
+&lt;img src=&quot;x&quot; onerror=&quot;alert()&quot;&gt;
+La vulnerabilità è dovuta ad una NON sanitizzazione dei dati in input, in particolare del parametro name
+nel file xss_exam.php. Essendo che questo parametro viene poi mostrato nella pagina, si dovrebbe prima
+sanificare, o attraverso escaping dei caratteri che possano portare a dell'HTML valido, o, in maniera
+ancora più efficace, con una whitelist di caratteri ammessi per il nome (da cui escludere, per esempio &lt;, &gt;, /, ...).
+In generale, ogni dato in input dall'esterno dovrebbe essere controllato e sanificato.
+Il filtro impiegato dal file php è troppo permissivo, infatti basta utilizzare un tag diverso da script
+per forzare una XSS.
+</code></pre>
+<p><strong>Dettaglio nuovo che emerge dal testo ufficiale (non nel riassunto sopra)</strong>: qui <strong>c'è un filtro</strong>
+che blocca <code>&lt;script&gt;</code> (restituisce "error"), a differenza dell'esempio "puro" del riassunto. Il
+bypass è a due mosse: prima si scopre che il filtro colpisce solo <code>script</code> (non gli altri tag: <code>&lt;a&gt;</code>
+passa), poi si sceglie un tag alternativo che porta esecuzione JS senza <code>script</code> → <code>&lt;img onerror&gt;</code>.
+Questo lo rende <strong>gemello del Caso 3</strong> (10 luglio 2025), dove lo stesso filtro <code>script</code> viene aggirato
+allo stesso modo — vedi il bivio là.</p>
+<h3 id="bivio-zona-grigia-caso-1">⚠️ Bivio / zona grigia — Caso 1</h3>
+<ul>
+<li><strong><code>&lt;script&gt;alert()</code> che ritorna "error" NON significa "sito non vulnerabile a XSS".</strong> Significa
+  "esiste un filtro, ma forse copre solo <code>&lt;script&gt;</code>". Non abbandonare la pista XSS al primo blocco:
+  prova subito un vettore <strong>script-less</strong> (<code>&lt;img src=x onerror=...&gt;</code>, <code>&lt;svg onload=...&gt;</code>,
+  <code>&lt;body onload=...&gt;</code>). Il 90% dei filtri d'esame blocca la stringa letterale <code>script</code> e nient'altro.</li>
+<li><strong><code>onerror</code> vs <code>onclick</code></strong>: usa un handler che scatta <strong>da solo</strong> (<code>onerror</code> con <code>src</code> invalido,
+  <code>onload</code>), non uno che richiede interazione (<code>onclick</code>) — la consegna vieta il "bruteforce" e vuole
+  la prova dell'esecuzione automatica.</li>
+</ul>
+<hr />
+<h2 id="caso-2-27-giugno-2025-path-traversal-lfi-vuln-file-browser">Caso 2 — 27 giugno 2025 (Path Traversal / LFI — vuln-file-browser)</h2>
+<blockquote>
+<p>⚠️ <strong>ATTENZIONE — questo è l'UNICO caso del pool SENZA soluzione ufficiale embedded.</strong> Nel thread
+HTML del 27 giugno 2025 non esiste alcun link/allegato "SOLUZIONE" (verificato: i 6 data-URI del
+file appartengono tutti agli altri 4 esercizi). La soluzione qui sotto è una <strong>RICOSTRUZIONE</strong>
+ancorata a: (a) la famiglia di vulnerabilità dichiarata nella consegna ("Server Side, non sono
+coinvolti database"), (b) il nome dell'immagine (<code>vuln-file-browser</code>/<code>vuln-doc-browser</code> = un
+browser di documenti = lettura di file per percorso), (c) l'Esercizio 4 del lab S3
+(<code>guida_lab_moduloS3_web_security.md</code>), che copre esattamente LFI/path traversal su DVWA. <strong>Non è il
+testo del docente.</strong> Marcata come tale ovunque.</p>
+</blockquote>
+<h3 id="consegna-originale-verbatim-dallhtml">Consegna originale (verbatim dall'HTML)</h3>
+<blockquote>
+<p><strong>PREDISPOSIZIONE</strong>: Scaricare l'immagine docker compressa <code>vuln-file-browser.tar.gz</code>; importarla
+con <code>zcat vuln-file-browser.tar.gz | sudo docker load</code>; lanciare
+<code>sudo docker run --rm -p 127.0.0.1:5000:5000 vuln-doc-browser</code>; collegarsi a <code>http://127.0.0.1:5000</code>.</p>
+<p><strong>CHALLENGE</strong>: La challenge è basata su una vulnerabilità <strong>Server Side</strong> vista a lezione (<strong>non
+sono coinvolti database</strong>). Obiettivo dello studente è sfruttare la vulnerabilità ed <strong>esfiltrare
+la flag contenuta in <code>/tmp/flag.txt</code></strong>. Non è possibile utilizzare tool di scansione automatica e
+non è consentito alcun tipo di "bruteforce".</p>
+<p><strong>CONSEGNA</strong>: un file <code>payload.(png|jpg)</code> che mostra l'esecuzione del payload e relativo output; un
+file <code>web.txt</code> che descrive il contenuto di <code>flag.txt</code>, i passi per scoprire la vulnerabilità, e la
+mitigazione dal punto di vista del sysadmin.</p>
+</blockquote>
+<h3 id="famiglia-path-traversal-local-file-inclusion-lfi">Famiglia: Path Traversal / Local File Inclusion (LFI)</h3>
+<p><strong>Perché è path traversal e non altro</strong> (il ragionamento che porta a questa famiglia — questa parte
+è il metodo, valido a prescindere dalla ricostruzione):</p>
+<ul>
+<li>"<strong>vulnerabilità Server Side, non sono coinvolti database</strong>" → esclude XSS (client-side) e SQLi
+  (database). Restano le famiglie server-side che non toccano un DB: <strong>path traversal/LFI</strong> e
+  <strong>command injection</strong>.</li>
+<li>"<strong>esfiltrare <code>/tmp/flag.txt</code></strong>" (un percorso di file preciso e assoluto) + un'app che si chiama
+  <strong>file/document browser</strong> → il target è la <strong>lettura di un file arbitrario per percorso</strong>. È la
+  firma della <strong>Path Traversal / LFI</strong>: l'app apre file il cui nome/percorso arriva dall'utente, e
+  con <code>../</code> (o un percorso assoluto) si esce dalla cartella prevista fino a <code>/tmp/flag.txt</code>.</li>
+<li>Se invece l'app mostrasse un "comando eseguito" (come nel Caso 4), sarebbe command injection. Qui
+  il nome "file-browser" spinge su path traversal. <strong>Nota onesta</strong>: senza soluzione ufficiale non è
+  escluso al 100% che fosse command injection; il metodo di exploit per entrambe è comunque nel Caso
+  4 (CI) e qui sotto (traversal), quindi sei coperto in ogni caso.</li>
+</ul>
+<h3 id="soluzione-ricostruita-non-ufficiale-webtxt">Soluzione RICOSTRUITA (non ufficiale) — <code>web.txt</code></h3>
+<pre><code>VULNERABILITÀ: Path Traversal / Local File Inclusion (lettura di file arbitrari)
+
+PASSI ESEGUITI:
+1. L'applicazione è un &quot;file/document browser&quot;: mostra o apre file del server
+   indicandone il nome/percorso in un parametro (es. ?file=doc1.txt, ?page=...,
+   ?path=...). Individuato il parametro che controlla QUALE file viene letto.
+2. Verificato che il valore finisce in una funzione di lettura file lato server
+   senza sanitizzazione del percorso: inserendo un nome di file inesistente si
+   ottiene un errore &quot;file not found&quot;/percorso nella risposta (conferma che il
+   valore è usato come path reale sul filesystem).
+3. Provata la risalita di directory con sequenze ../ per uscire dalla cartella
+   dei documenti fino alla radice, puntando al file bersaglio assoluto:
+   ?file=../../../../../tmp/flag.txt
+   (il numero di ../ va aumentato incrementalmente finché non si raggiunge /;
+   in eccesso è innocuo perché / non ha padre). In alternativa, se l'app accetta
+   percorsi assoluti, direttamente ?file=/tmp/flag.txt
+4. La risposta mostra il contenuto di /tmp/flag.txt = la flag.
+
+CONTENUTO flag.txt: &lt;la stringa restituita, es. SEC{...}&gt; (varia a ogni container)
+
+MITIGAZIONE (punto di vista sysadmin/sviluppatore):
+- Non passare mai input utente direttamente a funzioni di apertura file. Risolvere
+  il percorso (realpath/canonicalize) e verificare che resti DENTRO la cartella
+  consentita (base dir) prima di leggere.
+- Whitelist dei file/percorsi ammessi (es. un elenco fisso di documenti), oppure
+  accettare solo un identificativo (id numerico) mappato server-side al file.
+- Rimuovere/neutralizzare le sequenze ../ e i percorsi assoluti; principio del
+  minimo privilegio (il processo web non deve poter leggere /tmp, /etc, ecc.).
+</code></pre>
+<p><code>payload.png</code>: screenshot dell'URL con il payload <code>../../../../../tmp/flag.txt</code> nella barra e il
+contenuto della flag mostrato nella pagina.</p>
+<h3 id="perche-funziona">Perché funziona</h3>
+<p>L'applicazione costruisce un percorso di file concatenando una directory base con l'input utente
+(es. <code>open("/var/www/docs/" + file)</code>) e lo passa a una funzione di lettura <strong>senza canonicalizzare
+né validare</strong>. Le sequenze <code>../</code> sono interpretate dal filesystem come "sali di un livello": partendo
+da <code>/var/www/docs/</code> con abbastanza <code>../</code> si arriva a <code>/</code>, e da lì si scende su <code>/tmp/flag.txt</code>. È lo
+stesso meccanismo dell'Esercizio 4 del lab S3 (<code>?page=../../../../../etc/passwd</code> su DVWA), dove
+servivano <strong>5</strong> livelli di <code>../</code> perché la webroot era profonda 5 — da cui la regola "prova
+incrementalmente il numero di <code>../</code>".</p>
+<h3 id="bivio-zona-grigia-caso-2">⚠️ Bivio / zona grigia — Caso 2</h3>
+<ul>
+<li><strong>Path traversal vs Command Injection</strong>: entrambe sono server-side e "senza database". Le distingui
+  da <strong>cosa fa l'app</strong>: se <em>legge/mostra un file</em> per nome → traversal (payload <code>../</code>); se <em>esegue un
+  comando</em> e ne mostra l'output (spesso mostra la command line, come nel Caso 4) → command injection
+  (payload con <code>;</code>, <code>|</code>, <code>#</code>). Il segnale forte del Caso 2 è il nome "file browser" e il fatto che il
+  bersaglio è <strong>leggere</strong> un file.</li>
+<li><strong><code>../</code> di troppo non è un errore</strong>: <code>/</code> non ha padre, quindi <code>../../../../../../</code> da qualunque
+  profondità arriva comunque a <code>/</code>. Se un numero non basta, <strong>aumentalo</strong>, non abbandonare la pista.</li>
+<li><strong>Se <code>../</code> è filtrato</strong>: prova percorso assoluto (<code>/tmp/flag.txt</code>), doppia codifica (<code>%2e%2e%2f</code>),
+  o <code>....//</code> (che dopo la rimozione di un <code>../</code> interno ridiventa <code>../</code>). Sono i bypass classici.</li>
+</ul>
+<hr />
+<h2 id="caso-3-10-luglio-2025-xss-riflesso-via-decoder-base64-vuln-decoder">Caso 3 — 10 luglio 2025 (XSS riflesso via decoder base64 — vuln-decoder)</h2>
+<h3 id="consegna-originale-verbatim-dallhtml_1">Consegna originale (verbatim dall'HTML)</h3>
+<blockquote>
+<p><strong>PREDISPOSIZIONE</strong>: <code>vuln-decoder.tar.gz</code>; <code>zcat vuln-decoder.tar.gz | sudo docker load</code>;
+<code>sudo docker run --rm -p 5000:5000 vuln-decoder</code>; browser su <code>http://127.0.0.1:5000</code>.</p>
+<p><strong>CHALLENGE</strong>: Obiettivo dello studente è <strong>identificare il tipo di vulnerabilità e sfruttarla</strong>.
+Non è consentito né in alcun modo utile utilizzare tool di scansione automatica o "bruteforce".</p>
+<p><strong>CONSEGNA</strong>: più screenshot numerati <code>exploitN.png</code> che mostrano i passaggi fondamentali
+dell'exploit e il suo successo; un file <code>web.txt</code> con i passi e la mitigazione.</p>
+</blockquote>
+<p>Particolarità: la consegna <strong>non dice quale vulnerabilità è</strong> — parte del compito è classificarla.
+L'app è un "Base64 Decoder": prende una stringa, la decodifica da base64, e <strong>mostra il risultato</strong>
+nella pagina.</p>
+<h3 id="famiglia-xss-riflesso-attraverso-un-passaggio-di-decodifica-base64-bypass-di-due-difese">Famiglia: XSS riflesso (attraverso un passaggio di decodifica base64) + bypass di due difese</h3>
+<h3 id="webtxt-testo-ufficiale-verbatim-recuperato-dal-data-uri-zip"><code>web.txt</code> — testo ufficiale VERBATIM (recuperato dal data-URI zip)</h3>
+<pre><code>La pagina presenta una casella di input, e suggerisce che il compito svolto dal sito sia quello di
+decodificare stringhe fornite in formato base64.
+
+In presenza di input controllabili dal client, questi possono interagire col server in vari modi, tra cui:
+- componendo una query SQL
+- componendo una riga di comando
+- componendo un percorso di file o cartella
+- venendo integrati nella pagina di risposta
+
+Tentando diversi tipi di input si può capire in quale caso ci si trova, sulla base del fatto che alcuni
+caratteri speciali inseriti provochino o no errori che facciano capire come la stringa stessa viene usata.
+
+In questo caso, qualsiasi stringa &quot;leggibile&quot;, con caratteri speciali per SQL o shell o path, inserita
+provoca la visualizzazione dell'errore &quot;stringa base64 non valida&quot;, per cui si traggono tre conclusioni:
+- l'input deve effettivamente essere fornito in base64
+- è estremamente improbabile che venga usato per una query (ritorna solo quanto inserito, non altri dati)
+- pare che non venga trattato con una riga di comando tipo &quot;echo $input | base64 -d&quot; (i caratteri
+  speciali della shell non influenzano l'esecuzione)
+
+L'ipotesi più probabile, dato che il risultato della decodifica viene riportato al browser, è che si
+possa tentare un attacco di Reflected XSS.
+
+[XSS = iniezione di codice (JavaScript) eseguito nel browser degli altri utenti: furto di cookie,
+sessioni, dati sensibili.]
+
+Si può quindi tentare di codificare in base64 il tipico &lt;script&gt;alert(&quot;vuln&quot;)&lt;/script&gt;
+
+Primo ostacolo: l'input field è limitato a 20 caratteri
+Soluzione:
+a) usare l'inspector per modificare la proprietà del campo input rimuovendo il limite
+b) usare Burp per creare la richiesta POST, intercettando una richiesta e sostituendo l'input con la
+   versione codificata in base64 della stringa da iniettare
+
+Secondo ostacolo: la parola &quot;script&quot; viene filtrata lato server, sostituendola con la stringa vuota
+Soluzione:
+a) scrivere &quot;script&quot; in modi diversi -- la sostituzione è case sensitive (Script passa) e non è
+   reiterata (scrscriptipt diventa script)
+b) usare eventi, iniettando &lt;img src=&quot;&quot; onerror='alert(&quot;vuln&quot;)'&gt;
+
+Quest'ultima stringa, codificata in base64, è:
+PGltZyBzcmM9IiIgb25lcnJvcj0nYWxlcnQoInZ1bG4iKSc+
+
+La richiesta finale composta con Burp (estratto):
+POST / HTTP/1.1
+Host: 127.0.0.1:5000
+Content-Type: application/x-www-form-urlencoded
+...
+b64=PGltZyBzcmM9IiIgb25lcnJvcj0nYWxlcnQoInZ1bG4iKSc%2B
+
+Per mitigare: sanitizzare l'input, a monte della decodifica (escaping dei caratteri speciali della
+shell, se si teme uso in command line) e a valle della decodifica base64 (convertendo i caratteri
+speciali HTML in modo che il browser li visualizzi testualmente e non li interpreti come tag).
+</code></pre>
+<p>Screenshot (<code>exploit1..6.png</code>): il flusso mostra la pagina "Base64 Decoder", i tentativi di
+classificazione, e infine (<code>exploit6.png</code>) l'<strong>alert JavaScript nativo "127.0.0.1:5000 says — vuln"</strong>
+= prova dell'esecuzione. Il payload finale iniettato è <code>&lt;img src="" onerror='alert("vuln")'&gt;</code> fornito
+in base64.</p>
+<h3 id="perche-funziona_1">Perché funziona</h3>
+<p>Il decoder prende l'input, lo decodifica da base64, e <strong>inserisce il testo decodificato nell'HTML
+della risposta senza output-encoding</strong> → XSS riflesso classico, ma con due strati in più:</p>
+<ol>
+<li><strong>Lo strato base64</strong>: il payload va <strong>codificato</strong> perché il server lo decodifica prima di
+   rifletterlo. Se scrivessi il tag in chiaro, verrebbe visto come "base64 non valido". È solo un
+   involucro: dentro c'è lo stesso <code>&lt;img onerror&gt;</code> del Caso 1.</li>
+<li><strong>Il limite di 20 caratteri sul campo input</strong> è una difesa <strong>solo lato client</strong> (attributo
+   <code>maxlength</code>): si aggira modificando il DOM con l'inspector, oppure — meglio — inviando la richiesta
+   POST direttamente (Burp/curl), che non passa affatto dal campo HTML.</li>
+<li><strong>Il filtro <code>script</code> lato server</strong> è debole: sostituisce la stringa <code>script</code> con vuoto, ma è
+   <strong>case-sensitive</strong> (<code>ScRiPT</code> sopravvive) e <strong>non ricorsivo</strong> (<code>scrscriptipt</code> → dopo aver tolto il
+   <code>script</code> interno diventa <code>script</code>). In ogni caso lo si evita del tutto usando un vettore
+   script-less (<code>&lt;img onerror&gt;</code>) — stessa mossa del Caso 1.</li>
+</ol>
+<h3 id="bivio-zona-grigia-caso-3">⚠️ Bivio / zona grigia — Caso 3</h3>
+<ul>
+<li><strong>La procedura di classificazione all'inizio del web.txt è oro d'esame</strong>: davanti a un input
+  "misterioso", prova input che romperebbero <strong>ciascun</strong> interprete e guarda l'errore — <code>'</code> (SQL),
+  <code>; | \`` (shell),</code>../<code>(path),</code><b>` (HTML). L'errore ti dice a quale interprete arriva l'input.
+  Qui l'errore "base64 non valido" per qualunque cosa non-base64 rivela che c'è un layer di decodifica
+  prima, e che l'output viene riflesso → XSS.</li>
+<li><strong>Non farti fuorviare dal <code>maxlength=20</code></strong>: NON è una vera difesa, è client-side. Se il payload non
+  ci sta nel campo, la strada NON è "trova un payload più corto" (rischio di perdere tempo), è
+  "bypassa il campo" (inspector o POST diretto).</li>
+<li><strong><code>maxlength</code> bypass vs filtro server</strong>: sono due ostacoli <strong>distinti e indipendenti</strong>. Uno studente
+  sotto stress può confonderli e pensare che il payload "non funzioni" per il filtro quando in realtà
+  è stato troncato dal maxlength (o viceversa). Affrontali uno alla volta: prima manda un payload
+  qualsiasi lungo per verificare che il maxlength è bypassato, poi lavora sul filtro <code>script</code>.</li>
+<li><strong>Codifica base64 corretta</strong>: ricordati che nella POST i caratteri <code>+</code> <code>/</code> <code>=</code> vanno URL-encoded
+  (<code>=</code> → <code>%3D</code>, <code>+</code> → <code>%2B</code>). Nell'esempio ufficiale il trailing <code>&gt;</code> codificato finisce come <code>%2B</code>
+  (era un <code>+</code> in base64).</li>
+</ul>
+<hr />
+<h2 id="caso-4-30-ottobre-2025-command-injection-vuln-finder">Caso 4 — 30 ottobre 2025 (Command Injection — vuln-finder)</h2>
+<h3 id="consegna-originale-verbatim-dallhtml_2">Consegna originale (verbatim dall'HTML)</h3>
+<blockquote>
+<p><strong>PREDISPOSIZIONE</strong>: <code>vuln-finder.tar.gz</code>; <code>zcat vuln-finder.tar.gz | sudo docker load</code>;
+<code>sudo docker run --rm -p 5000:5000 vuln-finder</code>; browser su <code>http://127.0.0.1:5000</code>.</p>
+<p><strong>CHALLENGE</strong>: Obiettivo dello studente è <strong>sfruttare la vulnerabilità per trovare il file
+<code>flag.txt</code> ed estrarne il contenuto</strong>. Non è consentito né utile usare scansione automatica o
+"bruteforce".</p>
+<p><strong>CONSEGNA</strong>: screenshot numerati <code>exploit1.png, exploit2.png, ...</code>; un file <code>web.txt</code> che descrive
+il <strong>processo logico</strong> con cui si è dedotta la vulnerabilità, il <strong>principio</strong> della vulnerabilità e
+come si sono <strong>aggirate le difese</strong>, la mitigazione, e <strong>posizione e contenuto</strong> di <code>flag.txt</code>.</p>
+</blockquote>
+<h3 id="famiglia-os-command-injection-iniezione-in-una-riga-di-comando-find">Famiglia: OS Command Injection (iniezione in una riga di comando <code>find</code>)</h3>
+<h3 id="webtxt-testo-ufficiale-verbatim-recuperato-dal-data-uri-g-zip"><code>web.txt</code> — testo ufficiale VERBATIM (recuperato dal data-URI g-zip)</h3>
+<pre><code>Aprendo la pagina vediamo che è presente una barra di ricerca, l'elemento vulnerabile.
+
+Viene anche mostrato il comando eseguito lato server, che inizialmente è
+find / \( -path /proc -o -path /sys -o -path /run -o -path /dev \) -prune -o -name \*.pem 2&gt;/dev/null
+
+Inserendo un pattern nella barra di ricerca, ad esempio ANF, si nota in che punto esso viene inserito:
+find / \( ... \) -prune -o -name ANF\*.pem 2&gt;/dev/null
+e il risultato è di cercare tutti i file il cui nome inizia con il pattern e termina con .pem
+(screenshot 1)
+
+Il sistema è chiaramente vulnerabile a una COMMAND INJECTION.
+
+Per prima cosa, sfruttando il comando find già predisposto (che cerca ricorsivamente dalla root), si
+cerca il file di nome flag.txt. Per farlo si deve neutralizzare la parte che appende .pem al pattern:
+è sufficiente inserire come pattern il nome desiderato seguito da un carattere shell di commento:
+flag.txt #
+(screenshot 2)
+
+Trovato il file:
+/usr/local/share/325SQTNCIGVRGDRX/DMEW5LUIQQJ3IH5P/flag.txt
+(nota: cambia a ogni esecuzione del container)
+si procede a iniettare il comando per esfiltrarne il contenuto, usando come pattern:
+flag.txt ; cat /usr/local/share/325SQTNCIGVRGDRX/DMEW5LUIQQJ3IH5P/flag.txt #
+
+Questo causa l'esecuzione di
+find / \( ... \) -prune -o -name flag.txt ; cat /usr/local/share/.../flag.txt #\*.pem 2&gt;/dev/null
+
+che esegue correttamente il find, poi il cat, poi commenta la parte inutile del comando predefinito.
+
+La flag è: SEC{YouFoundTheDeepFlagOnOctoberThirtieth}
+
+Per evitare command injection:
+- non costruire mai una riga di comando con testo fornito dall'utente; preferire librerie che
+  implementino la funzionalità senza passare per un interprete sintattico
+- se serve l'esecuzione shell, controllare attentamente l'input (whitelist di pattern ammessi) e
+  neutralizzare (escaping) i caratteri pericolosi in modo che siano dati puri, non sintassi shell
+</code></pre>
+<p>Screenshot chiave (<code>exploit3.png</code>): l'app "<strong>Find PEM files by prefix</strong>" mostra il campo "Prefix
+(PATTERN)" con <code>flag.txt ; cat /usr/local/share/.../flag.txt</code> e — sotto — "<strong>Command run:</strong>" con la
+riga <code>find</code> completa, e in "<strong>Results</strong>" appare il percorso del file <strong>e</strong> la riga
+<code>SEC{YouFoundTheDeepFlagOnOctoberThirtieth}</code>.</p>
+<h3 id="perche-funziona_2">Perché funziona</h3>
+<p>L'app costruisce <strong>letteralmente</strong> una riga di shell interpolando il pattern dell'utente:
+<code>find / (...) -prune -o -name &lt;PATTERN&gt;*.pem 2&gt;/dev/null</code>. Poiché il <code>&lt;PATTERN&gt;</code> finisce <strong>non
+quotato</strong> in una rida passata a una shell, l'utente può iniettare <strong>metacaratteri shell</strong>:</p>
+<ul>
+<li><strong><code>#</code></strong> = commento shell: tutto ciò che segue viene ignorato. Serve a <strong>buttare via la coda</strong>
+  <code>*.pem 2&gt;/dev/null</code> che altrimenti si attaccherebbe al payload e lo romperebbe. Prima mossa:
+  <code>flag.txt #</code> trasforma il find in una ricerca del nome esatto <code>flag.txt</code>, rivelandone il percorso.</li>
+<li><strong><code>;</code></strong> = separatore di comandi: esegue un secondo comando indipendente. Seconda mossa:
+  <code>flag.txt ; cat &lt;percorso&gt; #</code> esegue il find (innocuo), poi <code>cat</code> del file trovato (esfiltrazione),
+  poi <code>#</code> commenta la coda <code>*.pem 2&gt;/dev/null</code>.</li>
+</ul>
+<p>È un attacco <strong>in due tempi</strong> perché il percorso della flag è randomizzato per container: prima lo
+<strong>scopri</strong> (<code>flag.txt #</code>), poi lo <strong>leggi</strong> (<code>; cat &lt;percorso&gt; #</code>).</p>
+<h3 id="bivio-zona-grigia-caso-4">⚠️ Bivio / zona grigia — Caso 4</h3>
+<ul>
+<li><strong>Il segnale che è Command Injection e non altro</strong>: l'app <strong>mostra la command line eseguita</strong>
+  ("Command run: ..."). Quando vedi il tuo input comparire dentro un comando shell mostrato a schermo,
+  la famiglia è quasi certamente command injection, e il gioco è <strong>spezzare la sintassi</strong> di quel
+  comando specifico (guarda dove finisce il tuo input e cosa gli sta attaccato dopo).</li>
+<li><strong>Perché serve <code>#</code> e non basta <code>;</code></strong>: senza il commento finale, la coda del comando originale
+  (<code>*.pem 2&gt;/dev/null</code> o simili) si concatena al tuo <code>cat</code> e può causare errore o comportamento
+  inatteso. <code>#</code> "taglia" tutto ciò che il template mette dopo il tuo payload. Alternative a <code>#</code>:
+  concludere con un altro separatore che assorba la coda, o commentarla; su shell POSIX <code>#</code> è il più
+  pulito.</li>
+<li><strong>Due tempi, non uno</strong>: non tentare di leggere la flag prima di conoscerne il percorso. Il percorso
+  è random per container: la mossa 1 (<code>flag.txt #</code>) serve a <strong>scoprirlo</strong>, la mossa 2 a leggerlo.
+  Saltare la mossa 1 = tirare a indovinare = perdere tempo.</li>
+<li><strong>Command Injection vs SQL Injection</strong>: entrambe "spezzano" un linguaggio interpolato. Le distingui
+  dai caratteri che provocano l'errore/effetto: <code>;</code> <code>|</code> <code>`</code> <code>#</code> <code>&amp;&amp;</code> → shell; <code>'</code> <code>"</code> <code>--</code> <code>UNION</code>
+  → SQL. E dal contesto: un "finder/search di file" → shell; una "directory/lista di record" → SQL.</li>
+</ul>
+<hr />
+<h2 id="caso-5-12-gennaio-2026-sql-injection-union-based-unionsh">Caso 5 — 12 gennaio 2026 (SQL Injection UNION-based — union.sh)</h2>
+<h3 id="consegna-originale-verbatim-dallhtml_3">Consegna originale (verbatim dall'HTML)</h3>
+<blockquote>
+<p><strong>PREDISPOSIZIONE</strong>: scaricare <code>union.sh.gpg</code>, decifrare con <code>gpg -d union.sh.gpg &gt; union.sh</code> (la
+password è <code>esame</code>), <code>chmod +x union.sh</code>, lanciare <code>./union.sh</code>; browser su <code>http://127.0.0.1:8000</code>.</p>
+<p><strong>CHALLENGE</strong>: La challenge è basata su una vulnerabilità, vista a lezione, presente su siti che
+<strong>interrogano database</strong>. Obiettivo: sfruttare la vulnerabilità ed <strong>esfiltrare le flag contenute
+nel database</strong>. Non è possibile usare scansione automatica né "bruteforce".</p>
+<p><strong>CONSEGNA</strong>: screenshot <code>query1.png, query2.png, ...</code> che mostrano le query iniettate e le
+risposte; un file <code>web.txt</code> con le <strong>flag</strong>, la <strong>logica</strong> delle query, e la descrizione
+dell'<strong>errore di progetto</strong> e della mitigazione.</p>
+</blockquote>
+<h3 id="famiglia-sql-injection-tecnica-union-based-backend-sqlite">Famiglia: SQL Injection, tecnica UNION-based, backend SQLite</h3>
+<h3 id="webtxt-testo-ufficiale-verbatim-recuperato-dal-data-uri-g-zip_1"><code>web.txt</code> — testo ufficiale VERBATIM (recuperato dal data-URI g-zip)</h3>
+<pre><code>1. Accedendo al sito e seguendo le istruzioni: visitando ?id=Alice il sito mostra &quot;People Directory&quot;
+   con un menu drop-down di tre utenti. L'ipotesi più probabile è che il parametro id interroghi un DB.
+
+Prima verifica: iniezione classica
+  http://127.0.0.1:8000/?id=Alice'+OR+'1'='1
+Risultano 7 utenti, con commenti utili una volta ricomposti:
+  &quot;Niente di interessante In questa tabella Forse bisogna Guardare altrove In questo database
+   In formato sqlite Doc: http://127.0.0.1:8000/schemata.html&quot;
+
+La tecnica che consente di estrarre tabelle diverse da quella cablata è la SQLi UNION-BASED.
+
+Per prima cosa determino il numero di colonne della query originale. Dopo qualche tentativo:
+  http://127.0.0.1:8000/?id=Alice' UNION select NULL,NULL,NULL,NULL --
+non dà errori. (=&gt; 4 colonne)
+
+Dalla documentazione al link indicato, la tabella coi metadati dello schema è sqlite_schema.
+Le colonne interessanti sono tre, quindi lascio un NULL:
+  http://127.0.0.1:8000/?id=Alice' UNION select type,name,tbl_name,NULL from sqlite_schema --
+Rilevo tre tabelle: flags, people, sqlite_sequence.
+Ipotizzo che people sia la tabella standard e sqlite_sequence sia metadati. Esploro flags,
+ipotizzando abbia tante colonne quante people (SQLITE non offre un modo semplice di scoprire i nomi
+delle colonne di ogni tabella):
+  http://127.0.0.1:8000/?id=Alice' UNION select * from flags --
+
+SUCCESSO (query5.png). Tre flag:  SEC_F1rstPrize   SEC_S3c0nd_PL4CE   SEC_3rd_qualified
+
+VULNERABILITÀ E MITIGAZIONE
+La vulnerabilità è dovuta a NON sanitizzazione del parametro id nell'URL. Ogni input esterno va
+controllato:
+- come minimo vietando caratteri che possano confondere interpreti (incluso SQL)
+- meglio: evitare l'uso di interpreti, usando PREPARE (prepared statement / bind variables)
+- se possibile, elencando esplicitamente i soli valori ammessi del parametro
+</code></pre>
+<p>Descrizione screenshot reali:
+- <code>query1.png</code>: URL <code>?id=' OR '1'='1</code> → "Details (7 entries)", i record ID 1..3 hanno negli <strong>Address</strong>
+  frammenti di messaggio ("Niente di interessante", "In questa tabella", "Forse bisogna"...) che
+  ricomposti indicano di guardare in un altro database SQLite e linkano <code>schemata.html</code>.
+- <code>query3.png</code>: <code>?id=Alice' UNION select NULL,NULL,NULL,NULL --</code> → "<strong>2 entries</strong>" (Alice + una riga
+  <code>ID None — None</code> di NULL): la query UNION è <strong>sintatticamente valida</strong> → <strong>4 colonne</strong> confermate.
+- <code>query4.png</code>: <code>?id=Alice' UNION select type,name,tbl_name,NULL from sqlite_schema --</code> → compaiono
+  righe <code>ID table — flags</code>, <code>ID table — people</code>, <code>ID table — sqlite_sequence</code>: enumerate le tabelle.
+- <code>query5.png</code>: <code>?id=Alice' UNION select * from flags --</code> → tre righe <strong>Gold / Silver / Bronze</strong> con
+  negli Address le flag <strong><code>SEC_F1rstPrize</code></strong>, <strong><code>SEC_S3c0nd_PL4CE</code></strong>, <strong><code>SEC_3rd_qualified</code></strong>.</p>
+<h3 id="perche-funziona_3">Perché funziona</h3>
+<p>Il server costruisce la query concatenando l'input: <code>SELECT ... FROM people WHERE id = '&lt;id&gt;'</code>.
+Chiudendo l'apice (<code>Alice'</code>) l'attaccante esce dal literal e aggiunge SQL proprio; <code>--</code> commenta il
+resto della query originale (l'apice di chiusura che altrimenti resterebbe spaiato).</p>
+<ul>
+<li><strong><code>' OR '1'='1</code></strong>: rende la <code>WHERE</code> sempre vera → il sito restituisce <strong>tutte</strong> le righe. Serve da
+  <strong>prova</strong> che l'iniezione funziona (7 righe invece di 1) e, qui, rivela messaggi-indizio.</li>
+<li><strong>UNION-based</strong>: <code>UNION SELECT</code> <strong>accoda</strong> i risultati di una <strong>seconda</strong> query arbitraria a quella
+  originale. Vincolo: la seconda query deve avere <strong>lo stesso numero di colonne</strong> e tipi compatibili —
+  per questo prima si trova il numero di colonne (4) con <code>UNION select NULL,NULL,NULL,NULL --</code>
+  (i NULL sono compatibili con qualunque tipo).</li>
+<li><strong><code>sqlite_schema</code></strong> (alias <code>sqlite_master</code>): la tabella di sistema di SQLite che elenca tutte le
+  tabelle/indici del DB. È il modo per <strong>scoprire</strong> che esiste una tabella <code>flags</code> non prevista
+  dall'app. Poi <code>UNION select * from flags</code> la svuota.</li>
+</ul>
+<h3 id="bivio-zona-grigia-caso-5">⚠️ Bivio / zona grigia — Caso 5</h3>
+<ul>
+<li><strong>Trovare il numero di colonne è il collo di bottiglia</strong>: se sbagli il conteggio, <code>UNION</code> dà errore
+  e sembra "non vulnerabile". Due metodi: (a) <code>UNION select NULL,NULL,... --</code> aumentando i NULL finché
+  <strong>sparisce l'errore</strong>; (b) <code>ORDER BY 1--</code>, <code>ORDER BY 2--</code>, ... finché dà errore (l'ultimo numero
+  valido = numero di colonne). Con SQLite il metodo NULL è il più affidabile.</li>
+<li><strong>Quali colonne "escono" a schermo</strong>: non tutte le colonne della query vengono mostrate. Metti dati
+  di test (o <code>sqlite_version()</code>, stringhe) al posto dei NULL per capire <strong>quale</strong> posizione è
+  visibile, e piazza lì i dati che vuoi leggere. Qui l'app mostra 3 dei 4 campi (id/name→heading,
+  address, phone), per questo si tiene un NULL.</li>
+<li><strong><code>sqlite_schema</code> è specifico di SQLite</strong>. La consegna/gli indizi dicono "in formato sqlite": se il
+  backend fosse MySQL useresti <code>information_schema.tables</code>/<code>.columns</code>; PostgreSQL idem; Oracle
+  <code>all_tables</code>. Riconoscere il DBMS (dagli indizi, dai messaggi d'errore, dalla sintassi che
+  funziona) decide <strong>quale</strong> tabella di metadati interrogare. Questo è il bivio che fa perdere tempo:
+  usare la tabella di metadati del DBMS sbagliato.</li>
+<li><strong>SQLi vs Command Injection</strong> (di nuovo): qui l'effetto di <code>'</code> è un errore/ cambiamento SQL e il
+  contesto è "sito che interroga un database / directory di persone" → SQL, non shell.</li>
+<li><strong><code>--</code> in SQLite richiede attenzione allo spazio</strong>: <code>--</code> deve essere seguito da fine-riga o, in
+  molti motori, da uno spazio per essere trattato come commento. Nell'URL a volte serve <code>-- -</code> o
+  <code>--%20</code>. Se l'iniezione "quasi funziona" ma dà errore di sintassi sulla coda, sospetta il commento.</li>
+</ul>
+<hr />
+<h2 id="nota-finale-sul-pool">Nota finale sul pool</h2>
+<p>Pool completo: <strong>5 esercizi, 4 famiglie</strong> (XSS riflesso ×2, Command Injection, SQLi UNION, Path
+Traversal/LFI). <strong>4/5 con soluzione ufficiale del docente trascritta verbatim</strong> dai data-URI base64;
+<strong>1/5 (27 giugno 2025, path traversal) ricostruito</strong> ed etichettato come tale — nel suo thread HTML
+non c'è alcuna soluzione ufficiale allegata. Se un giorno comparisse quella soluzione su Virtuale,
+va sostituita al blocco ricostruito del Caso 2.</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

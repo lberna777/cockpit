@@ -1,1 +1,0 @@
-/home/lorenzo/UniCode/.claude/commands/verifica.md

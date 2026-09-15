@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_modulo3C_gestione_processi.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_modulo3C_gestione_processi.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SYSADM/appunti_modulo3C_gestione_processi.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-3c-gestione-dei-processi">Appunti — Modulo 3C: Gestione dei Processi</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T
+<strong>Stato</strong>: 🔄 Es. 1–4 eseguiti · Es. 5 da fare · watch da correggere (vedi Es. 3)</p>
+<hr />
+<h2 id="1-processo-cose-e-come-si-identifica">1. Processo: cos'è e come si identifica</h2>
+<p>Ogni comando lanciato dalla shell diventa un <strong>processo</strong>. Ogni processo ha:</p>
+<ul>
+<li><strong>PID</strong> (Process ID): numero univoco globale nel sistema, assegnato dal kernel.</li>
+<li><strong>Job ID</strong>: numero locale alla shell corrente, usato solo nella sessione. Si referenzia con <code>%</code>, es. <code>%1</code>.</li>
+</ul>
+<p>Un processo agisce <strong>a nome dell'utente che lo ha lanciato</strong> — i permessi del processo sono quelli dell'utente. Solo i processi root possono declassarsi a un altro utente, senza possibilità di tornare indietro.</p>
+<p><strong>Come nasce un processo</strong> — la shell chiama:
+1. <code>fork()</code> — crea una copia del processo corrente (stesso codice, stesso spazio di memoria)
+2. <code>exec()</code> — sostituisce il codice in memoria con quello del programma da eseguire</p>
+<blockquote>
+<p><strong>fork()/exec() spiegati</strong>: <code>fork()</code> non crea il nuovo programma direttamente, crea una copia identica del processo shell. Poi il figlio chiama <code>exec()</code>, che <em>sovrascrive</em> il proprio codice con quello del programma richiesto (<code>sleep</code>, <code>ls</code>, ecc.). Il risultato è un processo con un'identità nuova ma che ha ereditato dal padre file descriptor, variabili d'ambiente e altre risorse. <code>fork()</code> senza <code>exec()</code> è il pattern dei demoni che si dividono in padre/figlio.</p>
+</blockquote>
+<p>Ogni processo figlio <strong>eredita i file descriptor aperti dal padre</strong>.</p>
+<blockquote>
+<p><strong>Cosa sono i file descriptor</strong>: il kernel rappresenta ogni risorsa aperta (file, pipe, socket) con un numero intero detto file descriptor (fd). I tre standard sono sempre presenti: 0 = stdin, 1 = stdout, 2 = stderr. Quando fai <code>echo "ciao" &gt; file.txt</code>, la shell apre <code>file.txt</code> e ottiene un fd, poi passa quell'fd al processo figlio. Ogni processo figlio eredita tutti gli fd aperti del padre — ecco perché il redirect impostato prima del <code>&amp;</code> funziona anche per il processo in background.</p>
+</blockquote>
+<hr />
+<h2 id="2-processi-in-foreground-e-background">2. Processi in foreground e background</h2>
+<p>Per default un comando è in <strong>foreground</strong>: la shell aspetta la sua terminazione prima di mostrare il prompt.</p>
+<p>Per lanciarlo in <strong>background</strong> si aggiunge <code>&amp;</code>:</p>
+<pre><code class="language-bash">sleep 1000 &amp;
+# [1] 12516   ← job id + PID
+</code></pre>
+<p><strong>Variabile speciale <code>$!</code></strong>: contiene il PID dell'ultimo processo lanciato in background.</p>
+<pre><code class="language-bash">sleep 1000 &amp;
+A=$!
+echo $A    # 12516
+</code></pre>
+<blockquote>
+<p><strong><code>$!</code> vale solo per background</strong>: sì, <code>$!</code> è definito solo dopo un <code>&amp;</code>. Per processi in foreground, il PID è disponibile solo dentro il processo stesso (come <code>$$</code>). Non esiste una variabile bash che cattura automaticamente il PID di un foreground process.</p>
+</blockquote>
+<p>Un processo in background:
+- Non riceve input dal terminale
+- Continua a scrivere su STDOUT e STDERR (l'output appare a schermo, si può redirigere)</p>
+<p><strong>Da foreground a background</strong> — passaggio che non era chiaro:</p>
+<pre><code class="language-bash">sleep 1000        # lanciato in foreground, shell bloccata
+# premi Ctrl+Z   → invia SIGTSTP → processo si SOSPENDE (stato stopped)
+bg %1             # invia SIGCONT → riprende in background
+</code></pre>
+<blockquote>
+<p><code>Ctrl+Z</code> non uccide il processo, lo sospende. <code>bg</code> lo sblocca e lo manda in background. <code>fg</code> invece lo riporta in foreground.</p>
+</blockquote>
+<hr />
+<h2 id="3-segnali">3. Segnali</h2>
+<p>I segnali sono <strong>eventi asincroni</strong> notificati dal kernel a un processo.</p>
+<blockquote>
+<p><strong>Asincrono = cosa significa</strong>: il segnale può arrivare in <em>qualunque momento</em> durante l'esecuzione del processo, indipendentemente da cosa stia facendo (potrebbe essere nel mezzo di un calcolo, in attesa di I/O, ecc.). Il processo non deve fare una chiamata esplicita per riceverlo — il kernel lo inietta nel flusso di esecuzione alla prima occasione utile.</p>
+</blockquote>
+<p><strong>Cosa può fare un processo alla ricezione di un segnale</strong>:
+- <strong>Terminare</strong> (con o senza core dump)
+- <strong>Ignorarlo</strong>
+- <strong>Sospendersi</strong> (stato stopped)
+- <strong>Riprendersi</strong> dallo stop (CONT)</p>
+<blockquote>
+<p><strong>Core dump</strong>: quando un processo termina per certi segnali (es. SIGSEGV, SIGQUIT), il kernel può scrivere su disco una copia dello stato di memoria del processo al momento della terminazione (il "core file"). Serve per debugging post-mortem: con <code>gdb ./programma core</code> puoi vedere esattamente dove si trovava il processo quando è andato in crash.</p>
+<p><strong>CONT</strong>: SIGCONT (continue) sblocca un processo che era in stato stopped. Il processo riprende esattamente da dove era stato sospeso — non ricomincia da capo.</p>
+</blockquote>
+<p><strong>Segnali importanti</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Segnale</th>
+<th>Numero</th>
+<th>Scorciatoia</th>
+<th>Effetto default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SIGTERM</td>
+<td>15</td>
+<td>—</td>
+<td>Termina (graceful, intercettabile)</td>
+</tr>
+<tr>
+<td>SIGKILL</td>
+<td>9</td>
+<td>—</td>
+<td>Termina (forza, <strong>non intercettabile</strong>)</td>
+</tr>
+<tr>
+<td>SIGINT</td>
+<td>2</td>
+<td><code>Ctrl+C</code></td>
+<td>Interrompe il processo</td>
+</tr>
+<tr>
+<td>SIGQUIT</td>
+<td>3</td>
+<td><code>Ctrl+\</code></td>
+<td>Termina con core dump</td>
+</tr>
+<tr>
+<td>SIGTSTP</td>
+<td>20</td>
+<td><code>Ctrl+Z</code></td>
+<td>Sospende (intercettabile)</td>
+</tr>
+<tr>
+<td>SIGSTOP</td>
+<td>19</td>
+<td>—</td>
+<td>Sospende (<strong>non intercettabile</strong>)</td>
+</tr>
+<tr>
+<td>SIGCONT</td>
+<td>18</td>
+<td>—</td>
+<td>Riprende un processo sospeso</td>
+</tr>
+<tr>
+<td>SIGHUP</td>
+<td>1</td>
+<td>—</td>
+<td>Hangup (chiusura terminale)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Invio segnali con <code>kill</code></strong>:</p>
+<pre><code class="language-bash">kill &lt;PID&gt;          # invia SIGTERM (default)
+kill -9 &lt;PID&gt;       # invia SIGKILL
+kill -STOP &lt;PID&gt;    # sospende
+kill -CONT &lt;PID&gt;    # riprende
+kill -l             # elenca tutti i segnali
+kill -&lt;N&gt; &lt;PID&gt;     # segnale per numero
+kill -9 -&lt;PGID&gt;     # SIGKILL a tutto il process group
+</code></pre>
+<blockquote>
+<p><strong><code>kill</code> non solo per uccidere</strong>: il nome è fuorviante. <code>kill</code> invia <em>qualsiasi</em> segnale — non solo SIGTERM o SIGKILL. È lo strumento generico per parlare con un processo dall'esterno. SIGTERM chiede al processo di terminare in modo ordinato; il processo può ignorarlo o fare cleanup prima di uscire. SIGKILL invece non può essere ignorato: il kernel termina il processo direttamente, senza passare dall'handler.</p>
+</blockquote>
+<p><strong><code>trap</code> — handler in bash</strong>:</p>
+<pre><code class="language-bash">trap &quot;echo 'Segnale ricevuto'&quot; SIGTERM
+trap &quot;rm -f /tmp/miofile&quot; EXIT   # eseguito all'uscita dello script
+</code></pre>
+<p>Pseudo-segnali bash: <code>DEBUG</code>, <code>ERR</code>, <code>EXIT</code>, <code>RETURN</code>.</p>
+<blockquote>
+<p><strong>Nota critica — trap non ereditato dai figli</strong>: gli handler definiti con <code>trap</code> appartengono alla shell bash corrente. Quando bash lancia un programma esterno (es. <code>sleep</code>), quel processo ha il proprio set di disposizioni dei segnali e non eredita i <code>trap</code> della shell padre. I pseudo-segnali bash (EXIT, DEBUG, ERR, RETURN) non esistono nemmeno nei processi esterni — sono costrutti interni a bash.</p>
+</blockquote>
+<hr />
+<h2 id="4-comandi-di-monitoraggio">4. Comandi di monitoraggio</h2>
+<p><strong><code>ps</code></strong> — snapshot dei processi in esecuzione:</p>
+<pre><code class="language-bash">ps                  # processi della shell corrente
+ps $PID             # processo specifico
+ps aux              # tutti i processi del sistema
+ps hp $PID          # output senza header, utile negli script
+</code></pre>
+<p><strong>Colonne di <code>ps</code></strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Colonna</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PID</code></td>
+<td>Process ID</td>
+</tr>
+<tr>
+<td><code>TTY</code></td>
+<td>Terminale di controllo (<code>pts/0</code> = pseudo-terminal, <code>?</code> = nessun terminale, tipico dei demoni)</td>
+</tr>
+<tr>
+<td><code>STAT</code></td>
+<td>Stato del processo</td>
+</tr>
+<tr>
+<td><code>TIME</code></td>
+<td>Tempo CPU totale consumato</td>
+</tr>
+<tr>
+<td><code>CMD</code>/<code>COMMAND</code></td>
+<td>Comando con argomenti</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Chi restituisce i codici di stato</strong>: è il kernel che mantiene lo stato di ogni processo. <code>ps</code> interroga <code>/proc/&lt;PID&gt;/stat</code> per leggere lo stato corrente.</p>
+</blockquote>
+<p><strong>Codici di stato (<code>STAT</code>)</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Codice</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>S</code></td>
+<td>Sleeping (in attesa di I/O o evento)</td>
+</tr>
+<tr>
+<td><code>R</code></td>
+<td>Running (in esecuzione o pronta a girare)</td>
+</tr>
+<tr>
+<td><code>T</code></td>
+<td>Stopped (sospeso da SIGSTOP/SIGTSTP)</td>
+</tr>
+<tr>
+<td><code>Z</code></td>
+<td>Zombie (terminato ma non ancora "raccoltao" dal padre)</td>
+</tr>
+<tr>
+<td><code>N</code></td>
+<td>Nice positivo (priorità più bassa del normale)</td>
+</tr>
+<tr>
+<td><code>s</code></td>
+<td>Session leader</td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>Foreground</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong><code>ps aux</code> spiegato</strong>: <code>-a</code> = mostra processi di tutti gli utenti; <code>-u</code> = formato utente-oriented (aggiunge USER, %CPU, %MEM, VSZ, RSS); <code>-x</code> = include processi senza terminale di controllo (demoni di sistema). Insieme danno un quadro completo di tutto ciò che gira sulla macchina.</p>
+</blockquote>
+<p><strong><code>jobs</code></strong> — lista dei job della shell corrente:</p>
+<pre><code class="language-bash">jobs        # mostra [job_id] stato comando
+jobs -l     # aggiunge il PID
+</code></pre>
+<blockquote>
+<p><strong>Processo vs job</strong>: un <em>processo</em> è un'entità del kernel identificata dal PID, indipendente dalla shell. Un <em>job</em> è un'astrazione della shell per gestire i processi che ha lanciato direttamente. Un job può comprendere più processi in pipeline (<code>cmd1 | cmd2</code> è un job con due processi). Quando chiudi la shell i job vengono notificati, i processi no.</p>
+</blockquote>
+<p><strong><code>fg</code></strong> — riporta un job in foreground:</p>
+<pre><code class="language-bash">fg %1    # riporta il job 1 in foreground
+</code></pre>
+<blockquote>
+<p><code>fg</code> è l'inverso di <code>bg</code>, non di <code>&amp;</code>. <code>&amp;</code> lancia direttamente in background. <code>fg</code> può riprendere sia job stopped (sospesi con Ctrl+Z) che job già in running background.</p>
+</blockquote>
+<p><strong><code>watch</code></strong> — esegue un comando periodicamente:</p>
+<pre><code class="language-bash">watch &quot;ps aux | grep sleep | grep -v grep&quot;
+watch -n 5 &quot;ps aux | grep sleep | grep -v grep&quot;   # aggiorna ogni 5 secondi
+</code></pre>
+<blockquote>
+<p><strong>Come è costruito il comando watch</strong>: <code>ps aux</code> lista tutti i processi → <code>| grep sleep</code> filtra le righe che contengono "sleep" → <code>| grep -v grep</code> esclude la riga del processo <code>grep</code> stesso (che avrebbe "grep sleep" nella colonna CMD e verrebbe inclusa falsamente). È un pattern classico.</p>
+<p><strong>Cambiare il tempo di aggiornamento</strong>: <code>watch -n SECONDI "comando"</code>. Il default è 2 secondi. <code>-n 0.5</code> è il minimo pratico.</p>
+</blockquote>
+<hr />
+<h2 id="5-sincronizzazione-wait">5. Sincronizzazione: <code>wait</code></h2>
+<p><code>wait</code> blocca l'esecuzione dello script fino al completamento dei job in background.</p>
+<pre><code class="language-bash">sleep 30 &amp;
+sleep 40 &amp;
+wait         # aspetta entrambi
+echo &quot;Tutti terminati&quot;
+</code></pre>
+<p>Oppure per un job specifico:</p>
+<pre><code class="language-bash">wait $PID    # aspetta solo quel PID
+</code></pre>
+<p><strong>Interazione con <code>trap</code></strong>:</p>
+<blockquote>
+<p><strong>Come funziona trap + wait</strong>: se durante l'attesa di <code>wait</code> arriva un segnale con handler definito via <code>trap</code>, bash non aspetta la fine del <code>wait</code> per eseguire l'handler — esce immediatamente con exit code &gt; 128 (128 + numero segnale), esegue l'handler, e poi il codice riprende <em>dopo</em> il <code>wait</code>. Questo è fondamentale per gestire interruzioni pulite: puoi fare cleanup (cancellare file temporanei, ecc.) anche se il programma viene interrotto a metà.</p>
+<p><code>bash
+trap "echo 'Interrotto!'; rm -f /tmp/mio_output; exit 1" SIGINT
+processo_lungo &amp;
+wait $!    # se arriva Ctrl+C, esce da wait, esegue trap, poi exit 1</code></p>
+</blockquote>
+<hr />
+<h2 id="6-modificatori-per-processi-in-background">6. Modificatori per processi in background</h2>
+<p><strong><code>nohup</code></strong> — immunità all'hangup:</p>
+<p>Normalmente alla chiusura della shell il kernel invia <code>SIGHUP</code> a tutti i job in background, terminandoli. <code>nohup</code> evita questo:</p>
+<pre><code class="language-bash">nohup sleep 1000 &amp;           # sopravvive alla chiusura della shell
+nohup sleep 1000 &gt; /dev/null 2&gt;&amp;1 &amp;   # stesso, ma senza creare nohup.out
+</code></pre>
+<blockquote>
+<p><strong>Come evitare nohup.out</strong>: di default <code>nohup</code> redirige stdout su <code>nohup.out</code> (nella directory corrente) perché non avrebbe altrove dove mandare l'output. Se non ti serve, redirect esplicito: <code>&gt; /dev/null 2&gt;&amp;1</code>. Il redirect esplicito ha precedenza su quello di nohup.</p>
+</blockquote>
+<p><strong><code>disown</code></strong> — rimuove un job dalla job table:</p>
+<pre><code class="language-bash">sleep 1000 &amp; disown       # lancia e rimuove subito dalla job table
+disown %1                 # rimuove il job 1 già in background
+disown -h %1              # aggiunge immunità a SIGHUP senza rimuovere dalla job table
+</code></pre>
+<blockquote>
+<p><strong>Disown vs nohup — differenza reale</strong>: la differenza è temporale e di meccanismo. <code>nohup</code> si specifica <em>all'avvio</em> del processo — immunizza il processo intercettando SIGHUP prima ancora che parta. <code>disown</code> invece agisce su un processo <em>già in esecuzione</em> — rimuove il job dalla job table della shell, così quando la shell chiude non sa più che quel processo esiste e non gli manda SIGHUP. Risultato finale simile (processo sopravvive al logout), meccanismo diverso. <code>disown</code> è utile quando hai già lanciato qualcosa senza <code>nohup</code> e ti ricordi solo dopo che vuoi farlo sopravvivere.</p>
+</blockquote>
+<p><strong><code>nice</code></strong> — priorità di scheduling:</p>
+<pre><code class="language-bash">nice -n 10 comando          # niceness +10 (priorità più bassa)
+nice -n -5 comando          # niceness -5 (priorità più alta, solo root)
+nice nohup long_calc &amp;      # combinazione comune
+</code></pre>
+<p>Valori: da -20 (massima priorità) a +19 (minima). Solo root può usare valori negativi.</p>
+<blockquote>
+<p><strong>Combinazione <code>nice nohup long_calc &amp;</code> spiegata</strong>: tre modificatori insieme per un calcolo lungo. <code>nice</code> lo lancia a bassa priorità (non rallenta il sistema). <code>nohup</code> lo rende immune a SIGHUP (non muore al logout). <code>&amp;</code> lo mette in background (non blocca il terminale). È il pattern standard per lavori batch che devono girare autonomamente senza impattare il sistema.</p>
+</blockquote>
+<hr />
+<h2 id="7-array-bash-per-tracciare-processi">7. Array bash per tracciare processi</h2>
+<p>In bash gli array possono avere <strong>indici non consecutivi</strong>. Il pattern usa il PID come indice:</p>
+<pre><code class="language-bash">COMANDO1=&quot;sleep 10&quot;
+COMANDO2=&quot;sleep 20&quot;
+
+$COMANDO1 &amp; PID[$!]=&quot;$COMANDO1&quot;   # lancia COMANDO1, salva il suo PID come indice
+$COMANDO2 &amp; PID[$!]=&quot;$COMANDO2&quot;   # lancia COMANDO2, salva il suo PID come indice
+
+echo ${!PID[@]}    # stampa gli indici = i PID (es. 1390 1393)
+echo ${PID[@]}     # stampa i valori = i comandi (es. sleep 10  sleep 20)
+echo ${PID[1390]}  # recupera il comando associato al PID 1390
+</code></pre>
+<blockquote>
+<p><strong>Cos'è un indice di array</strong>: l'indice è la "chiave" con cui accedi a un elemento. In <code>arr[0]="ciao"</code>, <code>0</code> è l'indice e <code>"ciao"</code> è il valore. Normalmente gli indici sono numeri consecutivi (0, 1, 2...). Bash però permette indici <em>arbitrari</em> — puoi avere <code>arr[1390]</code> e <code>arr[1393]</code> senza riempire i buchi.</p>
+<p><strong>A cosa serve qui</strong>: crei una struttura <code>PID[&lt;pid&gt;] = &lt;comando&gt;</code>. Quando un processo termina e vuoi sapere cosa stava facendo, cerchi <code>${PID[$!]}</code>. È una mappa PID → descrizione del lavoro. Utile in script che gestiscono molti processi paralleli.</p>
+</blockquote>
+<hr />
+<h2 id="8-file-temporanei-con-mktemp">8. File temporanei con <code>mktemp</code></h2>
+<pre><code class="language-bash">FA=$(mktemp)    # crea /tmp/tmp.XXXXXX e restituisce il path
+FB=$(mktemp)
+# processi paralleli scrivono su FA e FB separatamente
+rm -f &quot;$FA&quot; &quot;$FB&quot;   # pulizia obbligatoria
+</code></pre>
+<p><code>mktemp</code> risolve il problema della <strong>race condition</strong>: se due processi creassero <code>/tmp/output.txt</code> contemporaneamente con lo stesso nome, uno sovrascriverebbe l'altro. <code>mktemp</code> genera un nome univoco garantito.</p>
+<hr />
+<h2 id="comandi-di-riferimento">Comandi di riferimento</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Sintassi</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&amp;</code></td>
+<td><code>comando &amp;</code></td>
+<td>Lancia in background</td>
+</tr>
+<tr>
+<td><code>$!</code></td>
+<td><code>echo $!</code></td>
+<td>PID dell'ultimo processo in background</td>
+</tr>
+<tr>
+<td><code>jobs</code></td>
+<td><code>jobs [-l]</code></td>
+<td>Lista job della shell corrente (<code>-l</code> aggiunge PID)</td>
+</tr>
+<tr>
+<td><code>fg</code></td>
+<td><code>fg %job_id</code></td>
+<td>Riporta in foreground</td>
+</tr>
+<tr>
+<td><code>bg</code></td>
+<td><code>bg %job_id</code></td>
+<td>Manda/riavvia in background (invia SIGCONT)</td>
+</tr>
+<tr>
+<td><code>kill</code></td>
+<td><code>kill [-segnale] PID</code></td>
+<td>Invia segnale a processo</td>
+</tr>
+<tr>
+<td><code>ps</code></td>
+<td><code>ps [aux\|$PID]</code></td>
+<td>Mostra processi (<code>aux</code> = tutti, <code>$PID</code> = uno specifico)</td>
+</tr>
+<tr>
+<td><code>wait</code></td>
+<td><code>wait [PID]</code></td>
+<td>Aspetta terminazione job (tutti se senza argomenti)</td>
+</tr>
+<tr>
+<td><code>watch</code></td>
+<td><code>watch [-n N] "cmd"</code></td>
+<td>Esegue cmd ogni N secondi (default 2)</td>
+</tr>
+<tr>
+<td><code>nohup</code></td>
+<td><code>nohup cmd &amp;</code></td>
+<td>Lancia immune a SIGHUP</td>
+</tr>
+<tr>
+<td><code>disown</code></td>
+<td><code>disown [-h] [%job]</code></td>
+<td>Rimuove job dalla job table (<code>-h</code> aggiunge immunità SIGHUP)</td>
+</tr>
+<tr>
+<td><code>nice</code></td>
+<td><code>nice [-n N] cmd</code></td>
+<td>Lancia con niceness N (-20 max, +19 min)</td>
+</tr>
+<tr>
+<td><code>trap</code></td>
+<td><code>trap "codice" SEGNALE</code></td>
+<td>Definisce handler per segnale</td>
+</tr>
+<tr>
+<td><code>mktemp</code></td>
+<td><code>FA=$(mktemp)</code></td>
+<td>Crea file temporaneo sicuro</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="esercizi-sulla-vm">Esercizi sulla VM</h2>
+<h3 id="esercizio-1-processi-in-background-e-segnali">Esercizio 1 — Processi in background e segnali ✅</h3>
+<pre><code class="language-bash">sleep 1000 &amp;
+# [1] 12516
+
+A=$!
+echo $A
+# 12516
+
+ps $A
+# PID TTY  STAT TIME COMMAND
+# 12516 pts/2 SN  0:00 sleep 1000
+</code></pre>
+<blockquote>
+<p><strong>Cosa leggere da <code>ps $A</code></strong>: <code>pts/2</code> = pseudo-terminal 2 (il tuo terminale SSH). <code>S</code> = sleeping (il processo è in attesa — normale per <code>sleep</code>). <code>N</code> = nice positivo (in realtà qui la shell ha una niceness leggermente più alta). <code>TIME</code> = tempo CPU consumato (quasi zero perché <code>sleep</code> non fa calcoli).</p>
+</blockquote>
+<pre><code class="language-bash">jobs
+# [1]+ running sleep 1000
+
+jobs -l
+# [1]+ 12516 running sleep 1000
+</code></pre>
+<blockquote>
+<p><strong><code>jobs -l</code> vs <code>jobs</code></strong>: <code>-l</code> aggiunge il PID. Altre opzioni utili: <code>-n</code> mostra solo i job che hanno cambiato stato dall'ultima notifica.</p>
+</blockquote>
+<pre><code class="language-bash">kill -STOP $A
+# [1]+ 12516 suspended (signal) sleep 1000
+
+ps $A
+# PID TTY  STAT TIME COMMAND
+# 12516 pts/2 TN  0:00 sleep 1000
+</code></pre>
+<blockquote>
+<p><strong>Da <code>SN</code> a <code>TN</code></strong>: <code>S</code> (sleeping) → <code>T</code> (stopped/sospeso). <code>N</code> rimane perché la niceness non è cambiata.</p>
+</blockquote>
+<p><strong>Bug di Es. 1 — SIGTERM su processo stopped</strong>:</p>
+<pre><code class="language-bash">kill $A       # invia SIGTERM
+ps $A         # sembra ancora attivo!
+kill -TERM $A # stesso risultato
+</code></pre>
+<p>Questo <strong>non è un errore della VM</strong> — è comportamento corretto. Un processo in stato <code>T</code> (stopped) <strong>non può processare segnali</strong> finché non viene ripreso (eccetto SIGKILL, che bypassa tutto). SIGTERM è stato recapitato ma il processo non può gestirlo. Soluzioni:</p>
+<pre><code class="language-bash"># Opzione 1: SIGKILL (termina forzatamente anche i processi stopped)
+kill -KILL $A
+
+# Opzione 2: riprendi prima, poi termina
+kill -CONT $A &amp;&amp; kill $A
+</code></pre>
+<hr />
+<h3 id="esercizio-2-nohup-e-disown">Esercizio 2 — nohup e disown ✅</h3>
+<pre><code class="language-bash">sleep 1000 &amp;
+sleep 1000 &amp; disown
+nohup spleep 1000 &amp;   # errore di battitura → &quot;No such file or directory&quot; → nessun problema
+nohup sleep 1000 &amp;
+jobs
+# [1]- Running  sleep 1000 &amp;
+# [2]+ Running  nohup sleep 1000 &amp;
+exit
+# logout
+
+# Nuova sessione (vagrant ssh)
+ps
+# PID TTY TIME CMD
+# 1270 pts/1 00:00:00 bash
+# 1274 pts/1 00:00:00 ps
+</code></pre>
+<blockquote>
+<p><strong>Perché <code>ps</code> da solo non mostra i sleep</strong>: <code>ps</code> senza argomenti mostra solo i processi della shell corrente. Dopo <code>exit</code> e <code>vagrant ssh</code> sei in una <em>nuova</em> shell — i processi sleep girano sotto un'altra sessione terminale (o senza terminale, TTY = <code>?</code>). Per vederli servono <code>ps aux</code> o <code>ps ax</code>.</p>
+</blockquote>
+<pre><code class="language-bash">ps aux | grep sleep | grep -v grep
+# vagrant 1249 ... ? S ... sleep 1000
+# vagrant 1250 ... ? S ... sleep 1000
+# vagrant 1258 ... ? S ... sleep 1000
+</code></pre>
+<blockquote>
+<p><strong>Perché 3 processi invece di 2</strong>: ti aspettavi che solo 2 sopravvivessero (disown + nohup) e il primo morisse con SIGHUP. In realtà bash non invia SIGHUP ai job in background in tutti i contesti — lo fa solo se l'opzione <code>huponexit</code> è attiva (verificabile con <code>shopt huponexit</code>; di default è off su Debian/Vagrant). Quindi anche il primo <code>sleep 1000 &amp;</code> è sopravvissuto, portando il totale a 3.</p>
+</blockquote>
+<hr />
+<h3 id="esercizio-3-wait-e-watch">Esercizio 3 — wait e watch 🔄</h3>
+<pre><code class="language-bash"># Terminale 1 ✅
+sleep 30 &amp;
+sleep 40 &amp;
+wait
+echo &quot;tutti terminati&quot;
+# [1]- Done  sleep 30
+# [2]+ Done  sleep 40
+# tutti terminati
+</code></pre>
+<p>Il comportamento è corretto: <code>wait</code> aspetta entrambi, poi il prompt ritorna.</p>
+<pre><code class="language-bash"># Terminale 2 ❌
+watch &quot;ps auxw | grep sleep | grep -v grep&quot;
+# Error opening terminal: xterm-kitty
+</code></pre>
+<blockquote>
+<p><strong>Errore <code>xterm-kitty</code></strong>: il tuo emulatore di terminale locale è Kitty, che usa <code>TERM=xterm-kitty</code>. La VM Debian non ha la definizione del terminale kitty nel database <code>terminfo</code>, quindi <code>watch</code> (che usa ncurses per il refresh dello schermo) non sa come disegnare il terminale. Soluzione: sovrascrivere <code>$TERM</code> per quella sessione SSH:</p>
+<p><code>bash
+TERM=xterm-256color watch "ps auxw | grep sleep | grep -v grep"</code></p>
+<p>Oppure aggiungi <code>export TERM=xterm-256color</code> nel <code>.bashrc</code> della VM per non doverlo ripetere.</p>
+</blockquote>
+<hr />
+<h3 id="esercizio-4-array-con-pid">Esercizio 4 — Array con PID ✅</h3>
+<p>Annotazione riga per riga di quello che è successo sulla VM:</p>
+<pre><code class="language-bash">COMANDO1=&quot;sleep 10&quot;      # variabile stringa contenente il comando
+COMANDO2=&quot;sleep 20&quot;
+
+$COMANDO1 &amp;              # bash espande $COMANDO1 → esegue &quot;sleep 10 &amp;&quot;
+                         # poi: PID[$!]=&quot;$COMANDO1&quot; → PID[&lt;pid1&gt;]=&quot;sleep 10&quot;
+# [1] 1390               ← job 1, PID 1390
+
+$COMANDO2 &amp;              # esegue &quot;sleep 20 &amp;&quot;
+                         # poi: PID[$!]=&quot;$COMANDO2&quot; → PID[1393]=&quot;sleep 20&quot;
+# [2] 1393               ← job 2, PID 1393
+# [1] Done $COMANDO1     ← sleep 10 è già terminato (era breve)
+
+echo ${!PID[@]}          # ${!array[@]} = stampa gli INDICI dell'array
+# 1390 1393              ← i PID usati come indici
+
+echo ${PID[@]}           # ${array[@]} = stampa i VALORI
+# sleep 10 sleep 20
+
+echo ${PID[1390]}        # accesso diretto all'elemento con indice 1390
+# sleep 10               ← il comando che girava con quel PID
+# [2]+ Done $COMANDO2    ← sleep 20 termina
+</code></pre>
+<hr />
+<h3 id="esercizio-5-comandi-paralleli-sincronizzati-da-fare">Esercizio 5 — Comandi paralleli sincronizzati ⬜ da fare</h3>
+<p>Consegna: script che accetta due directory come argomenti, conta i file in ciascuna <strong>in parallelo</strong>, aspetta con <code>wait</code>, e stampa quale ne contiene di più. Requisiti: controllo argomenti, <code>&amp;</code>, <code>wait</code>, <code>mktemp</code>, pulizia finale.</p>
+<p>Prima di vedere la soluzione del prof, prova a implementare lo script da solo. La soluzione usa funzioni <code>testd()</code> e <code>conta()</code> per separare le responsabilità.</p>
+<hr />
+<h2 id="connessioni">Connessioni</h2>
+<p><strong>Con 3A (systemd)</strong>: systemd è un gestore di processi strutturato — fa a livello di servizi quello che facciamo a mano con <code>kill</code>, <code>wait</code> e segnali.</p>
+<p><strong>Con Security (S1, S5)</strong>: <code>ps aux</code> è uno dei primi passi del reconnaissance su un host compromesso. <code>nohup cmd &amp;</code> è il pattern per installare backdoor persistenti che sopravvivono al logout.</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo3C]]</li>
+<li>[[lezione_modulo3C_gestione_processi]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

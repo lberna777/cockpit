@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>template_report_web.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">template_report_web.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/template_report_web.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="template-webtxt-web-vulnerabilities">Template — web.txt (Web Vulnerabilities)</h1>
+<blockquote>
+<p>Struttura riutilizzabile per il deliverable testuale <code>web.txt</code> richiesto negli esercizi di tipo
+Web Vulnerabilities. Vale per <strong>qualunque famiglia</strong> (XSS, SQLi, Command Injection, Path Traversal).
+Vedi <code>modello_web_vulnerabilities.md</code> per 5 soluzioni ufficiali complete, <code>guida_esame_web.md</code> per
+il triage per famiglia, <code>procedura_operativa_web.md</code> per l'algoritmo e le zone grigie.</p>
+<p><strong>Regola d'oro (dalla consegna stessa)</strong>: <em>"il livello di dettaglio e precisione della descrizione
+sarà utilizzato come valutazione della prova"</em>. Non descrivere solo il payload finale: racconta il
+<strong>ragionamento</strong> — come hai classificato la vulnerabilità, quali difese hai incontrato, come le hai
+aggirate. Ogni bivio superato documentato = punti.</p>
+</blockquote>
+<hr />
+<h2 id="struttura-generale-copia-e-riempi">Struttura generale (copia e riempi)</h2>
+<pre><code>VULNERABILITÀ: &lt;famiglia + tecnica specifica&gt;
+  es. &quot;Cross-Site Scripting (XSS) Riflesso&quot;
+      &quot;SQL Injection (UNION-based, backend SQLite)&quot;
+      &quot;OS Command Injection&quot;
+      &quot;Path Traversal / Local File Inclusion&quot;
+
+--- (se la consegna lo chiede: CONTENUTO / POSIZIONE FLAG) ---
+FLAG: &lt;stringa/e esfiltrate&gt;
+POSIZIONE: &lt;path del file o tabella/colonna del DB, se richiesto&gt;
+
+PASSI ESEGUITI:
+1. [CLASSIFICAZIONE] Descrivi l'app e l'input controllabile individuato
+   (parametro GET/POST/campo). Riporta le SONDE provate e la reazione:
+   quale input ha generato quale errore/effetto, e perché concludi per
+   questa famiglia. (È il &quot;processo logico&quot; che diversi esercizi valutano
+   esplicitamente.)
+2. [CONFERMA] Come hai verificato che è davvero sfruttabile (non un falso
+   positivo): es. il tag interpretato / il n. di righe cambiato / l'output
+   di un comando tuo / il contenuto di un file.
+3. [OSTACOLI E BYPASS] Ogni difesa incontrata e come l'hai aggirata
+   (filtro su una stringa, maxlength client-side, involucro base64,
+   conteggio colonne, filtro su ../). Uno per uno.
+4. [EXPLOIT FINALE] Il payload/URL/richiesta esatta che ha avuto successo,
+   scritto per intero (riproducibile).
+5. [SUCCESSO] Cosa dimostra la prova (l'alert, le flag, il contenuto del
+   file) e come compare negli screenshot allegati.
+
+MITIGAZIONE (punto di vista sysadmin/sviluppatore):
+- &lt;fix specifico per QUESTA vulnerabilità&gt; (il più importante, per primo)
+- &lt;difesa in profondità / hardening generale&gt;
+- &lt;principio generale: validare/sanitizzare ogni input esterno&gt;
+</code></pre>
+<hr />
+<h2 id="riempimenti-pronti-per-famiglia-blocco-vulnerabilita-mitigazione">Riempimenti pronti per famiglia (blocco VULNERABILITÀ + MITIGAZIONE)</h2>
+<h3 id="xss-riflesso">XSS riflesso</h3>
+<pre><code>VULNERABILITÀ: Cross-Site Scripting (XSS) Riflesso
+
+MITIGAZIONE:
+- Output encoding: convertire &lt; &gt; &quot; ' &amp; nelle rispettive HTML entity prima di
+  inserire QUALSIASI input utente nel markup della risposta (fix specifico).
+- Whitelist server-side dei caratteri ammessi per il campo (es. solo
+  alfanumerici per un &quot;nome&quot;), rifiutando i metacaratteri HTML.
+- Content-Security-Policy restrittiva: vietare script inline e limitare le
+  fonti di script (difesa in profondità).
+- [se c'era un filtro debole:] il filtro su &quot;script&quot; era inefficace perché
+  case-sensitive e non ricorsivo, e comunque aggirabile con vettori
+  script-less (&lt;img onerror&gt;): la sanitizzazione va fatta per encoding
+  dell'output, non per blacklist di parole.
+</code></pre>
+<h3 id="sql-injection">SQL Injection</h3>
+<pre><code>VULNERABILITÀ: SQL Injection (UNION-based, backend SQLite)
+
+MITIGAZIONE:
+- Prepared statement / bind variables (PREPARE): separano codice SQL e dati,
+  eliminando l'iniezione alla radice (fix vero).
+- Whitelist dei valori ammessi del parametro (es. id numerico validato).
+- Input validation che vieti i metacaratteri SQL (', --, ;) come minimo.
+- Principio: mai concatenare input utente in una stringa di query.
+</code></pre>
+<h3 id="sql-injection-variante-blind-cieca">SQL Injection — variante BLIND (cieca)</h3>
+<pre><code>VULNERABILITÀ: SQL Injection Blind (boolean-based, backend SQLite)
+  [oppure: &quot;... time-based&quot; se l'unico segnale era il tempo di risposta]
+
+PASSI ESEGUITI:
+1. [CLASSIFICAZIONE] Il parametro &lt;id&gt; tocca una query SQL (l'apice ' cambia
+   l'esito). MA l'app NON stampa i dati recuperati: risponde solo con un esito
+   binario (&quot;utente trovato&quot;/&quot;nessun utente&quot; — o pagina diversa / redirect).
+   Verificato che ' UNION select 'AAAA',... -- NON fa comparire 'AAAA':
+   l'iniezione è quindi CIECA (blind), UNION-based non applicabile.
+2. [ORACOLO BOOLEANO] Confermato che l'app funge da oracolo sì/no:
+   ?id=Alice' AND 1=1--  -&gt; &quot;utente trovato&quot;  (condizione VERA)
+   ?id=Alice' AND 1=2--  -&gt; &quot;nessun utente&quot;   (condizione FALSA)
+   Le due risposte diverse dimostrano il canale booleano.
+3. [ESTRAZIONE char-per-char] Determinata la lunghezza del dato con length()
+   (ricerca binaria), poi estratto ogni carattere con
+   substr(&lt;subquery&gt;, i, 1) confrontando il codice ASCII con unicode()
+   (SQLite) tramite bisezione sull'intervallo 32-126 (~7 richieste/carattere).
+   Algoritmo: per ogni posizione i, dimezzo l'intervallo dei codici in base
+   alla risposta a  unicode(substr(SEGRETO,i,1)) &gt; mid.
+   [se time-based: il segnale VERO/FALSO è &quot;risposta lenta/veloce&quot;; su SQLite
+    il ritardo è forzato con una heavy query randomblob(...) perché manca SLEEP.]
+4. [EXPLOIT FINALE] Esempio di richiesta di estrazione (posizione 1):
+   ?id=Alice' AND unicode(substr((SELECT val FROM flags LIMIT 1),1,1))&gt;79--
+   Ripetuta bisezione per ogni posizione fino a ricomporre la stringa.
+5. [SUCCESSO] Flag ricostruita carattere per carattere dalle sole risposte
+   binarie: &lt;stringa&gt;. La prova NON è un output stampato ma la SEQUENZA
+   richiesta/risposta (vedi screenshot: i due esiti diversi di AND 1=1 / AND 1=2
+   + alcuni passi di estrazione con il relativo esito).
+
+MITIGAZIONE (punto di vista sysadmin/sviluppatore):
+- Prepared statement / bind variables (PREPARE): elimina l'iniezione alla radice
+  — vale identico al caso UNION, la tecnica di estrazione non cambia il fix.
+- Whitelist dei valori ammessi del parametro; niente concatenazione di input in SQL.
+- Nota: rendere l'output &quot;cieco&quot; NON è una difesa — il dato è comunque estraibile
+  un bit alla volta; la vulnerabilità va chiusa a monte (query parametrizzate).
+</code></pre>
+<blockquote>
+<p><strong>Come si documenta una blind (nota sul deliverable)</strong>: non hai lo screenshot
+di "flag stampata a schermo" tipico del ramo UNION. La prova è la <strong>catena di
+richieste/risposte binarie</strong>. Cattura almeno: (a) <code>AND 1=1</code> vs <code>AND 1=2</code> con le
+due risposte <strong>diverse</strong> (prova che l'oracolo esiste), (b) 2-3 richieste di
+estrazione con il loro esito vero/falso, (c) la stringa finale ricostruita.
+Nel <code>web.txt</code> <strong>scrivi l'algoritmo</strong> (bisezione) e il perché: è il "livello di
+dettaglio del ragionamento" che vale il voto. Screenshot suggeriti:
+<code>query1.png</code> (oracolo 1=1/1=2), <code>query2..N.png</code> (passi di estrazione).</p>
+</blockquote>
+<h3 id="command-injection">Command Injection</h3>
+<pre><code>VULNERABILITÀ: OS Command Injection
+
+MITIGAZIONE:
+- Non costruire una riga di comando con testo fornito dall'utente: usare le
+  API/librerie native del linguaggio che implementano la funzionalità senza
+  passare per una shell (fix vero).
+- Se la shell è inevitabile: esecuzione senza shell (execve con argomenti
+  separati, non system()); whitelist di pattern ammessi; escaping dei
+  metacaratteri shell (; | &amp; ` $ # ...) così che siano dati e non sintassi.
+- Principio del minimo privilegio per il processo web.
+</code></pre>
+<h3 id="path-traversal-lfi">Path Traversal / LFI</h3>
+<pre><code>VULNERABILITÀ: Path Traversal / Local File Inclusion
+
+MITIGAZIONE:
+- Canonicalizzare il percorso (realpath) e verificare che resti DENTRO la
+  cartella base consentita prima di aprire il file (fix vero).
+- Whitelist dei file ammessi, o accettare solo un id mappato server-side al
+  file reale (mai il percorso grezzo dall'utente).
+- Neutralizzare ../ e i percorsi assoluti; minimo privilegio del processo
+  web (non deve poter leggere /tmp, /etc, ...).
+</code></pre>
+<hr />
+<h2 id="esempio-compilato-caso-1-del-pool-xss-riflesso-13-giugno-2024">Esempio compilato (Caso 1 del pool — XSS riflesso, 13 giugno 2024)</h2>
+<pre><code>VULNERABILITÀ: Cross-Site Scripting (XSS) Riflesso
+
+PASSI ESEGUITI:
+1. [CLASSIFICAZIONE] La pagina &quot;XSS CHALLENGE&quot; mostra &quot;Hello SEC_EXAM&quot;; nell'URL
+   c'è il parametro name=SEC_EXAM. Cambiando name, il testo mostrato cambia:
+   l'input è RIFLESSO nella pagina -&gt; ipotesi XSS Riflesso.
+2. [CONFERMA + OSTACOLO] Provato &lt;script&gt;alert(&quot;ciao&quot;)&lt;/script&gt;: il sito
+   risponde &quot;error&quot; -&gt; esiste un filtro. Provate varianti (ScRiPT): nessuna
+   variazione di &quot;script&quot; passa. Si scopre però che &lt;a&gt; NON è filtrato -&gt;
+   il filtro colpisce solo la parola &quot;script&quot;, non tutti i tag.
+3. [BYPASS] Scelto un vettore script-less: il tag &lt;img&gt; non è filtrato e
+   permette esecuzione JS tramite l'handler onerror (src invalido -&gt; l'errore
+   scatta da solo, senza interazione utente).
+4. [EXPLOIT FINALE]
+   http://&lt;IP&gt;/xss/xss_exam.php?name=&lt;img src=&quot;x&quot; onerror=&quot;alert()&quot;&gt;
+5. [SUCCESSO] Il browser esegue il JS iniettato: compare l'alert nativo
+   (screenshot payload.png) -&gt; esecuzione arbitraria di codice lato client
+   nel contesto dell'applicazione.
+
+MITIGAZIONE:
+- Output encoding di ogni input riflesso (&lt; &gt; &quot; ' &amp; -&gt; HTML entity): fix
+  specifico di questo bug.
+- Whitelist dei caratteri ammessi per il parametro &quot;name&quot; (escludere &lt; &gt; /).
+- CSP restrittiva contro script inline (difesa in profondità).
+- Nota: il filtro su &quot;script&quot; è insufficiente perché aggirabile con &lt;img&gt;;
+  la difesa corretta è l'encoding dell'output, non la blacklist di parole.
+</code></pre></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_lab_modulo2A_utenti_permessi.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">guida_lab_modulo2A_utenti_permessi.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/guida_lab_modulo2A_utenti_permessi.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modulo-2a-gestione-utenti-e-permessi">Modulo 2A — Gestione Utenti e Permessi</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Prerequisito</strong>: Moduli 0A, 0B, 1A, 1B completati<br />
+<strong>VM</strong>: <code>cd ~/sysAdmin-lab &amp;&amp; vagrant up --provider=virtualbox &amp;&amp; vagrant ssh</code></p>
+<hr />
+<h2 id="contesto">Contesto</h2>
+<p>In Modulo 0A hai letto la stringa di permessi <code>drwxr-xr-x</code> e ne hai imparato la struttura. In questo modulo la padroneggi operativamente: crei utenti reali, assegni permessi, testi gli accessi effettivi con utenti diversi. È il modulo con la connessione più diretta a Security: <strong>privilege escalation</strong> — la tecnica con cui un attaccante passa da utente normale a root — si fonda quasi sempre su una misconfigurazione dei permessi o di <code>sudo</code>.</p>
+<p>Crea la directory di lavoro:</p>
+<pre><code class="language-bash">mkdir ~/Lab2A &amp;&amp; cd ~/Lab2A
+</code></pre>
+<hr />
+<h2 id="parte-1-il-modello-utenti-di-linux">Parte 1 — Il modello utenti di Linux</h2>
+<h3 id="11-come-linux-identifica-gli-utenti">1.1 Come Linux identifica gli utenti</h3>
+<p>Linux non conosce i nomi: internamente tutto è un numero. Ogni utente ha uno <strong>UID</strong> (User ID), ogni gruppo ha un <strong>GID</strong> (Group ID). Il nome (<code>vagrant</code>, <code>root</code>) è solo una traduzione leggibile memorizzata in <code>/etc/passwd</code>.</p>
+<pre><code class="language-bash">id
+cat /etc/passwd | grep vagrant
+cat /etc/passwd | grep root
+</code></pre>
+<p>Struttura di una riga di <code>/etc/passwd</code>:</p>
+<pre><code>vagrant:x:1000:1000:,,,:/home/vagrant:/bin/bash
+   |    | |    |    |       |              |
+  nome  | UID  GID  GECOS  home          shell
+        |
+      password (sempre &quot;x&quot; — la vera hash è in /etc/shadow)
+</code></pre>
+<p>I valori UID hanno una convenzione:
+- <code>0</code> — root (sempre)
+- <code>1–999</code> — utenti di sistema (servizi, demoni)
+- <code>1000+</code> — utenti umani reali</p>
+<pre><code class="language-bash"># Verificare il proprio UID/GID
+id
+
+# Vedere tutti gli utenti del sistema
+cat /etc/passwd
+
+# Vedere solo i gruppi dell'utente corrente
+groups
+</code></pre>
+<h3 id="12-il-file-etcshadow">1.2 Il file <code>/etc/shadow</code></h3>
+<p>Le password non sono in <code>/etc/passwd</code> (leggibile da tutti) ma in <code>/etc/shadow</code>, accessibile solo da root. Contiene gli hash delle password e le politiche di scadenza.</p>
+<pre><code class="language-bash">sudo cat /etc/shadow | grep vagrant
+</code></pre>
+<p>Struttura:</p>
+<pre><code>vagrant:$6$abc123...:19800:0:99999:7:::
+   |        |          |   |   |   |
+  nome    hash pw    gg ult  min max warn
+</code></pre>
+<hr />
+<h2 id="parte-2-gestione-degli-utenti">Parte 2 — Gestione degli utenti</h2>
+<h3 id="21-creare-un-utente-useradd">2.1 Creare un utente — <code>useradd</code></h3>
+<pre><code class="language-bash"># Crea l'utente &quot;alice&quot; con home directory
+sudo useradd -m -s /bin/bash alice
+
+# Verifica che sia stato creato
+id alice
+cat /etc/passwd | grep alice
+ls /home/
+</code></pre>
+<p>Il flag <code>-m</code> crea la home directory <code>/home/alice</code>. Il flag <code>-s /bin/bash</code> assegna Bash come shell di login. Senza <code>-m</code> non viene creata la home; senza <code>-s</code> viene assegnata una shell di default (spesso <code>sh</code> o nessuna).</p>
+<pre><code class="language-bash"># Imposta la password per alice
+sudo passwd alice
+# (inserisci una password quando richiesto, es. &quot;alice123&quot;)
+</code></pre>
+<h3 id="22-modificare-un-utente-usermod">2.2 Modificare un utente — <code>usermod</code></h3>
+<pre><code class="language-bash"># Creare un secondo utente
+sudo useradd -m -s /bin/bash bob
+
+# Aggiungere bob al gruppo &quot;sudo&quot; (gli dà i privilegi di amministratore)
+sudo usermod -aG sudo bob
+
+# Verificare i gruppi di bob
+groups bob
+id bob
+</code></pre>
+<p>Il flag <code>-aG</code> significa <strong>append to Group</strong> — aggiunge bob al gruppo <code>sudo</code> senza rimuoverlo dai gruppi esistenti. Senza <code>-a</code>, <code>-G</code> sostituisce tutti i gruppi con quello specificato — errore comune e pericoloso.</p>
+<h3 id="23-cambiare-utente-su">2.3 Cambiare utente — <code>su</code></h3>
+<pre><code class="language-bash"># Passare all'utente alice (richiede la password di alice)
+su - alice
+
+# Verificare chi si è adesso
+whoami
+id
+pwd
+
+# Tornare a vagrant
+exit
+</code></pre>
+<p>Il trattino in <code>su - alice</code> è importante: carica l'ambiente completo di alice (variabili d'ambiente, directory di lavoro, ecc.). <code>su alice</code> senza trattino cambia utente ma mantiene l'ambiente del chiamante — comportamento spesso indesiderato.</p>
+<h3 id="24-eliminare-un-utente-userdel">2.4 Eliminare un utente — <code>userdel</code></h3>
+<pre><code class="language-bash"># Elimina l'utente senza cancellare la home
+sudo userdel alice
+
+# Elimina l'utente E la sua home directory
+sudo userdel -r alice
+</code></pre>
+<p>Verificare che alice non esista più:</p>
+<pre><code class="language-bash">id alice   # deve dare: no such user
+ls /home/  # /home/alice non c'è più (se usato -r)
+</code></pre>
+<hr />
+<h2 id="parte-3-i-permessi-in-dettaglio">Parte 3 — I permessi in dettaglio</h2>
+<h3 id="31-riepilogo-della-stringa-di-permessi">3.1 Riepilogo della stringa di permessi</h3>
+<p>Già vista in Modulo 0A, ma adesso la usi operativamente. Ogni file ha una stringa di 10 caratteri:</p>
+<pre><code>-  r w x  r - x  r - -
+|  |||||  |||||  |||||
+|  owner  group  altri
+|
+tipo: - = file, d = directory, l = link simbolico
+</code></pre>
+<p>I tre blocchi <code>rwx</code> si ripetono per tre categorie:
+- <strong>owner</strong> (proprietario del file)
+- <strong>group</strong> (gruppo proprietario)
+- <strong>others</strong> (tutti gli altri)</p>
+<p>Ogni lettera vale un numero in notazione ottale:
+- <code>r</code> = 4
+- <code>w</code> = 2
+- <code>x</code> = 1</p>
+<p>I tre valori si sommano per ogni blocco: <code>rwx</code> = 4+2+1 = <strong>7</strong>, <code>r-x</code> = 4+0+1 = <strong>5</strong>, <code>r--</code> = 4+0+0 = <strong>4</strong>.</p>
+<p>Esempi di notazione ottale:
+| Stringa | Ottale | Significato pratico |
+|---|---|---|
+| <code>rwxr-xr-x</code> | 755 | Default directory — owner tutto, gli altri leggono ed eseguono |
+| <code>rw-r--r--</code> | 644 | Default file — owner legge/scrive, gli altri solo leggono |
+| <code>rwx------</code> | 700 | Solo l'owner può accedere |
+| <code>rw-------</code> | 600 | Solo l'owner legge/scrive, nessun altro nulla |
+| <code>rwxrwxrwx</code> | 777 | Tutti possono fare tutto — pericoloso |</p>
+<h3 id="32-modificare-i-permessi-chmod">3.2 Modificare i permessi — <code>chmod</code></h3>
+<pre><code class="language-bash"># Crea un file di test
+echo &quot;contenuto segreto&quot; &gt; file_test.txt
+ls -la file_test.txt
+# output: -rw-r--r-- 1 vagrant vagrant ...
+</code></pre>
+<p><strong>Notazione ottale</strong> (la più usata):</p>
+<pre><code class="language-bash">chmod 600 file_test.txt    # solo owner legge/scrive
+chmod 644 file_test.txt    # default file
+chmod 755 file_test.txt    # default directory o script
+chmod 700 file_test.txt    # solo owner, nessun altro
+chmod 000 file_test.txt    # nessuno può fare nulla (neanche leggere)
+</code></pre>
+<p><strong>Notazione simbolica</strong> (più leggibile per modifiche puntuali):</p>
+<pre><code class="language-bash">chmod u+x file_test.txt    # aggiunge esecuzione all'owner (u = user/owner)
+chmod g-w file_test.txt    # rimuove scrittura al gruppo (g = group)
+chmod o-r file_test.txt    # rimuove lettura agli altri (o = others)
+chmod a+r file_test.txt    # aggiunge lettura a tutti (a = all)
+</code></pre>
+<p><strong>Esercizio pratico — testare il blocco dei permessi</strong>:</p>
+<pre><code class="language-bash">chmod 000 file_test.txt
+cat file_test.txt          # → Permission denied
+chmod 644 file_test.txt
+cat file_test.txt          # → &quot;contenuto segreto&quot; (funziona)
+</code></pre>
+<h3 id="33-modificare-il-proprietario-chown-e-chgrp">3.3 Modificare il proprietario — <code>chown</code> e <code>chgrp</code></h3>
+<pre><code class="language-bash"># Ri-creare l'utente alice per questo esercizio
+sudo useradd -m -s /bin/bash alice
+sudo passwd alice
+
+# Creare un file come vagrant
+echo &quot;file di vagrant&quot; &gt; file_vagrant.txt
+ls -la file_vagrant.txt
+# output: -rw-r--r-- 1 vagrant vagrant ...
+
+# Cambiare il proprietario ad alice
+sudo chown alice file_vagrant.txt
+ls -la file_vagrant.txt
+# output: -rw-r--r-- 1 alice vagrant ...
+
+# Cambiare sia proprietario che gruppo in un solo comando
+sudo chown alice:alice file_vagrant.txt
+ls -la file_vagrant.txt
+# output: -rw-r--r-- 1 alice alice ...
+
+# Cambiare solo il gruppo
+sudo chgrp vagrant file_vagrant.txt
+ls -la file_vagrant.txt
+# output: -rw-r--r-- 1 alice vagrant ...
+</code></pre>
+<p><code>chown</code> richiede <code>sudo</code> perché solo root può cambiare il proprietario di un file. Un utente può cambiare il gruppo solo verso gruppi di cui fa parte.</p>
+<hr />
+<h2 id="parte-4-privilegi-elevati-sudo">Parte 4 — Privilegi elevati: <code>sudo</code></h2>
+<h3 id="41-come-funziona-sudo">4.1 Come funziona <code>sudo</code></h3>
+<p><code>sudo</code> (superuser do) permette a un utente autorizzato di eseguire un singolo comando come root, senza diventare root permanentemente. La configurazione che stabilisce chi può usare <code>sudo</code> e per quali comandi sta in <code>/etc/sudoers</code>.</p>
+<pre><code class="language-bash"># Vedere il contenuto di /etc/sudoers (non modificarlo mai direttamente)
+sudo cat /etc/sudoers
+</code></pre>
+<p>La riga chiave per Debian/Ubuntu è:</p>
+<pre><code>%sudo   ALL=(ALL:ALL) ALL
+</code></pre>
+<p>Traduzione: il gruppo <code>sudo</code> (<code>%sudo</code>) può eseguire qualsiasi comando (<code>ALL</code>) su qualsiasi host, come qualsiasi utente. È la configurazione standard.</p>
+<pre><code class="language-bash"># Verificare se vagrant è nel gruppo sudo
+groups vagrant
+# output deve includere: sudo
+
+# Eseguire un comando come root senza diventare root
+sudo whoami          # → root
+whoami               # → vagrant (si è ancora vagrant)
+</code></pre>
+<h3 id="42-sudo-l-vedere-cosa-si-puo-fare">4.2 <code>sudo -l</code> — vedere cosa si può fare</h3>
+<pre><code class="language-bash">sudo -l
+</code></pre>
+<p>Questo comando elenca tutti i comandi che l'utente corrente può eseguire con <code>sudo</code>. È uno dei primi comandi che un attaccante esegue dopo aver ottenuto accesso a una macchina — e per questo è fondamentale saperlo interpretare.</p>
+<h3 id="43-aggiungere-un-utente-al-gruppo-sudo">4.3 Aggiungere un utente al gruppo sudo</h3>
+<pre><code class="language-bash"># Bob è già nel gruppo sudo (aggiunto in Parte 2)
+# Verificarlo
+groups bob
+
+# Testare: passare a bob e usare sudo
+su - bob
+sudo whoami
+exit
+</code></pre>
+<h3 id="44-diventare-root-sudo-i-e-sudo-su">4.4 Diventare root — <code>sudo -i</code> e <code>sudo su</code></h3>
+<pre><code class="language-bash"># Aprire una shell root completa
+sudo -i
+whoami   # → root
+pwd      # → /root
+
+# Uscire dalla shell root
+exit
+whoami   # → vagrant
+</code></pre>
+<p><code>sudo -i</code> è equivalente a fare login come root. Usare con cautela: da root qualsiasi comando sbagliato viene eseguito senza restrizioni.</p>
+<hr />
+<h2 id="parte-5-esercizio-integrato">Parte 5 — Esercizio integrato</h2>
+<p>Metti insieme gestione utenti e permessi in uno scenario realistico.</p>
+<p><strong>Scenario</strong>: creare due utenti (<code>alice</code> e <code>bob</code>), una directory condivisa tra loro, e verificare che i permessi funzionino come previsto.</p>
+<pre><code class="language-bash"># Step 1 — creare il gruppo condiviso
+sudo groupadd progetto
+
+# Step 2 — aggiungere alice e bob al gruppo
+sudo usermod -aG progetto alice
+sudo usermod -aG progetto bob
+
+# Verificare
+groups alice
+groups bob
+
+# Step 3 — creare la directory condivisa
+sudo mkdir /srv/progetto
+sudo chown root:progetto /srv/progetto
+sudo chmod 770 /srv/progetto
+ls -la /srv/
+
+# Lettura: -rwxrwx--- (770) significa:
+# owner (root): rwx — può fare tutto
+# group (progetto): rwx — alice e bob possono fare tutto
+# others: --- — nessuno degli altri può accedere
+
+# Step 4 — testare come alice
+su - alice
+cd /srv/progetto
+echo &quot;file di alice&quot; &gt; alice.txt
+ls -la
+exit
+
+# Step 5 — testare come bob
+su - bob
+cd /srv/progetto
+cat alice.txt        # → funziona (bob è nel gruppo progetto)
+echo &quot;file di bob&quot; &gt; bob.txt
+exit
+
+# Step 6 — testare come utente fuori dal gruppo
+# Creare un terzo utente senza il gruppo
+sudo useradd -m -s /bin/bash charlie
+sudo passwd charlie
+su - charlie
+cd /srv/progetto     # → Permission denied (charlie non è nel gruppo progetto)
+exit
+</code></pre>
+<hr />
+<h2 id="connessione-con-security">Connessione con Security</h2>
+<p>Questo modulo è il prerequisito concettuale diretto per <strong>privilege escalation</strong>:</p>
+<ul>
+<li>Un attaccante che ottiene accesso come utente normale (<code>www-data</code>, <code>nobody</code>, ecc.) cercherà immediatamente di elevare i propri privilegi a root</li>
+<li><code>sudo -l</code> è il primo comando eseguito: se un utente può eseguire qualcosa con <code>sudo</code> senza password, o se può eseguire un interprete (<code>python</code>, <code>vim</code>, <code>bash</code>) con <code>sudo</code>, può ottenere una shell root</li>
+<li>Permessi <code>777</code> su file critici, o file di configurazione scrivibili da utenti non privilegiati, sono vettori di escalation classici</li>
+<li><code>/etc/shadow</code> leggibile da non-root è una vulnerabilità critica (gli hash delle password possono essere craccati offline)</li>
+<li>Capire la norma — come un sistema ben configurato dovrebbe apparire — è il prerequisito per riconoscere le anomalie che un attaccante sfrutterebbe</li>
+</ul>
+<hr />
+<h2 id="riepilogo-comandi">Riepilogo comandi</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>useradd -m -s /bin/bash nome</code></td>
+<td>Crea utente con home e shell Bash</td>
+</tr>
+<tr>
+<td><code>passwd nome</code></td>
+<td>Imposta/cambia password utente</td>
+</tr>
+<tr>
+<td><code>usermod -aG gruppo nome</code></td>
+<td>Aggiunge utente a un gruppo (senza rimuoverlo dagli altri)</td>
+</tr>
+<tr>
+<td><code>userdel -r nome</code></td>
+<td>Elimina utente e home directory</td>
+</tr>
+<tr>
+<td><code>groupadd nome</code></td>
+<td>Crea un nuovo gruppo</td>
+</tr>
+<tr>
+<td><code>id [nome]</code></td>
+<td>Mostra UID, GID e gruppi</td>
+</tr>
+<tr>
+<td><code>groups [nome]</code></td>
+<td>Mostra i gruppi dell'utente</td>
+</tr>
+<tr>
+<td><code>su - nome</code></td>
+<td>Cambia utente (con caricamento ambiente)</td>
+</tr>
+<tr>
+<td><code>sudo comando</code></td>
+<td>Esegue un comando come root</td>
+</tr>
+<tr>
+<td><code>sudo -i</code></td>
+<td>Apre shell root completa</td>
+</tr>
+<tr>
+<td><code>sudo -l</code></td>
+<td>Elenca comandi eseguibili con sudo</td>
+</tr>
+<tr>
+<td><code>chmod 755 file</code></td>
+<td>Modifica permessi (notazione ottale)</td>
+</tr>
+<tr>
+<td><code>chmod u+x file</code></td>
+<td>Modifica permessi (notazione simbolica)</td>
+</tr>
+<tr>
+<td><code>chown utente:gruppo file</code></td>
+<td>Cambia proprietario e gruppo</td>
+</tr>
+<tr>
+<td><code>chgrp gruppo file</code></td>
+<td>Cambia solo il gruppo</td>
+</tr>
+<tr>
+<td><code>ls -la</code></td>
+<td>Visualizza permessi di tutti i file</td>
+</tr>
+</tbody>
+</table>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo2A]]</li>
+<li>[[appunti_modulo2A_utenti_permessi]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

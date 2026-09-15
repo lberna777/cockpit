@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>template_ipt-endpoint.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">template_ipt-endpoint.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/03_iptables_nftables/template_ipt-endpoint.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="template-host-endpoint-client-o-server-non-fa-mai-da-tramite-per-un-terzo-host">Template — host "endpoint" (Client o Server: non fa mai da tramite per un terzo host)</h1>
+<p>Usa questo per qualunque host della topologia il cui traffico <strong>nasce o muore sempre su di lui</strong>
+(mai <code>FORWARD</code> verso un terzo host). Vale sia per un <code>ipt-client.sh</code> che per un <code>ipt-server.sh</code>:
+cambia solo chi inizia/chi riceve, lo scheletro è identico.</p>
+<p>⚠️ <strong>Non identificarlo con "ha una sola interfaccia"</strong>: nel pool esiste un caso reale (un
+webserver con <strong>due</strong> interfacce, una verso il Router/Internet e una dedicata verso un DB server —
+vedi <code>modello_iptables_nftables.md</code>, caso 30 ottobre 2025) che resta comunque un "endpoint" in
+questo senso: la sua catena <code>FORWARD</code> è vuota perché ogni interfaccia porta solo traffico che
+comincia o finisce <strong>su di lui</strong> (client verso il DB, server verso Internet) — nessun terzo host
+dall'altra parte a cui inoltrare qualcosa. Il numero di interfacce è un indizio, non la prova: la
+domanda giusta è sempre "questo flusso deve <em>raggiungere un host diverso da questo, passando di
+qui</em>?", non "quante porte fisiche ha la macchina".</p>
+<p>Mini-schema del caso reale (30 ott 2025) — <strong>due</strong> interfacce, <strong>zero</strong> regole FORWARD:</p>
+<pre><code>   Internet ──(Router)── [eth1] WEBSERVER [eth2] ──(link dedicato)── DB server
+                                    │                     │
+                          traffico che NASCE/MUORE   traffico che NASCE/MUORE
+                          sul webserver:             sul webserver:
+                          lui è server HTTPS,        lui è client Postgres
+                          lui è client DNS           verso il DB (5432)
+                          → INPUT/OUTPUT             → INPUT/OUTPUT
+</code></pre>
+<p>Nessuna delle due interfacce porta un flusso "di passaggio verso un terzo host": <code>eth1</code> porta solo
+ciò che riguarda il webserver in prima persona (server HTTPS verso Internet, client DNS), <code>eth2</code>
+idem (client Postgres verso il DB). Quindi <code>FORWARD</code> resta <strong>vuota</strong> anche con due schede. (Se
+invece dietro <code>eth2</code> ci fosse una rete che il webserver deve far comunicare con Internet
+<em>attraverso di sé</em>, allora sì: quel flusso sarebbe FORWARD e il webserver farebbe da router per
+quel flusso. Non è questo il caso: il DB parla solo col webserver.)</p>
+<p>Riferimento: <code>procedura_operativa_iptables.md</code> §3-4, <code>guida_esame_iptables.md</code> §4.1-4.2</p>
+<h2 id="chiarimenti-prima-di-iniziare-dubbi-comuni-non-solo-di-questo-esercizio">Chiarimenti prima di iniziare (dubbi comuni, non solo di questo esercizio)</h2>
+<ul>
+<li><strong><code>-i</code>/<code>-o</code> vs <code>-s</code>/<code>-d</code></strong>: <code>-i</code>/<code>-o</code> prendono <strong>il nome dell'interfaccia locale</strong> (<code>eth1</code>,
+  <code>eth2</code>...), mai un indirizzo IP — dicono "da/verso quale porta fisica/virtuale di questa
+  macchina". <code>-s</code>/<code>-d</code> prendono un <strong>indirizzo IP</strong> (o una rete, es. <code>172.20.0.0/20</code>) e guardano
+  dentro il pacchetto chi l'ha mandato/a chi è diretto. Sono due criteri indipendenti: puoi usarli
+  insieme (<code>-i eth1 -s 172.20.0.0/20</code>) per essere più precisi, ma non sono intercambiabili. Ricorda
+  che i nomi delle interfacce sono <strong>locali a ogni macchina</strong>: l'<code>eth1</code> di questo host non ha nulla a
+  che vedere con l'<code>eth1</code> di un altro host del disegno — condividono il nome per caso. Nello script
+  di questo host usi <strong>solo</strong> i nomi delle sue interfacce, mai quelli letti accanto ad altri host.</li>
+<li><strong><code>&lt;tcp|udp&gt;</code> nei template</strong>: è solo una notazione per dire "scegli uno dei due secondo il
+  servizio" — non va mai copiato alla lettera. Sostituiscilo con <code>tcp</code> o <code>udp</code> guardando cosa
+  chiede la consegna per quella porta.</li>
+<li><strong><code>--dport</code> vs <code>--sport</code>, e se il numero di porta cambia</strong>: <code>--dport</code> = porta di
+  <strong>destinazione</strong> (dove il pacchetto è diretto); <code>--sport</code> = porta di <strong>sorgente</strong> (da dove
+  parte). Nella richiesta usi <code>--dport &lt;porta_servizio&gt;</code> (stai andando verso il servizio); nella
+  risposta usi <code>--sport &lt;stessa_porta&gt;</code> (è il servizio a parlare, ora da lì). <strong>Il numero di porta
+  non cambia mai tra richiesta e risposta</strong> — cambia solo quale dei due flag lo tiene, perché è
+  cambiata la direzione del pacchetto. Eccezione da ricordare: NTP usa 123 su entrambi i lati,
+  quindi lì una stessa riga ha sia <code>--dport 123</code> sia <code>--sport 123</code>.</li>
+<li><strong>Quando NON è mai FORWARD</strong>: un host di questo tipo non ha nulla da mettere in <code>FORWARD</code> — se
+  ti ritrovi a scrivere una riga <code>FORWARD</code> qui, è quasi certamente un errore concettuale (stai
+  probabilmente confondendo questo host con il router, oppure hai un flusso che in realtà deve
+  raggiungere un terzo host attraverso di lui — allora <em>è</em> un router per quel flusso, e ti serve
+  anche una porzione di <code>template_ipt-router.md</code>). Chiediti sempre, per OGNI flusso: questo
+  traffico <em>nasce o muore su questa macchina</em> (sì → <code>INPUT</code>/<code>OUTPUT</code>, sempre e solo <strong>una</strong>
+  interfaccia per riga, <code>-i</code> da sola o <code>-o</code> da sola, mai entrambe insieme) o deve <em>proseguire
+  verso un host diverso da questo</em> (allora è FORWARD, anche se il diagramma lo chiama "server")?</li>
+</ul>
+<pre><code class="language-bash">#!/bin/bash
+
+# --- 1. Ripulisci lo stato precedente (rilanciabile senza accumulare regole) ---
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+
+# --- 2. Loopback sempre permesso ---
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# --- 3. Regole di servizio ---
+# Per OGNI riga della consegna che coinvolge questo host, chiediti prima:
+# questo host è chi INIZIA la connessione (client per quel flusso) o chi
+# la RICEVE (server per quel flusso)? Scrivi la coppia corrispondente.
+#
+# Se questo host INIZIA (es. il Client che accede a un servizio altrove):
+#   iptables -A OUTPUT -p &lt;tcp|udp&gt; --dport &lt;porta_servizio&gt; -j ACCEPT
+#   iptables -A INPUT  -p &lt;tcp|udp&gt; --sport &lt;porta_servizio&gt; -m state --state ESTABLISHED -j ACCEPT
+#
+# Se questo host RICEVE (es. il Server che offre un servizio):
+#   iptables -A INPUT  -p &lt;tcp|udp&gt; --dport &lt;porta_servizio&gt; -j ACCEPT
+#   iptables -A OUTPUT -p &lt;tcp|udp&gt; --sport &lt;porta_servizio&gt; -m state --state ESTABLISHED -j ACCEPT
+#
+# ⚠️ Se la consegna dice &quot;da/verso qualsiasi host&quot; per l'altro estremo, NON
+# aggiungere -s/-d: l'assenza del match è come dire &quot;chiunque va bene&quot;.
+# ⚠️ Eccezione NTP: porta 123 su entrambi i lati, stessa riga ha sia --dport
+# sia --sport 123 (non è lo schema dport-richiesta/sport-risposta standard).
+
+# &lt;&lt;&lt; scrivi qui le tue righe -A, una coppia per servizio &gt;&gt;&gt;
+
+# --- 4. Policy di default, sempre per ultime ---
+# Realizzano da sole &quot;qualsiasi altro pacchetto va scartato&quot;: non serve un
+# DROP esplicito in fondo, basta non aver accettato nulla di indesiderato sopra.
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+</code></pre></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

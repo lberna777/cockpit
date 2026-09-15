@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workflow · cockpit</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="index.html">Oggi</a>
+    <a href="laurea.html">Laurea</a>
+    <a href="corsi.html">Corsi</a>
+    <a href="materiali.html">Materiali</a>
+    <a href="workflow.html" aria-current="page">Workflow</a>
+    <a href="diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<h1 class="titolo-pagina">Come si lavora qui</h1>
+<p class="tenue">Descrizioni e argomenti sono letti dal frontmatter dei comandi veri, in
+<code>Vault/UniCode/.claude/commands/</code>: questa pagina non può divergere da ciò che lanci.</p>
+
+<section class="sezione" data-entra>
+  <h2>Il flusso di una sessione</h2>
+  <ol class="flusso">
+    <li class="flusso__passo">
+      <code class="flusso__comando">/sessione &lt;CODICE&gt; opzionale — vuoto = corso attivo dal briefing</code>
+      <p>Avvia la sessione di studio o cambia il corso in focus. Uso: /sessione [CODICE]</p>
+    </li>
+    <li class="flusso__passo">
+      <code class="flusso__comando">/lezione &lt;CODICE&gt; &lt;ID modulo&gt; — es. FI2 3A, SO 2B, CA 4</code>
+      <p>Crea la lezione strutturata per un modulo dai materiali del corso. Uso: /lezione &lt;CODICE&gt; &lt;ID&gt;  (es. /lezione FI2 3A)</p>
+    </li>
+    <li class="flusso__passo">
+      <code class="flusso__comando">/lab &lt;CODICE&gt; &lt;ID modulo&gt; — es. LAS 3D, FI2 2A</code>
+      <p>Genera la guida-lab operativa per un modulo dalle fonti del corso (passo 3 del flusso). Uso: /lab &lt;CODICE&gt; &lt;ID&gt;</p>
+    </li>
+    <li class="flusso__passo">
+      <code class="flusso__comando">/appunti &lt;CODICE&gt; &lt;ID modulo&gt; — es. FI2 3A, SO 2B</code>
+      <p>Elabora gli appunti grezzi di un modulo in appunti definitivi e aggiorna lo stato. Uso: /appunti &lt;CODICE&gt; &lt;ID&gt;</p>
+    </li>
+    <li class="flusso__passo">
+      <code class="flusso__comando">/verifica &lt;CODICE&gt; &lt;ID modulo&gt; — es. FI2 3A</code>
+      <p>Verifica qualità di una lezione o di appunti generati: confronta con la fonte e segnala i gap. Uso: /verifica &lt;CODICE&gt; &lt;ID&gt;</p>
+    </li>
+    <li class="flusso__passo">
+      <code class="flusso__comando">/ripassa &lt;CODICE&gt; &lt;ID modulo&gt; — es. FI2 3A, LAS 2B</code>
+      <p>Sessione di ripasso adattivo su un modulo completato. Genera domande nuove, non quelle dell&#39;autoverifica. Uso: /ripassa &lt;CODICE&gt; &lt;ID&gt;</p>
+    </li>
+    <li class="flusso__passo">
+      <code class="flusso__comando">/simula &lt;CODICE&gt; corso — es. FI2, SO, CA</code>
+      <p>Simulazione d&#39;esame: usa una prova passata se esiste, altrimenti genera domande cross-modulo. Uso: /simula &lt;CODICE&gt;</p>
+    </li>
+    <li class="flusso__passo">
+      <code class="flusso__comando">/chiudi</code>
+      <p>Chiude la sessione di studio: raccoglie il giudizio, aggiorna stato e log. Facoltativo — la traccia meccanica è già automatica.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="sezione" data-entra>
+  <h2>Strumenti trasversali</h2>
+  <ul class="elenco-materiali">
+    <li><code>/lacune</code> <span class="tenue">Analisi gap: moduli a rischio, ripasso scaduto, errori ricorrenti, e un piano d&#39;azione prioritizzato.</span></li>
+    <li><code>/pdf-batch &lt;CODICE&gt; opzionale — vuoto = tutti i corsi aperti</code> <span class="tenue">Converte in PDF le lezioni e gli appunti markdown che non hanno ancora un PDF. Poi git add + commit + push.</span></li>
+    <li><code>/piano</code> <span class="tenue">Genera il piano di studio per oggi basandosi su briefing, tracker e sessione d&#39;esame in corso.</span></li>
+    <li><code>/stato</code> <span class="tenue">Riepilogo rapido: stato dei moduli del corso attivo, avanzamento e prossimo passo.</span></li>
+  </ul>
+</section>
+
+<section class="sezione" data-entra>
+  <h2>Skill</h2>
+  <ul class="elenco-materiali">
+    <li><code>studia</code> <span class="tenue">checkpoint mentre annoti una lezione o una guida-lab inline.</span></li>
+    <li><code>unicode-output-gate</code> <span class="tenue">verifica gli standard di qualità prima di considerare finito un output di studio.</span></li>
+    <li><code>unicode-session-close</code> <span class="tenue">chiusura di sessione: nessun file di stato lasciato indietro.</span></li>
+    <li><code>unicode-link-note</code> <span class="tenue">tiene connesso il grafo dei wikilink quando nasce o si sposta una nota.</span></li>
+  </ul>
+</section>
+
+<section class="sezione" data-entra>
+  <h2>Script del cockpit</h2>
+  <ul class="elenco-materiali">
+    <li><code>scripts/build_ui.py</code> <span class="tenue">rigenera questo cruscotto.</span></li>
+    <li><code>scripts/build_index.py</code> <span class="tenue">rigenera <code>Vault/index.md</code>.</span></li>
+    <li><code>scripts/recap_generator.py</code> <span class="tenue">scrive il recap del giorno.</span></li>
+    <li><code>scripts/consolidate_recaps.py</code> <span class="tenue">consolida i recap passati.</span></li>
+    <li><code>scripts/link_modules.py</code> <span class="tenue">genera i wikilink fra le note di studio.</span></li>
+    <li><code>Vault/UniCode/scripts/briefing.py</code> <span class="tenue">ricostruisce il briefing iniettato all'avvio.</span></li>
+    <li><code>Vault/UniCode/scripts/giornata.py</code> <span class="tenue">consolida la giornata e aggiorna il tracker.</span></li>
+  </ul>
+</section>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "";</script>
+<script src="assets/indice.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

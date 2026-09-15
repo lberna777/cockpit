@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_modulo3A_systemd_servizi.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_modulo3A_systemd_servizi.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/lezione_modulo3A_systemd_servizi.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-3a-esecuzione-e-monitoraggio-dei-servizi">Lezione — Modulo 3A: Esecuzione e Monitoraggio dei Servizi</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Materiale</strong>: <code>gestione_servizi.pdf</code> (teoria) + LAB 31 marzo<br />
+<strong>Prerequisiti</strong>: Blocchi 0, 1, 2 completati</p>
+<hr />
+<h2 id="1-demoni">1. Demoni</h2>
+<p>Un <strong>demone</strong> (daemon) è un processo di sistema che:
+- viene avviato e arrestato automaticamente
+- non è collegato a nessun terminale
+- gira a nome di un utente specifico, senza shell interattiva</p>
+<p>Le operazioni tipiche dell'amministratore sui demoni:
+- configurarne avvio e arresto automatico
+- verificarne lo stato
+- tracciarne l'esecuzione (log)
+- avviarli, arrestarli o inviare segnali manualmente</p>
+<blockquote>
+<p><strong>Perché è importante</strong>: i processi inutili consumano risorse e ampliano la superficie d'attacco. Ogni servizio attivo è una porta potenziale.</p>
+</blockquote>
+<hr />
+<h2 id="2-le-tre-fonti-primarie-di-processi">2. Le tre fonti primarie di processi</h2>
+<p>Oltre agli utenti interattivi, i processi su un sistema Linux vengono da tre fonti:</p>
+<ol>
+<li><strong>Procedure di avvio del sistema</strong> → gestite dal sistema di init</li>
+<li><strong>Pianificatori periodici e sporadici</strong> → <code>cron</code>, <code>at</code>, timer systemd</li>
+<li><strong>Demoni di gestione degli eventi</strong> → <code>udev</code>, D-Bus</li>
+</ol>
+<hr />
+<h2 id="3-evoluzione-del-sistema-di-init">3. Evoluzione del sistema di init</h2>
+<p>Il processo con PID 1 si chiama <code>init</code>. È il primo avviato dal kernel ed è responsabile (direttamente o indirettamente) di tutti gli altri processi.</p>
+<h3 id="31-sysvinit-storico">3.1 SysVinit (storico)</h3>
+<ul>
+<li>Configurato da <code>/etc/inittab</code></li>
+<li>Gestisce <strong>runlevel</strong> (stati del sistema con sottoinsiemi di servizi attivi)</li>
+<li>Avvio <strong>sequenziale</strong>: lento, nessuna gestione errori</li>
+<li>Gli script dei servizi stanno in <code>/etc/init.d/</code>, symlinkati da <code>/etc/rcN.d/</code></li>
+<li>Comandi: <code>/etc/init.d/nomeservizio {start|stop|status}</code></li>
+<li>Su Debian: <code>update-rc.d nome enable/disable</code></li>
+</ul>
+<h3 id="32-upstart-ubuntu-6101410-ora-defunto">3.2 Upstart (Ubuntu 6.10–14.10, ora defunto)</h3>
+<ul>
+<li>Basato su logica a <strong>eventi</strong> — avvio parallelo e non bloccante</li>
+<li>Ogni task risponde ad eventi (avvio hardware, avvio rete, ecc.)</li>
+<li>Comando: <code>initctl start/stop/status</code></li>
+</ul>
+<h3 id="33-systemd-attuale-standard">3.3 Systemd (attuale standard)</h3>
+<ul>
+<li>Avvio <strong>parallelo condizionato</strong> — ogni unit parte appena i vincoli di dipendenza sono rispettati</li>
+<li>Sostituisce init, udev, cron, syslog e molto altro</li>
+<li>Usato da Debian 8+, Ubuntu 15.04+, praticamente tutto il mondo Linux moderno</li>
+</ul>
+<hr />
+<h2 id="4-systemd-concetti-fondamentali">4. Systemd — Concetti fondamentali</h2>
+<h3 id="41-unit">4.1 Unit</h3>
+<p>Systemd gestisce il sistema tramite <strong>unit</strong> — file di configurazione con nome nella forma <code>nome.tipo</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.service</code></td>
+<td>controllo e monitoraggio di un demone</td>
+</tr>
+<tr>
+<td><code>.socket</code></td>
+<td>attivazione via canale IPC (porta di rete, socket UNIX)</td>
+</tr>
+<tr>
+<td><code>.target</code></td>
+<td>gruppo di unit — <strong>sostituisce il concetto di runlevel</strong></td>
+</tr>
+<tr>
+<td><code>.timer</code></td>
+<td>attività legate al tempo (sostituisce cron)</td>
+</tr>
+<tr>
+<td><code>.device</code></td>
+<td>punti di accesso a dispositivi hardware</td>
+</tr>
+<tr>
+<td><code>.mount</code> / <code>.automount</code></td>
+<td>punti di montaggio filesystem</td>
+</tr>
+<tr>
+<td><code>.slice</code></td>
+<td>gestione risorse via cgroup</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-dove-trovare-le-unit">4.2 Dove trovare le unit</h3>
+<pre><code>/lib/systemd/system/        ← libreria di riferimento (pacchetti software)
+/usr/lib/systemd/system/    ← stessa cosa su alcune distro
+/etc/systemd/system/        ← personalizzazioni locali (priorità massima)
+</code></pre>
+<p>Le personalizzazioni in <code>/etc/systemd/system/</code> sovrascrivono quelle di sistema.</p>
+<hr />
+<h2 id="5-systemctl-controllo-dei-servizi">5. systemctl — Controllo dei servizi</h2>
+<h3 id="51-operazioni-a-runtime-volatili-nulla-cambia-alla-configurazione">5.1 Operazioni a runtime (volatili — nulla cambia alla configurazione)</h3>
+<pre><code class="language-bash">systemctl start   nomeservizio    # avvia
+systemctl stop    nomeservizio    # ferma
+systemctl restart nomeservizio    # stop + start
+systemctl reload  nomeservizio    # ricarica configurazione senza restart
+systemctl status  nomeservizio    # mostra stato, PID, log recenti
+</code></pre>
+<p><code>systemctl status</code> mostra: stato corrente, process tree, risorse (CPU, cgroup), ultimi log da journald.</p>
+<h3 id="52-configurazione-persistente-effetto-al-prossimo-boot">5.2 Configurazione persistente (effetto al prossimo boot)</h3>
+<pre><code class="language-bash">systemctl enable  nomeservizio    # avvio automatico al boot
+systemctl disable nomeservizio    # disabilita avvio automatico (ma manuale rimane possibile)
+systemctl mask    nomeservizio    # neutralizza completamente (impedisce anche start manuale)
+systemctl unmask  nomeservizio    # ripristina
+</code></pre>
+<blockquote>
+<p><code>disable</code> ≠ <code>mask</code>: <code>disable</code> rimuove l'avvio automatico ma lasci fare <code>start</code> manualmente. <code>mask</code> lo rende completamente inerte.</p>
+</blockquote>
+<h3 id="53-ispezione-della-configurazione">5.3 Ispezione della configurazione</h3>
+<pre><code class="language-bash">systemctl list-units                      # tutte le unit attive
+systemctl list-units -t service           # solo i servizi attivi
+systemctl list-unit-files -t service      # tutti i servizi installati (anche inattivi)
+systemctl list-unit-files -t service --state=enabled  # solo quelli abilitati al boot
+systemctl --state=failed                  # unit in stato failed
+</code></pre>
+<h3 id="54-target-i-nuovi-runlevel">5.4 Target — i nuovi runlevel</h3>
+<table>
+<thead>
+<tr>
+<th>SysV Runlevel</th>
+<th>Systemd Target</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code>poweroff.target</code></td>
+<td>Spegnimento</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>rescue.target</code></td>
+<td>Single user mode</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>multi-user.target</code></td>
+<td>Multi-utente, senza GUI</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>graphical.target</code></td>
+<td>Multi-utente con GUI</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>reboot.target</code></td>
+<td>Riavvio</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash">systemctl get-default                     # target di avvio corrente
+systemctl set-default multi-user.target   # imposta target di default
+</code></pre>
+<h3 id="55-contesto-utente">5.5 Contesto utente</h3>
+<p>Di default <code>systemctl</code> opera sul service manager di <strong>sistema</strong> (richiede root). Ma ogni utente ha il proprio service manager, attivabile con:</p>
+<pre><code class="language-bash">systemctl --user start   mioservizio
+systemctl --user enable  mioservizio    # avvio automatico al login (non al boot)
+</code></pre>
+<hr />
+<h2 id="6-struttura-di-un-unit-file">6. Struttura di un unit file</h2>
+<p>Un unit file <code>.service</code> minimo:</p>
+<pre><code class="language-ini">[Unit]
+Description=Il mio servizio di esempio
+Requires=network.target
+After=network.target
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/mioprogramma --opzione
+ExecStop=/usr/bin/mioprogramma --stop
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h3 id="61-sezione-unit-dipendenze">6.1 Sezione [Unit] — dipendenze</h3>
+<table>
+<thead>
+<tr>
+<th>Direttiva</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Requires=B</code></td>
+<td>B deve essere attiva; se B fallisce, questa si ferma</td>
+</tr>
+<tr>
+<td><code>Wants=B</code></td>
+<td>come Requires ma tollerante: se B fallisce, questa continua</td>
+</tr>
+<tr>
+<td><code>After=B</code></td>
+<td>avvia <em>dopo</em> B (Wants/Requires non implicano l'ordine temporale!)</td>
+</tr>
+<tr>
+<td><code>Conflicts=B</code></td>
+<td>mutuamente esclusivi con B</td>
+</tr>
+<tr>
+<td><code>OnFailure=C</code></td>
+<td>avvia C se questa fallisce</td>
+</tr>
+<tr>
+<td><code>WantedBy=</code> (in [Install])</td>
+<td>crea automaticamente un Wants nella unit indicata all'<code>enable</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Regola importante</strong>: <code>Wants=B</code> senza <code>After=B</code> significa "avvia in parallelo con B e verifica dopo". Per avvio in sequenza servono entrambi.</p>
+</blockquote>
+<h3 id="62-tipi-di-avvio-type-nella-sezione-service">6.2 Tipi di avvio (Type= nella sezione [Service])</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Comportamento</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>exec</code></td>
+<td>systemd considera il servizio avviato quando il comando ExecStart è effettivamente in esecuzione <em>(consigliato per i nuovi servizi)</em></td>
+</tr>
+<tr>
+<td><code>simple</code></td>
+<td>come exec ma systemd dichiara il servizio avviato già al fork — meno sicuro</td>
+</tr>
+<tr>
+<td><code>forking</code></td>
+<td>il processo si sdoppia e il genitore esce (demoni Unix classici)</td>
+</tr>
+<tr>
+<td><code>notify</code></td>
+<td>come exec, ma il programma invia esplicitamente segnale di readiness via <code>sd_notify</code></td>
+</tr>
+<tr>
+<td><code>oneshot</code></td>
+<td>esegue una volta sola e termina; utile per script di configurazione</td>
+</tr>
+<tr>
+<td><code>idle</code></td>
+<td>attende che tutti gli altri job siano smistati, poi parte</td>
+</tr>
+</tbody>
+</table>
+<p>Per servizi che configurano qualcosa all'avvio e la ripristinano allo stop (tipico <code>oneshot</code>):</p>
+<pre><code class="language-ini">ExecStart=/usr/bin/mio-configuratore
+ExecStop=/usr/bin/mio-de-configuratore
+</code></pre>
+<h3 id="63-riavvio-automatico-restart">6.3 Riavvio automatico (Restart=)</h3>
+<pre><code class="language-ini">Restart=on-failure    # riavvia se termina con exit code non zero o segnale non clean
+Restart=always        # riavvia sempre, tranne se fermato da systemctl stop
+</code></pre>
+<hr />
+<h2 id="7-esecuzioni-pianificate">7. Esecuzioni pianificate</h2>
+<h3 id="71-at-esecuzione-differita-una-tantum">7.1 at — esecuzione differita (una tantum)</h3>
+<p><code>at</code> pianifica un comando da eseguire una volta sola in un momento futuro.</p>
+<pre><code class="language-bash">sudo apt install at           # installa se non presente
+
+# Pianificare
+echo &quot;/bin/comando&quot; | at now + 30 minutes
+echo &quot;/bin/comando&quot; | at 14:30
+echo &quot;/bin/comando&quot; | at midnight 31.12.2025
+
+# Gestire la coda
+atq                           # lista job in coda
+atrm &lt;job_id&gt;                 # rimuove un job
+</code></pre>
+<p>Pattern per salvare l'ID del job (per poterlo cancellare):</p>
+<pre><code class="language-bash">ATJOB=$(mktemp)
+echo &quot;/bin/comando&quot; | at now + 30 minutes 2&gt;&amp;1 | grep '^job ' | cut -f2 -d' ' &gt; $ATJOB
+# Per cancellare:
+atrm $(cat $ATJOB)
+</code></pre>
+<h3 id="72-cron-esecuzione-periodica">7.2 cron — esecuzione periodica</h3>
+<p><code>crond</code> legge i file crontab ogni minuto e lancia i task pianificati.</p>
+<pre><code class="language-bash">crontab -l        # mostra il crontab dell'utente corrente
+crontab -e        # edita il crontab
+crontab FILE      # sostituisce il crontab con FILE
+</code></pre>
+<p><strong>Sintassi crontab</strong>:</p>
+<pre><code>MINUTO  ORA  G.MESE  MESE  G.SETTIMANA  &lt;comando&gt;
+</code></pre>
+<p>Esempi:</p>
+<pre><code>30 4 1,15 * 6     /bin/backup    # alle 4:30 del giorno 1, 15 e ogni sabato
+*/10 8-18 * * 1-5 /home/las/lavora.sh  # ogni 10 min, 8-18h, lun-ven
+0 0 1 1 *         /usr/sbin/auguri    # 1 gennaio a mezzanotte
+</code></pre>
+<blockquote>
+<p><strong>Eccezione</strong>: se sia G.MESE che G.SETTIMANA sono specificati (entrambi ≠ <code>*</code>), vengono considerati in <strong>OR logico</strong>, non AND.</p>
+</blockquote>
+<p><strong>Crontab di sistema</strong> (<code>/etc/crontab</code>) ha un campo aggiuntivo per specificare l'utente:</p>
+<pre><code>30 4 * * * root /usr/sbin/backup
+</code></pre>
+<p><strong>Manipolazione programmatica del crontab</strong> (da script):</p>
+<pre><code class="language-bash">TMPTAB=$(mktemp)
+crontab -l | grep -vF &quot;$COMANDO&quot; &gt; $TMPTAB   # dump senza duplicati
+echo &quot;$PERIODO $COMANDO&quot; &gt;&gt; $TMPTAB
+crontab $TMPTAB
+rm $TMPTAB
+</code></pre>
+<h3 id="73-timer-systemd-sostituzione-moderna-di-cron-e-at">7.3 Timer systemd — sostituzione moderna di cron e at</h3>
+<p><strong>Timer periodico (equivalente cron)</strong>:</p>
+<p>Creare due file: il servizio da eseguire e il timer che lo attiva.</p>
+<p><code>/etc/systemd/system/myscript.service</code>:</p>
+<pre><code class="language-ini">[Unit]
+Description=Il mio script periodico
+
+[Service]
+Type=oneshot
+ExecStart=/path/to/script.sh
+</code></pre>
+<p><code>/etc/systemd/system/myscript.timer</code>:</p>
+<pre><code class="language-ini">[Unit]
+Description=Timer per myscript
+
+[Timer]
+OnCalendar=*-*-* 04:30:00    # ogni giorno alle 4:30
+Persistent=true               # esegue anche se la macchina era spenta
+
+[Install]
+WantedBy=timers.target
+</code></pre>
+<pre><code class="language-bash">sudo systemctl enable --now myscript.timer   # attiva il timer subito e al boot
+systemctl list-timers                         # mostra tutti i timer attivi
+</code></pre>
+<p><strong>Timer differito (equivalente at)</strong> — usa <code>systemd-run</code>:</p>
+<pre><code class="language-bash">systemd-run --on-active=30m /path/to/script.sh           # tra 30 minuti
+systemd-run --on-calendar=&quot;2025-12-24 11:00:00&quot; /path/to/script.sh
+systemd-run --user --on-active=1m /bin/cmd               # come utente normale
+</code></pre>
+<p><strong>Sintassi OnCalendar</strong>:</p>
+<pre><code>DayOfWeek YYYY-MM-DD HH:MM:SS
+</code></pre>
+<ul>
+<li><code>*</code> = qualsiasi valore</li>
+<li><code>A..B</code> = range</li>
+<li><code>A,B,C</code> = lista</li>
+<li><code>/P</code> = incrementi di P unità (es. <code>*/2</code> = ogni 2)</li>
+</ul>
+<p>Verificare la prossima scadenza di un'espressione: <code>systemd-analyze calendar "Mon *-*-* 04:00"</code></p>
+<hr />
+<h2 id="8-monitoraggio">8. Monitoraggio</h2>
+<h3 id="81-log-di-sistema">8.1 Log di sistema</h3>
+<p>I log sono indispensabili per diagnostica e rilevamento attività malevole. Vanno protetti (integrity checker, replica su macchine remote).</p>
+<p><strong>Architettura syslog</strong> — principi mantenuti da tutte le implementazioni:
+1. I processi inviano messaggi al logger
+2. Il logger serializza, fa timestamping e classifica
+3. Il logger smista verso destinazioni configurate</p>
+<p>Ogni messaggio ha una coppia <code>&lt;facility&gt;.&lt;priority&gt;</code>:
+- <strong>Facility</strong>: argomento del messaggio (<code>auth</code>, <code>cron</code>, <code>daemon</code>, <code>kern</code>, <code>mail</code>, <code>user</code>, <code>local0</code>–<code>local7</code>, ...)
+- <strong>Priority</strong> (decrescente): <code>emerg</code>, <code>alert</code>, <code>crit</code>, <code>err</code>, <code>warning</code>, <code>notice</code>, <code>info</code>, <code>debug</code></p>
+<p>Una regola specifica una priority come <strong>soglia</strong>: fa match con quella priority e tutte le superiori, a meno che non sia preceduta da <code>=</code> (exact match).</p>
+<h3 id="82-rsyslog-standard-su-debian">8.2 rsyslog (standard su Debian)</h3>
+<p>rsyslog è il successore di syslog, installato di default su Debian.</p>
+<p><strong>File di configurazione</strong>:
+- Direttive globali: <code>/etc/rsyslog.conf</code>
+- Direttive aggiuntive: <code>/etc/rsyslog.d/*.conf</code> ← qui si aggiungono le proprie regole</p>
+<p><strong>Sintassi di una regola</strong>:</p>
+<pre><code>facility.priority    /path/al/file/di/destinazione
+</code></pre>
+<p>Esempi:</p>
+<pre><code>kern.*              /dev/console                  # tutto del kernel → console
+*.info;mail.none    /var/log/messages             # tutto info+ tranne mail
+*.emerg             *                             # emergenze → tutti gli utenti
+kern.crit           |/usr/bin/alerter             # critici del kernel → programma
+*.=warning          @loghost                      # solo warning → server remoto UDP
+</code></pre>
+<p><strong>Aggiungere una facility personalizzata</strong>:</p>
+<pre><code class="language-bash">echo &quot;local4.=info  /var/log/myevents.log&quot; &gt; /etc/rsyslog.d/mylog.conf
+systemctl restart rsyslog
+# Per disabilitarla:
+mv /etc/rsyslog.d/mylog.conf /etc/rsyslog.d/mylog.off
+systemctl restart rsyslog
+</code></pre>
+<h3 id="83-systemd-journald">8.3 systemd-journald</h3>
+<p>journald è il sistema di log integrato in systemd:
+- formato <strong>binario</strong> (non testo) → visualizzabile solo con <code>journalctl</code>
+- attivo dal boot, non dipende da altri servizi
+- rotazione automatica per età o dimensione</p>
+<pre><code class="language-bash">journalctl                        # tutto il journal
+journalctl -u nomeservizio        # log di un servizio specifico
+journalctl -f                     # segui in tempo reale (come tail -f)
+journalctl --since &quot;1 hour ago&quot;   # filtra per tempo
+journalctl -p err                 # solo priority err e superiori
+journalctl -b                     # log del boot corrente
+journalctl -b -1                  # log del boot precedente
+</code></pre>
+<p><strong>journald + rsyslog insieme</strong>: aggiungendo <code>ForwardToSyslog=yes</code> in <code>/etc/systemd/journald.conf</code>, i messaggi raccolti da journald vengono inoltrati a rsyslog (che può poi mandarli a server remoto o separarli in file di testo).</p>
+<h3 id="84-diagnostica-istantanea-del-sistema">8.4 Diagnostica istantanea del sistema</h3>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Cosa mostra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ps aux</code></td>
+<td>snapshot di tutti i processi attivi</td>
+</tr>
+<tr>
+<td><code>uptime</code></td>
+<td>tempo di attività + load average (1', 5', 15')</td>
+</tr>
+<tr>
+<td><code>free</code></td>
+<td>occupazione RAM e swap</td>
+</tr>
+<tr>
+<td><code>top</code></td>
+<td>combinazione interattiva di ps+uptime+free+CPU</td>
+</tr>
+<tr>
+<td><code>vmstat 1</code></td>
+<td>memoria, paging, I/O, CPU aggiornato ogni secondo</td>
+</tr>
+<tr>
+<td><code>iostat /dev/sda1</code></td>
+<td>statistiche I/O su un dispositivo</td>
+</tr>
+<tr>
+<td><code>df</code></td>
+<td>spazio disco per filesystem</td>
+</tr>
+<tr>
+<td><code>du -s /directory</code></td>
+<td>spazio occupato da una directory</td>
+</tr>
+<tr>
+<td><code>fuser /path</code></td>
+<td>quali processi usano un file/filesystem</td>
+</tr>
+<tr>
+<td><code>lsof</code></td>
+<td>tutti i file aperti da tutti i processi</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lettura di <code>uptime</code></strong>:</p>
+<pre><code>21:27:56 up 7:10, 2 users, load average: 0.00, 0.00, 0.00
+          └─ tempo attivo  └─ utenti    └─1'   └─5'  └─15'
+</code></pre>
+<p>Il load average va interpretato in rapporto al numero di CPU: load=2 su 4 CPU = sistema a metà carico.</p>
+<p><strong>Lettura di <code>free</code></strong>:</p>
+<pre><code>              total    used    free  shared  buff/cache  available
+Mem:         237040  121248    9596    1464      106196      98720
+</code></pre>
+<p><code>available ≈ free + buff/cache</code> — la cache può essere liberata se serve.</p>
+<p><strong><code>systemctl status</code> come strumento di diagnostica</strong> — mostra in un unico output: configurazione unit, stato corrente, PID, albero processi, uso risorse (CPU, cgroup), ultimi messaggi di log da journald.</p>
+<hr />
+<h2 id="9-esercizi-del-lab-31-marzo">9. Esercizi del Lab (31 marzo)</h2>
+<h3 id="es-1-installare-at-e-pianificare-un-comando">Es. 1 — Installare at e pianificare un comando</h3>
+<pre><code class="language-bash">sudo apt install at
+
+# Pianifica un comando tra 30 minuti
+echo &quot;/bin/echo ciao&quot; | at now + 30 minutes
+
+# Verifica la coda
+atq
+
+# Cancella il job (sostituire N con il numero del job)
+atrm N
+</code></pre>
+<h3 id="es-2-watchdog-con-at">Es. 2 — Watchdog con at</h3>
+<p>Pattern: limita il tempo di esecuzione di un processo.</p>
+<pre><code class="language-bash">COMANDO_LUNGO &amp;
+PID=$!
+WD=$(mktemp)
+echo &quot;/bin/kill $PID&quot; | at now + $LIMITE minutes 2&gt;&amp;1 | grep '^job ' | cut -f1 -d' ' &gt; $WD
+# Al completamento normale: atrm $(cat $WD)
+</code></pre>
+<h3 id="es-3-nice-execution-script-con-at">Es. 3 — Nice execution (script con at)</h3>
+<p>Logica: se load &lt; soglia, esegui il comando; altrimenti rischedula tra 2 minuti con <code>at</code>.</p>
+<pre><code class="language-bash">THIS=/home/vagrant/niceexec-base.sh
+LOAD=$(uptime | awk -F 'average: ' '{ print $2 }' | cut -f1 -d$(locale decimal_point))
+if test $LOAD -lt &quot;$1&quot; ; then
+    shift
+    eval &quot;$@&quot;
+else
+    echo $THIS &quot;$@&quot; | at now +2 minutes
+fi
+</code></pre>
+<h3 id="es-4-manipolazione-crontab-da-script">Es. 4 — Manipolazione crontab da script</h3>
+<pre><code class="language-bash">PERIODO='*/10 8-18 * * *'
+COMANDO='/home/las/qualcosa.sh parametri vari'
+TMPTAB=$(mktemp)
+crontab -l | grep -vF &quot;$COMANDO&quot; &gt; $TMPTAB
+echo &quot;$PERIODO $COMANDO&quot; &gt;&gt; $TMPTAB
+crontab $TMPTAB
+rm $TMPTAB
+</code></pre>
+<h3 id="es-5-configurazione-rsyslog">Es. 5 — Configurazione rsyslog</h3>
+<pre><code class="language-bash"># Aggiunge una facility
+echo &quot;local4.=info  /var/log/myevents.log&quot; | sudo tee /etc/rsyslog.d/mylog.conf
+sudo systemctl restart rsyslog
+
+# Testa con logger
+logger -p local4.info &quot;messaggio di test&quot;
+tail /var/log/myevents.log
+</code></pre>
+<h3 id="es-6-esercizio-logconfig">Es. 6 — Esercizio logconfig</h3>
+<p>Script che prende <code>facility.priority</code> e un percorso file, e:
+1. Configura rsyslog per loggare quella facility sul file dato
+2. Configura cron per mandare ogni 5 minuti l'output di <code>uptime</code> a syslog con quella etichetta</p>
+<p>Soluzione (schema essenziale):</p>
+<pre><code class="language-bash">#!/bin/bash
+# Validazioni: $1 deve essere facility.priority, $2 un path assoluto
+T=$(mktemp)
+echo -e &quot;$1\t$2&quot; &gt; $T
+sudo cp $T /etc/rsyslog.d/logconfig.conf
+sudo systemctl restart rsyslog.service
+
+CRONCOMMAND=&quot;/usr/bin/uptime | /usr/bin/logger -p $1&quot;
+crontab -l | grep -Fv &quot;$CRONCOMMAND&quot; &gt; $T
+echo &quot;*/5 * * * * $CRONCOMMAND&quot; &gt;&gt; $T
+crontab $T
+rm -f $T
+</code></pre>
+<h3 id="es-7-esaminare-unit-systemd-reali">Es. 7 — Esaminare unit systemd reali</h3>
+<pre><code class="language-bash"># Unit oneshot (configura qualcosa e poi ripristina)
+cat /lib/systemd/system/networking.service
+
+# Unit forking (demone in background)
+cat /lib/systemd/system/dnsmasq.service
+
+# Unit con Restart (riavvio automatico)
+cat /lib/systemd/system/cron.service
+cat /lib/systemd/system/rsyslog.service
+
+# Controllare log di una unit
+journalctl -u ssh.service
+journalctl -u cron.service -f
+</code></pre>
+<hr />
+<h2 id="10-cheat-sheet-systemctl">10. Cheat sheet systemctl</h2>
+<table>
+<thead>
+<tr>
+<th>Operazione</th>
+<th>Comando</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Avvia ora</td>
+<td><code>systemctl start nome</code></td>
+</tr>
+<tr>
+<td>Ferma ora</td>
+<td><code>systemctl stop nome</code></td>
+</tr>
+<tr>
+<td>Stato + log</td>
+<td><code>systemctl status nome</code></td>
+</tr>
+<tr>
+<td>Riavvia</td>
+<td><code>systemctl restart nome</code></td>
+</tr>
+<tr>
+<td>Ricarica config</td>
+<td><code>systemctl reload nome</code></td>
+</tr>
+<tr>
+<td>Abilita al boot</td>
+<td><code>systemctl enable nome</code></td>
+</tr>
+<tr>
+<td>Disabilita al boot</td>
+<td><code>systemctl disable nome</code></td>
+</tr>
+<tr>
+<td>Blocca completamente</td>
+<td><code>systemctl mask nome</code></td>
+</tr>
+<tr>
+<td>Lista servizi attivi</td>
+<td><code>systemctl list-units -t service</code></td>
+</tr>
+<tr>
+<td>Lista tutti i servizi</td>
+<td><code>systemctl list-unit-files -t service</code></td>
+</tr>
+<tr>
+<td>Solo i falliti</td>
+<td><code>systemctl --state=failed</code></td>
+</tr>
+<tr>
+<td>Target corrente</td>
+<td><code>systemctl get-default</code></td>
+</tr>
+<tr>
+<td>Log di un servizio</td>
+<td><code>journalctl -u nome</code></td>
+</tr>
+<tr>
+<td>Log in tempo reale</td>
+<td><code>journalctl -u nome -f</code></td>
+</tr>
+</tbody>
+</table>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo3A]]</li>
+<li>[[appunti_modulo3A_systemd_servizi]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

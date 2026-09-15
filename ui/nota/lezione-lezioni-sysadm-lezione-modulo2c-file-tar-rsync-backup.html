@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_modulo2C_file_tar_rsync_backup.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_modulo2C_file_tar_rsync_backup.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/lezione_modulo2C_file_tar_rsync_backup.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="gestione-file-find-tar-rsync-backup">Gestione File — find, tar, rsync, Backup</h1>
+<p><strong>Modulo</strong>: 2C | <strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Prerequisiti</strong>: Modulo 2B completato<br />
+<strong>VM</strong>: <code>cd ~/sysAdmin-lab &amp;&amp; vagrant up --provider=virtualbox &amp;&amp; vagrant ssh</code><br />
+<strong>Fonte</strong>: "Gestione di utenti e file [19 marzo]" (sezione file) + LAB esercizi 3–6</p>
+<hr />
+<h2 id="ricerca-nel-filesystem-find">Ricerca nel filesystem — <code>find</code></h2>
+<p><code>find</code> esplora il filesystem <strong>in tempo reale</strong> cercando file che soddisfano una combinazione di criteri. È potente ma ha un costo: percorre fisicamente le directory.</p>
+<h3 id="sintassi-base">Sintassi base</h3>
+<pre><code class="language-bash">find &lt;dove&gt; &lt;criteri&gt; &lt;azione&gt;
+</code></pre>
+<h3 id="criteri-principali">Criteri principali</h3>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Esempio</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-name</code></td>
+<td><code>-name '*.log'</code></td>
+<td>Nome del file (wildcard tra apici)</td>
+</tr>
+<tr>
+<td><code>-type</code></td>
+<td><code>-type f</code> / <code>-type d</code></td>
+<td>Tipo: <code>f</code>=file, <code>d</code>=directory, <code>l</code>=link</td>
+</tr>
+<tr>
+<td><code>-size</code></td>
+<td><code>-size +100k</code></td>
+<td>Dimensione: <code>+</code> maggiore di, <code>-</code> minore di</td>
+</tr>
+<tr>
+<td><code>-mtime</code></td>
+<td><code>-mtime -2</code></td>
+<td>Modificato negli ultimi 2 giorni (<code>-</code>=entro, <code>+</code>=più di)</td>
+</tr>
+<tr>
+<td><code>-user</code></td>
+<td><code>-user alice</code></td>
+<td>Proprietario specifico</td>
+</tr>
+<tr>
+<td><code>-nouser</code></td>
+<td><code>-nouser</code></td>
+<td>Nessun utente corrispondente (file "orfani")</td>
+</tr>
+<tr>
+<td><code>-perm</code></td>
+<td><code>-perm -2000</code></td>
+<td>Permessi (es. SGID attivo)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># Tutti i file .c sotto /usr/src più grandi di 100KB
+find /usr/src -name '*.c' -size +100k -print
+
+# File modificati nelle ultime 48 ore
+find /var/log -mtime -2 -type f
+
+# File orfani (utente eliminato) modificati meno di 2 giorni fa
+find / -type f -nouser -mtime -2
+</code></pre>
+<h3 id="eseguire-comandi-sui-file-trovati-exec">Eseguire comandi sui file trovati — <code>-exec</code></h3>
+<p><code>-exec</code> è una delle opzioni più potenti: per ogni file trovato esegue un comando.</p>
+<pre><code class="language-bash">find /usr/src -name '*.c' -size +100k -exec cat {} \;
+#                                            ^^  ^^
+#                                            |    fine del comando
+#                                            nome del file corrente
+</code></pre>
+<ul>
+<li><code>{}</code> viene sostituito di volta in volta con il nome del file trovato</li>
+<li><code>\;</code> segnala la fine del comando da eseguire (il backslash fa l'escape del <code>;</code>)</li>
+</ul>
+<pre><code class="language-bash"># Mostrare i permessi di tutti gli script nella home
+find /home -name '*.sh' -exec ls -la {} \;
+
+# Cercare file con SGID attivo (utile per audit di sicurezza)
+find / -perm -2000 -type f -exec ls -la {} \;
+</code></pre>
+<h3 id="locate-ricerca-rapida-su-database"><code>locate</code> — ricerca rapida su database</h3>
+<p><code>locate</code> non esplora il filesystem: cerca in un <strong>database pre-costruito</strong>. Molto più veloce, ma con un trade-off.</p>
+<pre><code class="language-bash">locate passwd        # istantaneo
+sudo updatedb        # aggiorna il database (solitamente schedulato automaticamente)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>find</code></th>
+<th><code>locate</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Velocità</td>
+<td>Lenta (esplora il filesystem)</td>
+<td>Istantanea (cerca nel db)</td>
+</tr>
+<tr>
+<td>Aggiornamento</td>
+<td>Sempre attuale</td>
+<td>Obsoleto tra un updatedb e l'altro</td>
+</tr>
+<tr>
+<td>Criteri</td>
+<td>Tutti (size, mtime, permessi…)</td>
+<td>Solo nome del file</td>
+</tr>
+<tr>
+<td>Uso tipico</td>
+<td>Ricerche precise e condizionali</td>
+<td>Trovare rapidamente dove si trova un file</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="identificazione-del-contenuto-file">Identificazione del contenuto — <code>file</code></h2>
+<p>In Linux le estensioni dei nomi non hanno significato per il sistema — sono solo etichette leggibili. Il comando <code>file</code> identifica il vero tipo del contenuto:</p>
+<pre><code class="language-bash">file /bin/bash
+# /bin/bash: ELF 64-bit LSB pie executable, x86-64...
+
+file /etc/passwd
+# /etc/passwd: ASCII text
+
+file foto.jpg.txt   # anche se il nome dice .txt
+# foto.jpg.txt: JPEG image data, JFIF standard
+</code></pre>
+<p><code>file</code> usa tre metodi in sequenza: controlla se il file è vuoto o speciale, poi usa i <strong>magic number</strong> (sequenze di byte caratteristiche di ogni formato), poi analisi euristica per testo e linguaggi.</p>
+<hr />
+<h2 id="trasferimento-dati-a-basso-livello-dd">Trasferimento dati a basso livello — <code>dd</code></h2>
+<p><code>dd</code> legge e scrive byte da qualsiasi file, inclusi i file speciali di device. Non c'è filtraggio — trasferisce esattamente quello che trova.</p>
+<pre><code class="language-bash">dd if=&lt;sorgente&gt; of=&lt;destinazione&gt; bs=&lt;dimensione_blocco&gt; count=&lt;n_blocchi&gt;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Parametro</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if=</code></td>
+<td>Input file (sorgente)</td>
+</tr>
+<tr>
+<td><code>of=</code></td>
+<td>Output file (destinazione)</td>
+</tr>
+<tr>
+<td><code>bs=</code></td>
+<td>Block size — dimensione di ogni blocco</td>
+</tr>
+<tr>
+<td><code>count=</code></td>
+<td>Numero di blocchi da trasferire</td>
+</tr>
+<tr>
+<td><code>skip=</code></td>
+<td>Blocchi da saltare all'inizio della sorgente</td>
+</tr>
+<tr>
+<td><code>seek=</code></td>
+<td>Blocchi da saltare all'inizio della destinazione</td>
+</tr>
+</tbody>
+</table>
+<h3 id="lab-esercizio-3-prenotazione-spazio-su-disco">Lab esercizio 3 — prenotazione spazio su disco</h3>
+<pre><code class="language-bash">dd if=/dev/zero of=file.out bs=4k count=16k
+</code></pre>
+<ul>
+<li><code>if=/dev/zero</code> — sorgente infinita di byte zero (file speciale sempre disponibile su Linux)</li>
+<li><code>bs=4k</code> — blocchi da 4 kilobyte</li>
+<li><code>count=16k</code> — 16.384 blocchi</li>
+</ul>
+<p>Dimensione risultante: <code>4096 × 16384 = 67.108.864 byte = 64 MB</code></p>
+<pre><code class="language-bash">ls -lh file.out
+# -rw-r--r-- 1 vagrant vagrant 64M ... file.out
+</code></pre>
+<p>Questa tecnica serve a <strong>riservare spazio su disco</strong> in anticipo — ad esempio per creare un file di swap, un'immagine disco, o garantire che uno spazio sia disponibile prima di un'operazione critica.</p>
+<hr />
+<h2 id="file-aperti-fuser-e-lsof">File aperti — <code>fuser</code> e <code>lsof</code></h2>
+<h3 id="lab-esercizio-4-differenza-tra-due-versioni-di-script">Lab esercizio 4 — differenza tra due versioni di script</h3>
+<pre><code class="language-bash"># v1 — apre e chiude il file a ogni iterazione
+while sleep 1; do
+  dd if=/dev/zero bs=1k count=$(( $(echo $RANDOM | rev | cut -c1) + 1 )) &gt;&gt; output
+done
+
+# v2 — il file viene aperto una sola volta, il redirect è fuori dal loop
+while sleep 1; do
+  dd if=/dev/zero bs=1k count=$(( $(echo $RANDOM | rev | cut -c1) + 1 ))
+done &gt;&gt; output
+</code></pre>
+<p>La differenza è <strong>dove si trova il redirect <code>&gt;&gt;</code></strong>:</p>
+<ul>
+<li><strong>v1</strong>: il <code>&gt;&gt;</code> è dentro il loop — ogni iterazione apre il file, scrive, chiude il file</li>
+<li><strong>v2</strong>: il <code>&gt;&gt;</code> è fuori dal loop — il file viene aperto una volta sola all'avvio dello script, rimane aperto per tutta la durata</li>
+</ul>
+<p><strong>Conseguenza pratica</strong>: se rinomini o cancelli il file <code>output</code> mentre v2 è in esecuzione, lo script continua a scrivere sul vecchio inode (il file "esiste ancora" perché è aperto), e non si accorge che il nome è stato cambiato. Con v1, al ciclo successivo riapre il file per nome — quindi crea un nuovo <code>output</code> se quello vecchio è sparito.</p>
+<h3 id="strumenti-per-ispezionare-file-aperti">Strumenti per ispezionare file aperti</h3>
+<pre><code class="language-bash"># fuser: mostra i PID che hanno aperto un file
+fuser output
+
+# lsof: mostra tutti i file aperti (o filtrati per file/processo)
+lsof output
+lsof -p &lt;PID&gt;
+</code></pre>
+<p>Questi comandi sono fondamentali per diagnosticare: "perché non riesco a smontare questo filesystem?" (qualcuno ha un file aperto), "chi sta scrivendo in questo log?", "perché lo spazio non si libera anche dopo aver cancellato il file?" (un processo lo tiene aperto).</p>
+<hr />
+<h2 id="archiviazione-tar">Archiviazione — <code>tar</code></h2>
+<p><code>tar</code> (Tape ARchiver) raccoglie più file in un unico archivio conservando tutti i metadati: permessi, ownership, timestamp. Non comprime di per sé.</p>
+<h3 id="comandi-principali">Comandi principali</h3>
+<table>
+<thead>
+<tr>
+<th>Opzione</th>
+<th>Azione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-c</code></td>
+<td><strong>C</strong>rea un nuovo archivio</td>
+</tr>
+<tr>
+<td><code>-x</code></td>
+<td>E<strong>x</strong>trae file da un archivio</td>
+</tr>
+<tr>
+<td><code>-t</code></td>
+<td>Elenco (<strong>t</strong>able of contents) senza estrarre</td>
+</tr>
+<tr>
+<td><code>-r</code></td>
+<td>Aggiunge file a un archivio esistente</td>
+</tr>
+</tbody>
+</table>
+<p>Sempre necessario: <code>-f &lt;file&gt;</code> per specificare il nome dell'archivio (senza, tar prova a leggere/scrivere su un nastro fisico).</p>
+<h3 id="opzioni-comuni">Opzioni comuni</h3>
+<table>
+<thead>
+<tr>
+<th>Opzione</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-v</code></td>
+<td><strong>V</strong>erboso — stampa i file processati</td>
+</tr>
+<tr>
+<td><code>-p</code></td>
+<td>Preserva permessi e ownership</td>
+</tr>
+<tr>
+<td><code>-C &lt;dir&gt;</code></td>
+<td>Esegue l'operazione come se ci si trovasse in <code>&lt;dir&gt;</code></td>
+</tr>
+<tr>
+<td><code>-T &lt;file&gt;</code></td>
+<td>Legge la lista dei file da archiviare da un file di testo</td>
+</tr>
+</tbody>
+</table>
+<h3 id="esempi-pratici">Esempi pratici</h3>
+<pre><code class="language-bash"># Creare un archivio delle home di tutti gli utenti
+tar cvpf users.tar /home/*
+# Nota: tar rimuove automaticamente lo slash iniziale dai path
+# → i path nell'archivio sono relativi (es. home/alice/...)
+
+# Elencare il contenuto senza estrarre
+tar tf users.tar
+
+# Estrarre in una directory specifica
+tar -C /newdisk -xvpf users.tar
+# → ricrea la struttura home/alice/... dentro /newdisk
+
+# Pipeline: copiare una gerarchia di file preservando tutto
+tar cvpf - /home/* | tar -C /newdisk -xvpf -
+#           ^                              ^
+#           - = stdout                    - = stdin
+</code></pre>
+<hr />
+<h2 id="compressione">Compressione</h2>
+<p><code>tar</code> non comprime — si combina con un filtro di compressione separato.</p>
+<h3 id="i-tre-formati-piu-comuni-su-linux">I tre formati più comuni su Linux</h3>
+<table>
+<thead>
+<tr>
+<th>Estensione</th>
+<th>Comando</th>
+<th>Opzione tar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.gz</code></td>
+<td><code>gzip</code> / <code>gunzip</code></td>
+<td><code>-z</code></td>
+</tr>
+<tr>
+<td><code>.bz2</code></td>
+<td><code>bzip2</code> / <code>bunzip2</code></td>
+<td><code>-j</code></td>
+</tr>
+<tr>
+<td><code>.xz</code></td>
+<td><code>xz</code> / <code>unxz</code></td>
+<td><code>-J</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>xz</code> offre la compressione migliore ma è più lento. <code>gzip</code> è il più veloce. <code>bzip2</code> è nel mezzo.</p>
+<pre><code class="language-bash"># Creare archivio compresso
+tar czf archivio.tar.gz /home/*     # gzip
+tar cjf archivio.tar.bz2 /home/*   # bzip2
+tar cJf archivio.tar.xz /home/*    # xz
+
+# Estrarre archivio compresso (tar rileva il formato automaticamente)
+tar xf archivio.tar.gz
+tar xf archivio.tar.bz2
+tar xf archivio.tar.xz
+
+# Compressione come filtro (pipeline)
+tar cf - * | xz -c &gt; archivio.tar.xz
+</code></pre>
+<h3 id="alias-utili">Alias utili</h3>
+<pre><code class="language-bash">zcat file.gz          # equivale a: gzip -dc file.gz
+zgrep pattern file.gz # equivale a: gzip -dc file.gz | grep pattern
+</code></pre>
+<hr />
+<h2 id="copia-massiva-rsync">Copia massiva — <code>rsync</code></h2>
+<p><code>rsync</code> è lo strumento standard per sincronizzare directory, localmente o via rete. Il suo vantaggio principale su <code>cp</code>: trasferisce solo le <strong>differenze</strong>, non ricopiando file già presenti a destinazione.</p>
+<h3 id="sintassi">Sintassi</h3>
+<pre><code class="language-bash">rsync [opzioni] SORGENTE DESTINAZIONE
+</code></pre>
+<h3 id="modalita-di-trasferimento">Modalità di trasferimento</h3>
+<pre><code class="language-bash"># Copia locale
+rsync -av /home/alice/ /backup/alice/
+
+# Copia via SSH (non richiede demone rsync sul server)
+rsync -av /home/alice/ user@host:/backup/alice/
+rsync -av user@host:/backup/alice/ /home/alice/
+
+# Copia via protocollo nativo rsync (richiede demone rsyncd)
+rsync user@host::srcdir /destinazione
+</code></pre>
+<h3 id="opzioni-principali">Opzioni principali</h3>
+<table>
+<thead>
+<tr>
+<th>Opzione</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-a</code></td>
+<td>Archive: equivale a <code>-rlptgoD</code> — ricorsivo, preserva link, permessi, timestamps, owner, group, file speciali</td>
+</tr>
+<tr>
+<td><code>-v</code></td>
+<td>Verbose</td>
+</tr>
+<tr>
+<td><code>-r</code></td>
+<td>Ricorsivo</td>
+</tr>
+<tr>
+<td><code>-u</code></td>
+<td>Salta file più nuovi a destinazione</td>
+</tr>
+<tr>
+<td><code>-c</code></td>
+<td>Confronta per checksum invece che per timestamp+size</td>
+</tr>
+<tr>
+<td><code>-b</code></td>
+<td>Backup dei file sovrascritti</td>
+</tr>
+<tr>
+<td><code>--exclude</code></td>
+<td>Esclude path dalla copia</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Simula senza copiare nulla (ottimo per verificare prima)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># Sincronizzazione tipica preservando tutto
+rsync -av --exclude '.cache' /home/alice/ /backup/alice/
+
+# Verifica cosa verrebbe copiato senza farlo davvero
+rsync -av --dry-run /home/ /backup/home/
+</code></pre>
+<hr />
+<h2 id="backup-strategie">Backup — strategie</h2>
+<p>Il backup è la copia dei dati su un supporto offline. Va pianificato considerando cosa copiare, quando, dove conservare le copie e per quanto.</p>
+<h3 id="full-backup">Full backup</h3>
+<p>Copia completa di ogni file. Semplice da ripristinare, ma lento e ingombrante — difficile da eseguire frequentemente.</p>
+<h3 id="incremental-backup">Incremental backup</h3>
+<p>Copia solo i file cambiati dall'ultimo backup. Adatto all'esecuzione frequente. Per il ripristino completo servono sia il full che tutti gli incrementali successivi. Può essere a più livelli:</p>
+<pre><code>Full
+├── Incrementale/0 (rispetto al full)
+│   ├── Incrementale/1a (rispetto all'incrementale/0)
+│   └── Incrementale/1b (rispetto all'incrementale/0)
+└── Incrementale/0b (rispetto al full)
+</code></pre>
+<h3 id="cautele">Cautele</h3>
+<table>
+<thead>
+<tr>
+<th>Rischio</th>
+<th>Misura</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File aperti/database in scrittura</td>
+<td>Pianificare il backup in orari di basso traffico o usare snapshot</td>
+</tr>
+<tr>
+<td>Riservatezza dei dati</td>
+<td>Il backup contiene tutto — va protetto fisicamente o cifrato</td>
+</tr>
+<tr>
+<td>Affidabilità del supporto</td>
+<td>Testare periodicamente che i dati siano leggibili</td>
+</tr>
+<tr>
+<td>Reperimento</td>
+<td>Organizzare le copie in modo da trovare rapidamente quello che serve</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="lab-esercizi-5-e-6-script-con-find">Lab esercizi 5 e 6 — script con <code>find</code></h2>
+<h3 id="esercizio-5-copia-flat">Esercizio 5 — copia "flat"</h3>
+<p><strong>Obiettivo</strong>: copiare in una directory (secondo parametro) tutti i file contenuti in una directory (primo parametro) modificati da meno di N giorni (terzo parametro), senza preservare la struttura delle sottodirectory.</p>
+<pre><code class="language-bash">#!/bin/bash
+# Uso: ./copia_flat.sh &lt;sorgente&gt; &lt;destinazione&gt; &lt;giorni&gt;
+
+SRC=&quot;$1&quot;
+DST=&quot;$2&quot;
+GIORNI=&quot;$3&quot;
+
+# Verifica parametri
+if [ -z &quot;$SRC&quot; ] || [ -z &quot;$DST&quot; ] || [ -z &quot;$GIORNI&quot; ]; then
+    echo &quot;Uso: $0 &lt;sorgente&gt; &lt;destinazione&gt; &lt;giorni&gt;&quot;
+    exit 1
+fi
+
+mkdir -p &quot;$DST&quot;
+
+find &quot;$SRC&quot; -maxdepth 1 -type f -mtime -&quot;$GIORNI&quot; -exec cp {} &quot;$DST&quot; \;
+</code></pre>
+<p><code>-maxdepth 1</code> limita la ricerca alla directory specificata senza scendere nelle sottodirectory (copia "flat" = senza struttura).</p>
+<h3 id="esercizio-6-copia-con-conservazione-della-struttura">Esercizio 6 — copia con conservazione della struttura</h3>
+<p><strong>Obiettivo</strong>: copiare in una directory (primo parametro) tutti i file del sistema modificati da meno di N giorni (secondo parametro) <strong>e</strong> tutti i file sotto <code>/home</code> appartenenti a UID senza utente valido, mantenendo la struttura originale delle directory.</p>
+<pre><code class="language-bash">#!/bin/bash
+# Uso: ./copia_struttura.sh &lt;destinazione&gt; &lt;giorni&gt;
+
+DST=&quot;$1&quot;
+GIORNI=&quot;$2&quot;
+
+if [ -z &quot;$DST&quot; ] || [ -z &quot;$GIORNI&quot; ]; then
+    echo &quot;Uso: $0 &lt;destinazione&gt; &lt;giorni&gt;&quot;
+    exit 1
+fi
+
+mkdir -p &quot;$DST&quot;
+
+# File recenti ovunque nel sistema
+find / -type f -mtime -&quot;$GIORNI&quot; -exec cp --parents {} &quot;$DST&quot; \;
+
+# File orfani sotto /home
+find /home -type f -nouser -exec cp --parents {} &quot;$DST&quot; \;
+</code></pre>
+<p><code>cp --parents</code> preserva il path completo — se copi <code>/var/log/syslog</code> in <code>/backup</code>, il risultato è <code>/backup/var/log/syslog</code>, non <code>/backup/syslog</code>.</p>
+<hr />
+<h2 id="riepilogo-comandi">Riepilogo comandi</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>find /path -name '*.log'</code></td>
+<td>Cerca file per nome</td>
+</tr>
+<tr>
+<td><code>find /path -mtime -2 -type f</code></td>
+<td>File modificati nelle ultime 48h</td>
+</tr>
+<tr>
+<td><code>find /path -nouser</code></td>
+<td>File orfani (utente eliminato)</td>
+</tr>
+<tr>
+<td><code>find /path -exec comando {} \;</code></td>
+<td>Esegue un comando su ogni file trovato</td>
+</tr>
+<tr>
+<td><code>locate nome</code></td>
+<td>Ricerca rapida su database</td>
+</tr>
+<tr>
+<td><code>sudo updatedb</code></td>
+<td>Aggiorna il database di locate</td>
+</tr>
+<tr>
+<td><code>file nome</code></td>
+<td>Identifica il tipo di contenuto di un file</td>
+</tr>
+<tr>
+<td><code>dd if=src of=dst bs=4k count=16k</code></td>
+<td>Copia a basso livello / prenotazione spazio</td>
+</tr>
+<tr>
+<td><code>fuser file</code></td>
+<td>Mostra i processi che hanno il file aperto</td>
+</tr>
+<tr>
+<td><code>lsof file</code></td>
+<td>Dettagli sui file aperti</td>
+</tr>
+<tr>
+<td><code>tar czf archivio.tar.gz /path</code></td>
+<td>Crea archivio compresso con gzip</td>
+</tr>
+<tr>
+<td><code>tar xf archivio.tar.gz</code></td>
+<td>Estrae un archivio</td>
+</tr>
+<tr>
+<td><code>tar tf archivio.tar.gz</code></td>
+<td>Elenca il contenuto senza estrarre</td>
+</tr>
+<tr>
+<td><code>rsync -av src/ dst/</code></td>
+<td>Sincronizza directory preservando tutto</td>
+</tr>
+<tr>
+<td><code>rsync -av --dry-run src/ dst/</code></td>
+<td>Simula rsync senza copiare</td>
+</tr>
+</tbody>
+</table>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo2C]]</li>
+<li>[[appunti_modulo2C_file_tar_rsync_backup]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

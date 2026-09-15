@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_esame_iptables.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">guida_esame_iptables.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/03_iptables_nftables/guida_esame_iptables.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="guida-esame-iptablesnftables">Guida Esame — Iptables/NFTables</h1>
+<blockquote>
+<p>File cockpit da aprire il giorno dell'esame appena riconosci un esercizio di questo tipo: una
+topologia di rete (uno o più host, spesso un Router) su cui scrivere regole di filtraggio — e
+talvolta NAT — che consentano <strong>esclusivamente</strong> il traffico descritto in consegna, scartando
+tutto il resto. Deliverable tipico: uno o più file di comandi (<code>iptables.txt</code>, <code>ipt-*.sh</code>,
+<code>*.nft</code>), <strong>non</strong> un report scritto con screenshot. Autosufficiente per la maggior parte dei casi
+insieme ai suoi rimandi. Per l'algoritmo esteso passo-passo e la cheatsheet sintassi completa,
+vedi <code>procedura_operativa_iptables.md</code>; per 7 casi reali già risolti (tutti con soluzione
+ufficiale del docente, incluse le imprecisioni onestamente segnalate), <code>modello_iptables_nftables.md</code>.</p>
+<p><strong>Principio guida</strong>: se sei bloccato su <em>come</em> costruire una regola, la risposta è quasi sempre
+nella <strong>Sezione 4</strong> di questo file o nella cheatsheet di <code>procedura_operativa_iptables.md</code>. Se sei
+bloccato su <em>quale</em> traffico va aperto per ogni host, è nella <strong>Sezione 2</strong>. Se sei bloccato su
+<em>dove leggere</em> un singolo pezzo di una regola (protocollo, porta, nome interfaccia, indirizzo — e
+cosa invece è "metodo fisso" sempre uguale), la mappa delle tre fonti è in
+<code>procedura_operativa_iptables.md</code> §0.5 "Da dove viene ogni pezzo di una regola".</p>
+</blockquote>
+<hr />
+<h2 id="0-i-gate-che-non-hai-il-permesso-di-saltare">0. I gate che NON hai il permesso di saltare</h2>
+<ul>
+<li>⚠️ <strong>Gate A — hai letto TUTTA la consegna prima di scrivere la prima regola?</strong> Il pool lo chiede
+  esplicitamente in almeno un caso ("si consiglia di leggere prima tutta la lista per determinare
+  correttamente i requisiti", 11 giu 2021) — un punto successivo può cambiare come va scritto un
+  punto precedente (es. un'esclusione dall'elenco finale che rivela una policy diversa dalle altre).</li>
+<li>⚠️ <strong>Gate B — hai contato ESATTAMENTE quali file la consegna chiede?</strong> Non presumere "un file per
+  host della topologia": nel pool ci sono esercizi che chiedono solo il Router (8 feb 2024), altri
+  Router+Server senza il Client (13 giu 2024), altri ancora ogni host coinvolto (13 set 2023, 12
+  gen 2026). Cerca i nomi di file esatti nel testo (<code>iptables.txt</code>, <code>ipt-router.sh</code>, <code>bastion.nft</code>,
+  ...) e produci solo quelli.</li>
+<li>⚠️ <strong>Gate C — hai deciso sintassi (iptables/nftables) e se serve NAT PRIMA di scrivere?</strong> Cambiare
+  idea a metà file costa tempo. Il triage per entrambe le decisioni è in Sezione 1 e Sezione 2.</li>
+</ul>
+<hr />
+<h2 id="1-triage-che-tipo-di-esercizio-e">1. Triage — che tipo di esercizio è</h2>
+<table>
+<thead>
+<tr>
+<th>Segnale nella consegna</th>
+<th>Cosa implica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Estensione file richiesta <code>.txt</code>/<code>.sh</code>, sintassi vista negli esempi con <code>-A</code>/<code>-I</code>/<code>-j</code></td>
+<td><code>iptables</code> legacy — sezione cheatsheet iptables in <code>procedura_operativa_iptables.md</code> §5</td>
+</tr>
+<tr>
+<td>Estensione file richiesta <code>.nft</code>, o la consegna nomina esplicitamente "nftables"</td>
+<td><code>nftables</code> — stessa sezione, colonna destra</td>
+</tr>
+<tr>
+<td>Un solo host, "potrebbe avere più interfacce e funzionare da router"</td>
+<td>Host singolo multi-ruolo: alcune regole sono INPUT/OUTPUT (locali), altre FORWARD (se davvero funge da router) — vedi caso 1 nel modello</td>
+</tr>
+<tr>
+<td>Consegna rimanda a un <strong>altro esercizio</strong> (es. "fate riferimento all'esercizio su Intrusion Detection") per la topologia</td>
+<td>La topologia non è nel testo iptables: va letta/dedotta dall'altro esercizio richiamato (stesso corso, altra tipologia). Non inventarla: cercala</td>
+</tr>
+<tr>
+<td>Parola <strong>"indiretto"/"indirettamente"</strong> riferita a un servizio raggiungibile dall'esterno</td>
+<td>Il target ha IP privato → serve <strong>DNAT</strong> per pubblicarlo dietro l'IP pubblico del router</td>
+</tr>
+<tr>
+<td>Consegna dice che le reti private <strong>non sono instradate automaticamente</strong> (nemmeno tra loro)</td>
+<td>Quasi ogni comunicazione che attraversa il confine pubblico/privato richiede NAT in una direzione</td>
+</tr>
+<tr>
+<td>Un host ha IP privato e deve raggiungere una rete diversamente indirizzata, <strong>anche senza la parola "indiretto"</strong></td>
+<td>Il bisogno di NAT può essere implicito nella topologia (client privato che raggiunge un segmento "pubblico" diverso, o Internet) — leggi gli indirizzi, non solo le parole chiave</td>
+</tr>
+<tr>
+<td>"le regole devono essere applicate nell'ordine in cui vengono proposte"</td>
+<td>Usa <code>-A</code> (append), mai <code>-I</code> (insert, che inverte l'ordine)</td>
+</tr>
+<tr>
+<td>Un host ha <strong>una sola interfaccia fisica</strong> verso "tutto il resto" (es. un Bastion, o un webserver dietro un router)</td>
+<td>Non puoi distinguere "da Internet" da "dalla mia rete" con <code>-i</code>/<code>-o</code> — serve un match sull'indirizzo (in nftables: insieme con negazione <code>!= {reti note}</code>)</td>
+</tr>
+<tr>
+<td>"qualsiasi altro pacchetto deve essere scartato" / "e null'altro oltre al traffico indispensabile"</td>
+<td>Default-drop su tutte le catene, loopback sempre permesso, scrivi solo le regole di ciò che deve passare</td>
+</tr>
+</tbody>
+</table>
+<p>Il triage non decide da solo tutte le regole: la distinzione INPUT/OUTPUT/FORWARD per ogni host va
+comunque fatta caso per caso leggendo la topologia (Sezione 2). Non presumere che un esercizio usi
+lo stesso schema NAT/filtro di uno simile solo perché "sembra uguale" — il pool varia deliberatamente
+quali host servono NAT e quali no.</p>
+<hr />
+<h2 id="2-percorso-standard-checklist">2. Percorso standard (checklist)</h2>
+<p>Versione condensata di <code>procedura_operativa_iptables.md</code> — apri quel file per il dettaglio ed
+esempi di codice.</p>
+<ul>
+<li>[ ] <strong>0. Leggi tutta la consegna</strong> (Gate A). Nota ogni parola chiave di Sezione 1.</li>
+<li>[ ] <strong>1. Conta i file richiesti</strong> (Gate B) e la sintassi (Gate C: iptables o nftables).</li>
+<li>[ ] <strong>2. Per ogni host della topologia</strong>, classifica ogni flusso richiesto: è locale
+  (INPUT/OUTPUT, l'host è client o server di quella interazione) o attraversa soltanto (FORWARD)?
+  Tabella di riferimento in <code>procedura_operativa_iptables.md</code> §1.</li>
+<li>[ ] <strong>3. Decidi se e dove serve NAT</strong> (<code>procedura_operativa_iptables.md</code> §2): DNAT in
+  PREROUTING/hook <code>prerouting priority dstnat</code> per pubblicare un server privato; SNAT/MASQUERADE in
+  POSTROUTING/hook <code>postrouting priority srcnat</code> per far uscire client privati. Ricorda: dopo un
+  DNAT, il filtro <code>FORWARD</code> (e l'host finale) vanno scritti sull'indirizzo <strong>tradotto</strong>, non
+  quello originale.</li>
+<li>[ ] <strong>4. Scrivi lo scheletro fisso</strong> per ogni host: flush/reset, loopback ACCEPT, poi le regole
+  di servizio, poi le policy DROP finali (eccetto se il testo implica il contrario — vedi caso 1
+  del modello). Schema esatto in <code>procedura_operativa_iptables.md</code> §3.</li>
+<li>[ ] <strong>5. Per ogni servizio consentito, scrivi la coppia richiesta/risposta</strong> su ogni host
+  coinvolto (client: OUTPUT dport + INPUT established sport; server: INPUT dport + OUTPUT
+  established sport) — occhio all'eccezione NTP (porta 123 simmetrica). Schema in
+  <code>procedura_operativa_iptables.md</code> §4.</li>
+<li>[ ] <strong>6. Rileggi ogni regola NAT</strong>: target giusto (<code>SNAT</code>/<code>DNAT</code>) con l'opzione giusta
+  (<code>--to-source</code>/<code>--to-destination</code>), interfaccia ammessa per quella catena, protocollo coerente
+  col servizio che stai abilitando. Sono i quattro errori più frequenti nelle soluzioni reali del
+  pool (§6 di <code>procedura_operativa_iptables.md</code>).</li>
+<li>[ ] <strong>7. Verifica il conteggio finale</strong>: hai scritto regole solo per ciò che deve passare?
+  Nessuna regola per traffico esplicitamente escluso/identificato come attacco (visto in 8 feb
+  2024: il traffico dell'attacco individuato in un altro esercizio non va aperto, semplicemente non
+  scriverci nessuna regola)?</li>
+</ul>
+<hr />
+<h2 id="3-rami-per-scenario">3. Rami per scenario</h2>
+<h3 id="31-host-singolo-con-o-senza-funzione-di-router">3.1 Host singolo (con o senza funzione di router)</h3>
+<ul>
+<li><strong>Riconoscere</strong>: la consegna descrive un solo host, eventualmente "con più interfacce",
+  potenzialmente "funziona da router".</li>
+<li><strong>Come procedere</strong>: stesso host può avere sia regole locali (INPUT/OUTPUT per servizi che
+  eroga/consuma lui stesso) sia regole FORWARD (se davvero inoltra traffico tra reti). Non
+  confonderle: chiediti separatamente, per ogni riga della consegna, se il servizio termina
+  sull'host o lo attraversa.</li>
+<li><strong>Gotcha noto</strong>: se la consegna richiama esplicitamente l'ordine delle regole, usa <code>-A</code>; se un
+  punto della lista finale "blocca tutto il resto" non richiama una catena già trattata, è un
+  indizio che quella catena ha una policy diversa (vedi caso 1 del modello, 11 giu 2021).</li>
+</ul>
+<h3 id="32-filtro-multi-host-senza-nat">3.2 Filtro multi-host senza NAT</h3>
+<ul>
+<li><strong>Riconoscere</strong>: più host, indirizzi già tutti instradabili senza traduzione (nessuna parola
+  "indiretto", nessun accenno a reti private non raggiungibili).</li>
+<li><strong>Come procedere</strong>: per ogni host, classifica ogni flusso (Sezione 2, passo 3), scrivi lo
+  scheletro fisso + le coppie richiesta/risposta. Nessuna tabella NAT necessaria in nessun file.</li>
+<li><strong>Esempio nel pool</strong>: 8 febbraio 2024 (solo Router, tre reti interne, nessun Internet).</li>
+</ul>
+<h3 id="33-filtro-nat-pubblicazione-indiretta-o-uscita-mascherata">3.3 Filtro + NAT (pubblicazione indiretta o uscita mascherata)</h3>
+<ul>
+<li><strong>Riconoscere</strong>: parola "indiretto", o un host con IP privato che deve raggiungere/essere
+  raggiunto da una rete diversamente indirizzata.</li>
+<li><strong>Come procedere</strong>:
+  1. Identifica <strong>quale</strong> host fa da confine (quasi sempre il Router) — è lì che vive la tabella
+     NAT, mai sull'host finale (client/server non fanno mai NAT di se stessi in questo pool).
+  2. DNAT per "pubblicare" un servizio con IP privato: prerouting, matcha l'IP pubblico esterno
+     come destinazione, traduci verso l'IP privato reale.
+  3. SNAT/MASQUERADE per far uscire un client/server privato verso una rete che non saprebbe
+     rispedire una risposta a quell'indirizzo: postrouting, matcha la sorgente privata, traduci con
+     l'IP del confine su quel segmento. <strong>Ma prima verifica che la rotta di ritorno manchi davvero</strong>:
+     se il router è il <em>default gateway</em> di entrambe le reti private (o la consegna dichiara il
+     routing), la risposta sa già tornare e il SNAT è superfluo — è la differenza tra 13 giu 2024
+     (serve SNAT) e 10 lug 2025 (niente SNAT pur essendo privato→privato). Criterio completo in
+     <code>procedura_operativa_iptables.md</code> §2, "Discriminante decisivo per il segnale 2".
+  4. <strong>Sul filtro</strong> (FORWARD sul router, o INPUT/OUTPUT sull'host finale): usa l'indirizzo <strong>dopo</strong>
+     la traduzione — il DNAT/SNAT in prerouting/postrouting accade prima che il filtro esamini il
+     pacchetto.
+  5. Sull'host finale (server pubblicato, o client mascherato), il filtro locale vede il pacchetto
+     già tradotto: il server non vede mai l'IP pubblico con cui è stato contattato, solo la
+     sorgente originale del richiedente (il DNAT cambia solo la destinazione); un host dietro un
+     SNAT del router viene visto dagli altri come se fosse il router stesso.</li>
+<li><strong>Ti serve UNA sola riga SNAT, non due</strong>: il verso di ritorno lo ritraduce automaticamente il
+  conntrack (nessuna regola NAT per la risposta). Se hai bisogno di <em>vederlo</em> pacchetto per pacchetto
+  per fidartene sotto stress, la traccia "senza SNAT vs con SNAT" hop per hop è in
+  <code>procedura_operativa_iptables.md</code> §2, "Traccia pacchetto per pacchetto". Ricorda solo che la riga
+  di <em>filtro</em> <code>ESTABLISHED</code> per la risposta va scritta comunque a mano — quella è filtro, non NAT.</li>
+<li><strong>Esempi nel pool</strong>: 13 giugno 2024 (SNAT sia per raggiungere il server "pubblico" sia per uscire
+  su Internet), 10 luglio 2025 e 30 ottobre 2025 (DNAT per pubblicare un servizio interno + SNAT
+  per il traffico DNS in uscita), 12 gennaio 2026 (DNAT + SNAT combinati, reti private non
+  instradate nemmeno tra loro).</li>
+</ul>
+<h3 id="34-host-single-homed-dietro-un-router-bastion-alg-webserver-con-un-solo-link-esterno">3.4 Host "single-homed dietro un router" (Bastion, ALG, webserver con un solo link esterno)</h3>
+<ul>
+<li><strong>Riconoscere</strong>: un host che non è il router ma ha comunque <strong>una sola interfaccia</strong> verso tutto
+  ciò che sta oltre il proprio segmento (Internet e/o altre reti raggiunte solo tramite il router).</li>
+<li><strong>Come procedere</strong>: niente <code>-i</code>/<code>-o</code> per distinguere "da Internet" da "dal mio segmento" — usa un
+  match sull'indirizzo. In nftables: insieme con negazione, <code>ip saddr != {rete_propria_1,
+  rete_propria_2}</code> per dire "viene da fuori". Questo host <strong>non ha bisogno di una catena FORWARD
+  funzionante</strong> (non inoltra nulla per definizione) — dichiarala comunque vuota con policy drop,
+  per chiarezza esplicita (visto nella soluzione ufficiale del 10 luglio 2025, commento "bastion
+  non è un router").</li>
+<li><strong>Attenzione al ruolo ALG</strong>: se l'host fa da Application-Level Gateway, la connessione in
+  ingresso (es. porta 8443) e quella in uscita verso il servizio reale (es. porta 443) sono <strong>due
+  connessioni indipendenti</strong>, non un semplice inoltro — quindi sull'host ALG la prima è INPUT (lui
+  è server) e la seconda è OUTPUT (lui è client), mai FORWARD.</li>
+<li><strong>Esempi nel pool</strong>: 10 luglio 2025 (Bastion/ALG), 30 ottobre 2025 (webserver verso Internet sulla
+  sua unica interfaccia esterna, ma con un secondo link dedicato — quindi non single-homed — verso
+  il DB server).</li>
+</ul>
+<hr />
+<h2 id="4-riferimento-comandi-come-si-costruiscono-non-solo-cosa-copiare">4. Riferimento comandi — come si costruiscono, non solo cosa copiare</h2>
+<h3 id="41-lo-scheletro-fisso-default-drop-loopback">4.1 Lo scheletro fisso (default-drop + loopback)</h3>
+<p>Vedi <code>procedura_operativa_iptables.md</code> §3 per il codice completo in entrambe le sintassi. Il punto
+concettuale: le policy di default realizzano da sole "qualsiasi altro pacchetto deve essere
+scartato" — non serve mai una regola finale di DROP esplicita, si scrivono solo le regole di ciò
+che deve passare.</p>
+<h3 id="42-la-coppia-richiestarisposta">4.2 La coppia richiesta/risposta</h3>
+<p>Vedi <code>procedura_operativa_iptables.md</code> §4. Il punto concettuale: <code>ESTABLISHED</code>/<code>ct state
+established</code> (non un secondo match statico sulla porta sorgente) restringe l'accettazione alle sole
+risposte di connessioni già avviate legittimamente da questo host — un match statico su <code>--sport</code>
+senza stato accetterebbe qualunque pacchetto con quella porta sorgente, anche non richiesto.
+Eccezione: NTP usa la porta 123 su entrambi i lati, quindi la stessa riga ha sia <code>--dport 123</code> sia
+<code>--sport 123</code>. Stesso principio (porte fisse su entrambi i lati) per <strong>DHCP</strong>: server 67, client 68
+→ richiesta <code>--sport 68 --dport 67</code>, risposta <code>--sport 67 --dport 68</code> (dettaglio in
+<code>procedura_operativa_iptables.md</code> §4).</p>
+<h3 id="43-cheatsheet-sintassi-comparata-iptables-nftables">4.3 Cheatsheet sintassi comparata iptables ↔ nftables</h3>
+<p>Tabella completa (tabelle/catene, hook/priority, match, NAT, verdetti) in
+<code>procedura_operativa_iptables.md</code> §5 — apri quella sezione ogni volta che devi tradurre un comando
+da una sintassi all'altra o non ricordi la keyword esatta.</p>
+<h3 id="44-nat-costruire-la-regola-giusta-non-solo-copiarla">4.4 NAT: costruire la regola giusta, non solo copiarla</h3>
+<pre><code># DNAT (iptables) — pubblica un servizio con IP privato dietro un IP pubblico
+iptables -t nat -A PREROUTING -i &lt;if_esterna&gt; -d &lt;ip_pubblico&gt; -p tcp --dport &lt;porta_pubblica&gt; \
+    -j DNAT --to-destination &lt;ip_privato&gt;:&lt;porta_reale&gt;
+
+# SNAT (iptables) — maschera un host/rete privata in uscita
+iptables -t nat -A POSTROUTING -s &lt;rete_privata&gt; -o &lt;if_esterna&gt; -j SNAT --to-source &lt;ip_confine&gt;
+</code></pre>
+<pre><code># nftables — DNAT
+chain prerouting {
+    type nat hook prerouting priority dstnat;
+    iif &lt;if_esterna&gt; ip daddr &lt;ip_pubblico&gt; tcp dport &lt;porta_pubblica&gt; dnat to &lt;ip_privato&gt;:&lt;porta_reale&gt;
+}
+
+# nftables — SNAT
+chain postrouting {
+    type nat hook postrouting priority srcnat;
+    oif &lt;if_esterna&gt; ip saddr &lt;rete_privata&gt; snat to &lt;ip_confine&gt;
+}
+</code></pre>
+<p><strong>Perché l'hook/la catena sono vincolanti e non intercambiabili</strong>: DNAT deve avvenire <em>prima</em> che
+il kernel decida come instradare (altrimenti instrada verso l'indirizzo sbagliato, quello ancora
+non tradotto) → <code>prerouting</code>. SNAT deve avvenire <em>dopo</em> che tutto il resto è deciso, appena prima
+che il pacchetto lasci il sistema (altrimenti il resto del sistema — routing, filtro — ragionerebbe
+su un indirizzo che non è quello reale del mittente) → <code>postrouting</code>.</p>
+<p><strong>Verifica sempre, riga per riga, prima di consegnare</strong>:
+- Il target è quello giusto per la direzione che vuoi (<code>DNAT</code>↔destinazione, <code>SNAT</code>↔sorgente)? Non
+  sono intercambiabili nemmeno nelle opzioni (<code>--to-destination</code> non esiste per <code>SNAT</code> e viceversa).
+- L'interfaccia che hai messo (<code>-i</code>/<code>-o</code>, <code>iif</code>/<code>oif</code>) è ammessa in quella catena? <code>PREROUTING</code>/
+  <code>INPUT</code> non ammettono <code>-o</code>; <code>OUTPUT</code>/<code>POSTROUTING</code> non ammettono <code>-i</code>.
+- Il protocollo (<code>-p</code>/<code>tcp</code>/<code>udp</code>) nella riga NAT corrisponde davvero al servizio che stai
+  traducendo? Un protocollo sbagliato non dà errore, semplicemente la regola non fa mai match sul
+  traffico che dovrebbe abilitare — bug silenzioso, il più insidioso da individuare rileggendo.</p>
+<h3 id="45-dopo-il-nat-il-filtro-guarda-lindirizzo-tradotto">4.5 Dopo il NAT, il filtro guarda l'indirizzo tradotto</h3>
+<p>Se una catena NAT agisce prima del filtro nel percorso del pacchetto (<code>prerouting</code> prima di
+<code>forward</code>), le regole di filtro successive devono matchare l'indirizzo <strong>come appare dopo</strong> quella
+traduzione:</p>
+<pre><code># Esempio: DNAT pubblica 130.136.1.1:443 -&gt; 192.168.1.7:443 in prerouting.
+# La regola forward, scritta DOPO che prerouting ha già agito, guarda l'IP privato:
+iif eth3 oif eth2 ip daddr 192.168.1.7 tcp dport 443 accept       # corretto
+iif eth3 oif eth2 ip daddr 130.136.1.1 tcp dport 443 accept       # SBAGLIATO: non farà mai match
+</code></pre>
+<p>Lo stesso vale per il filtro dell'host finale pubblicato: vede la destinazione locale già tradotta
+(il proprio IP privato reale), ma la sorgente rimane quella originale del richiedente esterno — il
+DNAT cambia <strong>solo</strong> la destinazione, mai la sorgente.</p>
+<hr />
+<h2 id="5-errori-comuni-riferimento-rapido">5. Errori comuni — riferimento rapido</h2>
+<p>Elenco completo con spiegazione in <code>procedura_operativa_iptables.md</code> §6. I più frequenti nel pool
+reale (con soluzione ufficiale del docente, non solo negli errori di uno studente):
+- Confondere <code>FORWARD</code> con <code>INPUT</code>/<code>OUTPUT</code>.
+- Scambiare <code>SNAT</code>/<code>DNAT</code> o le rispettive opzioni.
+- Dimenticare <code>-j SNAT</code>/<code>-j DNAT</code> prima di <code>--to-source</code>/<code>--to-destination</code>.
+- Usare <code>-i</code>/<code>-o</code> in catene che non li ammettono.
+- Protocollo sbagliato su una riga NAT (bug silenzioso).
+- Filtrare sull'indirizzo pre-NAT invece che post-NAT.
+- <code>type filter</code>/<code>priority nat</code> invece di <code>type nat</code>/<code>priority dstnat</code>/<code>srcnat</code> in nftables.
+- Usare <code>-I</code> quando l'ordine delle regole è esplicitamente richiesto.
+- Assumere "un file per host" senza verificarlo nella consegna specifica.</p>
+<hr />
+<h2 id="6-indice-dei-casi-reali-collegamento-a-modello_iptables_nftablesmd">6. Indice dei casi reali (collegamento a <code>modello_iptables_nftables.md</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Scenario (§3)</th>
+<th>Sintassi</th>
+<th>NAT</th>
+<th>Particolarità da ricordare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11 giugno 2021</td>
+<td>3.1 Host singolo</td>
+<td>iptables</td>
+<td>no</td>
+<td><code>FORWARD</code> default ACCEPT dedotto dal testo; <code>-A</code> obbligatorio per l'ordine</td>
+</tr>
+<tr>
+<td>13 settembre 2023</td>
+<td>3.3 Filtro + NAT</td>
+<td>iptables</td>
+<td>sì</td>
+<td>porta NTP: testo dice 1233, soluzione usa 123 (refuso nel testo); SNAT/DNAT invertiti nella soluzione ufficiale</td>
+</tr>
+<tr>
+<td>8 febbraio 2024</td>
+<td>3.2 Filtro multi-host senza NAT</td>
+<td>iptables</td>
+<td>no</td>
+<td>topologia dedotta da un esercizio NIDS collegato; NTP porta simmetrica 123/123</td>
+</tr>
+<tr>
+<td>13 giugno 2024</td>
+<td>3.3 Filtro + NAT</td>
+<td>iptables</td>
+<td>sì</td>
+<td>SNAT senza <code>-j SNAT</code> nella soluzione ufficiale; solo 2 file richiesti (non il Client)</td>
+</tr>
+<tr>
+<td>10 luglio 2025</td>
+<td>3.4 Single-homed (Bastion/ALG)</td>
+<td>nftables</td>
+<td>sì (solo DNAT)</td>
+<td>primo esercizio nftables del pool; ALG = due connessioni indipendenti, non forwarding</td>
+</tr>
+<tr>
+<td>30 ottobre 2025</td>
+<td>3.3 + 3.4 combinati</td>
+<td>nftables</td>
+<td>sì</td>
+<td><code>type filter</code>/<code>priority nat</code> invece di <code>type nat</code>/<code>dstnat</code>/<code>srcnat</code> nella tabella NAT ufficiale</td>
+</tr>
+<tr>
+<td>12 gennaio 2026</td>
+<td>3.3 Filtro + NAT</td>
+<td>nftables</td>
+<td>sì</td>
+<td>reti private non instradate nemmeno tra loro; refuso sospetto <code>:accept</code> in un file ufficiale</td>
+</tr>
+</tbody>
+</table>
+<p>Per il testo integrale di ogni consegna, la topologia, il ragionamento host-per-host e la soluzione
+ufficiale completa, apri <code>modello_iptables_nftables.md</code> e cerca la data.</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

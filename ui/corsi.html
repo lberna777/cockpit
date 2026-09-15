@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corsi · cockpit</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="index.html">Oggi</a>
+    <a href="laurea.html">Laurea</a>
+    <a href="corsi.html" aria-current="page">Corsi</a>
+    <a href="materiali.html">Materiali</a>
+    <a href="workflow.html">Workflow</a>
+    <a href="diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<h1 class="titolo-pagina">I dodici esami</h1>
+<p class="tenue">Raggruppati per sessione d'esame, come stanno nel piano di laurea.</p>
+
+<section class="sezione" data-entra>
+  <h2>S1 <span class="tenue">— gennaio–febbraio 2027 · 30 CFU</span></h2>
+  <div class="griglia">
+    <a class="scheda scheda--link" href="corsi/FI2.html">
+      <p class="metrica__etichetta">12 CFU</p>
+      <h3 class="scheda__titolo">FI2</h3>
+      <p class="tenue">Fondamenti di Informatica T-2</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/CALC.html">
+      <p class="metrica__etichetta">6 CFU</p>
+      <h3 class="scheda__titolo">CALC</h3>
+      <p class="tenue">Calcolatori Elettronici T</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/MATAP.html">
+      <p class="metrica__etichetta">6 CFU</p>
+      <h3 class="scheda__titolo">MATAP</h3>
+      <p class="tenue">Matematica Applicata T</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/LAS.html">
+      <p class="metrica__etichetta">6 CFU</p>
+      <h3 class="scheda__titolo">LAS</h3>
+      <p class="tenue">Laboratorio di Amministrazione di Sistemi T</p>
+    </a>
+  </div>
+</section>
+<section class="sezione" data-entra>
+  <h2>S2 <span class="tenue">— giugno–luglio 2027 · 33 CFU</span></h2>
+  <div class="griglia">
+    <a class="scheda scheda--link" href="corsi/SO.html">
+      <p class="metrica__etichetta">9 CFU</p>
+      <h3 class="scheda__titolo">SO</h3>
+      <p class="tenue">Sistemi Operativi T</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/IDS.html">
+      <p class="metrica__etichetta">9 CFU</p>
+      <h3 class="scheda__titolo">IDS</h3>
+      <p class="tenue">Ingegneria del Software T</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/TLC.html">
+      <p class="metrica__etichetta">9 CFU</p>
+      <h3 class="scheda__titolo">TLC</h3>
+      <p class="tenue">Fondamenti di Telecomunicazioni T</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/ELT.html">
+      <p class="metrica__etichetta">6 CFU</p>
+      <h3 class="scheda__titolo">ELT</h3>
+      <p class="tenue">Elettrotecnica T</p>
+    </a>
+  </div>
+</section>
+<section class="sezione" data-entra>
+  <h2>S3 <span class="tenue">— gennaio–febbraio 2028 · 33 CFU</span></h2>
+  <div class="griglia">
+    <a class="scheda scheda--link" href="corsi/CA.html">
+      <p class="metrica__etichetta">9 CFU</p>
+      <h3 class="scheda__titolo">CA</h3>
+      <p class="tenue">Controlli Automatici T</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/RETI.html">
+      <p class="metrica__etichetta">9 CFU</p>
+      <h3 class="scheda__titolo">RETI</h3>
+      <p class="tenue">Reti di Calcolatori T</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/WEB.html">
+      <p class="metrica__etichetta">9 CFU</p>
+      <h3 class="scheda__titolo">WEB</h3>
+      <p class="tenue">Tecnologie Web T</p>
+    </a>
+    <a class="scheda scheda--link" href="corsi/ELN.html">
+      <p class="metrica__etichetta">6 CFU</p>
+      <h3 class="scheda__titolo">ELN</h3>
+      <p class="tenue">Elettronica T</p>
+    </a>
+  </div>
+</section>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "";</script>
+<script src="assets/indice.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

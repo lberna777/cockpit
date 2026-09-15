@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_moduloS1_offensive_security_enumerazione.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_moduloS1_offensive_security_enumerazione.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SECURITY/appunti_moduloS1_offensive_security_enumerazione.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-s1-principi-di-offensive-security-e-enumerazione">Appunti — Modulo S1: Principi di Offensive Security e Enumerazione</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Materiale</strong>: <code>Principi_delloffensive_security_20_febbraio.pdf</code> · <code>Introduzione_alla_materia_20_febbraio.pdf</code>
+<strong>Lab</strong>: <code>guida_lab_moduloS1_enumerazione_nmap.md</code>
+<strong>Stato</strong>: lezione ✅ · grezzi ✅ · appunti ✅ · lab ⬜</p>
+<hr />
+<h2 id="1-cose-loffensive-security">1. Cos'è l'offensive security</h2>
+<p><strong>Offensive security</strong>: simulazione di attacchi reali, con permesso e obiettivi definiti, per trovare le falle <em>prima</em> di un attaccante ostile. Il difensore che non ha mai "pensato da attaccante" tende a lasciare aperture ovvie proprio dove non guarda.</p>
+<p><strong>VA (Vulnerability Assessment)</strong>: enumera le vulnerabilità note del sistema. Risponde a "cosa c'è di rotto?".</p>
+<p><strong>PT (Penetration Testing)</strong>: assessment autorizzato che <em>sfrutta</em> le falle trovate dalla VA, verifica le catene di attacco, e produce un report che dimostra l'impatto reale. Risponde a "cosa riesco a fare davvero con le falle?". "Autorizzato" è la parola chiave: le stesse tecniche senza autorizzazione sono reati.</p>
+<p><strong>Red Team</strong>: operazione prolungata (settimane o mesi) che simula un attore ostile sofisticato, incluse tecniche di social engineering e movimenti laterali, senza che il blue team sappia quando e come arriverà l'attacco.</p>
+<p><strong>Metodologie standardizzate</strong>: OSSTMM, OWASP (focalizzato su web app), NIST 800-115 (guida tecnica governo USA), ISSAF, PCI DSS (sistemi di pagamento). Garantiscono che il PT sia riproducibile, misurabile, e difendibile legalmente.</p>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi — MITRE ATT&amp;CK.
+<strong>MITRE ATT&amp;CK</strong> è il catalogo delle tecniche usate in ciascuna fase da gruppi APT reali. È la "biblioteca" che i team di difesa consultano per sapere cosa aspettarsi da un attore specifico. Compare spesso nel quiz teorico come riferimento alla nomenclatura delle tecniche.</p>
+</blockquote>
+<hr />
+<h2 id="2-kill-chain">2. Kill Chain</h2>
+<blockquote>
+<p>✅ Ottima intuizione: avevi il nome corretto. La struttura è questa:</p>
+</blockquote>
+<p>La <strong>Kill Chain</strong> è la sequenza di fasi che compone un attacco completo:</p>
+<table>
+<thead>
+<tr>
+<th>Fase</th>
+<th>Cosa succede</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reconnaissance</strong></td>
+<td>Raccolta info sull'obiettivo (passiva e attiva)</td>
+</tr>
+<tr>
+<td><strong>Weaponization</strong></td>
+<td>Costruzione del payload/exploit</td>
+</tr>
+<tr>
+<td><strong>Delivery</strong></td>
+<td>Consegna del payload al target (phishing, web, USB)</td>
+</tr>
+<tr>
+<td><strong>Exploitation</strong></td>
+<td>Esecuzione dell'exploit sulla vulnerabilità</td>
+</tr>
+<tr>
+<td><strong>Installation</strong></td>
+<td>Installazione di backdoor/RAT per persistenza</td>
+</tr>
+<tr>
+<td><strong>Command &amp; Control</strong></td>
+<td>Connessione al C2 server per controllare l'host compromesso</td>
+</tr>
+<tr>
+<td><strong>Actions on Objectives</strong></td>
+<td>Raggiungimento dell'obiettivo (data exfiltration, ransomware, etc.)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>In S1 si affrontano solo le prime due fasi</strong> — Reconnaissance ed Enumeration. Le fasi successive entrano in S3–S11.</p>
+<hr />
+<h2 id="3-rischio-difesa-e-superfici-dattacco">3. Rischio, difesa e superfici d'attacco</h2>
+<blockquote>
+<p>✅ Ottima definizione: "rischio come prodotto tra probabilità e impatto" — è proprio la formula della lezione.</p>
+</blockquote>
+<p><strong>RISCHIO = PROBABILITÀ × IMPATTO</strong>. Orienta quanto sforzo vale la pena investire per correggere una falla.</p>
+<blockquote>
+<p>✅ "Window of Exposure: tempo che passa tra la scoperta della falla e la patch" — corretto. Si mira a tenerla breve.</p>
+</blockquote>
+<p><strong>Zero-day</strong>: vulnerabilità sfruttata prima che esista una patch — window of exposure teoricamente infinita per la vittima.</p>
+<p><strong>Paesaggio minacce reali</strong> (ENISA 2023): ransomware 31%, DDoS 21%, violazioni dati 20%. Tre casi concreti che illustrano la complessità moderna:</p>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi — casi concreti.
+- <strong>Stuxnet</strong>: malware che ha sabotato fisicamente le centrifughe di arricchimento uranio iraniane modificando i PLC Siemens. Primo caso documentato di attacco cyber con effetti fisici nel mondo reale.
+- <strong>SolarWinds (2020)</strong>: attacco supply chain. Gli attaccanti hanno compromesso il processo di build di Orion inserendo una DLL malevola distribuita come aggiornamento legittimo firmato dal vendor a migliaia di organizzazioni.
+- <strong>xz/liblzma (CVE-2024-3094)</strong>: due anni di social engineering su un maintainer open source per inserire una backdoor in una libreria presente in quasi tutte le distro Linux. La supply chain open source è vulnerabile quanto quella commerciale.</p>
+</blockquote>
+<p><strong>NIST Cybersecurity Framework (CSF)</strong>:</p>
+<blockquote>
+<p>La struttura che chiedevi — "argomenta e inserisci il processo":</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Fase</th>
+<th>Domanda a cui risponde</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Identify</strong></td>
+<td>Cosa ho? Cosa vale la pena proteggere?</td>
+</tr>
+<tr>
+<td><strong>Protect</strong></td>
+<td>Come riduco la probabilità di un attacco?</td>
+</tr>
+<tr>
+<td><strong>Detect</strong></td>
+<td>Come mi accorgo che qualcosa sta succedendo?</td>
+</tr>
+<tr>
+<td><strong>Respond</strong></td>
+<td>Cosa faccio quando rilevo un incidente?</td>
+</tr>
+<tr>
+<td><strong>Recover</strong></td>
+<td>Come ripristino l'operatività dopo?</td>
+</tr>
+</tbody>
+</table>
+<p>Non è lineare ma <strong>ciclico</strong>: un incidente alimenta la fase Identify del ciclo successivo.</p>
+<p><strong>Politiche &amp; Meccanismi</strong>: le politiche dichiarano <em>cosa</em> è consentito ("nessun accesso remoto senza MFA"); i meccanismi sono gli strumenti tecnici che le fanno rispettare (firewall, IDS, autenticazione). Una politica senza meccanismo è carta; un meccanismo senza politica è rumore.</p>
+<p><strong>Superfici d'attacco</strong> — 3 vettori:</p>
+<blockquote>
+<p>✅ "Forme di attacco: fisico, cyber, umano" — corretto e completo.</p>
+</blockquote>
+<ul>
+<li><strong>Fisico</strong>: accesso fisico ai locali e alle macchine</li>
+<li><strong>Cyber</strong>: rete, applicazioni, sistemi (focus di S1)</li>
+<li><strong>Umano</strong>: phishing, social engineering (si intreccia lungo tutto il programma)</li>
+</ul>
+<hr />
+<h2 id="4-reconnaissance">4. Reconnaissance</h2>
+<p>La reconnaissance è la fase in cui si raccolgono informazioni sull'obiettivo <strong>senza interagire direttamente con i suoi sistemi</strong>. Si divide in:
+- <strong>Passiva</strong>: fonti pubbliche, nessun contatto col target. Lascia meno tracce. Si inizia sempre da qui.
+- <strong>Attiva</strong>: interazione diretta (ping, port scan). Più informazioni, più rumore.</p>
+<h3 id="41-google-dorking">4.1 Google Dorking</h3>
+<blockquote>
+<p>La tabella degli operatori che chiedevi:</p>
+</blockquote>
+<p>Google indicizza tutto ciò che viene esposto, volontariamente o per errore. Un attaccante lo usa come chiunque altro.</p>
+<table>
+<thead>
+<tr>
+<th>Operatore</th>
+<th>Cosa fa</th>
+<th>Esempio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>site:</code></td>
+<td>Limita la ricerca a un dominio</td>
+<td><code>site:unibo.it</code></td>
+</tr>
+<tr>
+<td><code>filetype:</code></td>
+<td>Tipo di file specifico</td>
+<td><code>filetype:PDF</code></td>
+</tr>
+<tr>
+<td><code>intext:</code></td>
+<td>Parola nel contenuto della pagina</td>
+<td><code>intext:password</code></td>
+</tr>
+<tr>
+<td><code>intitle:</code></td>
+<td>Parola nel titolo della pagina</td>
+<td><code>intitle:index.of</code></td>
+</tr>
+<tr>
+<td><code>inurl:</code></td>
+<td>Parola nell'URL</td>
+<td><code>inurl:admin</code></td>
+</tr>
+<tr>
+<td><code>cache:</code></td>
+<td>Versione in cache di Google</td>
+<td><code>cache:example.com</code></td>
+</tr>
+<tr>
+<td><code>-</code> (minus)</td>
+<td>Esclude un termine</td>
+<td><code>-id_rsa.pub</code></td>
+</tr>
+</tbody>
+</table>
+<p>Esempi concreti dalle slide:</p>
+<pre><code>site:ulisse.unibo.it filetype:PDF intext:password
+→ trova PDF su quel dominio che contengono la parola &quot;password&quot;
+
+site:ulisse.unibo.it intitle:index.of id_rsa -id_rsa.pub
+→ cerca directory listing con chiavi SSH private esposte
+</code></pre>
+<p>Il database <strong>Google Hacking</strong> (exploit-db.com/google-hacking-database) cataloga dork già noti per trovare configurazioni errate comuni.</p>
+<blockquote>
+<p>✅ "robots.txt: convenzione tra web developer e crawler legittimi... un hacker se ne sbatte" — ottima sintesi del punto critico.</p>
+</blockquote>
+<p><strong><code>robots.txt</code></strong> dice ai crawler cosa non indicizzare. <code>Disallow: /cartella-sensibile</code> blocca i crawler legittimi — ma è una <strong>convenzione, non un meccanismo di sicurezza</strong>. Un crawler ostile lo ignora, e la stessa lista delle cartelle escluse può rivelare all'attaccante cosa c'è di interessante. La vera difesa è non esporre mai dati sensibili su server pubblici.</p>
+<h3 id="42-osint-su-ip-e-domini">4.2 OSINT su IP e domini</h3>
+<p>Gerarchia di assegnazione IP: <strong>IANA</strong> → <strong>RIR</strong> (es. RIPE per l'Europa) → <strong>LIR</strong> (università, ISP). Conoscere anche solo un IP di un sistema dell'obiettivo permette di risalire via RIPE a tutti i blocchi allocati a quell'organizzazione.</p>
+<h3 id="43-dns-enumeration">4.3 DNS Enumeration</h3>
+<blockquote>
+<p>Il "retro engineering" che intuivi è esatto come concetto — è proprio quello che si fa: da un IP si risale all'organizzazione. La sezione DNS che chiedevi:</p>
+</blockquote>
+<p>Il DNS è l'elenco telefonico di internet, ma anche una miniera di informazioni organizzative. I <strong>record DNS</strong> rivelano struttura e infrastruttura del target:</p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Cosa rivela</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>hostname → IPv4</td>
+</tr>
+<tr>
+<td>AAAA</td>
+<td>hostname → IPv6</td>
+</tr>
+<tr>
+<td>CNAME</td>
+<td>alias (rivela nomi interni, CDN usati)</td>
+</tr>
+<tr>
+<td>MX</td>
+<td>mail server dell'organizzazione</td>
+</tr>
+<tr>
+<td>NS</td>
+<td>nameserver autoritativi (rivela provider DNS, cloud)</td>
+</tr>
+<tr>
+<td>SOA</td>
+<td>zona + email admin del dominio</td>
+</tr>
+<tr>
+<td>TXT</td>
+<td>SPF → mappa infrastruttura cloud</td>
+</tr>
+<tr>
+<td>PTR</td>
+<td>reverse lookup: da IP a hostname (rivela nomi interni)</td>
+</tr>
+<tr>
+<td>SRV</td>
+<td>service locator (es. SIP, XMPP)</td>
+</tr>
+</tbody>
+</table>
+<p>Tool: <code>nslookup google.com</code> (record A base); <code>nslookup -type=any google.com</code> (tutti i tipi); <code>dnsrecon -d DOMAIN</code>; <code>dnsmap DOMAIN</code> (bruteforce sottodomini).</p>
+<p><strong>Zone transfer (AXFR)</strong>: se un nameserver è mal configurato, risponde a richieste AXFR restituendo l'intera zona DNS in una query — tutta la struttura interna dell'organizzazione in un colpo solo.</p>
+<h3 id="44-subdomain-enumeration-e-ct-abuse">4.4 Subdomain Enumeration e CT Abuse</h3>
+<blockquote>
+<p>La versione semplificata che chiedevi:</p>
+</blockquote>
+<p>I sottodomini sono superfici d'attacco trascurate — dietro <code>old-staging.example.com</code> può nascondersi un'applicazione dimenticata, non aggiornata.</p>
+<p><strong>⚠️ Distinzione critica</strong>: <code>http://myaltropc.ulisse.com</code> non è un subdomain DNS — è un'applicazione ospitata sulle porte 80/443 di un host. Un subdomain DNS come <code>corsosec.ulisse.com</code> potrebbe invece esporre un servizio su porta 8080 senza nulla su 80. Strategia corretta: (1) mappa tutti i subdomain DNS, (2) per ciascuno analizza separatamente quali servizi espone e su quali porte.</p>
+<p><strong>Approccio passivo</strong> — interroga dataset pubblici senza toccare il target:
+- SecurityTrails, Shodan, Censys, VirusTotal, Binaryedge
+- Tool: <code>amass</code> (OWASP), <code>subfinder</code>, <code>assetfinder</code>, <code>Findomain</code></p>
+<p><strong>Certificate Transparency (CT) abuse</strong>: ogni certificato TLS emesso viene registrato in log pubblici e immutabili (RFC 6962). Interrogando <code>crt.sh/?q=%25.example.com</code> si ottengono tutti i sottodomini che hanno mai avuto un certificato — inclusi quelli rimossi dal DNS ma ancora raggiungibili. Non esiste difesa: la trasparenza è by design.</p>
+<p><strong>Approccio attivo</strong>: DNS bruteforcing, permutation/alternations, VHOST probing. Non esiste difesa reale dall'enumeration attiva — i subdomain sono pubblici per definizione.</p>
+<p><strong>Shodan.io</strong>: motore di ricerca per dispositivi connessi. Mentre Google indicizza HTML, Shodan indicizza i banner dei servizi esposti su internet: porte aperte, versione del software, geolocalizzazione, organizzazione.</p>
+<hr />
+<h2 id="5-nmap-enumerazione-attiva">5. nmap — Enumerazione Attiva</h2>
+<blockquote>
+<p>La spiegazione con esempi e output di sistema che chiedevi:</p>
+</blockquote>
+<p><code>nmap</code> è lo strumento centrale della fase di enumerazione attiva. Si usa in tre passaggi progressivi:</p>
+<h3 id="51-host-discovery-sn">5.1 Host Discovery (<code>-sn</code>)</h3>
+<pre><code class="language-bash">sudo nmap -sn 192.168.X.0/24
+</code></pre>
+<pre><code>Nmap scan report for 192.168.56.32
+Host is up (0.007s latency).
+Nmap scan report for 192.168.56.33
+Host is up (0.001s latency).
+</code></pre>
+<blockquote>
+<p>⚠️ <strong>Errore frequente</strong>: <code>nmap -sn</code> senza <code>sudo</code> — senza privilegi non usa ARP su rete locale, più lento e meno affidabile.</p>
+</blockquote>
+<h3 id="52-port-scan-completo-p-">5.2 Port Scan completo (<code>-p-</code>)</h3>
+<pre><code class="language-bash">nmap -sT 192.168.56.32 -p-
+</code></pre>
+<pre><code>PORT     STATE SERVICE
+22/tcp   open  ssh
+80/tcp   open  http
+3306/tcp open  mysql
+5432/tcp open  postgresql
+</code></pre>
+<blockquote>
+<p>⚠️ <strong>Errore frequente</strong>: senza <code>-p-</code> nmap scansiona solo ~1000 porte popolari. Un servizio SSH su 1337 non appare. Usa sempre <code>-p-</code> per la mappa completa.</p>
+</blockquote>
+<p><strong>Differenza <code>-sT</code> vs <code>-sS</code></strong>: <code>-sT</code> completa il three-way handshake (non richiede root, più rumoroso); <code>-sS</code> invia solo SYN e non completa la connessione (richiede root, più veloce e stealth, default con sudo).</p>
+<h3 id="53-version-detection-sv">5.3 Version Detection (<code>-sV</code>)</h3>
+<pre><code class="language-bash">nmap -sV 192.168.56.32 -p 22,80,3306,5432
+</code></pre>
+<pre><code>PORT     STATE SERVICE  VERSION
+22/tcp   open  ssh      OpenSSH 9.2p1 Debian 2+deb12u4
+80/tcp   open  http     Apache httpd 2.4.57
+3306/tcp open  mysql    MariaDB 10.11.4
+5432/tcp open  postgresql PostgreSQL 15.3
+</code></pre>
+<blockquote>
+<p>⚠️ <strong>Errore frequente</strong>: <code>-sT</code> e <code>-sV</code> non sono equivalenti. <code>-sT</code> = TCP connect, dice solo "porta aperta/chiusa". <code>-sV</code> legge il banner del servizio e identifica nome + versione. Per l'enumeration vera serve <code>-sV</code>.</p>
+<p>⚠️ <strong>Errore frequente</strong>: <code>-p 22 80 3306</code> — spazi tra i numeri fanno trattare <code>80</code> e <code>3306</code> come host aggiuntivi. Usa sempre la virgola: <code>-p 22,80,3306</code>.</p>
+</blockquote>
+<p><strong>unicornscan</strong>: alternativa a nmap con fingerprinting più affidabile e più veloce (separa fase di invio e ricezione). Preferibile quando si vuole evitare il <strong>reverse fingerprinting</strong> (il target non riesce a identificare l'OS dell'attaccante dal modo in cui costruisce i pacchetti).</p>
+<hr />
+<h2 id="6-evasione-scan-senza-essere-visti">6. Evasione: scan senza essere visti</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi.</p>
+</blockquote>
+<p>La fase di enumeration genera traffico visibile — IDS e IPS possono rilevarlo.</p>
+<ul>
+<li><strong>Reconnaissance anonima</strong>: ToR, account usa-e-getta, VM periodicamente sostituite</li>
+<li><strong>Timing nmap</strong>: <code>-T0</code> (ultra-lento, stealth) → <code>-T5</code> (aggressivo). Default: <code>-T3</code></li>
+<li><strong>Stealth scan</strong>: randomizza ordine IP e porte, usa decoy scan, source port spoofing</li>
+<li><strong>Reverse fingerprinting</strong>: il target identifica l'OS dell'attaccante dal modo in cui costruisce i pacchetti TCP. unicornscan lo evita usando stack separato</li>
+</ul>
+<hr />
+<h2 id="7-tentativi-di-accesso-ai-servizi-e-vulnerability-scanners">7. Tentativi di accesso ai servizi e Vulnerability Scanners</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi.</p>
+</blockquote>
+<p>Dopo enumeration, si analizzano i <strong>protocolli applicativi</strong> esposti: SMB, SMTP, SNMP. Il <strong>fuzzing applicativo</strong> (tool: <code>bed</code>, <code>doona</code>) invia payload randomizzati per trovare crash o info leak.</p>
+<p><strong>Vulnerability scanners</strong> — automatizzano il passaggio da "porta aperta" a "vulnerabilità sfruttabile":
+- <strong>Nessus</strong> (Tenable, commerciale)
+- <strong>OpenVAS / Greenbone Community Edition (GCE)</strong> — fork open-source di Nessus dal 2005. Architettura: OpenVAS Scanner + Notus Scanner → <code>ospd-openvas</code> → <strong>gvmd</strong> → interfaccia web <strong>Greenbone Security Assistant (GSA)</strong>. Il feed giornaliero contiene <strong>NVT</strong> (Network Vulnerability Tests): per ogni vulnerabilità, descrizione, piattaforme colpite, processo di verifica.</p>
+<hr />
+<h2 id="8-postura-interna-vs-esterna">8. Postura interna vs esterna</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi.</p>
+</blockquote>
+<p>Reconnaissance ed enumeration si fanno tipicamente <strong>dall'esterno</strong> — postura fedele all'attaccante reale. Dall'esterno però ci sono NIDS e firewall di perimetro.</p>
+<p><strong>Auto-attacco dall'interno</strong>: si simula un attaccante già infiltrato. NIDS e FW perimetrali vengono scavalcati, i sistemi interni sono raggiungibili direttamente, i test per HIDS (S11) sono più efficaci. In S1 si parte dall'esterno; S7–S11 esplorano la postura interna.</p>
+<hr />
+<h2 id="9-connessioni">9. Connessioni</h2>
+<ul>
+<li><strong>SysAdmin 3D</strong>: <code>ss -tlnp</code> dall'interno mostra le stesse porte che nmap vede dall'esterno — stessa realtà, prospettiva ribaltata</li>
+<li><strong>S2 (Autenticazione)</strong>: nmap <code>-sV</code> rivela i servizi; S2 mostra come attaccarli a livello di credenziali</li>
+<li><strong>S3 (Web Security)</strong>: la subdomain enumeration porta a web app dimenticate — quelle stesse app vengono attaccate in S3 con OWASP Top 10</li>
+<li><strong>S5 (Firewall)</strong>: la scansione stealth di nmap è il punto di vista opposto rispetto alle regole iptables di S5</li>
+<li><strong>S10 (Suricata)</strong>: ogni scan nmap genera traffico rilevabile. In S1 lo si genera; in S10 si scrivono regole per rilevarlo</li>
+</ul>
+<hr />
+<h2 id="10-domande-di-autoverifica-risposte">10. Domande di autoverifica — Risposte</h2>
+<blockquote>
+<p>✅ <strong>Tutte e 6 le risposte sono corrette!</strong></p>
+</blockquote>
+<p><strong>1.</strong> Un PT differisce da una VA perché: <strong>C</strong> — verifica effettivamente la sfruttabilità delle vulnerabilità trovate. ✅</p>
+<p><strong>2.</strong> <code>site:example.com filetype:PDF intext:password</code> trova: <strong>B</strong> — PDF su example.com che contengono la parola "password" nel testo. ✅</p>
+<p><strong>3.</strong> Il record DNS di tipo MX rivela: <strong>B</strong> — i mail server dell'organizzazione. ✅</p>
+<blockquote>
+<p>Avevi il <code>(?)</code> — conferma: B è corretto. MX = Mail eXchanger.</p>
+</blockquote>
+<p><strong>4.</strong> <code>-sT</code> e <code>-sV</code> forniscono lo stesso livello di informazione: <strong>Falso</strong>. ✅</p>
+<blockquote>
+<p><code>-sT</code> = porta aperta/chiusa; <code>-sV</code> = porta + servizio + versione via banner.</p>
+</blockquote>
+<p><strong>5.</strong> La CT abuse permette di: <strong>B</strong> — enumerare i sottodomini cercando nei log CT pubblici. ✅</p>
+<p><strong>6.</strong> <code>robots.txt</code> con <code>Disallow: /</code> impedisce agli attaccanti di accedere alle cartelle escluse: <strong>Falso</strong>. ✅</p>
+<blockquote>
+<p>Il tuo "Fc" era abbreviazione di "Falso" — risposta esatta.</p>
+</blockquote>
+<hr />
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[guida_lab_moduloS1_enumerazione_nmap]]</li>
+<li>[[lezione_moduloS1_offensive_security_enumerazione]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

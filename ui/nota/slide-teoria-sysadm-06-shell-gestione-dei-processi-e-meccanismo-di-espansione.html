@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 - Shell Gestione dei Processi e Meccanismo di Espansione.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  slide-teoria · LAS</p>
+<h1 class="titolo-pagina">06 - Shell Gestione dei Processi e Meccanismo di Espansione.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/06 - Shell Gestione dei Processi e Meccanismo di Espansione.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="shell-gestione-dei-processi-e-meccanismo-di-espansione">Shell: Gestione dei Processi e Meccanismo di Espansione</h1>
+<p>Laboratorio di Amministrazione di Sistemi — Prof. Prandini</p>
+<hr />
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-principi-dello-scripting-con-bash">Principi dello Scripting con Bash</a></li>
+<li><a href="#2-fork-ed-exec">Fork ed Exec</a></li>
+<li><a href="#3-stream-shell-terminale-e-avvio-dei-programmi">Stream, Shell, Terminale e Avvio dei Programmi</a></li>
+<li><a href="#4-stream-e-ridirezione">Stream e Ridirezione</a></li>
+<li><a href="#5-ridirezioni-speciali-e-permanenti">Ridirezioni Speciali e Permanenti</a></li>
+<li><a href="#6-la-pipe-in-bash-costruzione-interna">La Pipe in Bash: Costruzione Interna</a></li>
+<li><a href="#7-pipe-con-builtin-e-funzioni">Pipe con Builtin e Funzioni</a></li>
+<li><a href="#8-subshell">Subshell</a></li>
+<li><a href="#9-interazione-con-i-processi-pid-e-job-id">Interazione con i Processi: PID e Job ID</a></li>
+<li><a href="#10-segnali">Segnali</a></li>
+<li><a href="#11-disposizione-dei-segnali-e-trap">Disposizione dei Segnali e trap</a></li>
+<li><a href="#12-invio-di-segnali-kill-e-scorciatoie-da-terminale">Invio di Segnali: kill e Scorciatoie da Terminale</a></li>
+<li><a href="#13-sleep-e-interazione-con-i-segnali">sleep e Interazione con i Segnali</a></li>
+<li><a href="#14-processi-in-background--wait-jobs-fg">Processi in Background: &amp;, wait, jobs, fg</a></li>
+<li><a href="#15-modificatori-per-il-background-nohup-nice-disown">Modificatori per il Background: nohup, nice, disown</a></li>
+<li><a href="#16-il-meccanismo-di-espansione-della-shell">Il Meccanismo di Espansione della Shell</a></li>
+</ol>
+<hr />
+<h2 id="1-principi-dello-scripting-con-bash">1. Principi dello Scripting con Bash</h2>
+<p>Bash è al tempo stesso una shell interattiva e un interprete di script. La sua funzione principale è gestire due categorie di risorse del sistema operativo: <strong>file</strong> e <strong>processi</strong>. Tutta la potenza di bash deriva dalla capacità di orchestrare comandi (processi) e di collegare i loro flussi di I/O (file descriptor) attraverso i meccanismi di pipe e ridirezione.</p>
+<p>Un aspetto fondamentale da interiorizzare è che bash è un interprete <strong>espansivo</strong>: prima di eseguire un comando, la riga digitata dall'utente viene sottoposta a una serie ordinata di trasformazioni (le <em>espansioni</em>). Comprendere questo meccanismo è indispensabile per prevedere il comportamento degli script e per evitare errori sottili.</p>
+<hr />
+<h2 id="2-fork-ed-exec">2. Fork ed Exec</h2>
+<p>Ogni nuovo processo in Unix nasce attraverso la coppia di system call <strong><code>fork()</code></strong> e <strong><code>exec()</code></strong>.</p>
+<h3 id="fork">fork()</h3>
+<p><code>fork()</code> <strong>duplica</strong> il processo chiamante (<em>processo padre</em>), creando un processo figlio (<em>child</em>) che eredita:</p>
+<ul>
+<li>una copia dell'<strong>immagine di memoria</strong> (stack, heap, variabili globali)</li>
+<li>la <strong>tabella dei file descriptor</strong> aperti (stdin, stdout, stderr e tutti gli altri)</li>
+<li>le <strong>strutture dell'utente</strong> (UID, GID, directory corrente, ecc.)</li>
+</ul>
+<p>Padre e figlio condividono inizialmente il <strong>segmento di testo</strong> (codice), che viene duplicato solo se uno dei due lo modifica (meccanismo <em>copy-on-write</em>). Dopo <code>fork()</code>, entrambi i processi riprendono l'esecuzione dalla stessa istruzione, distinguendosi dal valore di ritorno: <code>0</code> nel figlio, PID del figlio nel padre.</p>
+<h3 id="exec">exec()</h3>
+<p><code>exec()</code> <strong>sostituisce</strong> l'immagine del processo corrente con un nuovo programma: il codice, lo stack e l'heap del chiamante vengono rimpiazzati da quelli del nuovo eseguibile. I file descriptor aperti vengono conservati (a meno che non abbiano il flag <code>FD_CLOEXEC</code>). Il PID rimane invariato.</p>
+<p>Il pattern tipico in bash è: <code>fork()</code> per creare un figlio, poi <code>exec()</code> nel figlio per eseguire il comando richiesto. Il padre attende la terminazione del figlio con <code>wait()</code>.</p>
+<hr />
+<h2 id="3-stream-shell-terminale-e-avvio-dei-programmi">3. Stream, Shell, Terminale e Avvio dei Programmi</h2>
+<p>Quando un utente accede al sistema, si instaura una catena di processi collegati:</p>
+<pre><code>terminale (hardware o emulatore) → /dev/tty* o /dev/pts/* → bash → comando
+</code></pre>
+<p>Il kernel espone i dispositivi di I/O attraverso file speciali in <code>/dev</code>: <code>/dev/tty*</code> per i terminali fisici (console), <code>/dev/pts/*</code> per gli pseudoterminali (finestre di terminale, SSH). Quando bash lancia un comando, il figlio eredita i <strong>file descriptor</strong> 0 (stdin), 1 (stdout) e 2 (stderr) di bash, che a loro volta puntano al dispositivo terminale.</p>
+<p>Questa catena di fork/exec è il motivo per cui i programmi "vedono" automaticamente il terminale come loro I/O standard: lo ereditano dal processo bash che li ha lanciati.</p>
+<hr />
+<h2 id="4-stream-e-ridirezione">4. Stream e Ridirezione</h2>
+<p>I tre stream standard sono:</p>
+<table>
+<thead>
+<tr>
+<th>File Descriptor</th>
+<th>Nome</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>stdin</td>
+<td>Input standard</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>stdout</td>
+<td>Output standard</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>stderr</td>
+<td>Output di errore</td>
+</tr>
+</tbody>
+</table>
+<p>Le <strong>ridirezioni</strong> modificano il collegamento di questi file descriptor prima dell'esecuzione del comando:</p>
+<table>
+<thead>
+<tr>
+<th>Sintassi</th>
+<th>Effetto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd &gt; file</code></td>
+<td>Ridirezione stdout su <code>file</code> (sovrascrive)</td>
+</tr>
+<tr>
+<td><code>cmd &gt;&gt; file</code></td>
+<td>Ridirezione stdout su <code>file</code> (aggiunge in coda)</td>
+</tr>
+<tr>
+<td><code>cmd 2&gt; file</code></td>
+<td>Ridirezione stderr su <code>file</code> (sovrascrive)</td>
+</tr>
+<tr>
+<td><code>cmd 2&gt;&gt; file</code></td>
+<td>Ridirezione stderr su <code>file</code> (aggiunge in coda)</td>
+</tr>
+<tr>
+<td><code>cmd 2&gt;&amp;1</code></td>
+<td>Ridirezione stderr sullo stesso fd di stdout</td>
+</tr>
+<tr>
+<td><code>cmd &lt; file</code></td>
+<td>Ridirezione stdin da <code>file</code></td>
+</tr>
+</tbody>
+</table>
+<p>L'ordine delle ridirezioni è significativo: <code>cmd &gt; file 2&gt;&amp;1</code> ridireige prima stdout su <code>file</code>, poi stderr sullo stesso fd di stdout (quindi su <code>file</code>). L'ordine inverso <code>cmd 2&gt;&amp;1 &gt; file</code> produce un effetto diverso.</p>
+<hr />
+<h2 id="5-ridirezioni-speciali-e-permanenti">5. Ridirezioni Speciali e Permanenti</h2>
+<h3 id="here-document">Here Document</h3>
+<p>Consente di fornire un blocco di testo multiriga come stdin di un comando, all'interno dello script:</p>
+<pre><code class="language-bash">cat &lt;&lt;MARKER
+Prima riga
+Seconda riga
+MARKER
+</code></pre>
+<p>Il testo tra i due <code>MARKER</code> viene inviato a stdin di <code>cat</code>. Le espansioni di variabili sono attive all'interno del here document (a meno di non quotare il marker di apertura: <code>&lt;&lt;'MARKER'</code>).</p>
+<h3 id="here-string">Here String</h3>
+<p>Versione compatta del here document per fornire una singola stringa come stdin:</p>
+<pre><code class="language-bash">cat &lt;&lt;&lt; &quot;testo da passare a stdin&quot;
+</code></pre>
+<h3 id="ridirezioni-permanenti-con-exec">Ridirezioni Permanenti con exec</h3>
+<p><code>exec</code> senza un comando da eseguire modifica i file descriptor della shell corrente in modo permanente per il resto dello script:</p>
+<pre><code class="language-bash">exec 2&gt;/dev/null            # da qui in poi, stderr va in /dev/null
+exec 3&lt; filein              # fd 3 aperto in lettura su filein
+exec 4&gt; fileout             # fd 4 aperto in scrittura su fileout
+exec 5&lt;&gt; filerw             # fd 5 aperto in lettura e scrittura
+</code></pre>
+<p>Questo meccanismo è utile per redirigere stderr dell'intero script o per aprire file descriptor aggiuntivi per comunicazioni tra parti dello script.</p>
+<hr />
+<h2 id="6-la-pipe-in-bash-costruzione-interna">6. La Pipe in Bash: Costruzione Interna</h2>
+<p>La pipe (<code>|</code>) è uno dei meccanismi più potenti di Unix: consente di collegare lo stdout di un processo allo stdin del successivo. La sua costruzione interna in bash segue esattamente <strong>6 passi</strong>:</p>
+<p><strong>Esempio</strong>: <code>ls | sort</code></p>
+<ol>
+<li>
+<p><strong><code>pipe(fd[])</code></strong> — bash chiama la system call <code>pipe()</code>, che crea un canale unidirezionale nel kernel e restituisce due file descriptor: <code>fd[0]</code> (estremità di lettura) e <code>fd[1]</code> (estremità di scrittura).</p>
+</li>
+<li>
+<p><strong><code>fork()</code> × 2</strong> — bash si duplica due volte, creando due processi figli: <code>bash_c1</code> (per <code>ls</code>) e <code>bash_c2</code> (per <code>sort</code>).</p>
+</li>
+<li>
+<p><strong><code>dup2(fd[1], 1)</code> nel figlio 1</strong> — <code>bash_c1</code> sostituisce il proprio stdout (fd 1) con l'estremità di scrittura della pipe (<code>fd[1]</code>). Da questo momento, tutto ciò che <code>ls</code> scriverà su stdout finirà nella pipe.</p>
+</li>
+<li>
+<p><strong><code>dup2(fd[0], 0)</code> nel figlio 2</strong> — <code>bash_c2</code> sostituisce il proprio stdin (fd 0) con l'estremità di lettura della pipe (<code>fd[0]</code>). Da questo momento, <code>sort</code> leggerà da stdin ciò che arriva dalla pipe.</p>
+</li>
+<li>
+<p><strong>Chiusura di <code>fd[0]</code> e <code>fd[1]</code></strong> — entrambi i figli chiudono le estremità originali (non duplicate) della pipe, in modo che il canale si chiuda correttamente quando il produttore termina.</p>
+</li>
+<li>
+<p><strong><code>exec("ls")</code> e <code>exec("sort")</code></strong> — i figli eseguono i comandi richiesti. Quando <code>ls</code> termina, l'estremità di scrittura della pipe si chiude; <code>sort</code> riceve EOF su stdin e può completare l'ordinamento.</p>
+</li>
+</ol>
+<hr />
+<h2 id="7-pipe-con-builtin-e-funzioni">7. Pipe con Builtin e Funzioni</h2>
+<p>Quando uno dei comandi in una pipeline è un <strong>builtin</strong> bash o una <strong>funzione</strong>, non può essere eseguito con <code>exec()</code> (che sostituisce il processo). In questo caso il passo 6 è diverso:</p>
+<ul>
+<li>il figlio corrispondente al builtin/funzione <strong>non chiama <code>exec()</code></strong>, ma esegue direttamente il codice del builtin nella propria copia di bash (che diventa una <em>subshell</em>).</li>
+</ul>
+<p>Questa distinzione ha importanti conseguenze: le modifiche a variabili effettuate all'interno di un builtin in pipeline (ad esempio <code>read</code> in <code>... | read VAR</code>) avvengono in una subshell e non sono visibili nella shell genitrice.</p>
+<hr />
+<h2 id="8-subshell">8. Subshell</h2>
+<p>Una <strong>subshell</strong> è un processo figlio di bash che esegue un gruppo di comandi in un ambiente separato. Si crea con la sintassi:</p>
+<pre><code class="language-bash">( cmd1 ; cmd2 ; cmd3 )
+</code></pre>
+<p>La subshell <strong>eredita</strong> tutto l'ambiente della shell genitrice (variabili, file descriptor aperti, directory corrente), ma ogni modifica effettuata al suo interno (assegnazione di variabili, cambio di directory, ridirezioni permanenti) è <strong>locale</strong> alla subshell e non si propaga alla genitrice.</p>
+<p>Le subshell sono utili per isolare effetti collaterali:</p>
+<pre><code class="language-bash"># La directory corrente della shell genitrice non cambia
+(cd /tmp &amp;&amp; ls)
+echo &quot;Sono ancora in: $PWD&quot;
+</code></pre>
+<hr />
+<h2 id="9-interazione-con-i-processi-pid-e-job-id">9. Interazione con i Processi: PID e Job ID</h2>
+<p>Ogni processo nel sistema è identificato da un <strong>PID</strong> (<em>Process ID</em>), un numero intero assegnato dal kernel al momento della creazione. I processi in esecuzione sotto la stessa sessione bash sono organizzati in <strong>job</strong>, identificati da un <strong>Job ID</strong> progressivo.</p>
+<p>I processi vengono eseguiti con i <strong>privilegi dell'utente</strong> che ha lanciato la shell, il che determina i file accessibili e le operazioni permesse.</p>
+<p>La variabile speciale <code>$!</code> contiene il PID dell'ultimo processo lanciato in background con <code>&amp;</code>.</p>
+<hr />
+<h2 id="10-segnali">10. Segnali</h2>
+<p>I <strong>segnali</strong> sono eventi asincroni che il kernel invia ai processi per notificare condizioni particolari (errori, richieste di terminazione, interrupt da tastiera, ecc.). Ogni segnale è identificato da un numero intero e da un nome simbolico.</p>
+<p>Caratteristiche fondamentali:</p>
+<ul>
+<li>I segnali sono <strong>asincroni</strong>: possono arrivare in qualunque momento, indipendentemente da ciò che il processo sta facendo.</li>
+<li>Un segnale può trovarsi in stato <strong>pending</strong> (consegnato ma non ancora gestito) mentre il processo è occupato in una system call bloccante.</li>
+<li>Ciascun processo può registrare un <strong>handler</strong> (gestore) per ogni segnale, ovvero una funzione da eseguire alla ricezione del segnale.</li>
+</ul>
+<hr />
+<h2 id="11-disposizione-dei-segnali-e-trap">11. Disposizione dei Segnali e trap</h2>
+<p>La risposta di un processo a un segnale è detta <strong>disposizione</strong> (<em>disposition</em>). Le disposizioni possibili sono:</p>
+<table>
+<thead>
+<tr>
+<th>Disposizione</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>terminate</strong></td>
+<td>Il processo termina (comportamento predefinito per molti segnali).</td>
+</tr>
+<tr>
+<td><strong>ignore</strong></td>
+<td>Il segnale viene ignorato.</td>
+</tr>
+<tr>
+<td><strong>stop</strong></td>
+<td>Il processo viene sospeso (fermato).</td>
+</tr>
+<tr>
+<td><strong>cont</strong></td>
+<td>Il processo sospeso riprende l'esecuzione.</td>
+</tr>
+</tbody>
+</table>
+<p>Due segnali sono <strong>non intercettabili e non ignorabili</strong>:
+- <code>SIGKILL</code> (9): termina il processo incondizionatamente.
+- <code>SIGSTOP</code> (19/17): sospende il processo incondizionatamente.</p>
+<h3 id="il-builtin-trap">Il builtin trap</h3>
+<p>In bash, il builtin <strong><code>trap</code></strong> consente di registrare handler per i segnali:</p>
+<pre><code class="language-bash">trap [-lp] [[codice] segnale...]
+</code></pre>
+<ul>
+<li><code>trap 'echo "Intercettato SIGINT"' INT</code> — registra un handler per SIGINT.</li>
+<li><code>trap '' INT</code> — ignora SIGINT.</li>
+<li><code>trap - INT</code> — ripristina la disposizione predefinita.</li>
+<li><code>trap -l</code> — elenca i segnali disponibili.</li>
+<li><code>trap -p</code> — mostra gli handler correntemente registrati.</li>
+</ul>
+<p>Bash definisce anche <strong>pseudo-segnali</strong> che non corrispondono a segnali reali del kernel, ma possono essere intercettati con <code>trap</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Pseudo-segnale</th>
+<th>Quando viene attivato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEBUG</code></td>
+<td>Prima di ogni comando.</td>
+</tr>
+<tr>
+<td><code>RETURN</code></td>
+<td>Al ritorno da una funzione o da uno script sorgente.</td>
+</tr>
+<tr>
+<td><code>ERR</code></td>
+<td>Ogni volta che un comando restituisce exit code ≠ 0.</td>
+</tr>
+<tr>
+<td><code>EXIT</code></td>
+<td>All'uscita dalla shell (normale o per segnale).</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota</strong>: gli handler registrati con <code>trap</code> nella shell genitrice <strong>non vengono ereditati</strong> dai processi figli.</p>
+</blockquote>
+<hr />
+<h2 id="12-invio-di-segnali-kill-e-scorciatoie-da-terminale">12. Invio di Segnali: kill e Scorciatoie da Terminale</h2>
+<h3 id="il-comando-kill">Il comando kill</h3>
+<pre><code class="language-bash">kill [opzioni] &lt;pid&gt; [...]
+</code></pre>
+<p>Nonostante il nome, <code>kill</code> non uccide necessariamente un processo: invia un segnale qualsiasi al PID specificato. Per impostazione predefinita invia <code>SIGTERM</code> (15), che può essere intercettato e ignorato. Le opzioni principali sono:</p>
+<ul>
+<li><code>kill -9 &lt;pid&gt;</code> — invia SIGKILL (non intercettabile).</li>
+<li><code>kill -l</code> — elenca i segnali disponibili.</li>
+<li><code>kill -s SIGNAME &lt;pid&gt;</code> — invia il segnale specificato per nome.</li>
+</ul>
+<h3 id="scorciatoie-da-terminale">Scorciatoie da terminale</h3>
+<p>Il terminale intercetta alcune combinazioni di tasti e le converte in segnali inviati al processo in foreground:</p>
+<table>
+<thead>
+<tr>
+<th>Combinazione</th>
+<th>Segnale</th>
+<th>Effetto predefinito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Ctrl+C</code></td>
+<td><code>SIGINT</code></td>
+<td>Interruzione</td>
+</tr>
+<tr>
+<td><code>Ctrl+\</code></td>
+<td><code>SIGQUIT</code></td>
+<td>Terminazione con core dump</td>
+</tr>
+<tr>
+<td><code>Ctrl+Z</code></td>
+<td><code>SIGTSTP</code></td>
+<td>Sospensione (stop)</td>
+</tr>
+<tr>
+<td><code>Ctrl+D</code></td>
+<td>(EOF)</td>
+<td>Chiusura stdin</td>
+</tr>
+<tr>
+<td><code>Ctrl+Q</code></td>
+<td>—</td>
+<td>Riprende output terminale (XON)</td>
+</tr>
+<tr>
+<td><code>Ctrl+S</code></td>
+<td>—</td>
+<td>Sospende output terminale (XOFF)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="13-sleep-e-interazione-con-i-segnali">13. sleep e Interazione con i Segnali</h2>
+<p>Il comando <strong><code>sleep</code></strong> è un processo esterno (non un builtin) che sospende l'esecuzione per un intervallo di tempo. Supporta i suffissi:</p>
+<pre><code class="language-bash">sleep 10      # 10 secondi
+sleep 2m      # 2 minuti
+sleep 1h      # 1 ora
+sleep 0.5d    # 0.5 giorni
+</code></pre>
+<p>Poiché <code>sleep</code> è un processo esterno, <strong>risponde ai segnali</strong>: un <code>SIGINT</code> (Ctrl+C) lo interrompe immediatamente. Questo comportamento è rilevante negli script che utilizzano <code>sleep</code> come timer: se il processo bash genitore intercetta un segnale mentre è in <code>wait</code>, il comportamento dipende dalla registrazione degli handler.</p>
+<hr />
+<h2 id="14-processi-in-background-wait-jobs-fg">14. Processi in Background: &amp;, wait, jobs, fg</h2>
+<h3 id="avvio-in-background-con">Avvio in background con &amp;</h3>
+<p>Aggiungendo <code>&amp;</code> al termine di un comando, bash lo avvia in background senza attenderne il completamento:</p>
+<pre><code class="language-bash">comando &amp;
+# Output: [1] 12345
+</code></pre>
+<p>Il numero tra parentesi quadre è il <strong>Job ID</strong>, il numero successivo è il <strong>PID</strong>. Il PID viene anche memorizzato nella variabile speciale <code>$!</code>.</p>
+<p>Per sospendere un processo in foreground e inviarlo in background: <code>Ctrl+Z</code> (invia SIGTSTP, sospende il processo), poi <code>bg %job_id</code> per riprenderne l'esecuzione in background.</p>
+<h3 id="wait">wait</h3>
+<p>Il builtin <strong><code>wait</code></strong> blocca la shell corrente fino al completamento dei job in background specificati:</p>
+<pre><code class="language-bash">wait [pid_o_job_id...]
+</code></pre>
+<p>Senza argomenti, attende tutti i job in background. <code>wait</code> risponde ai segnali durante l'attesa.</p>
+<h3 id="jobs-e-fg">jobs e fg</h3>
+<ul>
+<li><strong><code>jobs</code></strong>: elenca i job attivi con il loro stato (Running, Stopped, Done).</li>
+<li><strong><code>fg %job_id</code></strong>: riporta in foreground il job specificato.</li>
+</ul>
+<pre><code class="language-bash"># Esempio
+sleep 100 &amp;    # avvia in background (Job 1)
+sleep 200 &amp;    # avvia in background (Job 2)
+jobs           # mostra: [1] Running, [2] Running
+fg %1          # riporta &quot;sleep 100&quot; in foreground
+</code></pre>
+<hr />
+<h2 id="15-modificatori-per-il-background-nohup-nice-disown">15. Modificatori per il Background: nohup, nice, disown</h2>
+<p>Questi tre comandi/builtin modificano il comportamento di processi in background in modo complementare:</p>
+<h3 id="nohup">nohup</h3>
+<p>Esegue un comando <strong>immune a SIGHUP</strong> (il segnale inviato ai processi quando la sessione termina). Utile per processi che devono sopravvivere alla disconnessione dell'utente:</p>
+<pre><code class="language-bash">nohup comando [argomenti] &amp;
+</code></pre>
+<p><code>nohup</code> ridireige automaticamente stdout e stderr su <code>nohup.out</code> (nella directory corrente) se non già ridirezionati esplicitamente.</p>
+<h3 id="nice">nice</h3>
+<p>Modifica la <strong>priorità di scheduling</strong> del processo (il valore di <em>niceness</em>). Valori più alti di niceness significano priorità più bassa (il processo è "gentile" verso gli altri):</p>
+<pre><code class="language-bash">nice -n 10 comando    # avvia con niceness +10 (meno prioritario)
+</code></pre>
+<p>Il valore predefinito di <code>nice</code> è 10. Solo root può impostare valori di niceness negativi (maggiore priorità).</p>
+<h3 id="disown">disown</h3>
+<p>Rimuove un job dalla <strong>tabella dei job</strong> di bash, in modo che bash non gli invii SIGHUP alla chiusura della sessione:</p>
+<pre><code class="language-bash">disown %job_id
+</code></pre>
+<p>A differenza di <code>nohup</code> (che si usa prima di avviare il processo), <code>disown</code> può essere applicato a un processo già in esecuzione.</p>
+<hr />
+<h2 id="16-il-meccanismo-di-espansione-della-shell">16. Il Meccanismo di Espansione della Shell</h2>
+<p>Prima di eseguire qualsiasi comando, bash sottopone la riga di input a una sequenza ordinata di <strong>trasformazioni</strong>. Comprendere quest'ordine è fondamentale per scrivere script corretti.</p>
+<h3 id="ordine-di-elaborazione-della-riga-di-comando">Ordine di elaborazione della riga di comando</h3>
+<p>Bash processa la riga in questo ordine:</p>
+<ol>
+<li><strong>Accantonamento delle assegnazioni</strong> — le assegnazioni <code>NOME=valore</code> all'inizio della riga vengono messe da parte temporaneamente.</li>
+<li><strong>Espansione degli elementi</strong> — gli elementi non-assegnazione vengono espansi secondo i passi descritti sotto.</li>
+<li><strong>Impostazione delle ridirezioni</strong> — le ridirezioni vengono applicate dopo le espansioni.</li>
+<li><strong>Ripristino delle assegnazioni</strong> — le assegnazioni accantonate vengono applicate all'ambiente del processo figlio.</li>
+</ol>
+<h3 id="i-passi-dellespansione">I passi dell'espansione</h3>
+<p><strong>Passo 1 — Tokenizzazione</strong>: la riga viene divisa in <em>token</em> usando i metacaratteri <code>SPACE TAB NEWLINE ; ( ) &lt; &gt; | &amp;</code>.</p>
+<p><strong>Passo 2 — Espansione degli alias</strong>: se il primo token corrisponde a un alias definito, viene sostituito e la tokenizzazione riparte dall'inizio.</p>
+<p><strong>Passo 3 — Riconoscimento delle keyword</strong>: se il primo token è una keyword bash (<code>if</code>, <code>while</code>, <code>function</code>, <code>{</code>, <code>(</code>, …), viene attivato il parsing strutturato corrispondente.</p>
+<p><strong>Passo 4 — Brace expansion</strong>: le espressioni tra graffe vengono espanse. Due forme:
+- <strong>Lista</strong>: <code>Pre{a,b,c}Post</code> → <code>Prea Preb Prec</code>
+- <strong>Sequenza</strong>: <code>{1..5}</code> → <code>1 2 3 4 5</code></p>
+<p>Questa espansione avviene <em>prima</em> delle altre e non dipende dal filesystem.</p>
+<p><strong>Passo 5 — Tilde expansion</strong>: <code>~</code> viene espanso nella home directory dell'utente corrente; <code>~username</code> nella home di <code>username</code>.</p>
+<p><strong>Passo 6 — Parameter expansion</strong>: <code>$NOME</code> o <code>${NOME}</code> viene sostituito con il valore della variabile.</p>
+<p><strong>Passo 7 — Command substitution</strong>: <code>$(comando)</code> viene sostituito con l'output del comando eseguito (rimuovendo il newline finale).</p>
+<p><strong>Passo 8 — Arithmetic substitution</strong>: <code>$((espressione))</code> viene valutato aritmeticamente e sostituito con il risultato.</p>
+<p><strong>Passo 9 — Process substitution</strong>: <code>&lt;(comando)</code> o <code>&gt;(comando)</code> sostituisce il comando con un file descriptor (supportato solo in bash, non in sh).</p>
+<p><strong>Passo 10 — Word splitting</strong>: il risultato delle espansioni 6–8 viene suddiviso in parole separate usando i caratteri in <code>$IFS</code> (per impostazione predefinita: spazio, tab, newline).</p>
+<p><strong>Passo 11 — Pathname expansion</strong> (globbing): i pattern contenenti <code>*</code>, <code>?</code> o <code>[SET]</code> vengono espansi nella lista dei file corrispondenti (in ordine alfabetico). Se nessun file corrisponde, il pattern rimane letterale.</p>
+<p><strong>Passo 12 — Command lookup</strong>: il primo token risultante viene cercato come funzione, builtin o comando esterno nel <code>PATH</code>.</p>
+<h3 id="quoting-inibire-lespansione">Quoting: inibire l'espansione</h3>
+<p>I meccanismi di <strong>quoting</strong> permettono di proteggere i caratteri speciali dall'espansione:</p>
+<table>
+<thead>
+<tr>
+<th>Meccanismo</th>
+<th>Effetto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>\c</code></td>
+<td>Protegge il singolo carattere <code>c</code></td>
+</tr>
+<tr>
+<td><code>'testo'</code></td>
+<td>Protegge tutto il contenuto letteralmente (nessuna eccezione)</td>
+</tr>
+<tr>
+<td><code>"testo"</code></td>
+<td>Protegge tutto tranne <code>$</code>, <code>`</code> e <code>\</code></td>
+</tr>
+</tbody>
+</table>
+<p>Le sequenze protette possono essere concatenate: <code>"valore=$VAR"'\*'</code> produce la stringa <code>valore=&lt;contenuto di VAR&gt;</code> seguita da <code>\*</code> letterale.</p>
+<hr /></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

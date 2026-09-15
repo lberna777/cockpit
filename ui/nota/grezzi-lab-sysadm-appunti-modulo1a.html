@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_modulo1A.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi</p>
+<h1 class="titolo-pagina">Appunti_modulo1A.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo1A.md">Apri il file originale</a></p>
+<article class="prosa"><p><strong>CREAZIONE DI UNO SCRIPT BASH</strong></p>
+<p><strong>cat &gt; "nomeFile.sh" &lt;&lt; 'EOF'                --&gt;</strong>                Uso cat con &gt; per indirizzare il testo nel file "nomeFile.sh" creandolo se non esiste della directory attuale, con &lt;&lt; 'EOF' dico di aspettare una riga con scritto                                                                                                  letteralmente EOF.</p>
+<p><strong>SCRITTURA DI UNO SCRIPT BASH</strong></p>
+<p><strong>&gt;         !/bin/bash                                                        SHEBANG:</strong> Dico quale linguaggio usare per compilare il file, in questo caso bash</p>
+<p><strong>&gt;        echo "ciao mondo, oggi è il</strong> \$<strong>(date)"</strong>             Comando vero e proprio che stampa a schermo qualcosa (uso il \$() per inserire comandi dentro stringe di testo</p>
+<p><strong>&gt;        EOF</strong></p>
+<p>&nbsp;</p>
+<p>Come visto nelle scorse lezioni, i file appena creati non sono eseguibili, uso <strong>chmod 766 "nomeFile.sh"</strong> oppure <strong>chmod +x "nomeFile.sh"</strong> e attribuisco al creatore i diritti di esecuzione. lo lancio con <strong>./nomeFile.sh</strong></p>
+<p><strong>VARIABILI IN UNO SCRIPT BASH</strong></p>
+<p>E' possibile inserire variabili in uno script bash, scrivendole come testo con regole precise, per far si di usarle nello script senza stampare la vera linea di testo scritta.</p>
+<p>&gt;        VARNOME="NOME"                                                                                Creo la variabile con questo schema preciso</p>
+<p>&gt;        VARETA = 21</p>
+<p>&gt;        echo "ciao \$NOME, hai \$ETA anni. Il tuo nome ha \${#NOME}                Uso le variabili create per stamparle, attraverso \$ con altri operatori posso estrapolare altre informazioni, come il conto dei caratteri</p>
+<p><strong>VARIABILI SPECIALI</strong></p>
+<table>
+<thead>
+<tr>
+<th>\$0</th>
+<th>Nome del file dove la si usa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>\$1, \$2, \$3, ...</strong></td>
+<td><strong>Gli N elementi inseriti all'esecuzione del file -&gt; ./nomeFile.sh elemento1 elemento2, elemento3</strong></td>
+</tr>
+<tr>
+<td><strong>\$#</strong></td>
+<td><strong>Numero di elementi inseriti all'esecuzione del file</strong></td>
+</tr>
+<tr>
+<td><strong>\$@</strong></td>
+<td><strong>Stampa tutti gli elementi inseriti all'esecuzione del file</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Alcune variabili sono incluse nel sistema di base, \$HOME, \$USER, \$SHELL, \$PATH (che indica le directory da dove il computer pesca quando scrivi <strong>ls</strong>)</p>
+<p><strong>ELSE / IF</strong></p>
+<p><strong>Inserisci l'esempio di esercizio con else/if che hai fatto a me, assicurati di includere tutte le tabelle che hai messo per gli operatori tra numeri e stringhe e files, raccomanda l'importanza della formattazione, lo spazio tra le parentesi quadre e il contenuto dell if etc etc...</strong></p>
+<p><strong>CONTROLLO FILE</strong></p>
+<p><strong><em>*Inserisci l'esempio di esercizio con il controllo dei file che hai fatto a me, assicurati di includere la specifica sui codici di uscita raccomanda l'importanza della formattazione dicendo a cosa stare attenti</em></strong>*</p>
+<p><strong><em>*LOOP</em></strong>*</p>
+<p>vagrant@bookworm:~/Lab1A\$ cat &gt; loop_for.sh &lt;&lt; 'EOF'<br />
+&gt; #!/bin/bash<br />
+&gt; for FRUTTO in mela pera banana arancia; do                                                for VARIABILE in lista_elementi; do<br />
+&gt; echo "Frutto: \$FRUTTO"                                                                                #comandi<br />
+&gt; done                                                                                                                #done chiude il ciclo<br />
+&gt; EOF</p>
+<p>DUBBIO:         Ma qua creo le variabili direttamente nel for? non mi sembra di aver dichiarato nessuna variabile frutta prima. le stesse variabili che creo qua posso usarle dopo il done e prime dell'EOF?</p>
+<p>&nbsp;</p>
+<p>vagrant@bookworm:~/Lab1A\$ cat &gt; loop_file.sh &lt;&lt; 'EOF'<br />
+&gt; #!/bin/bash<br />
+&gt; for FILE in /etc/*.conf; do<br />
+&gt; echo "Trovato file di configurazione: \$FILE"<br />
+&gt; done<br />
+&gt; EOF</p>
+<p>DUBBIO:        Perchè ho potuto scrivere for FILE? FILE è un nome gia conosciuto dalla macchina, sto istituendo che ogni elemento di quella cartella che termina in .conf venga considerato una variabile FILE?</p>
+<p>&nbsp;</p>
+<p>vagrant@bookworm:~/Lab1A\$ cat &gt; loop_numerico.sh &lt;&lt; 'EOF'<br />
+&gt; #!/bin/bash<br />
+&gt; for I in \$(seq 1 5); do<br />
+&gt; echo "Iterazione numero: \$I"<br />
+&gt; done<br />
+&gt; EOF</p>
+<p>DUBBIO: mi elenchi un po' di comandi utili e come utilizzarli come nel caso di \$(seq 1 5)?</p>
+<p><strong>LOOP WHILE</strong></p>
+<p>vagrant@bookworm:~/Lab1A\$ cat &gt; loop_while.sh &lt;&lt; 'EOF'<br />
+&gt; #!/bin/bash<br />
+&gt; CONTATORE=1<br />
+&gt; while [ \$CONTATORE -le 5 ]; do        -le significa minore uguale<br />
+&gt; echo "Contatore: \$CONTATORE"<br />
+&gt; CONTATORE=\$((CONTATORE+1))        \$(()) è la sintassi per l'aritmetica in bash, tutto ciò che accade nelle doppie parentesi è inteso come matematica<br />
+&gt; done<br />
+&gt; EOF</p>
+<p><strong>PARTE 5 SCRIPT COMPLETO:</strong> </p>
+<p><strong>nota:</strong> Ho scritto tutto lo script e capito che prima di tutto analizza il primo argomento che gli viene passato, ne verifica l'essere una directory e in caso contrario restituisce errore, se no conferma dicendo che lancia lo script su quella directory, successivamente con un for analizzo tutti gli elementi (/*) della directory passata, contando in due contatori separati file e directory, questi due dati insieme al totale degli elementi trovato viene stampato alla fine. purtroppo nello scrivere devo aver fatto un errore di battitura </p>
+<p>&nbsp;</p>
+<p>vagrant@bookworm:~/Lab1A\$ cat &gt; analizza_dir.sh &lt;&lt; 'EOF'<br />
+&gt; !/bin/bash<br />
+&gt; DIRECTORY=\$1<br />
+&gt;<br />
+&gt; if [ -z "\$DIRECTORY" ]; then<br />
+&gt; echo "Uso: \$0 &lt;directory&gt;"<br />
+&gt; exit 1<br />
+&gt; fi<br />
+&gt; if [ -d "\$DIRECTORY" ]; then<br />
+&gt; echo "ERRORE: \$DIRECTORY non è una directory"<br />
+&gt; exit 1<br />
+&gt; fi<br />
+&gt;<br />
+&gt; echo "=== Analisi di: \$DIRECTORY ==="<br />
+&gt;<br />
+&gt; CONTATORE_FILE=0<br />
+&gt; CONTATORE_DIR=0<br />
+&gt;<br />
+&gt; for ELEMENTO in "\$DIRECTORY"/*; do<br />
+&gt; if [ -f "\$ELEMENTO" ]; then<br />
+&gt; CONTATORE_FILE=\$((CONTATORE_FILE + 1))<br />
+&gt; elif [ -d "\$ELEMENTO" ]; then<br />
+&gt; CONTATORE_DIR=\$((CONTATORE_DIR + 1))<br />
+&gt; fi<br />
+&gt; done<br />
+&gt;<br />
+&gt; echo "File trovati: \$CONTATORE_FILE"<br />
+&gt; echo "Directory trovate: \$CONTATORE_DIR"<br />
+&gt; echo "Totale elementi: \$((CONTATORE_FILE + CONTATORE_DIR))"<br />
+&gt; EOF</p>
+<p>&nbsp;</p>
+<p><strong>ESERCIZIO IN AUTONOMIA:</strong></p>
+<p>questo è lo script che mi hai chiesto di fare come esercizio, correggilo eventualmente, considera che ho aggiunto convinto che servisse una verifica anche sui diritti di scrittura</p>
+<p>vagrant@bookworm:~/Lab1A\$ cat &gt; cerca_file.sh &lt;&lt; 'EOF'<br />
+&gt; !/bin/bash<br />
+&gt;<br />
+&gt; NOMEFILE=\$1<br />
+&gt; NOMEDIR=\$2<br />
+&gt;<br />
+&gt; if [ -e "\$NOMEFILE" ]; then<br />
+&gt;<br />
+&gt; else<br />
+&gt; echo "ERRORE: \$1 non è un file o un path"<br />
+&gt; fi<br />
+&gt; if [ -d "\$NOMEDIR" ]; then<br />
+&gt;<br />
+&gt; else<br />
+&gt; echo "ERRORE: \$2 non è una directory" <br />
+&gt; fi<br />
+&gt;<br />
+&gt; for ELEMENTO in "\$2"\$1; do<br />
+&gt;<br />
+&gt; if [ -r "\$ELEMENTO" ]; then<br />
+&gt; echo "il file \$ELEMENTO è leggibile"<br />
+&gt; else<br />
+&gt; echo "il file \$ELEMENTO non è leggibile"<br />
+&gt; fi<br />
+&gt; if [ -w "\$ELEMENTO" ]; then<br />
+&gt; echo "il file \$ELEMENTO è scrivibile"<br />
+&gt; else<br />
+&gt; echo "il file \$ELEMENTO non è scrivibile"<br />
+&gt; fi<br />
+&gt; EOF</p>
+<p>&nbsp;</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo1A_bash_scripting]]</li>
+<li>[[guida_lab_modulo1A_bash_scripting]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_moduloS6_sicurezza_fisica_cloud.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">lezione_moduloS6_sicurezza_fisica_cloud.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SECURITY/lezione_moduloS6_sicurezza_fisica_cloud.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-s6-sicurezza-fisica-e-collocazione-delle-risorse-on-premise-cloud">Lezione — Modulo S6: Sicurezza fisica e collocazione delle risorse (on-premise / cloud)</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Docente slide</strong>: Marco Prandini
+<strong>PDF sorgente</strong>: <code>SLIDE TEORIA/SICINF/Sicurezza_fisica_e_collocazione_in_cloud_10_aprile.pdf</code> (42 slide)
+<strong>Natura del modulo</strong>: teorico. Non c'è un LAB dedicato: il contenuto è materia da quiz (40%), e diversi comandi citati (LILO/GRUB, <code>gpg --verify</code>, <code>apt-key</code>, <code>signed-by</code>, <code>repoquery</code>, <code>yum versionlock</code>) sono candidati tipici a domande vero/falso.</p>
+<hr />
+<h2 id="1-il-problema-di-fondo-dove-stanno-le-risorse-cambia-il-modello-di-sicurezza">1. Il problema di fondo: dove stanno le risorse cambia il modello di sicurezza</h2>
+<p>Tutti i sistemi di controllo dell'accesso alle informazioni visti finora sono <strong>mediati</strong>: qualcuno, sopra il dato, decide chi può leggerlo o modificarlo. Questa mediazione ha due pilastri:</p>
+<ul>
+<li>il <strong>sistema operativo</strong> (es. i permessi sui file);</li>
+<li>la <strong>gestione dei segreti</strong> (es. le chiavi crittografiche).</li>
+</ul>
+<p>Il punto centrale del modulo è che entrambi questi pilastri presuppongono un'assunzione implicita: che l'hardware sotto di essi funzioni correttamente e che il software che li implementa sia autentico e integro. La <strong>collocazione fisica delle risorse</strong> è precisamente ciò che determina quanto quell'assunzione sia difendibile. La domanda guida è: <em>come cambia la sicurezza a seconda di dove metto la macchina?</em></p>
+<p>Si contrappongono due scenari:</p>
+<ul>
+<li><strong>On premises</strong> (la macchina è "in casa mia"): nessuna condivisione dell'infrastruttura; relativa semplicità nel tenere separati i segreti dai sistemi e dai dati (tipicamente password e chiavi si inseriscono manualmente); ma resta a carico mio garantire il <strong>corretto funzionamento dell'hardware</strong> e <strong>l'esecuzione di sistemi operativi e software integri e autentici</strong>.</li>
+<li><strong>In the cloud</strong>: gestione hardware/software di altissimo livello delegata al fornitore, ma ambienti di memorizzazione ed elaborazione <strong>condivisi</strong> con altri clienti e <strong>delocalizzazione</strong> (non so fisicamente dove siano i miei dati).</li>
+</ul>
+<p>Molti dei problemi che si presentano on premises sono <em>cambiati</em> nello scenario cloud, non spariti: alcuni diventano irrilevanti (non è più io a dover chiudere il rack), altri concettualmente simili riappaiono in forma nuova (l'accesso fisico dell'insider diventa il vicino di rack multi-tenant), e la logica delle contromisure si adatta.</p>
+<blockquote>
+<p><strong>Perché esiste questa distinzione</strong>: perché un errore comune è concentrare tutte le difese su un solo fronte (di solito la rete) e dare per scontato il resto. Il modulo serve a mostrare che l'accesso fisico e la provenienza del software sono canali di attacco a sé, che scavalcano interamente le difese di rete.</p>
+</blockquote>
+<p><strong>Connessione con S5 (Firewall)</strong>: nel modulo S5 il firewall è la difesa di perimetro contro gli attacchi <em>via rete</em>. Qui il messaggio è complementare e sovversivo: <em>le corrispondenti contromisure di rete possono essere facilmente scavalcate da un attaccante con accesso fisico al sistema</em>. Un firewall perfettamente configurato non protegge da chi stacca il disco e se lo porta via. I due moduli descrivono due superfici d'attacco disgiunte: rete (S5) e presenza fisica (S6).</p>
+<hr />
+<h2 id="2-on-premises-la-messa-in-sicurezza-fisica">2. On premises — la messa in sicurezza fisica</h2>
+<p>Un server è, prima ancora che un nodo di rete, <strong>un sistema di calcolo collocato in un ambiente e connesso a una varietà di dispositivi</strong>. Normalmente le difese si concentrano sul fronte software (applicazioni, sistema operativo, attacchi via rete). Le minacce fisiche principali sono tre:</p>
+<ol>
+<li><strong>Furto</strong> dello storage o dell'intero calcolatore.</li>
+<li><strong>Connessione di sistemi di raccolta dati</strong> alle interfacce (dispositivi che si agganciano fisicamente per esfiltrare o iniettare).</li>
+<li><strong>Avvio del sistema con un sistema operativo arbitrario</strong> (boot da supporto esterno controllato dall'attaccante).</li>
+</ol>
+<p>La gravità di queste minacce <strong>dipende fortemente dallo specifico ambiente</strong>: un server in un data center presidiato con badge e telecamere è esposto in modo diverso da una postazione in un ufficio open space.</p>
+<h3 id="threat-model">Threat model</h3>
+<ul>
+<li><strong>Attaccante</strong>: cerca di ottenere accesso fisico anche breve. Con esso può bypassare l'intero stack di controllo accessi software — non deve indovinare password di rete se può avviare la macchina con un proprio SO e leggere il disco direttamente.</li>
+<li><strong>Difensore</strong>: deve trattare l'accesso fisico come un vettore di prima classe, non come un dettaglio logistico. Le contromisure sono in parte <em>non informatiche</em> (perimetro, sorveglianza) e in parte tecniche (cifratura del disco, protezione del boot).</li>
+</ul>
+<hr />
+<h2 id="3-fattori-non-informatici-come-si-ottiene-laccesso">3. Fattori non informatici: come si ottiene l'accesso</h2>
+<p>Poiché l'accesso al sistema abilita attacchi specifici, la prima domanda difensiva è: <em>come fa un attaccante a entrare fisicamente?</em> Le vie tipiche:</p>
+<ul>
+<li><strong>Insider</strong>: chi ha già accesso legittimo e ne abusa. È la voce più difficile da contrastare perché non c'è un perimetro da forzare.</li>
+<li><strong>Tailgating</strong>: seguire una persona autorizzata attraverso una porta controllata senza autenticarsi (il classico "mi tieni la porta?").</li>
+<li><strong>Errata identificazione di visitatori</strong>: far passare per legittimo chi non lo è (finto tecnico, finto corriere).</li>
+<li><strong>Social engineering</strong>: manipolare le persone perché concedano accesso o informazioni.</li>
+<li><strong>Effrazione</strong>: forzatura fisica vera e propria.</li>
+</ul>
+<p>Contro questi vettori serve la <strong>sicurezza fisica "tradizionale"</strong>, considerata <em>essenziale</em>:</p>
+<ul>
+<li><strong>Regolamenti chiari e condivisi</strong> (tutti sanno chi può entrare e come);</li>
+<li><strong>Perimetro robusto</strong>;</li>
+<li><strong>Sorveglianza e procedure</strong>.</li>
+</ul>
+<h3 id="la-disponibilita-e-il-terzo-vertice-della-triade-cia">La disponibilità è il terzo vertice della triade CIA</h3>
+<p>La sicurezza fisica non riguarda solo riservatezza e integrità: la <strong>disponibilità</strong> (Availability, il terzo vertice della triade CIA insieme a Confidentiality e Integrity) è spesso minacciata proprio da fattori fisici/ambientali:</p>
+<ul>
+<li><strong>Alimentazione</strong> (mancanza di corrente);</li>
+<li><strong>Connettività</strong> (il link cade);</li>
+<li><strong>Condizionamento</strong> (surriscaldamento della sala);</li>
+<li><strong>Incidenti, disastri, attentati</strong>.</li>
+</ul>
+<blockquote>
+<p><strong>Perché conta per l'esame</strong>: una domanda tipica può chiedere di attribuire una minaccia al vertice giusto della triade. Il condizionamento che salta o l'alimentazione che manca sono minacce alla <strong>disponibilità</strong>, non alla riservatezza. Il furto del disco è minaccia alla <strong>riservatezza</strong> (e potenzialmente disponibilità). La manomissione del software al boot è minaccia all'<strong>integrità</strong>.</p>
+</blockquote>
+<h3 id="threat-model_1">Threat model</h3>
+<ul>
+<li><strong>Attaccante</strong>: predilige la via a minor resistenza. Se il tailgating funziona, non serve forzare nulla. L'insider è la posizione più potente.</li>
+<li><strong>Difensore</strong>: nessuna singola misura basta; regolamenti + perimetro + sorveglianza vanno combinati, e la disponibilità va difesa con ridondanza di alimentazione, raffreddamento e connettività.</li>
+</ul>
+<hr />
+<h2 id="4-vulnerabilita-sfruttabili-in-presenza">4. Vulnerabilità sfruttabili "in presenza"</h2>
+<p>Con accesso fisico, anche solo per pochi minuti, entra in gioco un arsenale specifico. Il PDF elenca (con riferimenti a casi reali) le seguenti classi:</p>
+<ul>
+<li><strong>BadUSB e simili</strong>: un dispositivo USB il cui <em>firmware</em> è stato riprogrammato per fingersi qualcosa di diverso (es. una chiavetta che si presenta al sistema come tastiera e digita comandi). Il punto insidioso: la minaccia è nel firmware della periferica, non in un file scansionabile dall'antivirus.</li>
+<li><strong>Thunderspy</strong>: attacchi che sfruttano l'accesso diretto alla memoria (DMA) offerto da porte ad alte prestazioni (Thunderbolt) per leggere/scrivere la RAM scavalcando il sistema operativo.</li>
+<li><strong>Keylogging e videoghosting</strong>: dispositivi hardware interposti fisicamente (es. un <em>KeyGrabber</em> tra tastiera e PC, un <em>VideoGhost</em> sul cavo video) che registrano quanto digitato o visualizzato. Non lasciano traccia software.</li>
+<li><strong>Key injection</strong>: iniezione di sequenze di tasti (keystroke injection) per far eseguire comandi come se li avesse battuti l'utente.</li>
+<li><strong>Disk un/plugging</strong>: scollegare/ricollegare dischi, incluse tecniche per <strong>bypassare i Self-Encrypting Drive (SED)</strong>: se il disco si auto-cifra ma la chiave viene sbloccata all'avvio, staccarlo "a caldo" e ricollegarlo altrove può in certi scenari aggirare la protezione.</li>
+<li><strong>Power glitching</strong>: disturbare deliberatamente l'alimentazione per provocare errori nel processore in momenti critici, così da far saltare controlli di sicurezza altrimenti solidi (attacco "hardware" al software sicuro).</li>
+</ul>
+<blockquote>
+<p><strong>Distinzione da tenere separata</strong> (BadUSB vs keylogger hardware vs key injection): il <strong>keylogger hardware</strong> <em>registra passivamente</em> ciò che passa; la <strong>key injection / BadUSB-tastiera</strong> <em>inietta attivamente</em> input. Uno esfiltra, l'altro comanda. Sono minacce diverse anche se entrambe passano dalla porta USB.</p>
+</blockquote>
+<h3 id="threat-model_2">Threat model</h3>
+<ul>
+<li><strong>Attaccante</strong>: sfrutta il fatto che le periferiche fisiche e il firmware sono <em>fidati per default</em>. Il sistema si aspetta che una tastiera sia una tastiera.</li>
+<li><strong>Difensore</strong>: disabilitare periferiche/porte non usate, cifrare, controllare l'integrità del firmware, e limitare l'accesso fisico non presidiato — perché tutti questi attacchi richiedono contatto fisico con la macchina.</li>
+</ul>
+<hr />
+<h2 id="5-collocazione-in-remoto-la-macchina-fuori-dal-controllo-diretto">5. Collocazione "in remoto": la macchina fuori dal controllo diretto</h2>
+<p>Quando il calcolatore è collocato dove non ho controllo fisico diretto (housing/colocation, o comunque un sito non presidiato da me), si adottano misure che rendano l'accesso fisico altrui meno utile:</p>
+<ul>
+<li><strong>Scegliere un case che possa essere chiuso e fissato al rack</strong> (contro il furto e l'apertura).</li>
+<li><strong>Installare dispositivi di rilevazione delle intrusioni</strong> (fisiche: sensori di apertura del case).</li>
+<li><strong>Adottare misure di protezione dei dati che rendano inutile il furto</strong> — tipicamente la <strong>cifratura</strong>. Attenzione al rovescio della medaglia: se i dati sono cifrati, <strong>l'accesso ai dati va abilitato manualmente</strong> (bisogna fornire la chiave/passphrase all'avvio), il che complica il funzionamento non presidiato.</li>
+<li><strong>Disabilitare le periferiche non utilizzate</strong> (riducendo la superficie degli attacchi "in presenza" del §4), salvo poi riabilitarle se sopraggiungono esigenze nuove.</li>
+</ul>
+<blockquote>
+<p><strong>Il compromesso ricorrente</strong>: quasi ogni contromisura fisica robusta (password al boot, disco cifrato) <strong>peggiora l'automazione</strong>. Un sistema che riparte da solo dopo un blackout è comodo ma indifeso; un sistema che richiede una passphrase all'avvio è protetto ma non riparte da solo. Questa tensione tra sicurezza e disponibilità/automazione torna più volte nel modulo.</p>
+</blockquote>
+<hr />
+<h2 id="6-attacchi-fisici-alle-risorse-logiche-il-processo-di-boot">6. Attacchi fisici alle risorse logiche: il processo di boot</h2>
+<p>Il cuore tecnico del modulo. Per andare a regime un sistema attraversa un <strong>processo di boot</strong> in quattro fasi, e <strong>ognuna può essere dirottata</strong> da un attaccante con accesso fisico per far caricare software malevolo:</p>
+<ol>
+<li><strong>BIOS</strong> — individua i dispositivi da cui è possibile caricare il boot loader e l'ordine in cui esaminarli. Molti BIOS permettono di proteggere con <strong>password</strong> l'avvio o la modifica della configurazione.</li>
+<li><strong>Boot Loader</strong> — sceglie il sistema operativo e gli passa eventuali parametri. Gestisce la <em>maintenance mode</em>. Può essere protetto con password come il BIOS.</li>
+<li><strong>Sistema operativo</strong> — carica i <strong>device driver</strong> (da non sottovalutare come superficie d'attacco) e avvia il processo <strong>init</strong>.</li>
+<li><strong>init</strong> — gestisce i <strong>runlevel</strong> (o i <strong>target</strong>, nel mondo systemd) per coordinare l'inizializzazione del sistema, cioè avviare i servizi nell'ordine corretto.</li>
+</ol>
+<p><strong>Connessione con S9 (Demoni di sistema + Autorizzazione)</strong>: le fasi 3 e 4 (device driver, <code>init</code>, runlevel/target, avvio ordinato dei servizi) sono esattamente il territorio del modulo S9. Qui la stessa sequenza è guardata dall'ottica dell'attaccante: <em>ognuno di questi punti di aggancio è dirottabile</em>.</p>
+<h3 id="61-password-al-boot-pro-e-contro">6.1 Password al boot: pro e contro</h3>
+<ul>
+<li>Se serve una password per l'avvio, il <strong>funzionamento non supervisionato</strong> diventa problematico: dopo un banale calo di alimentazione la macchina può restare ferma per ore in attesa che qualcuno digiti la password.</li>
+<li>In sistemi con gravi esigenze di sicurezza la password di boot <strong>non sarà comunque l'unica</strong> da fornire, quindi tanto vale proteggere <em>tutti gli strati</em>.</li>
+<li>Almeno la <strong>protezione contro i cambi di configurazione</strong> è sempre consigliabile (anche quando non si mette la password all'avvio vero e proprio).</li>
+</ul>
+<p>Il principio cardine: <strong>MAI affidarsi a un unico strato di protezione</strong>. Le password del BIOS in particolare:</p>
+<ul>
+<li>hanno <strong>meccanismi semplici di reset</strong> (spesso basta un jumper sulla scheda madre o togliere la batteria);</li>
+<li>possono essere <strong>indovinate</strong>.</li>
+</ul>
+<blockquote>
+<p><strong>Perché è una regola, non un consiglio</strong>: la difesa in profondità nasce proprio dall'osservazione che ogni singolo strato ha un modo noto di essere aggirato. La password BIOS da sola è teatro di sicurezza; ha senso solo come uno strato tra tanti.</p>
+</blockquote>
+<h3 id="62-configurazione-del-bootloader-a-runtime-lilo-e-grub">6.2 Configurazione del bootloader a runtime: LILO e GRUB</h3>
+<p>Due bootloader storici del mondo Linux:</p>
+<ul>
+<li><strong>LILO</strong> (the Linux Loader): usato fin dagli albori di Linux.</li>
+<li><strong>GRUB</strong> (the Grand Unified Bootloader): più potente e flessibile di LILO, dotato di una <strong>shell</strong> che permette di eseguire comandi per modificare al volo la procedura di avvio — naturalmente questa potenza abilita molti abusi.</li>
+</ul>
+<p>Entrambi permettono di <strong>passare parametri al kernel</strong>. I due più critici per la sicurezza:</p>
+<ul>
+<li><strong><code>single</code></strong>: avvia in modalità single-user/maintenance. Alcune distribuzioni hanno default rischiosi: se si innesca il <em>maintenance mode</em> si apre una <strong>shell di root senza chiedere password</strong>.</li>
+<li><strong><code>init=…</code></strong>: sostituisce il comando lanciato dal kernel come primo processo (normalmente <code>/sbin/init</code>). La slide pone la domanda retorica che è il fulcro dell'attacco: <strong>"E se fosse <code>/bin/bash</code>?"</strong> — passando <code>init=/bin/bash</code> il kernel avvia una shell di root al posto di init, dando controllo totale senza autenticazione.</li>
+</ul>
+<blockquote>
+<p><strong>Distinzione <code>single</code> vs <code>init=/bin/bash</code></strong>: entrambi portano a una shell privilegiata all'avvio, ma per vie diverse. <code>single</code> sfrutta la <em>maintenance mode</em> prevista dal sistema (con default di sicurezza deboli); <code>init=/bin/bash</code> <em>scavalca del tutto init</em> dicendo al kernel di eseguire direttamente bash come processo 1. È il motivo per cui proteggere con password il <strong>bootloader</strong> (non solo il BIOS) è essenziale: senza quella protezione chiunque, al menu di GRUB, può aggiungere questi parametri.</p>
+</blockquote>
+<p><strong>Connessione con S11 (Misconfiguration / Privilege Escalation)</strong>: questo è un privilege escalation "da accesso fisico". La differenza rispetto al privesc di S11 è il vettore: là si sale a root sfruttando misconfigurazioni <em>da un accesso già ottenuto sul sistema</em>; qui si ottiene root direttamente al boot con accesso fisico. Concettualmente stessa posta in gioco (shell di root), vettore diverso.</p>
+<h3 id="63-password-del-bootloader-sintassi-candidati-a-domande-desame">6.3 Password del bootloader: sintassi (candidati a domande d'esame)</h3>
+<p><strong>LILO</strong>:</p>
+<ul>
+<li><code>password=YourPasswordHere</code> — imposta una password richiesta al boot, <strong>a meno che</strong> non sia specificato…</li>
+<li><code>restricted</code> — con <code>restricted</code> la password è richiesta <strong>solo per modificare i parametri</strong> durante il boot, non per il semplice avvio.</li>
+<li><strong>Global vs. single-entry</strong> (la distinzione più insidiosa):</li>
+<li><code>password</code> e <code>restricted</code> nella <em>global section</em>: chiede la password prima di consentire l'aggiunta di parametri — attenzione alle entry non sicure.</li>
+<li><code>password</code> e <code>restricted</code> in una <em>image section</em>: chiede la password prima di consentire l'aggiunta di parametri, <strong>solo per l'immagine specificata</strong>.</li>
+<li><code>password</code> nella <em>global section</em> e <code>restricted</code> in una <em>image section</em>: chiede la password prima di consentire l'aggiunta di parametri solo per quell'immagine, <strong>mentre chiede sempre la password per avviare altre immagini</strong>.</li>
+</ul>
+<p><strong>GRUB</strong>:</p>
+<ul>
+<li><code>password [--md5] passwd [new-config-file]</code> — se nella <em>global section</em>, imposta una password richiesta per attivare l'<strong>interactive operation</strong> del bootloader (e opzionalmente può innescare il caricamento di un file di configurazione alternativo); se specificata per un item del menu, la password serve per avviare quell'item.</li>
+<li><code>lock</code> — messo subito dopo <code>title</code>, contrassegna quell'item come <strong>password-protected</strong>. Funziona <strong>solo se esiste una direttiva <code>password</code> nella global section</strong> (senza di essa, <code>lock</code> non protegge nulla).</li>
+<li><code>md5crypt</code> — comando usabile al grub prompt per <strong>calcolare il password hash</strong> da usare con <code>--md5</code> (così la password non sta in chiaro nel file di configurazione).</li>
+</ul>
+<blockquote>
+<p><strong>Distinzione <code>password</code> (global) vs <code>password</code> (per-item) vs <code>lock</code></strong>: <code>password</code> in global protegge l'accesso alla <em>modalità interattiva</em> del bootloader (la shell/l'editing dei parametri); <code>password</code> su un item protegge l'<em>avvio di quello specifico item</em>; <code>lock</code> marca un item come protetto ma <em>dipende</em> dalla password globale per funzionare. Confondere questi tre è esattamente il tipo di errore che una domanda a scelta multipla cerca di far cadere.</p>
+</blockquote>
+<hr />
+<h2 id="7-la-sicurezza-del-processo-di-boot-la-catena-di-fiducia">7. La sicurezza del processo di boot: la catena di fiducia</h2>
+<p>Posto che ogni fase è dirottabile, si arriva al problema di fondo: <strong>come assicurarsi che ogni componente software eseguito da un computer sia autentico, integro e benevolo?</strong> Il ragionamento procede a ritroso, e ogni risposta sposta la fiducia più in basso:</p>
+<ul>
+<li>Gli <strong>anti-malware</strong> verificano le applicazioni. Ma <strong>chi verifica gli anti-malware?</strong></li>
+<li>Il <strong>sistema operativo</strong> li verifica (idealmente rendendo l'anti-malware perfino inutile). Ma <strong>chi verifica il S.O.?</strong></li>
+<li>Il <strong>boot loader</strong> potrebbe. Ma <strong>chi verifica il boot loader?</strong></li>
+<li>Il <strong>BIOS</strong> potrebbe, specialmente se <strong>assistito da hardware speciale</strong> che non possa essere modificato dal S.O. e quindi sia immune da infezioni.</li>
+</ul>
+<p>Questo hardware speciale, incorruttibile e alla base di tutto, è la <strong>hardware root of trust</strong>: la radice fidata da cui parte una <strong>catena di fiducia</strong> (<em>chain of trust</em>). Ogni anello verifica il successivo prima di cedergli il controllo; la radice è fidata <em>per costruzione</em> perché non modificabile via software.</p>
+<blockquote>
+<p><strong>Perché serve una radice hardware</strong>: qualsiasi verifica puramente software può, in linea di principio, essere compromessa dallo stesso attaccante che compromette ciò che dovrebbe verificare. Serve un punto d'ancoraggio che l'attaccante software non possa toccare — e questo può essere solo hardware.</p>
+</blockquote>
+<h3 id="71-measured-trusted-secure-boot-tre-termini-da-non-confondere">7.1 Measured / Trusted / Secure Boot — tre termini da non confondere</h3>
+<p>Questi tre nomi sono la trappola concettuale principale del modulo. <strong>Non sono sinonimi</strong>:</p>
+<ul>
+<li><strong>Measured Boot</strong>: processo <em>generale</em> che tipicamente usa un <strong>TPM</strong> come hardware root of trust. <strong>Misura</strong> (calcola e registra l'hash di) ogni componente caricato. <strong>NON definisce come <em>prevenire</em> un avvio malevolo</strong> — si limita a <em>registrare</em> cosa è stato caricato, lasciando ad altri la decisione.</li>
+<li><strong>Trusted Boot</strong>: processo che <em>usa gli strumenti del Measured Boot</em> e in più <strong>blocca il boot non appena individua un componente non fidato</strong>. Cioè: measured boot + capacità di <em>fermarsi</em>.</li>
+<li><strong>Secure Boot</strong>: è il <strong>nome specifico dato all'implementazione di trusted boot basata su UEFI</strong>. Implementazione software + chiavi nel firmware; richiede un BIOS standard per la fase di POST; può avvalersi del TPM per velocizzare e migliorare i controlli di integrità.</li>
+</ul>
+<blockquote>
+<p><strong>La distinzione chiave (misurare vs bloccare)</strong>: Measured Boot <em>misura e basta</em> (registra hash, non impedisce nulla); Trusted Boot <em>misura e blocca</em>. Secure Boot è semplicemente il nome di Trusted Boot <strong>quando è implementato su UEFI</strong>. Una domanda tipica: "Il Measured Boot impedisce l'avvio di un bootloader manomesso? → <strong>Falso</strong>: lo misura soltanto, la decisione è demandata (eventualmente a una remote attestation)."</p>
+</blockquote>
+<h3 id="72-measured-boot-in-dettaglio-tpm-crtm-pcr">7.2 Measured Boot in dettaglio: TPM, CRTM, PCR</h3>
+<p>Il <strong>TPM</strong> (Trusted Platform Module) è un chip con funzionalità crittografiche, parte delle specifiche del <strong>Trusted Computing Group</strong>. Il measured boot vi si basa attraverso:</p>
+<ul>
+<li><strong>CRTM</strong> (Core Root of Trust for Measurement): il primo pezzo di codice fidato, la radice da cui parte la misurazione.</li>
+<li><strong>PCR</strong> (Platform Configuration Registers): registri che <strong>una volta scritti sono fisicamente non modificabili</strong> (si possono solo estendere, non riscrivere arbitrariamente).</li>
+</ul>
+<p>Il funzionamento (rappresentato nella slide con lo schema CRTM → BIOS → Bootloader → OS, con frecce di <em>measuring</em>, <em>passing control</em> e <em>storing</em> verso i PCR): a ogni passaggio il componente corrente <strong>misura</strong> il successivo, <strong>memorizza</strong> l'hash nei PCR e poi gli <strong>passa il controllo</strong>. Si raccoglie così l'hash di ogni componente caricato.</p>
+<p>Caratteristica importante: il measured boot <strong>pospone i controlli</strong> finché non dispone (a) delle chiavi crittografiche e (b) di abbastanza memoria per fare i calcoli necessari. E soprattutto: <strong>si può decidere chi fa i controlli e quando</strong> — per esempio <em>dall'esterno</em>, da un sistema fidato, per abilitare funzioni critiche. Questo è il meccanismo della <strong>remote attestation</strong>: un verificatore remoto interroga i PCR e decide se la macchina è in uno stato fidato prima di concederle, per esempio, l'accesso a una risorsa.</p>
+<blockquote>
+<p><strong>Perché "pospone i controlli" e perché conta</strong>: proprio perché measured boot <em>registra</em> e non <em>blocca</em>, la valutazione può avvenire dopo (quando ci sono chiavi e memoria) e altrove (remote attestation). È l'esatto opposto del secure boot UEFI, che invece verifica e blocca <em>sul momento</em>, componente per componente.</p>
+</blockquote>
+<h3 id="73-uefi-e-secure-boot">7.3 UEFI e Secure Boot</h3>
+<ul>
+<li><strong>EFI</strong> (nato in Intel) nasce come interfaccia più flessibile del BIOS tra S.O. e firmware; l'<strong>UEFI Forum</strong> ne standardizza e aggiorna la specifica.</li>
+<li><strong>UEFI è un "mini OS"</strong>: milioni di righe di codice, standard per molte piattaforme — e proprio per questo un <strong>bersaglio ideale degli attaccanti</strong> (una superficie enorme, sotto il sistema operativo).</li>
+<li><strong>UEFI verifica ogni componente software prima di passare il controllo</strong> a Bootloader/Sistema Operativo: richiede la disponibilità di un <strong>database di chiavi</strong> e <strong>blocca il boot appena rileva una difformità</strong>.</li>
+</ul>
+<h4 id="le-chiavi-di-uefi-secure-boot">Le chiavi di UEFI Secure Boot</h4>
+<p>UEFI Secure Boot definisce <strong>due processi di sicurezza</strong>: (1) la <strong>verifica dell'immagine di boot</strong> e (2) la <strong>verifica degli aggiornamenti al database</strong> di sicurezza delle immagini. Per farlo usa più database e set di chiavi (schema della slide 16), in una gerarchia dove le chiavi più in alto autorizzano quelle più in basso:</p>
+<table>
+<thead>
+<tr>
+<th>Chiave</th>
+<th>Verifica</th>
+<th>Il suo aggiornamento è verificato da</th>
+<th>Ruolo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PK</strong></td>
+<td>nuova PK, KEK, db/dbx/dbt/dbr, OsRecovery…</td>
+<td>PK</td>
+<td><strong>Platform Key</strong> (la radice)</td>
+</tr>
+<tr>
+<td><strong>KEK</strong></td>
+<td>nuovi db/dbx/dbt/dbr, OsRecovery…</td>
+<td>PK</td>
+<td><strong>Key Exchange Key</strong></td>
+</tr>
+<tr>
+<td><strong>db</strong></td>
+<td>immagini UEFI</td>
+<td>PK/KEK</td>
+<td><strong>Authorized</strong> Image Database (lista dei "consentiti")</td>
+</tr>
+<tr>
+<td><strong>dbx</strong></td>
+<td>immagini UEFI</td>
+<td>PK/KEK</td>
+<td><strong>Forbidden</strong> Image Database (lista dei "vietati/revocati")</td>
+</tr>
+<tr>
+<td><strong>dbt</strong></td>
+<td>immagine UEFI + dbx</td>
+<td>PK/KEK</td>
+<td>Timestamp Database</td>
+</tr>
+<tr>
+<td><strong>dbr</strong></td>
+<td>OsRecovery</td>
+<td>PK/KEK</td>
+<td>Recovery Database</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Distinzione db vs dbx (la coppia più chiedibile)</strong>: <strong>db</strong> è la lista <em>bianca</em> (immagini autorizzate); <strong>dbx</strong> è la lista <em>nera</em> (immagini proibite/revocate — es. un bootloader di cui è emersa una vulnerabilità). Sono complementari: un'immagine passa se è in <code>db</code> <strong>e</strong> non è in <code>dbx</code>. La <strong>PK</strong> è la radice che autorizza tutto il resto; la <strong>KEK</strong> sta in mezzo e autorizza gli aggiornamenti a db/dbx.</p>
+</blockquote>
+<h4 id="uefi-secure-boot-image-verification-il-modello-clark-wilson">UEFI Secure Boot Image Verification (il modello Clark-Wilson)</h4>
+<p>La slide 17 descrive le entità coinvolte nella verifica delle immagini al boot con un vocabolario formale:</p>
+<ul>
+<li><strong>TP</strong> = <em>Trusted Platform</em>: la procedura di verifica stessa.</li>
+<li><strong>CDI</strong> = il <strong>UEFI Secure Boot Image Security Database</strong> (Constrained Data Item): il <strong>database delle politiche di sicurezza</strong> da applicare alle immagini da caricare. È <strong>aggiornabile</strong>.</li>
+<li><strong>UDI</strong> = <em>Unconstrained Data Item</em>: qualsiasi firmware di terze parti, incluso <strong>boot loader, PCI option ROM, o UEFI shell tool</strong>.</li>
+</ul>
+<p>Meccanismo: <strong>al boot, TP verifica l'integrità di UDI utilizzando le policy CDI</strong>; se il controllo va a buon fine, <strong>UDI entra a far parte di CDI</strong> e il firmware di terze parti viene eseguito. Poiché il CDI è aggiornabile, un fornitore che voglia far accettare il proprio componente deve <strong>firmarlo con la propria chiave privata e rendere disponibile la chiave pubblica</strong>; questa <strong>chiave pubblica va iscritta (<em>enrolled</em>) nel firmware del sistema</strong>. E qui la garanzia cruciale: <strong>normalmente questo passaggio richiede un reboot in una modalità speciale e l'intervento sulla console</strong>, bloccando quindi l'azione di utenti malevoli <strong>ma senza accesso fisico</strong> al sistema.</p>
+<blockquote>
+<p><strong>Perché il modello Clark-Wilson</strong>: è un modello formale di integrità in cui procedure fidate (TP) trasformano dati non vincolati (UDI) in dati vincolati/fidati (CDI) solo dopo verifica. Non serve conoscerlo a fondo per l'esame, ma è utile capire il <em>movimento</em>: un componente esterno diventa fidato solo dopo che una procedura fidata lo ha validato con una policy, e l'iscrizione di nuove chiavi richiede presenza alla console.</p>
+</blockquote>
+<h4 id="uefi-secure-boot-in-linux-shim-e-mok">UEFI Secure Boot in Linux: shim e MOK</h4>
+<p>Su Linux la catena (schema slide 18: PK → KEK db → <strong>Shim</strong> ↔ <strong>MOK List</strong> → GRUB2 → Kernel) funziona così:</p>
+<ol>
+<li>La <strong>Platform Key ufficiale verifica un piccolo pre-boot-loader, <code>shim</code></strong>. La chiave usata per firmare <code>shim</code> deve essere fornita dal costruttore hardware — <strong>in pratica è una chiave Microsoft</strong> (è Microsoft a firmare <code>shim</code> perché la sua PK è quella preinstallata su quasi tutto l'hardware consumer).</li>
+<li><strong><code>shim</code> può usare o trasferire le MOK</strong> (<em>Machine Owner Keys</em>): per validare il bootloader e per validare <strong>moduli custom del kernel</strong>.</li>
+<li>I <strong>componenti aggiuntivi del kernel devono essere firmati</strong> per poter essere caricati:
+   - l'utente <strong>genera le MOK</strong>;
+   - l'utente <strong>deposita le MOK in shim</strong>;
+   - <strong>al boot successivo, shim trova le chiavi nella fase di setup e chiede conferma per salvarle in firmware</strong> → il <strong>consenso esplicito e basato su password è sempre richiesto</strong>.</li>
+</ol>
+<blockquote>
+<p><strong>Perché esiste <code>shim</code></strong>: risolve un problema pratico. L'hardware si fida solo di chiavi Microsoft (la PK preinstallata). Le distribuzioni Linux non possono far firmare ogni kernel da Microsoft, quindi Microsoft firma un piccolo componente stabile (<code>shim</code>), e <code>shim</code> a sua volta gestisce le MOK dell'utente. Il meccanismo MOK è ciò che permette al proprietario della macchina di far caricare moduli propri (es. un driver che compili tu) senza disabilitare Secure Boot — ma solo con <strong>consenso alla console + password</strong>, mai da remoto.</p>
+<p><strong>Nota pratica ricorrente</strong>: chi ha Secure Boot attivo e installa VirtualBox su Linux incontra proprio questo — il modulo <code>vboxdrv</code> non si carica finché non lo si firma con una MOK e la si iscrive rispondendo al prompt di <code>shim</code> al reboot. È l'esempio concreto del meccanismo.</p>
+</blockquote>
+<p><strong>Connessione con S14/S15 (Crittografia e gestione delle chiavi con gpg)</strong>: l'intera catena di fiducia poggia su firma digitale e gestione delle chiavi — hash nei PCR, chiavi PK/KEK, firma di <code>shim</code> e dei moduli con MOK. È la stessa primitiva (firma asimmetrica, chiave privata firma / chiave pubblica verifica) che S15 esercita concretamente con <code>gpg</code>. Qui la si vede applicata alla catena di boot; là alla verifica di file e messaggi.</p>
+<hr />
+<h2 id="8-integrita-e-autenticita-del-software-applicativo">8. Integrità e autenticità del software applicativo</h2>
+<p>Il <strong>secure boot garantisce l'integrità fino all'avvio del sistema operativo</strong> — ma non oltre. I <strong>pacchetti software applicativi</strong> sono meno "potenti" (girano senza privilegi di boot) ma <strong>non necessariamente meno pericolosi</strong>. Da qui il problema di verificare la provenienza del software che installo <em>dopo</em> l'avvio.</p>
+<h3 id="81-autenticazione-del-software-scaricato">8.1 Autenticazione del software scaricato</h3>
+<p>La <strong>prima cautela</strong> quando si scarica software dovrebbe essere <strong>verificarne l'autenticità da una firma digitale</strong>. Ma per verificare una firma serve una <strong>chiave pubblica fidata</strong> — il che sposta il problema (da dove viene la fiducia in quella chiave?). Procedura tipica con GPG:</p>
+<ol>
+<li><code>gpg --verify FILE.asc FILE.tar.gz</code> — mostra il <em>key id</em> con cui è stato firmato.</li>
+<li><code>gpg --keyserver pgpkeys.mit.edu --recv-key &lt;KEY_ID&gt;</code> — scarica quella chiave. Ma <strong>l'autenticità della chiave, in questo caso, deriva solo dalla fonte… basta?</strong> Va valutato caso per caso, seguendo indicazioni specifiche del progetto.</li>
+<li>Si ripete il passo (1) ora che si ha la chiave.</li>
+</ol>
+<p>Come minimo dovrebbe essere disponibile un <strong>fingerprint</strong>. Basta mettere il fingerprint (es. in formato <code>.sha256</code>) nella stessa directory del file e lanciare <code>sha256 -c FILE.sha256</code>.</p>
+<blockquote>
+<p><strong>Distinzione firma vs fingerprint/hash</strong>: la <strong>firma digitale</strong> (<code>gpg --verify</code>) prova <em>autenticità + integrità</em> (chi l'ha prodotto e che non è stato alterato), ma richiede fiducia in una chiave pubblica. Il <strong>fingerprint/hash</strong> (<code>sha256</code>) prova solo <em>integrità</em> (il file non è cambiato rispetto a quello di cui il produttore ha pubblicato l'hash) — non dice nulla su chi l'ha prodotto se non ti fidi già del canale su cui hai preso l'hash. Sono controlli diversi con garanzie diverse.</p>
+</blockquote>
+<h3 id="82-installazione-da-sorgenti-la-trappola-della-fiducia">8.2 Installazione da sorgenti: la trappola della fiducia</h3>
+<p>Installare da sorgenti <em>offre la possibilità teorica di verificare il codice</em>. Ma:</p>
+<ul>
+<li><strong>se non lo fai davvero, è un falso senso di sicurezza</strong>;</li>
+<li>se ti limiti a fidarti della firma sull'archivio, <strong>non è diverso dal verificare la firma su un binario</strong> (non hai guadagnato nulla in sicurezza rispetto al binario firmato);</li>
+<li>è <strong>più difficile da manutenere</strong>;</li>
+<li>richiede <strong>MOLTI componenti ausiliari</strong> (header, librerie, processori di macro, compilatori, linker…) — e <strong>ognuno di essi può avvantaggiare un attaccante</strong>. Il riferimento classico è il <strong>Ken Thompson Hack</strong>: un compilatore compromesso può inserire backdoor nei binari che compila (e persino in una nuova versione di sé stesso), rendendo inutile ispezionare il <em>sorgente</em> perché il male sta nel <em>toolchain</em>.</li>
+</ul>
+<p>Da qui l'ingresso di <strong>distribuzioni e pacchetti</strong> come soluzione pragmatica:</p>
+<ul>
+<li><strong>chiavi di verifica installate una volta per tutte</strong> — comodo, ma diventa un <strong>Single Point Of Failure</strong> (SPOF): se quella chiave è compromessa, cade tutto;</li>
+<li><strong>gestione automatica delle dipendenze</strong>;</li>
+<li><strong>garanzia di compatibilità binaria</strong> tra tutti gli elementi del set.</li>
+</ul>
+<blockquote>
+<p><strong>Perché il Ken Thompson Hack è citato</strong>: dimostra che "installo da sorgenti così controllo tutto" è un'illusione se non controlli anche il compilatore, il linker, le librerie — un regresso infinito di fiducia analogo a quello del boot (§7). La soluzione, come per il boot, è spostare la fiducia su un punto gestito centralmente (la distribuzione), accettandone i limiti (lo SPOF della chiave).</p>
+</blockquote>
+<h3 id="83-installazione-assistita-e-package-manager">8.3 Installazione assistita e package manager</h3>
+<p>L'installazione è comunemente effettuata tramite <strong>software ausiliari</strong>: il <strong>package manager</strong> specifico della distribuzione (rpm/yum, dpkg/apt…) o un installer su Windows. Un tool di installazione:</p>
+<ul>
+<li><strong>può farsi carico delle verifiche relative alle dipendenze</strong>;</li>
+<li><strong>non può configurare ogni dettaglio del sistema</strong> in modo specifico;</li>
+<li><strong>può generare dinamicamente dati specifici</strong>.</li>
+</ul>
+<p>Le dipendenze formano un <strong>grafo</strong> (es. <code>glibc</code> serve a <code>gtk</code>, <code>firefox</code>, <code>zlib</code>…; <code>zlib</code> serve ad <code>apache</code>; <code>apache</code> serve a <code>php</code>). "A → B" significa "A serve per B", dove <em>servire</em> può essere logico (non ha senso un linguaggio di generazione pagine web senza un web server) o fisico (un binario linkato dinamicamente non gira senza le librerie di cui importa i simboli).</p>
+<h3 id="84-debian-e-red-hat-pacchetti-e-repository">8.4 Debian e Red Hat: pacchetti e repository</h3>
+<p>Le due <strong>distribuzioni capostipite</strong> da cui derivano quasi tutte le varianti, con due sistemi di gestione dei pacchetti molto simili, articolati su tre livelli: tool <strong>di basso livello</strong> (singolo pacchetto), tool <strong>intermedi</strong> (gestione coordinata di pacchetti + dipendenze), tool per il <strong>reperimento automatico dai repository</strong>.</p>
+<p><strong>Anatomia del nome del pacchetto</strong> (candidato a domanda):</p>
+<ul>
+<li>Debian/derivate (.deb): <code>aptitude-0.2.15.9-2_i386.deb</code> → <strong>nome</strong> (<code>aptitude</code>) · <strong>versione del software</strong> (<code>0.2.15.9</code>) · <strong>versione del pacchetto</strong> (<code>2</code>) · <strong>architettura</strong> (<code>i386</code>).</li>
+<li>RedHat/derivate (.rpm): <code>httpd-2.4.6-45.el7.centos.x86_64.rpm</code> → nome · versione software · versione pacchetto · architettura.</li>
+</ul>
+<blockquote>
+<p><strong>Distinzione "versione del software" vs "versione del pacchetto"</strong>: la prima è la versione del programma a monte (upstream); la seconda incrementa quando il <em>packaging</em> cambia (patch della distribuzione, correzioni allo script di installazione) a parità di software. Due errori diversi da non confondere.</p>
+</blockquote>
+<p><strong>Repository</strong>: raccolte indicizzate di pacchetti, online o su filesystem locale. I package manager leggono per ogni repo l'<strong>indice e i metadati</strong>, così conoscono le versioni disponibili e le dipendenze (e come risolverle). Collocazioni tipiche:</p>
+<ul>
+<li>APT: <code>/etc/apt/sources.list</code> e <code>/etc/apt/sources.list.d/*</code> — es. <code>deb http://archive.ubuntu.com/ubuntu bionic-updates universe</code>.</li>
+<li>YUM: <code>/etc/yum.conf</code> e <code>/etc/yum.repos.d/*.repo</code> — con direttive come <code>gpgcheck=1</code> e <code>gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7</code>.</li>
+</ul>
+<h3 id="85-verifica-dellautenticita-dei-pacchetti">8.5 Verifica dell'autenticità dei pacchetti</h3>
+<p>La <strong>firma dei pacchetti è gestita centralmente</strong>: i <em>mantainer</em> della distribuzione forniscono le chiavi di verifica nei media di installazione ufficiali o sui repository online. I set di chiavi si possono gestire in modo standard con <strong>GnuPG</strong> (es. i sistemi .deb mettono i keyring in <code>/etc/apt/trusted.gpg.d/</code>), ma è <strong>più comune usare gli strumenti forniti dalla distribuzione</strong>:</p>
+<ul>
+<li>.deb: <code>apt-key {add file | list | del keyid | adv --recv-key keyid | …}</code> — <strong>deprecato da tempo ma ancora in uso</strong>; metteva tutte le chiavi nello stesso file <code>/etc/apt/trusted.gpg</code>.</li>
+<li>.rpm: <code>rpm {--import | -e | -q[ai] | …}</code> — <strong>rpm tratta le chiavi come se fossero pacchetti</strong>, quindi si usano gli stessi comandi per interrogarle, eliminarle, ecc.</li>
+</ul>
+<h3 id="86-lavorare-coi-repository-esterni-il-rischio-dellautenticazione-disattivata">8.6 Lavorare coi repository esterni: il rischio dell'autenticazione disattivata</h3>
+<p>Esigenza comune: installare software ben supportato ma <strong>non incluso nei canali ufficiali</strong>. Si aggiunge semplicemente il repository all'elenco — ma <strong>succede che non tutti supportino l'autenticazione</strong>, e la si disattiva:</p>
+<ul>
+<li>APT: <code>deb [allow-insecure=yes] http://good.site/virtualbox/debian bookworm contrib</code></li>
+<li>YUM: nel <code>.repo</code>, <code>gpgcheck=0</code>.</li>
+</ul>
+<blockquote>
+<p><strong>Threat model dell'<code>allow-insecure</code>/<code>gpgcheck=0</code></strong>: disattivare la verifica della firma significa installare pacchetti la cui autenticità non è provata. È comodo (funziona subito) ma apre alla sostituzione malevola dei pacchetti (man-in-the-middle sul mirror, mirror compromesso). È l'equivalente, per il software, di avviare un SO non firmato: si è rinunciato alla catena di fiducia.</p>
+</blockquote>
+<h3 id="87-cross-signing-threat-la-minaccia-sottile-dei-keyring-condivisi">8.7 Cross-signing threat (la minaccia sottile dei keyring condivisi)</h3>
+<p>Nelle distro .deb era diffuso l'uso di righe di configurazione <strong>prive di specifica della chiave</strong>: <code>deb http://download.virtualbox.org/virtualbox/debian xenial contrib</code>. In questo caso vengono usate <strong>tutte le chiavi collocate in posti "fidati"</strong> (<code>/etc/apt/trusted.gpg</code> e <code>/etc/apt/trusted.gpg.d/*</code>). Conseguenza: <strong>una chiave importata per convalidare <em>una<em> fonte di pacchetti può essere usata per </em>tutti</em></strong> → <strong>cross signing</strong>. Se un repo viene violato e la sua chiave privata sottratta, quella chiave può <strong>pubblicare aggiornamenti fraudolenti per qualsiasi pacchetto, anche degli altri</strong>.</p>
+<p><strong>Best practice correnti</strong>: legare ogni fonte alla <em>sua</em> chiave.</p>
+<ul>
+<li>Opzione sulla singola riga: <code>deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian bookworm contrib</code>.</li>
+<li>File di configurazione in stile "rpm-like" (<code>.sources</code> con campo <code>Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg</code>).</li>
+</ul>
+<blockquote>
+<p><strong>Perché il cross-signing è pericoloso e la distinzione con <code>allow-insecure</code></strong>: sono due debolezze diverse. <code>allow-insecure</code>/<code>gpgcheck=0</code> = <em>nessuna</em> verifica. Cross-signing = c'è verifica, <strong>ma con lo scope sbagliato</strong>: la chiave giusta per un repo minore diventa valida per l'intero sistema. <code>signed-by</code> risolve il secondo problema restringendo <em>quale</em> chiave è accettata <em>per quale</em> fonte.</p>
+</blockquote>
+<h3 id="88-gestire-la-provenienza-dei-pacchetti-software-injection">8.8 Gestire la provenienza dei pacchetti: software injection</h3>
+<p>Confusione possibile se un pacchetto con lo <strong>stesso nome</strong> esiste in <strong>versioni diverse in repository differenti</strong>. I package manager, di default, <strong>scelgono sempre la versione più avanzata</strong>. Scenario d'attacco: si è aggiunto un repo semisconosciuto per un'app innocua; se a quel repo viene aggiunto un pacchetto <strong>"core"</strong> dichiarato più recente della versione ufficiale → <strong>software injection</strong> (il sistema aggiorna un componente critico prelevandolo dal repo malevolo). In alcuni casi anche aggiornamenti nello stesso repo sono indesiderabili (situazioni legacy). La situazione va <strong>controllata e gestita</strong>:</p>
+<ul>
+<li>Provenienza di un pacchetto: YUM <code>repoquery -i [package name]</code>; APT <code>apt-cache showpkg [package name]</code>.</li>
+<li>Elenco pacchetti da un repo: YUM <code>yum list installed | grep [repo name]</code>; APT: vari comandi per estrarre info dalla cache.</li>
+</ul>
+<h3 id="89-limitare-le-modifiche-automatiche-version-lockingpinning">8.9 Limitare le modifiche automatiche: version locking/pinning</h3>
+<p>Per evitare a priori problemi in sistemi con dipendenze complesse (mix di pacchetti installati a mano e via package manager) si usa il <strong>version locking/pinning</strong>:</p>
+<ul>
+<li>APT: editare <code>/etc/apt/preferences.d/*</code> (Apt Preferences/pinning).</li>
+<li>YUM: <code>yum install yum-plugin-versionlock</code>, poi <code>yum versionlock [package name]</code> (o editare <code>/etc/yum/pluginconf.d/versionlock.list</code>).</li>
+</ul>
+<blockquote>
+<p><strong>Perché il pinning è una contromisura di sicurezza e non solo di stabilità</strong>: bloccare la versione di un pacchetto critico è anche una difesa contro la software injection (§8.8): impedisce che un repo dichiari una versione "più recente" e me la faccia installare al posto di quella fidata.</p>
+</blockquote>
+<h3 id="810-devops-woes-dependency-confusion">8.10 DevOps woes: dependency confusion</h3>
+<p><strong>DevOps</strong> (development + operations) automatizza build e deployment, inclusa <strong>l'inclusione automatica delle dipendenze</strong>. Il problema: <strong>raramente c'è una gestione corretta dei namespace</strong> — es. <code>npm</code> per Node è praticamente <em>flat</em> (piatto, senza namespace robusti). Scenario (<strong>dependency confusion</strong>): un'azienda sviluppa internamente un pacchetto <code>myutils</code>; un attaccante registra un pacchetto <code>myutils</code> nel repo pubblico di default; al prossimo build, <strong>quale prende il sistema di CI/CD?</strong> Se prende quello pubblico (magari perché ha numero di versione più alto), esegue codice dell'attaccante nella pipeline.</p>
+<blockquote>
+<p><strong>Connessione con §8.8</strong>: dependency confusion è software injection portata nel mondo dei package manager di linguaggio (npm, pip…). Stessa logica ("il sistema sceglie la versione/fonte sbagliata perché ha lo stesso nome"), contesto diverso (build automatizzati invece di aggiornamenti di sistema). La radice comune è la mancanza di un <em>namespace</em> che distingua "il mio pacchetto interno" da "un pacchetto pubblico omonimo".</p>
+</blockquote>
+<hr />
+<h2 id="9-due-parole-su-cloud-security">9. Due parole su cloud security</h2>
+<p>Nel cloud, <strong>a seconda del livello di servizio utilizzato, molti problemi "svaniscono"</strong> (delegati al provider). I livelli, dal più basso al più alto (schema slide 32):</p>
+<ul>
+<li><strong>Hardware</strong> (i server fisici) — sotto tutto.</li>
+<li><strong>IaaS</strong> (Infrastructure as a Service): Computer, Network, Storage — es. EC2, S3, VPC.</li>
+<li><strong>PaaS</strong> (Platform as a Service): Components, Services — es. runtime Java/Node/Ruby, Lambda, API Gateway.</li>
+<li><strong>SaaS</strong> (Software as a Service): User Interface, Machine Interface — es. G Suite, applicazioni web pronte.</li>
+</ul>
+<blockquote>
+<p><strong>Perché "svaniscono" e la distinzione tra i livelli</strong>: più si sale (IaaS → PaaS → SaaS), più responsabilità (e controllo) si cede al provider. In IaaS gestisco ancora il sistema operativo della VM (e me ne assumo la sicurezza); in SaaS uso solo l'applicazione e quasi tutta la sicurezza è del provider. È il modello della <strong>responsabilità condivisa</strong>: chi è responsabile di cosa dipende dal livello scelto. Una domanda tipica: "In SaaS il cliente è responsabile del patching del sistema operativo sottostante? → <strong>Falso</strong>: a quel livello lo gestisce il provider."</p>
+</blockquote>
+<h3 id="91-sicurezza-cloud-vs-on-premise">9.1 Sicurezza: cloud vs. on-premise</h3>
+<ul>
+<li>I problemi di sicurezza del cloud riguardano <strong>raramente</strong> la sicurezza dell'host e della rete (di cui si occupa il provider).</li>
+<li>C'è un <strong>impatto "emotivo" della distanza</strong>: la <strong>perdita di controllo</strong>.</li>
+<li><strong>Osservazione razionale</strong>: il più delle volte i fornitori cloud hanno <strong>team di sicurezza di livello mondiale</strong> che quasi nessuna azienda potrebbe permettersi per i propri data center.</li>
+<li>La <strong>due diligence</strong> suggerisce però di <strong>verificare</strong> questa affermazione quando si seleziona un fornitore: <strong>certificazione ISO27001</strong> (con il suo <em>ambito di applicazione</em>) e risultati di un <strong>audit SAS70 di tipo II</strong>.</li>
+<li>Paradossalmente, <strong>alcune minacce reali riguardano la disponibilità</strong>: <strong>lock-in</strong>, <strong>dipendenza dalla rete</strong>, <strong>cessazione dell'attività</strong> del fornitore.</li>
+</ul>
+<blockquote>
+<p><strong>Perché la certificazione va letta con l'"ambito di applicazione"</strong>: una ISO27001 certifica che <em>un certo perimetro</em> è gestito secondo lo standard — ma se il servizio che uso è fuori da quel perimetro, la certificazione non mi copre. Errore da manuale: fidarsi del bollino senza guardare <em>cosa</em> certifica.</p>
+</blockquote>
+<h3 id="92-i-benefici-potenziali-del-cloud-per-la-sicurezza">9.2 I benefici potenziali del cloud per la sicurezza</h3>
+<p>Le misure di sicurezza sono <strong>più economiche su scala ampia</strong>:</p>
+<ul>
+<li><strong>Collocazioni multiple</strong> = ridondanza di istanze e dati = indipendenza dai guasti (anche dolosi) e opportunità di ripristino.</li>
+<li><strong>Tempestività migliorata</strong> nella risposta agli incidenti.</li>
+<li><strong>Gestione delle minacce</strong> con specialisti dedicati.</li>
+<li>La <strong>sicurezza come elemento di differenziazione sul mercato</strong>: il <strong>CSC</strong> (Cloud Service Customer, il cliente) sceglie in base alla reputazione di riservatezza/integrità/resilienza del <strong>CSP</strong> (Cloud Service Provider) — forte motore per i CSP a migliorare.</li>
+<li><strong>Aggiornamenti più tempestivi</strong>: immagini di VM pre-rafforzate e aggiornate centralmente; IaaS che consente snapshot regolari e deploy rapido su piattaforme omogenee.</li>
+<li><strong>Concentrazione delle risorse e ridimensionamento rapido</strong>: applicare controlli e policy in modo economico; il CSP può <strong>scalare dinamicamente</strong> i meccanismi difensivi (traffic shaping, filtraggio, crittografia) durante un attacco.</li>
+<li><strong>Sicurezza come servizio e raccolta di prove</strong>: interfacce standardizzate di sicurezza gestita; IaaS che clona VM e offre storage per i log utile ad <strong>analisi forensi offline</strong> senza degradare le prestazioni.</li>
+<li><strong>Gli SLA impongono una migliore gestione del rischio</strong>: per quantificare le sanzioni negli SLA, i CSP adottano audit interni e valutazioni del rischio più rigorosi.</li>
+</ul>
+<blockquote>
+<p><strong>Definizioni CSC e CSP (da tenere dritte)</strong>: <strong>CSC</strong> = <em>Customer</em> (chi compra/usa il servizio cloud); <strong>CSP</strong> = <em>Provider</em> (chi lo eroga). Molte domande sui rischi organizzativi (§9.4) giocano proprio sul chi-fa-cosa tra questi due attori.</p>
+</blockquote>
+<p><strong>Connessione con S10 (NIDS) e con l'analisi forense</strong>: il cloud che offre "storage conveniente per i log" e "clonazione di VM per analisi forense offline" è la controparte infrastrutturale della rilevazione (S10): i dati che un NIDS produce e i log da correlare trovano nel cloud un luogo economico dove essere conservati e analizzati senza toccare i sistemi in produzione.</p>
+<h3 id="93-attori-e-minacce-nel-cloud">9.3 Attori e minacce nel cloud</h3>
+<p>Lo schema (slide 39) mostra che attorno alla "nuvola" gravitano molti attori, ciascuno una potenziale minaccia: Government, Identity provider, Attribute provider, Image/application publisher, Cloud provider, Transport agent, Hacker/cracker, Competitor, Cloud broker, Consumer. Il messaggio: la superficie di fiducia nel cloud è <strong>molto più affollata</strong> che on-premise — ci si fida (volenti o nolenti) di parecchi terzi.</p>
+<h3 id="94-i-rischi-specifici-del-cloud-tre-categorie">9.4 I rischi specifici del cloud: tre categorie</h3>
+<p>Il cuore "da quiz" della parte cloud. <strong>Tre categorie</strong>:</p>
+<p><strong>A) Rischi Organizzativi</strong>
+- <strong>Perdita di controllo</strong> — <em>forse il rischio considerato più grave</em>: il CSC cede il controllo al CSP su molti aspetti critici; se lo SLA lascia un <em>gap</em> rispetto alle necessità, non c'è modo di chiuderlo; outsourcing/subcontracting possono introdurre attori non fidati; il CSC non può verificare autonomamente la compliance del CSP.
+- <strong>Lock-in</strong> — aspetti proprietari rendono difficile la migrazione (esiste anche on premise, ma lì almeno i dati restano in mano al CSC).
+- <strong>Supply Chain Failure</strong> — l'outsourcing crea catene di fornitura <em>forti quanto l'anello più debole</em>.
+- <strong>Interferenze tra politiche di sicurezza CSC-CSP</strong> — il CSC potrebbe volere controlli in conflitto con l'ambiente del CSP (non implementabili); le insicurezze di <em>un</em> CSC possono diventare vulnerabilità dell'intera piattaforma condivisa.</p>
+<p><strong>B) Rischi Tecnici</strong>
+- <strong>Economic Denial of Service (EDoS)</strong> — con servizi <em>pay-per-use</em> che scalano automaticamente, un attacco di sovraccarico, <strong>invece di degradare le prestazioni, aumenta i costi</strong>. È il "DoS economico".
+- <strong>Vulnerabilità della piattaforma</strong> — un attacco all'infrastruttura potrebbe dare accesso a <em>tutte</em> le VM (molto improbabile ma devastante); più plausibile la <strong>compromissione dell'interfaccia di gestione</strong>.
+- <strong>Cedimento dell'isolamento</strong> — la <strong>multi-tenancy</strong> permette teoricamente di installare una VM malevola <em>accanto</em> a quella della vittima: possibili <strong>attacchi cross-VM via side channel</strong>, forzatura di migrazioni saturando l'host, <strong>intercettazione dei dati in transito</strong> (non tanto quelli dell'utente — che deve cautelarsi cifrando <strong>end-to-end</strong> — quanto le operazioni trasparenti del CSP: sincronizzazioni, migrazioni).</p>
+<p><strong>C) Rischi Legali</strong>
+- <strong>Protezione dei dati</strong> — legislazioni differenti; potrebbe essere <strong>illegale trasferire certi dati in certi paesi</strong>; il CSP potrebbe spostare i dati tra i propri datacenter <strong>senza dirlo al CSC</strong>.
+- <strong>Giurisdizione</strong> — il CSP potrebbe essere costretto ad azioni dagli organi giudiziari sulla base delle leggi del paese della sede legale o dei datacenter; il CSC potrebbe subire interruzioni o <strong>sequestro di dati per motivi che non sussistono nel proprio paese</strong>.</p>
+<blockquote>
+<p><strong>Distinzioni da non confondere nei rischi cloud</strong> (fonte tipica di domande a scelta multipla):
+- <strong>EDoS vs DoS classico</strong>: il DoS classico <em>nega il servizio</em>; l'EDoS lo mantiene ma <em>fa esplodere il conto</em> sfruttando l'auto-scaling pay-per-use.
+- <strong>Lock-in (organizzativo) vs cedimento dell'isolamento (tecnico)</strong>: il primo è un problema di <em>dipendenza contrattuale/proprietaria</em> (difficile andarsene); il secondo è un problema <em>tecnico</em> di multi-tenancy (il vicino di rack ti attacca). Categorie diverse.
+- <strong>Cedimento dell'isolamento vs vulnerabilità della piattaforma</strong>: il primo è "il tenant accanto rompe l'isolamento tra VM"; il secondo è "l'infrastruttura stessa/l'interfaccia di gestione è bucata". Il secondo è più raro ma colpisce <em>tutti</em> i tenant.
+- <strong>Rischi legali</strong> = <em>dove</em> stanno i dati e <em>quali leggi</em> si applicano; sono l'altra faccia della <strong>delocalizzazione</strong> vista al §1.</p>
+</blockquote>
+<p><strong>Connessione con S12/S13 (Sicurezza delle comunicazioni, TLS)</strong>: la contromisura esplicita al cedimento dell'isolamento sul fronte dati in transito è la <strong>cifratura end-to-end</strong> — cioè esattamente la materia di S12/S13 (protezione delle comunicazioni, TLS). Il modulo S6 identifica la minaccia (intercettazione nel multi-tenant) e rimanda per la soluzione tecnica alla crittografia dei canali.</p>
+<hr />
+<h2 id="10-sintesi-dei-fili-conduttori">10. Sintesi dei fili conduttori</h2>
+<ol>
+<li><strong>La collocazione decide il modello di minaccia</strong>: on-premise → accesso fisico; cloud → condivisione + delocalizzazione. Le contromisure si adattano, non spariscono.</li>
+<li><strong>L'accesso fisico scavalca le difese di rete</strong> (contrappunto diretto a S5).</li>
+<li><strong>Regresso della fiducia</strong>: chi verifica chi? Sia nel boot (anti-malware ← SO ← bootloader ← BIOS ← hardware root of trust) sia nel software da sorgenti (Ken Thompson Hack). La soluzione è sempre ancorare la fiducia a un punto gestito/incorruttibile e costruire una catena.</li>
+<li><strong>Measured ≠ Trusted ≠ Secure Boot</strong>: misurare / misurare+bloccare / implementazione UEFI di trusted boot.</li>
+<li><strong>Provenienza del software</strong>: firma vs hash, chiavi centralizzate (comode ma SPOF), scope delle chiavi (cross-signing → <code>signed-by</code>), scelta della versione/fonte (software injection, dependency confusion).</li>
+<li><strong>Cloud</strong>: responsabilità condivisa per livello (IaaS/PaaS/SaaS); benefici reali (scala, ridondanza, competenze) ma rischi propri (organizzativi/tecnici/legali), con la disponibilità e la delocalizzazione come temi ricorrenti.</li>
+</ol>
+<hr />
+<h2 id="11-autoverifica-domande-in-stile-quiz-desame">11. Autoverifica — domande in stile quiz d'esame</h2>
+<blockquote>
+<p>Formato reale: vero/falso e scelta multipla, penalità sulle risposte sbagliate. Rispondi <em>prima</em> di guardare le soluzioni negli appunti. Molte domande sono costruite sulle <strong>distinzioni</strong> segnalate nella lezione, perché è lì che si cade.</p>
+</blockquote>
+<p><strong>Vero/Falso</strong></p>
+<ol>
+<li>Un firewall correttamente configurato protegge il sistema anche da un attaccante con accesso fisico che avvia la macchina da un supporto esterno. <em>(V/F)</em></li>
+<li>Il Measured Boot, da solo, blocca l'avvio non appena rileva un componente non fidato. <em>(V/F)</em></li>
+<li>Secure Boot è semplicemente il nome dato all'implementazione di Trusted Boot basata su UEFI. <em>(V/F)</em></li>
+<li>Nel database UEFI Secure Boot, <code>db</code> è la lista delle immagini <em>proibite</em> e <code>dbx</code> quella delle immagini <em>autorizzate</em>. <em>(V/F)</em></li>
+<li>Passare <code>init=/bin/bash</code> come parametro al kernel dal bootloader può fornire una shell di root senza autenticazione. <em>(V/F)</em></li>
+<li>Le password del BIOS sono considerate una protezione sufficiente da sole, perché non hanno meccanismi di reset. <em>(V/F)</em></li>
+<li>In <code>shim</code>, l'iscrizione di una MOK avviene automaticamente da remoto senza intervento alla console. <em>(V/F)</em></li>
+<li><code>gpg --verify</code> fornisce una garanzia di sola integrità, mentre un hash <code>sha256</code> fornisce anche autenticità. <em>(V/F)</em></li>
+<li>Impostare <code>gpgcheck=0</code> in un repo YUM disattiva la verifica della firma dei pacchetti provenienti da quel repo. <em>(V/F)</em></li>
+<li>Un attacco EDoS tipicamente riduce la disponibilità del servizio negandolo del tutto. <em>(V/F)</em></li>
+<li>La disponibilità (alimentazione, condizionamento, connettività) è il terzo vertice della triade CIA. <em>(V/F)</em></li>
+<li>In un modello SaaS, il cliente (CSC) è responsabile del patching del sistema operativo sottostante. <em>(V/F)</em></li>
+</ol>
+<p><strong>Scelta multipla</strong></p>
+<ol start="13">
+<li>
+<p>In che situazione la direttiva GRUB <code>lock</code> protegge effettivamente un item del menu?
+    a) sempre, in modo autonomo;
+    b) solo se esiste una direttiva <code>password</code> nella <em>global section</em>;
+    c) solo se il BIOS ha una password impostata;
+    d) solo con Secure Boot attivo.</p>
+</li>
+<li>
+<p>Il cross-signing threat nei sistemi APT consiste in:
+    a) l'assenza totale di verifica delle firme;
+    b) una chiave importata per una fonte che diventa valida per <em>tutte</em> le fonti fidate;
+    c) la scelta automatica della versione più recente di un pacchetto;
+    d) la cifratura end-to-end dei pacchetti.</p>
+</li>
+<li>
+<p>La contromisura best-practice al cross-signing è:
+    a) <code>allow-insecure=yes</code>;
+    b) <code>gpgcheck=0</code>;
+    c) legare la fonte alla sua chiave con <code>signed-by=</code>/<code>Signed-By:</code>;
+    d) usare sempre <code>apt-key add</code>.</p>
+</li>
+<li>
+<p>La <em>remote attestation</em> è resa possibile principalmente da:
+    a) Secure Boot UEFI che blocca il boot;
+    b) Measured Boot che registra gli hash nei PCR, verificabili da un sistema esterno;
+    c) le password del bootloader;
+    d) la cifratura del disco.</p>
+</li>
+<li>
+<p>Il "Ken Thompson Hack" illustra che:
+    a) installare da sorgenti garantisce sempre la sicurezza;
+    b) un toolchain compromesso (es. il compilatore) può inserire backdoor invisibili nel sorgente;
+    c) i pacchetti .deb sono più sicuri dei .rpm;
+    d) i fingerprint sha256 sono inutili.</p>
+</li>
+<li>
+<p>Quale coppia associa correttamente rischio cloud → categoria?
+    a) Lock-in → tecnico;
+    b) Cedimento dell'isolamento → organizzativo;
+    c) EDoS → tecnico; giurisdizione → legale;
+    d) Supply chain failure → legale.</p>
+</li>
+<li>
+<p>La "dependency confusion" (DevOps) è concettualmente più vicina a:
+    a) il power glitching;
+    b) la software injection da repository (scelta della fonte/versione sbagliata per omonimia);
+    c) il tailgating;
+    d) la remote attestation.</p>
+</li>
+<li>
+<p>Nella catena di fiducia del boot, la <em>hardware root of trust</em> è necessaria perché:
+    a) è più veloce del software;
+    b) qualsiasi verifica puramente software può essere compromessa dallo stesso attaccante che compromette il componente verificato;
+    c) il BIOS non esiste più con UEFI;
+    d) i PCR sono modificabili a piacere.</p>
+</li>
+</ol>
+<p><em>(Soluzioni ragionate nel file di appunti corrispondente.)</em></p>
+<hr />
+<!-- Fine lezione S6. Contenuto ancorato integralmente alle 42 slide del PDF; nessun concetto aggiunto oltre a ciò che il PDF tratta. --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

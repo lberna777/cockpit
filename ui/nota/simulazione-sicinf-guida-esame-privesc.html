@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_esame_privesc.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">guida_esame_privesc.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/guida_esame_privesc.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="guida-esame-integrity-check-privilege-escalation">Guida Esame — Integrity Check &amp; Privilege Escalation</h1>
+<blockquote>
+<p>File cockpit da aprire il giorno dell'esame appena riconosci un esercizio di questo tipo (un
+binario <code>changeN</code> o un pacchetto <code>.deb</code>/<code>.deb.gz</code>/<code>.deb.gpg</code> che "apporta modifiche a file dentro
+<code>/usr/bin</code> e <code>/etc</code>", con Fase 1 = identificare le modifiche e Fase 2 = diventare root <strong>senza il
+potere sudo di <code>kali</code></strong>). Autosufficiente per la maggior parte dei casi. Per l'algoritmo esteso
+passo-passo vedi <code>procedura_operativa_privesc.md</code>; per 9 casi reali già risolti,
+<code>modello_integrity_privesc.md</code>.</p>
+<p><strong>Principio guida</strong>: se sei bloccato su come costruire un comando, la risposta è quasi sempre
+nella <strong>Sezione 4</strong>. Se sei bloccato su <em>quale</em> modifica sfruttare, è nella <strong>Sezione 3</strong>.</p>
+</blockquote>
+<hr />
+<h2 id="0-i-due-gate-che-non-hai-il-permesso-di-saltare">0. I due gate che NON hai il permesso di saltare</h2>
+<ul>
+<li>⚠️ <strong>Gate A — ordine.</strong> Hai creato la baseline AIDE (<code>aideinit</code> + copia manuale di <code>aide.db.new</code>
+  in <code>aide.db</code>) <strong>prima</strong> di eseguire <code>changeN</code>/installare il <code>.deb</code>? Se hai fatto il contrario, la
+  baseline è già "sporca": ricrea la VM pulita. E hai davvero aggiunto <code>/usr/bin f Full</code> al config
+  <strong>prima</strong> di <code>aideinit</code>? Senza, i binari non vengono confrontati.</li>
+<li>⚠️ <strong>Gate B — non fermarti al primo file.</strong> Il pacchetto introduce <strong>più modifiche insieme</strong> e di
+  norma <strong>una sola è sfruttabile</strong>. Hai analizzato <em>ogni</em> riga del diff (con <code>getcap</code>/<code>getfacl</code>/
+  <code>ls -l</code>) e scritto per ciascuna se è il vettore o un vicolo cieco? In 7 dei 9 esercizi reali la
+  maggior parte delle modifiche era rumore deliberato. Saltare l'analisi porta a inseguire un
+  depistaggio (una <code>cap_mknod</code>, un'ACL su <code>mknod</code>, un SUID su <code>yes</code>) e perdere tempo.</li>
+</ul>
+<hr />
+<h2 id="1-triage-che-tipo-di-esercizio-e">1. Triage — che tipo di esercizio è</h2>
+<p>Tutti gli esercizi della famiglia hanno la <strong>stessa struttura</strong> (baseline AIDE → esegui →
+confronta → sfrutta), ma cambiano formato di consegna e obiettivo di Fase 2. Guarda la consegna:</p>
+<table>
+<thead>
+<tr>
+<th>Segnale nella consegna</th>
+<th>Cosa implica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File <code>changeN</code> (binario ELF)</td>
+<td>Modifiche applicate direttamente; formato più vecchio (2023–2025). <code>chmod +x</code> + <code>sudo ./changeN</code>.</td>
+</tr>
+<tr>
+<td>Pacchetto <code>.deb.gz</code></td>
+<td><code>gunzip</code> poi <code>sudo dpkg -i</code>. Formato dal luglio 2025.</td>
+</tr>
+<tr>
+<td>Pacchetto <code>.deb.gpg</code></td>
+<td><code>gpg -d file &gt; e.deb</code> (password tipica <code>esame</code>) poi <code>sudo dpkg -i</code>. Formato dal 2025-10.</td>
+</tr>
+<tr>
+<td>"creare utente <code>X</code> con privilegi di root e <strong>senza password</strong>"</td>
+<td>riga passwd <code>X::0:0::/root:/bin/bash</code> (campo pw vuoto).</td>
+</tr>
+<tr>
+<td>"…con password <code>Y</code>"</td>
+<td>serve un hash: <code>openssl passwd -1 -salt s Y</code> inline nel 2° campo passwd, oppure in shadow.</td>
+</tr>
+<tr>
+<td>"diventare root e lanciare <code>id</code>" (senza nome/pw)</td>
+<td>libertà totale sul metodo; scegli il vettore più diretto.</td>
+</tr>
+<tr>
+<td>"senza ricorrere al potere sudo dell'utente <code>kali</code>" (quasi sempre)</td>
+<td>l'exploit non può essere <code>sudo &lt;x&gt;</code> come <code>kali</code>; deve passare per il vettore introdotto dal pacchetto.</td>
+</tr>
+<tr>
+<td>"più eventualmente altre modifiche da dedurre"</td>
+<td>il diff AIDE potrebbe non mostrare tutto: usa anche <code>getcap -r /</code>, <code>find / -perm /7000</code>, <code>getfacl -sR /</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Il triage non decide il vettore: quello emerge <strong>solo</strong> dall'analisi del diff (Sezione 3). Non
+assumere che l'esercizio X usi lo stesso vettore di un esercizio simile — il pool ricicla i
+binari (<code>vim.tiny</code>, <code>tee</code>, <code>chmod</code>, <code>cp</code>) ma cambia quale sia quello <em>vero</em>.</p>
+<hr />
+<h2 id="2-percorso-standard-checklist">2. Percorso standard (checklist)</h2>
+<p>Versione condensata di <code>procedura_operativa_privesc.md</code> — apri quel file per il dettaglio.</p>
+<ul>
+<li>[x] <strong>0. AIDE installato?</strong> <code>which aide</code> — se non c'è (<code>/etc/aide</code> non esiste), <strong><code>sudo apt install
+  aide</code></strong> prima di tutto. Su Parrot/Kali di questa VM AIDE <strong>non è preinstallato di default</strong>
+  (troubleshooting_vm.md, §S11): senza, sei bloccato al passo 1.</li>
+<li>[x] <strong>1. Config AIDE</strong>: commenta <code>@@x_include …</code>; aggiungi <code>/usr/bin f Full</code> e <code>/etc f Full</code>
+  (o regola custom <code>p+n+u+g+s+m+c+xattrs+md5+sha512</code>). ⚠️ <strong>Sintassi esatta: <code>/usr/bin f Full</code>,
+  campi separati da SPAZI, NIENTE trattino.</strong> <code>/usr/bin -f Full</code> (col <code>-f</code>) è un errore comune e
+  fa fallire/ignorare la regola. <em>(Gate A: prima della baseline.)</em></li>
+<li>[x] <strong>2. Baseline</strong>: <code>sudo aideinit</code> <strong>poi</strong> <code>sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db</code>.</li>
+<li>[x] <strong>3. Esegui il file</strong> fornito (binario o <code>.deb</code>).</li>
+<li>[x] <strong>4. Confronta</strong>: <code>sudo aide -C -c /etc/aide/aide.conf</code>.</li>
+<li>[x] <strong>5. Leggi il diff</strong>: legenda della riga di sintesi in <code>procedura_operativa_privesc.md</code> §5
+  (ricorda: <code>X</code>=xattr/capability, <code>A</code>=ACL, <code>&gt;</code>=contenuto cresciuto, <code>c</code>/ctime da solo = rumore).</li>
+<li>[x] <em>(Gate B qui.)</em> <strong>6. Analizza OGNI file segnalato</strong> (§3): vettore o vicolo cieco?</li>
+<li>[ ] <strong>7. Sfrutta</strong> il vettore (§3/§4), verifica con <code>id</code> → <code>uid=0(root)</code>.</li>
+<li>[ ] <strong>8. <code>integrity.txt</code></strong> (strategia + output AIDE incollato + analisi file-per-file) e
+  <strong><code>privesc.png</code></strong> (comandi + prova <code>id</code>).</li>
+</ul>
+<hr />
+<h2 id="3-rami-speciali-un-ramo-per-vettore">3. Rami speciali — un ramo per vettore</h2>
+<p>Per ciascuno: <strong>come si riconosce nel diff/ispezione</strong>, <strong>come si sfrutta</strong>, <strong>gotcha</strong>. I nomi
+tra parentesi rimandano ai casi reali in <code>modello_integrity_privesc.md</code>.</p>
+<h3 id="31-suid-bit-9-gen-2023-ricreato-in-8-feb-2024">3.1 SUID bit (9 gen 2023; ricreato in 8 feb 2024)</h3>
+<ul>
+<li><strong>Riconoscere</strong>: nel diff <code>p</code> (permessi) su un binario; <code>ls -l</code> mostra la <strong><code>s</code></strong> al posto della
+  <code>x</code> nel campo utente (<code>-rwsr-xr-x</code>). Scoperta a tappeto: <code>find / -perm /7000 2&gt;/dev/null</code>.</li>
+<li><strong>Sfruttare</strong>: il binario gira coi privilegi del <strong>proprietario</strong> (root), chiunque lo lanci. Se è
+  <code>cp</code>/<code>tee</code>/un editor → scrivi <code>/etc/passwd</code>/<code>/etc/shadow</code> come root:</li>
+</ul>
+<pre><code>cp /etc/passwd ~/p ; cat ~/p &gt; ~/passwd            # cat &gt; per una copia scrivibile
+echo &quot;toor::0:0::/root:/bin/bash&quot; &gt;&gt; ~/passwd
+cp ~/passwd /etc/passwd
+su toor
+</code></pre>
+<ul>
+<li><strong>Sfruttare (2) — il SUID è un interprete/shell, non solo "scrive file"</strong>: se il bit SUID cade su
+  un binario che sa <strong>eseguire comandi o aprire una shell</strong> (<code>find</code>, <code>python3</code>, <code>perl</code>, <code>bash</code>,
+  <code>vim</code>, <code>awk</code>, <code>less</code>, <code>nmap</code>…), non serve passare da <code>/etc/passwd</code>: prendi una <strong>shell root
+  diretta</strong>. Ricette GTFOBins (funzione <em>Shell</em>, generalizza §3.6 dal sudoers al SUID):</li>
+</ul>
+<pre><code>find . -exec /bin/sh -p \; -quit          # -p: la shell NON rilascia l'euid ereditato dal SUID
+bash -p                                    # se il SUID è direttamente bash: -p preserva l'euid
+python3 -c 'import os; os.setuid(0); os.system(&quot;/bin/sh&quot;)'   # setuid(0) allinea ruid/euid a 0
+perl -e 'use POSIX qw(setuid); setuid(0); exec &quot;/bin/sh&quot;;'
+vim -c ':py3 import os; os.setuid(0); os.execl(&quot;/bin/sh&quot;,&quot;sh&quot;,&quot;-pc&quot;,&quot;reset; exec sh&quot;)'
+</code></pre>
+<p>⚠️ <strong>Il <code>-p</code> / <code>setuid(0)</code> NON è un dettaglio.</strong> Un SUID lancia il binario con <strong>euid=0</strong> ma
+  <strong>ruid=<tuo utente></strong>; bash e molti interpreti, all'avvio, <strong>rilasciano</strong> l'euid quando
+  <code>euid≠ruid</code> (misura di sicurezza) e ti riportano ai tuoi privilegi. <code>-p</code> (bash/sh) impedisce quel
+  rilascio; <code>setuid(0)</code> (python/perl) forza <code>ruid=euid=suid=0</code>. È lo <strong>stesso principio
+  real-vs-effective</strong> del gotcha <code>cat &gt; file</code> qui sotto e di §4.6. <strong>Differenza col caso sudoers
+  (§3.6)</strong>: lì <code>vi</code>/<code>find</code> girano con <strong>ruid=euid=0</strong> (è <code>sudo</code>, non SUID), quindi <code>:!/bin/bash</code>
+  senza <code>-p</code> basta — con un SUID <em>puro</em> invece il <code>-p</code>/<code>setuid</code> è necessario.
+- <strong>Gotcha</strong>: se copi <code>passwd</code>/<code>shadow</code> con un <code>cp</code> SUID, la <strong>copia resta di root</strong> e non è
+  editabile — serve il passo intermedio <code>cat file &gt; file_scrivibile</code> (la redirezione gira coi tuoi
+  privilegi reali, non con quelli del SUID). <strong>Prima di liquidare un SUID come vicolo cieco,
+  cercalo in GTFOBins</strong> (funzione <em>Shell</em>/<em>Command</em>/<em>File read</em>/<em>File write</em>): <code>find</code>, <code>python</code>,
+  <code>perl</code>, <code>bash</code>, <code>vim</code>, <code>awk</code>, <code>less</code>, <code>nano</code>, <code>env</code>, <code>nmap</code>… hanno una via di fuga verso root e
+  sono <strong>quasi certamente il vettore vero</strong>, non rumore (criterio generale in §4.5). Solo i binari
+  <strong>senza</strong> alcuna funzione sfruttabile (<code>yes</code>, <code>whoami</code>, <code>sort</code>) sono davvero vicoli ciechi.</p>
+<h3 id="32-capabilities-11-gen-2024-8-feb-2024-feb-2025-10-lug-2025-30-ott-2025-12-gen-2026">3.2 Capabilities (11 gen 2024, 8 feb 2024, feb 2025, 10 lug 2025, 30 ott 2025, 12 gen 2026)</h3>
+<p>Il ramo più frequente e più insidioso: le capability spacchettano "i poteri di root" in permessi
+granulari assegnati a un binario <strong>senza SUID</strong>. Nel diff appaiono come <code>X</code>/<code>+</code> (xattr
+<code>security.capability</code>). <strong>Verifica sempre con <code>getcap &lt;file&gt;</code></strong> — il diff dice "c'è una capability",
+solo <code>getcap</code> dice <em>quale</em>, e da quella dipende tutto:</p>
+<ul>
+<li><strong><code>cap_dac_override</code></strong> (su <code>vim.tiny</code>, <code>vim.basic</code>, <code>tee</code>) → <strong>il vettore d'oro</strong>: ignora i
+  controlli di permesso in lettura/scrittura, quindi l'editor/<code>tee</code> scrive <strong>qualunque file</strong>.
+  Sfruttare: apri <code>/etc/passwd</code>, aggiungi <code>toor::0:0::/root:/bin/bash</code> o togli la <code>x</code> di root o
+  metti a 0 l'UID di un utente-ponte; con vim salva forzando <code>:w!</code> (avvisa che non è scrivibile —
+  è normale, la cap bypassa il DAC). Con <code>tee</code> usa <strong>sempre la pipe</strong> (<code>echo … | tee -a /etc/passwd</code>),
+  mai <code>echo … &gt;&gt; /etc/passwd</code> → vedi §4.6 (il redirect lo apre la shell, non tee: fallisce sempre).</li>
+<li><strong><code>cap_fowner</code></strong> (su <code>chmod</code>) → può cambiare permessi/bit di file di <strong>altri proprietari</strong>.
+  Sfruttare: <strong>fabbrica un secondo vettore</strong> — <code>chmod u+s /usr/bin/cp</code> (→ SUID cp, §3.1) oppure
+  <code>chmod 0777 /etc/passwd</code> e poi edita.</li>
+<li><strong><code>cap_setuid</code></strong> (su un <strong>interprete</strong> — <code>python3</code>, <code>perl</code> — o su una shell) → permette al
+  processo di chiamare <code>setuid(0)</code>/<code>setgid(0)</code> e <strong>assumere direttamente l'identità di root</strong>, senza
+  toccare <code>/etc/passwd</code>. È il vettore più <strong>diretto</strong> di tutti quando cade su un binario capace di
+  eseguire codice arbitrario. Verifica: <code>getcap /usr/bin/python3</code> → <code>cap_setuid=ep</code> (serve la <code>e</code> =
+  <em>effective</em>; se fosse solo <code>p</code>=permitted il processo dovrebbe alzarla da sé). Sfruttare — one-liner
+  che fa <code>setuid(0)</code> e apre una shell root:</li>
+</ul>
+<pre><code>python3 -c 'import os; os.setuid(0); os.system(&quot;/bin/bash&quot;)'
+perl -e 'use POSIX qw(setuid); setuid(0); exec &quot;/bin/bash&quot;;'
+</code></pre>
+<p>poi <code>id</code> → <code>uid=0</code>. Distinguere dal rumore: <code>cap_setuid</code> su un binario che <strong>non</strong> esegue codice
+  arbitrario (es. su <code>ping</code>) non è banalmente sfruttabile — serve un interprete/eseguibile
+  controllabile. Su python/perl/una shell è quasi sempre il vettore vero.
+- <strong><code>cap_dac_read_search</code></strong> (l'equivalente in <strong>lettura</strong> di <code>cap_dac_override</code>, che è
+  lettura+scrittura) → bypassa i controlli di permesso in <strong>lettura</strong> e la ricerca nelle directory:
+  consente di <strong>leggere qualunque file</strong>, incluso <code>/etc/shadow</code>, senza essere root. <strong>Non</strong> dà
+  scrittura, quindi da solo non riscrive <code>passwd</code>/<code>sudoers</code> — ma abilita il <strong>cracking offline</strong>
+  (§3.5). Verifica: <code>getcap /usr/bin/cat</code> (o su un interprete) → <code>cap_dac_read_search=ep</code>. Sfruttare:
+  usa il binario per leggere shadow e poi cracca:</p>
+<pre><code>cat /etc/shadow                      # ora leggibile grazie alla cap (con getcap su cat)
+# oppure, se la cap è su un interprete:
+python3 -c 'print(open(&quot;/etc/shadow&quot;).read())'
+unshadow /etc/passwd /etc/shadow &gt; /tmp/f
+john -format=crypt -wordlist=/usr/share/wordlists/rockyou.txt /tmp/f     # → §3.5
+</code></pre>
+<p>Distinguere: è utile <strong>solo</strong> in catena con un utente da crackare (il vettore è "lettura shadow →
+  john", §3.5). Di per sé <strong>non</strong> ti fa root: è un anello, non il traguardo. (Simmetria da capire e
+  saper spiegare: <code>cap_dac_override</code> = scrittura → riscrivi <code>passwd</code>; <code>cap_dac_read_search</code> = lettura
+  → leggi <code>shadow</code> e cracchi.)
+- <strong><code>cap_sys_admin</code></strong> (la capability "quasi onnipotente" — la man page la chiama <em>"the new root"</em>:
+  include <code>mount(2)</code> e decine di operazioni privilegiate) → per una VM/container Debian il caso più
+  pulito e verificabile è l'abuso di <strong>mount</strong>. Con <code>cap_sys_admin</code> puoi fare un <strong>bind-mount</strong> di un
+  file che controlli <strong>sopra</strong> un file di sistema: da quel momento il kernel serve il <em>tuo</em>
+  contenuto, <strong>senza nemmeno modificare l'inode originale</strong> (AIDE sul file reale non vedrebbe la
+  sostituzione). Verifica: <code>getcap /usr/bin/mount</code> (o un interprete che chiami <code>mount(2)</code>) →
+  <code>cap_sys_admin=ep</code>. Sfruttare — sovrascrivi <em>virtualmente</em> <code>/etc/passwd</code> con una versione con un
+  root senza password:</p>
+<pre><code>cp /etc/passwd /tmp/passwd
+echo &quot;toor::0:0::/root:/bin/bash&quot; &gt;&gt; /tmp/passwd
+mount --bind /tmp/passwd /etc/passwd     # richiede cap_sys_admin
+su toor                                   # il login legge il passwd bind-montato → root
+</code></pre>
+<p>Distinguere: a differenza di <code>cap_setuid</code>, <strong>non</strong> è un one-liner-shell automatico — è sfruttabile
+  solo se il binario che la porta compie davvero un'operazione privilegiata (<code>mount</code> stesso, o un
+  interprete che invoca <code>mount(2)</code>); serve un'azione concreta (qui il bind-mount). In un container
+  abilita spesso anche altri percorsi (accesso a <code>/proc</code>, namespace), ma per questo esame il mount è
+  il più diretto.
+- <strong><code>cap_mknod</code></strong> (su <code>sort</code>, <code>whoami</code>), <strong><code>cap_audit_read</code></strong> (su <code>date</code>) → reali ma <strong>inutili</strong>
+  in pratica (creare device / leggere audit log non ti danno root): <strong>vicoli ciechi</strong>.
+- <strong>Falso positivo</strong> (<code>getcap</code> restituisce <strong>vuoto</strong> pur essendo il file nel diff): il binario
+  <code>changeN</code> ha impostato e poi <strong>ripristinato</strong> la capability (<code>mycapfake</code> = set + <code>cap_clear</code>),
+  lasciando solo il <code>ctime</code> cambiato. <strong>Vicolo cieco.</strong>
+- <strong>Gotcha</strong>: <code>getcap</code> è in <code>/usr/sbin</code> (se non nel PATH: <code>/usr/sbin/getcap</code>). Un editor con
+  capability può essere <strong>eseguibile solo da un certo gruppo</strong> (permessi tipo <code>----rwx--- root:wbr</code>)
+  → devi prima diventare quell'utente (vedi §3.6).</p>
+<h3 id="33-acl-posix-11-gen-2024-13-giu-2024-feb-2025-10-lug-2025-30-ott-2025-12-gen-2026">3.3 ACL POSIX (11 gen 2024, 13 giu 2024, feb 2025, 10 lug 2025, 30 ott 2025, 12 gen 2026)</h3>
+<ul>
+<li><strong>Riconoscere</strong>: nel diff <code>A</code> (ACL); <code>ls -l</code> mostra un <strong><code>+</code></strong> finale nei permessi
+  (<code>-rw-r--r--+</code>). <strong>Verifica con <code>getfacl &lt;file&gt;</code></strong> — cerca righe <code>user:&lt;nome&gt;:rwx</code>/<code>rw-</code>.</li>
+<li><strong>Sfruttare</strong>: dipende da <em>su cosa</em> è l'ACL:</li>
+<li>ACL di <strong>scrittura su <code>/etc/sudoers</code></strong> → l'utente si aggiunge una riga sudo onnipotente
+    (<code>echo 'X ALL=(ALL:ALL) ALL' | tee -a /etc/sudoers</code>) e poi <code>sudo -i</code>.</li>
+<li>ACL di <strong>scrittura su <code>/etc/passwd</code></strong> → aggiunge/edita una riga root.</li>
+<li>ACL di <strong>lettura su <code>/etc/shadow</code></strong> (<code>user:first:r--</code>) → può leggere gli hash → <code>unshadow</code> +
+    <code>john</code> (§3.5).</li>
+<li><strong>Gotcha</strong>: un'ACL che dà pieno controllo di un <strong>binario senza privilegi speciali</strong> (es.
+  <code>user:spy:rw</code> su <code>tee</code>, o su <code>mknod</code>) è un <strong>vicolo cieco</strong> — poter modificare il file del binario
+  non ti dà i suoi privilegi di runtime. Spesso però l'ACL indica <em>quale utente</em> è il ponte (es.
+  <code>spy</code>): usalo come indizio, non come exploit. <code>newaclfake</code> nei binari <code>changeN</code> imposta e
+  <strong>ripristina</strong> l'ACL → nel diff resta solo il ctime: falso positivo.</li>
+</ul>
+<h3 id="34-utente-senza-password-in-etcpasswd-13-giu-2024-10-lug-2025-30-ott-2025">3.4 Utente senza password in /etc/passwd (13 giu 2024, 10 lug 2025, 30 ott 2025)</h3>
+<ul>
+<li><strong>Riconoscere</strong>: <code>/etc/passwd</code> cresciuto (<code>&gt;</code> nel diff); leggendolo (è pubblico) trovi una riga
+  col <strong>secondo campo vuoto</strong>: <code>intruso::1202:1000::/tmp:/bin/bash</code>, <code>first::1001:…</code>,
+  <code>searcher::11110:…</code>.</li>
+<li><strong>Sfruttare</strong>: <code>su &lt;utente&gt;</code> non chiede password → hai subito quel foothold. Da lì combini con
+  l'altro vettore (l'utente-ponte serve a <em>raggiungere</em> la capability/ACL/sudoers introdotta). Se
+  l'utente senza password ha già <strong>UID 0</strong> → sei direttamente root.</li>
+<li><strong>Gotcha</strong>: quasi mai l'utente passwordless è già root; è il primo anello di una catena. La mossa
+  finale tipica è metterne l'UID a 0 con un editor privilegiato (§3.2) e poi rifare <code>su</code>.</li>
+</ul>
+<h3 id="35-utente-con-password-crack-offline-john-online-hydra-feb-2025-10-lug-2025-30-ott-2025">3.5 Utente CON password → crack (offline john / online hydra) (feb 2025, 10 lug 2025, 30 ott 2025)</h3>
+<p>Quando il vettore richiede un utente protetto da password (<code>next</code>, <code>wbr</code>, <code>spy</code>), la password va
+<strong>ottenuta</strong>. Due strade, mutuamente esclusive a seconda dell'accesso a shadow:</p>
+<ul>
+<li><strong>Puoi leggere <code>/etc/shadow</code></strong> (ACL di lettura, o un comando che te lo fa <code>cat</code> come root):
+  crack <strong>offline</strong>, veloce e silenzioso:</li>
+</ul>
+<pre><code>unshadow /etc/passwd /etc/shadow &gt; /tmp/f
+john -format=crypt -wordlist=/usr/share/wordlists/rockyou.txt /tmp/f
+john --show /tmp/f          # rileggi la password trovata
+</code></pre>
+<ul>
+<li><strong>NON puoi leggere shadow</strong>: brute-force <strong>online</strong> via SSH:</li>
+</ul>
+<pre><code>hydra -l &lt;utente&gt; -P /usr/share/wordlists/rockyou.txt ssh://localhost
+</code></pre>
+<ul>
+<li><strong>Gotcha wordlist</strong>: se <code>/usr/share/wordlists/rockyou.txt</code> non esiste, di norma è ancora compressa:
+  <code>sudo gunzip /usr/share/wordlists/rockyou.txt.gz</code> (una volta sola). Senza, john/hydra falliscono
+  con "No such file".</li>
+<li><strong>Gotcha</strong>: se il servizio SSH è disabilitato, hydra su ssh non funziona → devi trovare un modo
+  di leggere shadow come root (es. abuso sudoers, §3.7) e passare a john. Viceversa, se shadow non è
+  leggibile e SSH è attivo, hydra è l'unica via (caso feb 2025). Non esiste un unico comando
+  "giusto": dipende da quale delle due condizioni vale.</li>
+</ul>
+<h3 id="36-sudoers-permissivo-feb-2025-30-ott-2025-base-nei-lab">3.6 sudoers permissivo (feb 2025, 30 ott 2025; base nei lab)</h3>
+<ul>
+<li><strong>Riconoscere</strong>: <code>/etc/sudoers</code> nel diff, o un file <strong>aggiunto</strong> in <code>/etc/sudoers.d/</code> (entry
+  <code>ADDED</code>). Leggilo; conferma con <code>sudo -l</code> una volta che sei l'utente giusto.</li>
+<li><strong>Sfruttare</strong>, per tipo di regola:</li>
+<li><code>NOPASSWD: /usr/bin/tee</code> → <code>echo "toor::0:0::/root:/bin/bash" | sudo /usr/bin/tee -a /etc/passwd</code>.</li>
+<li><code>NOPASSWD: /usr/bin/vi &lt;path&gt;/*</code> → dentro <code>vi</code> esegui <code>:!/bin/bash</code> (shell come root), oppure
+    apri un file fuori path con <strong>path traversal</strong> (<code>…/../../../etc/shadow</code>).</li>
+<li><strong>Wildcard</strong> <code>… -exec cat *</code> → il <code>*</code> finale ti lascia mettere <strong>qualunque argomento</strong>: <code>sudo
+    /usr/bin/find /etc/passwd -exec cat /etc/shadow \;</code> esegue <code>cat /etc/shadow</code> <strong>come root</strong> →
+    esfiltrazione. (Caso 30 ott 2025: è così che si legge shadow per poi crackare <code>wbr</code>.)</li>
+<li><strong>Gotcha</strong>: <code>sudo -l</code> ti dice <em>esattamente</em> cosa puoi fare come root — è la prima cosa da lanciare
+  appena diventi un nuovo utente. Le wildcard e i binari "GTFOBins" (<code>vi</code>, <code>find</code>, <code>tee</code>, editor)
+  sono il punto: un binario innocuo diventa arbitrario per come è scritta la regola.</li>
+</ul>
+<h3 id="37-persistenza-processi-nascosti-cron-at-systemd-timer-dai-lab-non-ancora-vettore-desame">3.7 Persistenza / processi nascosti — cron, at, systemd timer (dai lab; NON ancora vettore d'esame)</h3>
+<ul>
+<li><strong>Riconoscere</strong>: non emerge dal diff AIDE su <code>/usr/bin</code>+<code>/etc</code> standard. Ispezione attiva:</li>
+</ul>
+<pre><code>systemctl list-timers
+atq
+crontab -l ; sudo crontab -l ; ls -l /etc/cron.*  /var/spool/cron/
+</code></pre>
+<ul>
+<li><strong>Sfruttare</strong>: se trovi uno <strong>script eseguito da root</strong> periodicamente e <strong>scrivibile</strong> da te,
+  modificalo e attendi che giri per tuo conto (aggiunge un utente, setta un SUID, ecc.).</li>
+<li><strong>Stato nel pool</strong>: nei 9 esercizi reali questo <strong>non</strong> è mai stato il vettore vincente (in
+  13 giu 2024 <code>/etc/crontab</code> compare nel diff ma solo come cambio di permessi <em>ininfluente</em>, un
+  depistaggio). È un ramo dei <strong>lab</strong> (<code>LAB_Misconfiguration_attacks_e_HIDS</code>, sez. 8) da conoscere
+  per completezza e perché la consegna può dire "più modifiche da dedurre" — ma <strong>non</strong> è dove
+  cercare per primo. Segnalato qui come tale, non inventato.</li>
+</ul>
+<h3 id="38-ssh-private-key-sgid-altri-decoy-12-gen-2026">3.8 SSH private key / SGID / altri decoy (12 gen 2026)</h3>
+<ul>
+<li><strong>Chiave privata SSH</strong> lasciata leggibile (es. <code>/etc/backup/id_guest</code>, <code>file</code> → "OpenSSH private
+  key") → <code>ssh -i key utente@localhost</code> per diventare quell'utente (vettore reale in 12 gen 2026).</li>
+<li><strong>SGID su directory</strong> per un gruppo di cui non fai parte (es. <code>/etc/timidity</code> gruppo root) →
+  <strong>vicolo cieco</strong>: il bit ha effetto solo sui file creati dai membri di quel gruppo.</li>
+</ul>
+<hr />
+<h2 id="4-riferimento-comandi-come-si-costruiscono-non-solo-cosa-copiare">4. Riferimento comandi — come si costruiscono, non solo cosa copiare</h2>
+<h3 id="41-aide-pezzo-per-pezzo">4.1 AIDE, pezzo per pezzo</h3>
+<ul>
+<li><strong><code>aide.conf</code></strong>: le direttive <code>database_out</code> (snapshot creato ora), <code>database_in</code> (riferimento
+  con cui si confronta il filesystem), <code>database_new</code> (per confrontare due db tra loro). La regola
+  <code>/percorso  f  Full</code> dice "sui file sotto questo percorso applica il preset Full" (permessi,
+  owner, size, tempi, hash, <strong>xattrs</strong>). ⚠️ <strong>Tre token separati da spazi: <code>&lt;percorso&gt; f Full</code>. La
+  <code>f</code> è un selettore, NON un'opzione: si scrive <code>f</code>, mai <code>-f</code></strong> (<code>/usr/bin -f Full</code> col trattino non
+  seleziona i file → i binari non vengono confrontati). <code>@@x_include …</code> (ultima riga) include tutta la conf.d:
+  commentalo per velocità e copertura prevedibile.</li>
+<li><strong><code>sudo aideinit</code></strong>: crea <code>database_out</code>; copia in <code>database_in</code> <strong>solo se non esiste</strong>. → copia
+  a mano sempre: <code>sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db</code>.</li>
+<li><strong><code>sudo aide -C -c /etc/aide/aide.conf</code></strong>: modalità Check (filesystem vs <code>database_in</code>). Il <code>-c</code>
+  è obbligatorio anche qui.</li>
+<li>Perché l'ordine è vincolante: AIDE confronta <em>stato salvato</em> vs <em>stato attuale</em>. Se salvi lo stato
+  <strong>dopo</strong> la modifica, la modifica è già "normale" e non viene rilevata.</li>
+</ul>
+<h3 id="42-leggere-una-capability-acl-suid">4.2 Leggere una capability / ACL / SUID</h3>
+<pre><code>getcap &lt;file&gt;            # quale capability (vuoto = nessuna effettiva → falso positivo)
+getfacl &lt;file&gt;           # ACL: righe user:&lt;nome&gt;:&lt;perm&gt; oltre a owner/group/other
+ls -l &lt;file&gt;             # SUID = 's' nel campo utente (-rws...); '+' finale = ACL presente
+/usr/sbin/getcap -r / 2&gt;/dev/null      # scoperta a tappeto capability
+find / -perm /7000 2&gt;/dev/null         # scoperta a tappeto SUID(4000)/SGID(2000)/sticky(1000)
+getfacl -sR / 2&gt;/dev/null              # scoperta a tappeto ACL non standard
+</code></pre>
+<h3 id="43-formato-di-etcpasswd-e-etcshadow-perche-gli-exploit-funzionano">4.3 Formato di /etc/passwd e /etc/shadow (perché gli exploit funzionano)</h3>
+<p><code>/etc/passwd</code>: <strong>7 campi</strong> separati da <code>:</code> → <code>utente:password:UID:GID:GECOS:home:shell</code>.
+- 2° campo <code>x</code> = "password in shadow"; <strong>vuoto</strong> = <strong>nessuna password</strong>; un <strong>hash</strong> inline = quello
+  è la password (formato storico ancora accettato).
+- <strong>UID 0 = root</strong> a prescindere dal nome. Quindi bastano: campo pw vuoto (o hash noto) + UID/GID 0.
+- Riga tipo: <code>toor::0:0::/root:/bin/bash</code> (root senza password) oppure
+  <code>hack:$1$hack$xR6zsfvpez/t8teGRRSNr.:0:0:root:/root:/bin/bash</code> (root con password <code>hack</code>).
+- ⚠️ <strong>Conta sempre i campi: devono essere 7, quindi 6 <code>:</code>.</strong> Un errore facile è omettere la home
+  e scrivere <code>hack:$1$hack$…:0:0:root:/bin/bash</code> (<strong>6 campi</strong> — è proprio come appare la riga nella
+  trascrizione ufficiale di 11 gen 2024 in <code>modello_integrity_privesc.md</code>, che è un refuso). Con 6
+  campi i valori slittano: <code>root</code> finisce nel campo home e <code>/bin/bash</code> nel campo shell sbagliato →
+  home inesistente e comportamento imprevedibile di <code>su</code>. Se il campo GECOS non ti serve, lascialo
+  <strong>vuoto</strong> ma tienilo (<code>hack:$1$hack$…:0:0::/root:/bin/bash</code>), non eliminarlo.</p>
+<p><code>/etc/shadow</code>: <code>utente:hash:lastchange:…</code>. Campo hash vuoto = nessuna password. Generare un hash:</p>
+<pre><code>openssl passwd -1 -salt &lt;salt&gt; &lt;password&gt;     # MD5-crypt ($1$)
+openssl passwd -6 -salt &lt;salt&gt; &lt;password&gt;      # SHA-512 ($6$)
+openssl passwd &lt;password&gt;                       # salt casuale, algoritmo di default
+</code></pre>
+<h3 id="44-diventare-root-la-mossa-finale-per-vettore">4.4 Diventare root — la mossa finale, per vettore</h3>
+<pre><code>su toor                 # dopo aver creato l'utente in passwd
+su root                 # dopo aver svuotato/rimosso la password di root in passwd
+su &lt;utente&gt;             # dopo aver messo il suo UID a 0
+sudo -i  /  sudo su     # dopo esserti concesso una riga sudoers
+id                      # PROVA: deve dare uid=0(root) — è lo screenshot da consegnare
+</code></pre>
+<h3 id="45-distinguere-vettore-reale-da-decoy-il-ragionamento-in-una-frase">4.5 Distinguere vettore reale da decoy — il ragionamento in una frase</h3>
+<p>Una modifica è <strong>sfruttabile</strong> solo se combina (a) un <strong>meccanismo che bypassa un controllo</strong> (SUID,
+cap_dac_override, cap_dac_read_search, cap_setuid, cap_sys_admin, cap_fowner, ACL di scrittura su
+file critico, regola sudoers) con (b) un <strong>bersaglio che controlla l'autenticazione o i privilegi</strong>
+(<code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/sudoers</code>, l'UID). Se manca (a) — capability inutile, ACL su
+binario innocuo, falso positivo — o se il bersaglio non porta a root, è un <strong>vicolo cieco</strong>, per
+quanto AIDE lo segnali. AIDE trova tutto indiscriminatamente; scegliere è lavoro umano.</p>
+<p><strong>Corollario GTFOBins (vale sia per il SUID §3.1 sia per le capability §3.2, e i due si richiamano a
+vicenda).</strong> Quando il "meccanismo (a)" è un <strong>bit SUID</strong> o una <strong>capability</strong> (<code>cap_setuid</code>,
+<code>cap_dac_override</code>, <code>cap_dac_read_search</code>) su un <strong>binario che è un interprete/tool con una via di
+fuga</strong> (<code>find</code>, <code>python</code>, <code>perl</code>, <code>bash</code>, <code>vim</code>, <code>awk</code>, <code>less</code>, <code>tee</code>, <code>cp</code>…), il "bersaglio (b)"
+<strong>non deve</strong> per forza essere <code>/etc/passwd</code>: il bersaglio può essere la <strong>shell stessa</strong> (setuid/-p)
+o un file arbitrario letto/scritto dal binario. <strong>Perciò, prima di scartare un binario SUID o con
+capability come rumore, verifica se è un nome noto in GTFOBins</strong> con una funzione
+<em>Shell</em>/<em>Command</em>/<em>File read</em>/<em>File write</em> — se sì, è <strong>quasi certamente il vettore reale</strong>. Regola
+pratica: <code>yes</code>/<code>whoami</code>/<code>sort</code> = nessuna funzione utile = rumore; <code>find</code>/<code>python</code>/<code>bash</code>/<code>vim</code>/<code>tee</code>/
+<code>cp</code> = funzione sfruttabile = vettore. Nei rami §3.1/§3.2 c'è la ricetta; qui il criterio per
+decidere se applicarla — senza dover ricordare GTFOBins a memoria.</p>
+<h3 id="46-perche-teepipe-e-mai-diretto-il-punto-meccanico-da-capire-e-da-saper-spiegare-a-voce">4.6 Perché <code>| tee</code>/pipe e MAI <code>&gt;&gt;</code> diretto (il punto meccanico da capire, e da saper spiegare a voce)</h3>
+<p>Con un binario privilegiato (SUID, o con <code>cap_dac_override</code>) devi passargli il contenuto <strong>in pipe</strong>
+e dargli il file protetto <strong>come argomento</strong> — mai usare la redirezione della shell:</p>
+<pre><code>echo &quot;toor::0:0::/root:/bin/bash&quot; | sudo /usr/bin/tee -a /etc/passwd   # ✅ è tee che apre /etc/passwd
+cat /tmp/passwd | tee /etc/passwd                                      # ✅ (tee con SUID/cap)
+echo &quot;toor::0:0::/root:/bin/bash&quot; &gt;&gt; /etc/passwd                       # ❌ Permission denied, SEMPRE
+</code></pre>
+<p><strong>Perché il <code>&gt;&gt;</code> fallisce anche se il binario ha la capability/SUID</strong>: <code>&gt;&gt;</code> e <code>&gt;</code> sono <strong>redirezioni
+della shell</strong>. È la <strong>shell</strong> (che gira coi permessi dell'utente <code>kali</code>, non privilegiati) ad aprire
+il file di destinazione <em>prima</em> di lanciare il comando — quindi <code>/etc/passwd</code> viene aperto senza
+alcun privilegio e l'apertura fallisce con <em>Permission denied</em> prima ancora che tee/l'editor parta.
+La capability/il SUID vivono sul <strong>binario</strong>, e si attivano <strong>solo quando è il binario stesso ad
+aprire il file</strong>. Perciò: il contenuto arriva a <code>tee</code> via <strong>pipe</strong> (o stdin) e il file protetto è un
+<strong>argomento</strong> di <code>tee</code>, così è <code>tee</code> — privilegiato — a fare la <code>open()</code>.
+- Corollario per l'editor (<code>vim.tiny</code> con <code>cap_dac_override</code>): apri il file <em>da dentro l'editor</em>
+  (<code>vim.tiny /etc/passwd</code>) e salva con <code>:w!</code> — è <code>vim.tiny</code> ad aprirlo, quindi la cap si applica.
+  Non usare <code>vim.tiny &lt; x &gt; /etc/passwd</code>.
+- Corollario per il SUID <code>cp</code> (§3.1): stesso principio, per questo la ricetta è
+  <code>cp fileScrivibile /etc/passwd</code> (è <code>cp</code> ad aprire la destinazione), mai <code>cat x &gt; /etc/passwd</code>.</p>
+<hr />
+<h2 id="5-vettori-catalogati-indice-rapido-e-casi-reali">5. Vettori catalogati (indice rapido) e casi reali</h2>
+<table>
+<thead>
+<tr>
+<th>Vettore</th>
+<th>§</th>
+<th>Comparso in (casi reali)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SUID bit (scrive file protetti)</td>
+<td>3.1</td>
+<td>9 gen 2023; 8 feb 2024 (creato via cap_fowner)</td>
+</tr>
+<tr>
+<td>SUID su binario-shell (GTFOBins: <code>find</code>/<code>python</code>/<code>bash</code>/<code>vim</code>)</td>
+<td>3.1</td>
+<td>variante non ancora nel pool (shell root diretta con <code>-p</code>/<code>setuid</code>)</td>
+</tr>
+<tr>
+<td>Capability <code>cap_dac_override</code></td>
+<td>3.2</td>
+<td>11 gen 2024 (tee), 15 giu 2023 (vim.tiny), 30 ott 2025 (vim.tiny), 12 gen 2026 (vim.tiny)</td>
+</tr>
+<tr>
+<td>Capability <code>cap_fowner</code></td>
+<td>3.2</td>
+<td>8 feb 2024 (chmod), 10 lug 2025 (chmod)</td>
+</tr>
+<tr>
+<td>Capability <code>cap_setuid</code> / <code>cap_dac_read_search</code> / <code>cap_sys_admin</code></td>
+<td>3.2</td>
+<td>variante non ancora nel pool (setuid→shell diretta; dac_read_search→lettura shadow+john; sys_admin→bind-mount di passwd)</td>
+</tr>
+<tr>
+<td>Capability inutili (<code>cap_mknod</code>, <code>cap_audit_read</code>)</td>
+<td>3.2</td>
+<td>10 lug 2025, 30 ott 2025, feb 2025 (decoy)</td>
+</tr>
+<tr>
+<td>ACL POSIX (scrittura sudoers/passwd, lettura shadow)</td>
+<td>3.3</td>
+<td>13 giu 2024 (sudoers), 10 lug/30 ott 2025 (shadow)</td>
+</tr>
+<tr>
+<td>Utente senza password</td>
+<td>3.4</td>
+<td>13 giu 2024, 10 lug 2025, 30 ott 2025</td>
+</tr>
+<tr>
+<td>Crack password (john offline / hydra online)</td>
+<td>3.5</td>
+<td>10 lug 2025 (john), 30 ott 2025 (john), feb 2025 (hydra)</td>
+</tr>
+<tr>
+<td>sudoers permissivo / wildcard</td>
+<td>3.6</td>
+<td>feb 2025 (NOPASSWD tee), 30 ott 2025 (wildcard find)</td>
+</tr>
+<tr>
+<td>Persistenza cron/at/systemd</td>
+<td>3.7</td>
+<td>solo lab (mai vettore vincente nel pool)</td>
+</tr>
+<tr>
+<td>Chiave SSH / SGID decoy</td>
+<td>3.8</td>
+<td>12 gen 2026</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>modello_integrity_privesc.md</code> — 9 casi reali completi (9 gen 2023 → 12 gen 2026), con consegna,
+  soluzione trascritta e "perché funziona". Il caso <strong>15 giugno 2023</strong> è l'unico senza soluzione
+  ufficiale allegata: è ricostruito per analisi statica del binario e segnalato come tale.</li>
+<li><code>procedura_operativa_privesc.md</code> — algoritmo esteso passo per passo + gotcha AIDE.</li>
+<li>Lab di riferimento: <code>SLIDE LAB/SICINF/LAB_Esempi_di_misconfiguration_22apr.html</code> (4 vettori) e
+  <code>LAB_Misconfiguration_attacks_e_HIDS_22apr.html</code> (AIDE + 4 vettori + persistenza).</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

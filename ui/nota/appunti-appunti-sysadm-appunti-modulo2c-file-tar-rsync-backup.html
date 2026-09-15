@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_modulo2C_file_tar_rsync_backup.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_modulo2C_file_tar_rsync_backup.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SYSADM/appunti_modulo2C_file_tar_rsync_backup.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-gestione-file-find-tar-rsync-backup">Appunti — Gestione File: find, tar, rsync, Backup</h1>
+<p><strong>Modulo</strong>: 2C | <strong>Corso</strong>: Lab Amministrazione di Sistemi T</p>
+<hr />
+<h2 id="find">find</h2>
+<p><code>find</code> esplora il filesystem in tempo reale cercando file che rispettano dei criteri.</p>
+<pre><code>find &lt;dove&gt; &lt;criteri&gt; &lt;azione&gt;
+</code></pre>
+<h3 id="criteri">Criteri</h3>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Esempio</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-name</code></td>
+<td><code>-name '*.log'</code></td>
+<td>Nome del file (wildcard tra apici)</td>
+</tr>
+<tr>
+<td><code>-type</code></td>
+<td><code>-type f</code> / <code>-type d</code></td>
+<td>Tipo: <code>f</code>=file, <code>d</code>=directory, <code>l</code>=link</td>
+</tr>
+<tr>
+<td><code>-size</code></td>
+<td><code>-size +100k</code></td>
+<td>Dimensione: <code>+</code> maggiore di, <code>-</code> minore di</td>
+</tr>
+<tr>
+<td><code>-mtime</code></td>
+<td><code>-mtime -2</code></td>
+<td>Modificato negli ultimi 2 giorni (<code>-</code>=entro, <code>+</code>=più di)</td>
+</tr>
+<tr>
+<td><code>-user</code></td>
+<td><code>-user alice</code></td>
+<td>Proprietario specifico</td>
+</tr>
+<tr>
+<td><code>-nouser</code></td>
+<td><code>-nouser</code></td>
+<td>Nessun utente corrispondente (file "orfani")</td>
+</tr>
+<tr>
+<td><code>-perm</code></td>
+<td><code>-perm -2000</code></td>
+<td>Permessi specifici attivi (es. SGID)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="azioni">Azioni</h3>
+<table>
+<thead>
+<tr>
+<th>Azione</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-print</code></td>
+<td>Stampa il path del file trovato (default se non specifichi nulla)</td>
+</tr>
+<tr>
+<td><code>-exec comando {} \;</code></td>
+<td>Esegue un comando su ogni file trovato</td>
+</tr>
+<tr>
+<td><code>-delete</code></td>
+<td>Cancella ogni file trovato</td>
+</tr>
+<tr>
+<td><code>-ls</code></td>
+<td>Stampa dettagli stile <code>ls -l</code> per ogni file trovato</td>
+</tr>
+</tbody>
+</table>
+<h3 id="-exec-eseguire-comandi-sui-risultati"><code>-exec</code> — eseguire comandi sui risultati</h3>
+<pre><code class="language-bash">find /usr/src -name '*.c' -size +100k -exec cat {} \;
+#                                            ^^  ^^
+#                                            |    \; = fine del comando
+#                                            {} = nome del file trovato
+</code></pre>
+<p>Per ogni file trovato, <code>{}</code> viene sostituito con il path del file e il comando viene eseguito. Il <code>\;</code> è obbligatorio per indicare a <code>find</code> dove finisce il comando (il backslash fa l'escape del <code>;</code> altrimenti interpretato dalla shell).</p>
+<hr />
+<h2 id="locate">locate</h2>
+<h3 id="perche-non-funziona-nella-vm">Perché non funziona nella VM</h3>
+<p><code>locate</code> non è installato di default su Debian. Installalo con:</p>
+<pre><code class="language-bash">sudo apt install plocate
+</code></pre>
+<p>Dopo l'installazione, aggiorna il database prima del primo uso:</p>
+<pre><code class="language-bash">sudo updatedb
+locate passwd
+</code></pre>
+<hr />
+<h2 id="file-identificazione-del-contenuto">file — identificazione del contenuto</h2>
+<p>In Linux le estensioni (<code>.txt</code>, <code>.jpg</code>...) sono puramente decorative per l'utente — il sistema non le usa per decidere cosa è un file. Il comando <code>file</code> identifica il vero contenuto.</p>
+<pre><code class="language-bash">file /bin/bash
+# → /bin/bash: ELF 64-bit LSB pie executable, x86-64, ...
+
+file /etc/passwd
+# → /etc/passwd: ASCII text
+
+file foto.jpg.txt   # anche se il nome dice .txt
+# → foto.jpg.txt: JPEG image data
+</code></pre>
+<p><strong>Cosa estrago dall'output?</strong> Il tipo concreto del file, indipendentemente dal nome. È utile quando ricevi un file senza estensione, o con estensione sbagliata, o quando vuoi sapere se un binario è davvero eseguibile.</p>
+<p><strong>I tre livelli che usa internamente</strong> (non devi memorizzarli, ma capire la logica):
+1. Controlla se il file è vuoto o è un file speciale (tipo <code>/dev/zero</code>)
+2. Legge i primi byte del file e li confronta con un database di <strong>magic number</strong> — sequenze di byte caratteristiche di ogni formato. Un file JPEG inizia sempre con <code>FF D8 FF</code>, un eseguibile Linux con <code>7F 45 4C 46</code>. Con questi "impronte" identifica il formato.
+3. Se nessun magic number corrisponde, prova a capire empiricamente se è testo e in che lingua o linguaggio di programmazione</p>
+<hr />
+<h2 id="dd-trasferimento-dati-a-basso-livello">dd — trasferimento dati a basso livello</h2>
+<h3 id="cose-devzero-e-cosa-stai-copiando">Cos'è <code>/dev/zero</code> e cosa stai copiando</h3>
+<p><code>/dev/zero</code> è un <strong>file speciale virtuale</strong> — non esiste su disco, è fornito direttamente dal kernel. Quando lo leggi, produce un flusso infinito di byte zero (<code>0x00</code>). Non c'è un "contenuto" pre-esistente: il kernel li genera al momento.</p>
+<p>Quindi nell'esercizio:</p>
+<pre><code class="language-bash">dd if=/dev/zero of=file.out bs=4k count=16k
+</code></pre>
+<p>Stai leggendo byte zero dal kernel (sorgente infinita) e scrivendoli in <code>file.out</code>. Il risultato è un file da 64MB riempito di zeri — spazio su disco riservato, ma senza dati significativi.</p>
+<p><strong>Perché serve?</strong> Per riservare spazio in anticipo. Se sai che un'operazione avrà bisogno di 64MB, li puoi prenotare ora e garantire che lo spazio ci sia quando serve.</p>
+<hr />
+<h2 id="file-aperti-fuser-e-lsof">File aperti — fuser e lsof</h2>
+<h3 id="fuser-non-funziona-nella-vm">fuser non funziona nella VM</h3>
+<p>Installalo con:</p>
+<pre><code class="language-bash">sudo apt install psmisc
+</code></pre>
+<h3 id="i-due-script-cosa-fanno-e-cosa-cambia">I due script — cosa fanno e cosa cambia</h3>
+<p>Prima di capire la differenza, vediamo la parte che confonde: <code>count=$(( $(echo $RANDOM | rev | cut -c1) + 1 ))</code>.</p>
+<p>Smontata pezzo per pezzo:
+- <code>$RANDOM</code> → numero casuale tra 0 e 32767, es. <code>19847</code>
+- <code>echo 19847 | rev</code> → inverte la stringa: <code>74891</code>
+- <code>cut -c1</code> → prende solo il primo carattere: <code>7</code>
+- <code>$(( 7 + 1 ))</code> → somma 1: <code>8</code></p>
+<p>Risultato: un numero casuale tra 1 e 10. Ogni ciclo scrive una quantità casuale di KB.</p>
+<p><strong>Perché non c'è <code>of=</code>?</strong> Perché il redirect <code>&gt;&gt;</code> sostituisce <code>of=</code>. <code>dd</code> senza <code>of=</code> scrive su stdout, e <code>&gt;&gt; output</code> redirige stdout nel file <code>output</code>. È la stessa cosa di <code>of=output</code>, solo scritta diversamente.</p>
+<p><strong>La differenza tra v1 e v2:</strong></p>
+<pre><code class="language-bash"># v1 — &gt;&gt; output è DENTRO il loop
+while sleep 1; do
+  dd if=/dev/zero bs=1k count=... &gt;&gt; output   # apre file, scrive, chiude file
+done
+
+# v2 — &gt;&gt; output è FUORI dal loop
+while sleep 1; do
+  dd if=/dev/zero bs=1k count=...             # scrive su stdout
+done &gt;&gt; output                                 # stdout → file, aperto una sola volta
+</code></pre>
+<p>In v1: ogni iterazione apre <code>output</code>, scrive, chiude <code>output</code>.
+In v2: <code>output</code> viene aperto una volta all'avvio e rimane aperto per tutto il ciclo.</p>
+<p><strong>Conseguenza pratica</strong>: se mentre v2 è in esecuzione rinomini o cancelli il file <code>output</code>, lo script continua a scrivere sul vecchio inode (il file esiste ancora perché è aperto da un processo). Con v1, al ciclo successivo prova a riaprire il file per nome — se non c'è, ne crea uno nuovo.</p>
+<h3 id="fuser-e-lsof-in-pratica">fuser e lsof in pratica</h3>
+<pre><code class="language-bash">fuser output          # stampa i PID dei processi che hanno output aperto
+lsof output           # mostra dettagli: processo, PID, utente, descrittore, path
+lsof -p 1234          # tutti i file aperti dal processo con PID 1234
+</code></pre>
+<p>Uso tipico: "perché non riesco a smontare questo disco?" → <code>lsof /mnt/disco</code> → scopri quale processo ha ancora file aperti lì.</p>
+<hr />
+<h2 id="tar-archiviazione">tar — archiviazione</h2>
+<h3 id="le-lettere-come-si-legge-cvpf">Le lettere — come si legge <code>cvpf</code></h3>
+<p>Le opzioni di tar sono singole lettere che si concatenano senza spazio (il trattino è facoltativo):</p>
+<table>
+<thead>
+<tr>
+<th>Lettera</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>c</code></td>
+<td><strong>C</strong>rea archivio</td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td>E<strong>x</strong>trai da archivio</td>
+</tr>
+<tr>
+<td><code>t</code></td>
+<td>Elenca contenuto (<strong>t</strong>able of contents)</td>
+</tr>
+<tr>
+<td><code>r</code></td>
+<td>Aggiunge file a archivio esistente</td>
+</tr>
+<tr>
+<td><code>v</code></td>
+<td><strong>V</strong>erboso — stampa ogni file processato</td>
+</tr>
+<tr>
+<td><code>p</code></td>
+<td><strong>P</strong>reserva permessi e ownership</td>
+</tr>
+<tr>
+<td><code>f</code></td>
+<td><strong>F</strong>ile — specifica il nome dell'archivio (deve essere l'ultima, perché l'argomento la segue)</td>
+</tr>
+<tr>
+<td><code>z</code></td>
+<td>Compressione <strong>gz</strong>ip</td>
+</tr>
+<tr>
+<td><code>j</code></td>
+<td>Compressione <strong>bz</strong>ip2</td>
+</tr>
+<tr>
+<td><code>J</code></td>
+<td>Compressione <strong>xz</strong></td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td>Cambia directory prima di estrarre</td>
+</tr>
+</tbody>
+</table>
+<p>Quindi:
+- <code>cvpf users.tar</code> = <strong>c</strong>rea, <strong>v</strong>erboso, <strong>p</strong>reserva permessi, <strong>f</strong>ile = <code>users.tar</code>
+- <code>czf archivio.tar.gz</code> = <strong>c</strong>rea, compressione <strong>z</strong> (gzip), <strong>f</strong>ile = <code>archivio.tar.gz</code>
+- <code>xf archivio.tar.gz</code> = e<strong>x</strong>trai, <strong>f</strong>ile = <code>archivio.tar.gz</code> (verbose omesso)</p>
+<p>Il trattino (<code>-cvpf</code> vs <code>cvpf</code>) è opzionale per tar — entrambe le forme funzionano.</p>
+<h3 id="path-relativi-perche-tar-rimuove-lo-slash-iniziale">Path relativi — perché tar rimuove lo slash iniziale</h3>
+<p>Quando archivi <code>/home/alice</code>, tar potrebbe salvare il path assoluto <code>/home/alice/file.txt</code>. Al momento dell'estrazione, ricreerebbe esattamente quel path — sovrascrivendo il vero <code>/home/alice/file.txt</code> sul sistema di destinazione, anche se non è quello che vuoi.</p>
+<p>Per sicurezza, tar rimuove lo slash iniziale e salva <code>home/alice/file.txt</code> (path relativo). Quando estrai in <code>/newdisk</code> con <code>-C /newdisk</code>, il file viene creato in <code>/newdisk/home/alice/file.txt</code> — senza toccare il sistema originale.</p>
+<pre><code>Archivio senza slash: home/alice/file.txt
+                      ^
+                      path relativo → sicuro da estrarre ovunque
+</code></pre>
+<h3 id="newdisk-non-esiste-errore-e-soluzione">/newdisk non esiste — errore e soluzione</h3>
+<p>L'errore che hai visto (<code>No such file or directory</code>) è normale: tar non crea la directory di destinazione, deve esistere già. Soluzione:</p>
+<pre><code class="language-bash">sudo mkdir /newdisk
+tar -C /newdisk -xvpf users.tar
+</code></pre>
+<p>Gli errori <code>Permission denied</code> su <code>.bash_history</code> sono normali: quei file appartengono ai singoli utenti e vagrant non può leggerli. Per archiviare anche quelli serve <code>sudo</code>:</p>
+<pre><code class="language-bash">sudo tar cvpf users.tar /home/*
+</code></pre>
+<h3 id="la-pipeline-con-">La pipeline con <code>-</code></h3>
+<pre><code class="language-bash">tar cvpf - /home/* | tar -C /newdisk -xvpf -
+#          ^                              ^
+#          - al posto del nome file       - al posto del nome file
+</code></pre>
+<p>In tar, <code>-f -</code> significa "usa stdin/stdout come archivio invece di un file su disco".</p>
+<ul>
+<li><code>tar cvpf - /home/*</code> → crea l'archivio e lo scrive su <strong>stdout</strong> (il <code>-</code> dopo <code>f</code>)</li>
+<li><code>|</code> → collega lo stdout del primo comando allo stdin del secondo</li>
+<li><code>tar -C /newdisk -xvpf -</code> → legge l'archivio da <strong>stdin</strong> (il <code>-</code> finale) ed estrae in <code>/newdisk</code></li>
+</ul>
+<p>Il risultato è identico a creare <code>users.tar</code> e poi estrarlo, ma senza creare il file intermedio — utile quando non hai spazio per tenere sia l'archivio che i file estratti.</p>
+<hr />
+<h2 id="compressione-con-tar">Compressione con tar</h2>
+<p>Le opzioni <code>z</code>, <code>j</code>, <code>J</code> si aggiungono semplicemente alle combinazioni già viste:</p>
+<pre><code class="language-bash">tar czf archivio.tar.gz /home/*    # c + z(gzip) + f
+tar cjf archivio.tar.bz2 /home/*  # c + j(bzip2) + f
+tar cJf archivio.tar.xz /home/*   # c + J(xz) + f
+</code></pre>
+<p>Per estrarre, <code>tar xf</code> rileva automaticamente il formato di compressione — non devi specificare <code>z</code>/<code>j</code>/<code>J</code>:</p>
+<pre><code class="language-bash">tar xf archivio.tar.gz    # tar capisce da solo che è gzip
+tar xf archivio.tar.xz    # idem per xz
+</code></pre>
+<h3 id="la-pipeline-con-xz">La pipeline con xz</h3>
+<pre><code class="language-bash">tar cf - * | xz -c &gt; archivio.tar.xz
+</code></pre>
+<ul>
+<li><code>tar cf - *</code> → crea archivio non compresso su stdout</li>
+<li><code>xz -c</code> → comprime da stdin e scrive su stdout (<code>-c</code> = write to stdout)</li>
+<li><code>&gt; archivio.tar.xz</code> → redirige l'output compresso su file</li>
+</ul>
+<p>L'output è silenzioso perché non c'è <code>-v</code> — sta lavorando, non è bloccato. Puoi aggiungere <code>-v</code> a tar se vuoi vedere i file processati.</p>
+<hr />
+<h2 id="rsync">rsync</h2>
+<p><code>rsync</code> sincronizza directory trasferendo solo le differenze — non ricopia file già presenti a destinazione identici.</p>
+<pre><code class="language-bash">rsync -av /home/alice/ /backup/alice/       # locale
+rsync -av /home/alice/ user@host:/backup/   # via SSH
+</code></pre>
+<p><code>-a</code> (archive) è la combinazione più usata: ricorsivo + preserva permessi, timestamp, owner, group, link simbolici, file speciali. Quasi sempre si usa <code>-av</code> (aggiungendo verbose).</p>
+<hr />
+<h2 id="esercizi-5-e-6-script-con-find">Esercizi 5 e 6 — script con find</h2>
+<h3 id="mkdir-p-cosa-fa-il-p"><code>mkdir -p</code> — cosa fa il <code>-p</code></h3>
+<p>Senza <code>-p</code>: <code>mkdir /a/b/c</code> fallisce se <code>/a/b</code> non esiste già, e fallisce anche se <code>/a/b/c</code> esiste già.</p>
+<p>Con <code>-p</code>:
+- Crea tutte le directory intermedie mancanti (<code>/a</code>, poi <code>/a/b</code>, poi <code>/a/b/c</code>)
+- Non dà errore se la directory esiste già</p>
+<p>È quasi sempre la forma da usare negli script per evitare errori inutili.</p>
+<h3 id="esercizio-5-analisi-riga-per-riga">Esercizio 5 — analisi riga per riga</h3>
+<pre><code class="language-bash">find &quot;$SRC&quot; -maxdepth 1 -type f -mtime -&quot;$GIORNI&quot; -exec cp {} &quot;$DST&quot; \;
+</code></pre>
+<p>Smontata:</p>
+<table>
+<thead>
+<tr>
+<th>Parte</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>find "$SRC"</code></td>
+<td>Cerca dentro la directory sorgente</td>
+</tr>
+<tr>
+<td><code>-maxdepth 1</code></td>
+<td>Non scendere nelle sottodirectory — solo i file direttamente dentro <code>$SRC</code></td>
+</tr>
+<tr>
+<td><code>-type f</code></td>
+<td>Solo file regolari (escludi directory, link, ecc.)</td>
+</tr>
+<tr>
+<td><code>-mtime -"$GIORNI"</code></td>
+<td>Modificati negli ultimi N giorni</td>
+</tr>
+<tr>
+<td><code>-exec cp {} "$DST" \;</code></td>
+<td>Per ogni file trovato: esegui <code>cp &lt;file&gt; $DST</code></td>
+</tr>
+</tbody>
+</table>
+<p>Il risultato è "copia flat": tutti i file finiscono direttamente in <code>$DST</code>, senza ricreare la struttura di sottodirectory dell'originale.</p>
+<h3 id="esercizio-6-cp-parents">Esercizio 6 — <code>cp --parents</code></h3>
+<pre><code class="language-bash">find / -type f -mtime -&quot;$GIORNI&quot; -exec cp --parents {} &quot;$DST&quot; \;
+</code></pre>
+<p><code>cp --parents</code> preserva il path completo nella destinazione:</p>
+<pre><code># Senza --parents:
+cp /var/log/syslog /backup/   → /backup/syslog
+
+# Con --parents:
+cp --parents /var/log/syslog /backup/   → /backup/var/log/syslog
+</code></pre>
+<p>Questo è ciò che si intende con "conservazione della struttura" — la gerarchia di directory originale viene ricreata dentro <code>$DST</code>.</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo2C]]</li>
+<li>[[lezione_modulo2C_file_tar_rsync_backup]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

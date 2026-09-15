@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>modello_iptables_nftables.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">modello_iptables_nftables.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/03_iptables_nftables/modello_iptables_nftables.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modello-risolto-iptablesnftables">Modello Risolto — Iptables/NFTables</h1>
+<blockquote>
+<p>Fonte: <code>SIMULAZIONI ESAMI/SICINF/IptablesNFTables.html</code> (Virtuale) — <strong>7 esercizi d'esame reali</strong>
+(11 giugno 2021 → 12 gennaio 2026), in ordine cronologico in questo file.</p>
+<p><strong>Nota tecnica sull'estrazione (rilevante per come sono stati trovati questi materiali)</strong>: in
+questo HTML le soluzioni ufficiali del docente non sono testo visibile scorrendo la pagina — sono
+allegate come <strong>data URI in base64</strong> dietro ogni link "SOLUZIONE" (<code>href="data:text/plain;
+base64,..."</code> o simili). Vanno decodificate esplicitamente per essere lette. Con questo metodo,
+<strong>tutti e 7 gli esercizi del pool hanno soluzione ufficiale del docente recuperabile</strong> — nessuna
+elaborazione è stata necessaria per completare questo file.</p>
+<p><strong>AGGIORNAMENTO 15/07/2026</strong>: quando il caso del 13 settembre 2023 fu catalogato per la prima
+volta (09/07/2026), la soluzione ufficiale non venne trovata con una lettura superficiale
+dell'HTML e fu quindi elaborata (segnalato esplicitamente all'epoca, correttamente, come
+elaborazione e non trascrizione). Riesaminando l'HTML con decodifica sistematica dei link
+<code>SOLUZIONE</code>, la soluzione ufficiale <strong>esiste ed è stata trovata</strong> — è trascritta più sotto nel
+caso 2, con l'elaborazione precedente mantenuta accanto per confronto (resta un ragionamento
+valido, ma il testo da studiare è quello ufficiale).</p>
+</blockquote>
+<hr />
+<h2 id="come-leggere-questo-file">Come leggere questo file</h2>
+<p>Per ciascuno dei 7 casi: consegna trascritta fedelmente dall'HTML, topologia (dal disegno originale
+se presente nell'HTML, altrimenti dedotta dagli indirizzi usati nella soluzione ufficiale — sempre
+segnalato quale dei due casi si applica), ragionamento INPUT/OUTPUT/FORWARD per ogni host coinvolto,
+la soluzione ufficiale per intero, e una sezione "Perché funziona" a due livelli (meccanismo +
+visione). Gotcha e refusi nel testo del docente sono segnalati onestamente, mai silenziati né
+corretti senza nota — quando lo faccio, la correzione proposta è chiaramente etichettata come mia,
+non come parte del materiale ufficiale.</p>
+<hr />
+<h2 id="caso-1-11-giugno-2021-iptables-host-singolo">Caso 1 — 11 giugno 2021 (iptables, host singolo)</h2>
+<h3 id="consegna-originale">Consegna originale</h3>
+<blockquote>
+<p>L'esercitazione di iptables consiste nel creare una serie di regole per un singolo host che
+potrebbe avere più interfacce e funzionare come router.</p>
+<p>Scrivete nel file di testo i comandi che si devono impartire per ottenere i risultati richiesti.
+Si consiglia di leggere prima tutta la lista per determinare correttamente i requisiti.</p>
+<p>Le regole saranno testate per verificarne la correttezza.</p>
+<p><strong>Le regole devono essere applicate nell'ordine in cui vengono proposte.</strong></p>
+<p>Si inizi garantendo che le catene siano tutte vuote, e si proceda per:
+1. Consentire qualsiasi traffico sull'interfaccia di loopback
+2. Consentire il traffico delle connessioni HTTP entranti
+3. Consentire connessioni SSH uscenti verso la rete host-only <code>192.168.56.0/24</code>
+4. Bloccare l'inoltro del traffico proveniente dalla rete host-only verso altre destinazioni
+5. Consentire la risoluzione dei nomi DNS
+6. Infine bloccare tutto il traffico non elencato nei punti 2, 3, 5</p>
+</blockquote>
+<p>Nessun disegno di rete allegato in questo HTML: è deliberatamente un esercizio a <strong>host singolo</strong>
+("potrebbe avere più interfacce e funzionare come router" — tipico contesto da VM VirtualBox con
+un'interfaccia NAT/verso Internet e una host-only verso <code>192.168.56.0/24</code>, lo stesso contesto
+esplicito anche nel caso 3 di questo file).</p>
+<h3 id="come-ragionare">Come ragionare</h3>
+<p>Un solo host da configurare, ma <strong>due ruoli distinti nello stesso host</strong>: traffico che lo riguarda
+in prima persona (INPUT/OUTPUT) e traffico che eventualmente attraversa (FORWARD), perché il testo
+dice esplicitamente che potrebbe fare da router.</p>
+<ul>
+<li><strong>Punto 2 (HTTP entrante)</strong>: l'host è <strong>server</strong> → INPUT <code>--dport 80</code> (richiesta) + OUTPUT
+  <code>--sport 80</code> con <code>ESTABLISHED</code> (risposta).</li>
+<li><strong>Punto 3 (SSH uscente verso l'host-only)</strong>: l'host è <strong>client</strong> → OUTPUT <code>--dport 22</code> (richiesta)</li>
+<li>INPUT <code>--sport 22</code> con <code>ESTABLISHED</code> (risposta), ristretto a quella rete specifica.</li>
+<li><strong>Punto 4 (bloccare il forwarding dalla rete host-only verso altre destinazioni)</strong>: qui l'host
+  <strong>attraversa</strong> traffico che non lo riguarda (non è né sorgente né destinazione finale) → <code>FORWARD</code>.</li>
+<li><strong>Punto 5 (risoluzione DNS)</strong>: è l'host stesso a dover risolvere nomi → OUTPUT <code>--dport 53</code>
+  (richiesta) + INPUT <code>--sport 53</code> con <code>ESTABLISHED</code> (risposta).</li>
+<li><strong>Punto 6 (blocca tutto il resto)</strong>: nota bene, dice <strong>"non elencato nei punti 2, 3, 5"</strong> — il
+  punto 4 (FORWARD) non è tra quelli richiamati. È l'indizio testuale che la policy di default per
+  <code>FORWARD</code> non deve essere <code>DROP</code> (vedi "Perché funziona").</li>
+</ul>
+<h3 id="iptablestxt-soluzione-ufficiale"><code>iptables.txt</code> — soluzione ufficiale</h3>
+<pre><code># Utilizzo l'opzione -A in tutte le regole per fare in modo che vengano inserite una in seguito all'altra in ordine
+
+# 1) Consentire qualsiasi traffico sull'interfaccia di loopback
+
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+
+# 2) Consentire il traffico delle connessioni HTTP entranti
+
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
+
+
+# 3) Consentire connessioni SSH uscenti verso la rete host-only 192.168.56.0/24
+
+iptables -A OUTPUT -p tcp -d 192.168.56.0/24 --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -s 192.168.56.0/24 --sport 22 -m state --state ESTABLISHED -j ACCEPT
+
+# 4) Bloccare l'inoltro del traffico proveniente dalla rete host-only verso altre destinazioni
+
+iptables -A FORWARD -s 192.168.56.0/24 ! -d 192.168.56.0/24 -j DROP
+
+# 5) Consentire la risoluzione dei nomi DNS
+
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p udp --sport 53 -m state --state ESTABLISHED -j ACCEPT
+
+
+# 6) Infine bloccare tutto il traffico non elencato nei punti 2, 3, 5
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD ACCEPT
+
+# notare che l'esclusione della regola 4 deve far dedurre  che per il forwarding
+# deve valere un principio di default accept, altrimenti non avrebbe senso la regola
+# che applica a un caso specifico l'azione DROP
+</code></pre>
+<h3 id="perche-funziona">Perché funziona</h3>
+<p><strong><code>-A</code> ovunque, non <code>-I</code>, e il perché è nella consegna stessa.</strong> La traccia dice esplicitamente "le
+regole devono essere applicate nell'ordine in cui vengono proposte" — <code>-A</code> (append) accoda ogni
+regola in fondo alla catena, preservando l'ordine di scrittura; <code>-I</code> (insert, senza numero) la mette
+sempre in <strong>testa</strong>, quindi una sequenza di <code>-I</code> produce l'ordine <strong>invertito</strong> rispetto a quello di
+scrittura. Qui l'ordine non è un dettaglio stilistico: è testato. Tienilo a mente per il triage di
+ogni esercizio di questa famiglia — se la consegna richiama esplicitamente l'ordine, usa <code>-A</code>; se
+non lo richiama (vedi caso 3 più sotto) e le regole non si sovrappongono nel traffico che
+intercettano, <code>-I</code> è innocuo.</p>
+<p><strong>Il punto più sottile dell'esercizio è dedurre la default policy di <code>FORWARD</code> dal testo, non da
+una regola esplicita.</strong> Il punto 6 dice di bloccare tutto ciò "non elencato nei punti 2, 3, 5":
+il punto 4 (il DROP sul forwarding host-only) resta fuori da questo elenco. Se la policy di
+<code>FORWARD</code> fosse già <code>DROP</code> di default, la regola del punto 4 sarebbe <strong>ridondante</strong> (un DROP
+esplicito su un sottoinsieme di traffico che sarebbe comunque scartato dalla policy) — non avrebbe
+senso scriverla. L'unica lettura coerente è che <code>FORWARD</code> resti <code>ACCEPT</code> di default, e la regola
+del punto 4 sia l'<strong>unica</strong> eccezione esplicita a quella libertà: tutto il resto del forwarding
+(traffico che non ha sorgente nella rete host-only) passa, mentre specificamente il traffico
+originato dalla rete host-only e diretto altrove viene bloccato. Il commento ufficiale nel file lo
+conferma testualmente.</p>
+<p><strong><code>! -d 192.168.56.0/24</code></strong> nella regola 4 è la negazione di match: "sorgente nella rete host-only
+<strong>e</strong> destinazione <strong>non</strong> nella stessa rete" — se il <code>!</code> mancasse, la regola bloccherebbe anche il
+traffico host-only↔host-only (violando implicitamente lo scopo dell'esercizio, che è isolare la
+rete host-only dal resto, non da sé stessa).</p>
+<p><strong>Sintassi</strong>: <code>iptables</code> legacy. Nessun NAT. <strong>Gotcha</strong>: nessun refuso rilevato in questa soluzione
+— è però l'unico caso del pool con <code>FORWARD</code> default <code>ACCEPT</code> invece di <code>DROP</code>: non applicare
+meccanicamente "default-drop ovunque" senza aver riletto la consegna punto per punto.</p>
+<hr />
+<h2 id="caso-2-13-settembre-2023-iptables-3-host">Caso 2 — 13 settembre 2023 (iptables, 3 host)</h2>
+<h3 id="consegna-originale_1">Consegna originale</h3>
+<blockquote>
+<p>Facendo riferimento allo schema di rete sopra riportato, si definiscano regole di filtraggio che
+consentano il traffico come sotto specificato; <strong>qualsiasi altro pacchetto deve essere
+scartato</strong>.
+<strong>NOTA</strong>: le regole devono essere installate su <strong>ogni</strong> host coinvolto nel flusso di traffico
+specificato.
+1. i Client sulla rete privata <code>192.168.0.0/24</code> devono poter interrogare DNS e servizi di
+   sincronizzazione NTP in Internet (porte UDP 53 e <strong>1233</strong>)
+2. il servizio SMTP (porta 25 tcp) del Server collocato sulla rete privata <code>172.16.0.0/20</code> deve
+   essere raggiungibile da qualsiasi host di Internet
+3. il servizio LDAP (porta 389 tcp) del Router deve essere raggiungibile dal Server</p>
+<p><strong>MODALITÀ DI CONSEGNA</strong>: 1 file <code>iptables.txt</code> con tre sezioni chiaramente contrassegnate, una
+per ogni host su cui è richiesto installare le regole, coi comandi (sintatticamente corretti)
+che le realizzano.</p>
+</blockquote>
+<p>Topologia (dal disegno originale):</p>
+<pre><code>Client (eth1) ---- Rete 192.168.0.0/24 ---- eth1(.254) [R] eth2(172.16.15.254) ---- Rete 172.16.0.0/20 ---- Server (eth1, 172.16.0.1)
+                                                    eth3 (130.136.5.15)
+                                                      |
+                                                  Internet
+</code></pre>
+<h3 id="come-ragionare-sulla-topologia">Come ragionare sulla topologia</h3>
+<ul>
+<li><strong>Client</strong>: genera traffico (DNS/NTP) verso Internet → <strong>OUTPUT</strong> (richiesta) + <strong>INPUT</strong>
+  (risposta). Non fa forwarding.</li>
+<li><strong>Router</strong>: il traffico Client↔Internet e Internet↔Server lo <strong>attraversa</strong> → <strong>FORWARD</strong>. Il
+  traffico Server→Router:389 <strong>termina sul Router stesso</strong> (è lui il server LDAP) → <strong>INPUT</strong>
+  (richiesta) + <strong>OUTPUT</strong> (risposta).</li>
+<li><strong>Server</strong>: riceve SMTP da Internet → <strong>INPUT</strong>+<strong>OUTPUT</strong> locale. Interroga LDAP sul Router →
+  <strong>OUTPUT</strong>+<strong>INPUT</strong> locale (è lui il client in questa interazione).</li>
+</ul>
+<p>Poi, per ogni regola: default-drop su tutte e tre le catene, loopback sempre permesso, e per ogni
+interazione bidirezionale due righe (richiesta con <code>--dport</code>, risposta con <code>--sport</code> +
+<code>ESTABLISHED</code>).</p>
+<h3 id="iptablestxt-soluzione-ufficiale-ritrovata-il-15072026"><code>iptables.txt</code> — soluzione ufficiale (ritrovata il 15/07/2026)</h3>
+<pre><code>################ CLIENT ################
+
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+
+iptables -I INPUT -i lo -j ACCEPT
+iptables -I OUTPUT -o lo -j ACCEPT
+
+# 1) i Client sulla rete privata 192.168.0.0/24
+# devono poter interrogare DNS e servizi di sincronizzazione NTP
+# in Internet (porte UDP 53 e 123)
+
+iptables -A INPUT -p udp -i eth1 --sport 53 -m state --state ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p udp -o eth1 --dport 53 -j ACCEPT
+iptables -A INPUT -p udp -i eth1 --sport 123 -m state --state ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p udp -o eth1 --dport 123 -j ACCEPT
+#
+# nulla da configurare per i punti (2) e (3)
+#
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+
+################ SERVER ################
+
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+
+iptables -I INPUT -i lo -j ACCEPT
+iptables -I OUTPUT -o lo -j ACCEPT
+
+# nulla da configurare per il punto (1)
+#
+# 2) il servizio SMTP (porta 25 tcp) del Server collocato sulla rete privata 172.16.0.0/20
+# deve essere raggiungibile da qualsiasi host di Internet
+#
+# per semplicità accettiamo tutte le sorgenti ma a rigore andrebbero escluse le reti private
+#
+iptables -A INPUT -p tcp -i eth1 -d 172.16.0.1 --dport 25 -j ACCEPT
+iptables -A OUTPUT -p tcp -o eth1 -s 172.16.0.1 --sport 25 -m state --state ESTABLISHED -j ACCEPT
+
+#
+# 3) il servizio LDAP (porta 389 tcp) del Router deve essere raggiungibile dal Server
+#
+iptables -A OUTPUT -p tcp -o eth1 -s 172.16.0.1 -d 172.16.15.254 --dport 389 -j ACCEPT
+iptables -A INPUT -p tcp -i eth1 -s 172.16.15.254 -d 172.16.0.1 --sport 389 -m state --state ESTABLISHED -j ACCEPT
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+
+################ ROUTER ################
+
+iptables -t nat -F
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+
+iptables -I INPUT -i lo -j ACCEPT
+iptables -I OUTPUT -o lo -j ACCEPT
+
+# 1) i Client sulla rete privata 192.168.0.0/24
+# devono poter interrogare DNS e servizi di sincronizzazione NTP
+# in Internet (porte UDP 53 e 123)
+
+iptables -A FORWARD -p udp -i eth1 -o eth3 -s 192.168.0.0/16 --dport 53 -j ACCEPT
+iptables -A FORWARD -p udp -i eth3 -o eth1 -d 192.168.0.0/16 --sport 53 -m state --state ESTABLISHED -j ACCEPT
+iptables -A FORWARD -p udp -i eth1 -o eth3 -s 192.168.0.0/16 --dport 123 -j ACCEPT
+iptables -A FORWARD -p udp -i eth3 -o eth1 -d 192.168.0.0/16 --sport 123 -m state --state ESTABLISHED -j ACCEPT
+iptables -t nat -A POSTROUTING -p tcp -i eth1 -s 192.168.0.0/24 -o eth3 -j SNAT --to-source 130.136.5.15
+
+# 2) il servizio SMTP (porta 25 tcp) del Server collocato sulla rete privata 172.16.0.0/20
+# deve essere raggiungibile da qualsiasi host di Internet
+#
+iptables -t nat -A PREROUTING -i eth3 -o eth1 -s 130.136.5.15 -p tcp --dport 25 -j SNAT --to-destination 172.16.0.1
+iptables -A FORWARD -p tcp -i eth3 -o eth2 -d 172.16.0.1 --dport 25 -j ACCEPT
+iptables -A FORWARD -p tcp -i eth2 -o eth3 -s 172.16.0.1 --sport 25 -m state --state ESTABLISHED -j ACCEPT
+
+#
+# 3) il servizio LDAP (porta 389 tcp) del Router deve essere raggiungibile dal Server
+#
+iptables -A INPUT -p tcp -i eth2 -s 172.16.0.1 -d 172.16.15.254 --dport 389 -j ACCEPT
+iptables -A OUTPUT -p tcp -o eth2 -s 172.16.15.254 -d 172.16.0.1 --sport 389 -m state --state ESTABLISHED -j ACCEPT
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+</code></pre>
+<h3 id="perche-funziona_1">Perché funziona</h3>
+<p>Le policy di default <code>DROP</code> su tutte e tre le catene realizzano subito il requisito "qualsiasi
+altro pacchetto deve essere scartato" — non serve una regola finale di DROP esplicita: si scrivono
+solo le regole di ciò che deve passare. Ogni interazione "vera" (non locale all'host) è bidirezionale:
+chi apre la connessione lo fa in uscita verso una porta di <strong>destinazione</strong> nota; chi risponde lo fa
+in ingresso su quella porta e risponde con sorgente uguale a quella porta — da cui la coppia
+<code>--dport</code> (richiesta) / <code>--sport</code> + <code>ESTABLISHED</code> (risposta), sempre più restrittiva di "apri anche
+la porta sorgente in permanenza".</p>
+<p>Sul Router, la parte concettualmente delicata è distinguere <code>FORWARD</code> (Client↔Internet,
+Internet↔Server: il router non è né sorgente né destinazione finale) da <code>INPUT</code>/<code>OUTPUT</code> (LDAP:
+il router <strong>è</strong> il server, quindi per lui è locale come su un host qualunque) — lo stesso errore
+concettuale da evitare ovunque in questo pool è mettere in <code>FORWARD</code> un servizio che gira sull'host
+stesso: non funzionerebbe mai, quel traffico non transita mai per quella catena.</p>
+<h3 id="differenze-rispetto-allelaborazione-precedente-09072026">Differenze rispetto all'elaborazione precedente (09/07/2026)</h3>
+<p>Quando questo caso fu catalogato la prima volta senza la soluzione ufficiale, il ragionamento
+prodotto era strutturalmente corretto (stessa distinzione INPUT/OUTPUT/FORWARD, stesso schema
+richiesta/risposta) ma differiva in due dettagli minori: filtrava sull'intera subnet
+<code>172.16.0.0/20</code> per SMTP/LDAP invece che sull'host specifico <code>172.16.0.1</code> (più permissivo, non
+sbagliato se il Server è l'unico host di quel ruolo in quella rete), e non replicava i due errori
+di sintassi della soluzione ufficiale descritti sotto (semplicemente perché non li aveva "copiati").
+Se stai ripassando da zero questo caso, usa il testo ufficiale sopra come riferimento, non
+l'elaborazione — ma il ragionamento del "Perché funziona" resta valido in entrambe le versioni.</p>
+<h3 id="gotcha-1-refuso-nella-consegna-la-porta-ntp">⚠️ Gotcha 1 — refuso nella consegna: la porta NTP</h3>
+<p>La consegna scrive "porte UDP 53 e <strong>1233</strong>", ma la soluzione ufficiale usa correttamente
+<code>--dport 123</code> (la porta NTP standard, RFC 5905) sia sul Client sia sul Router — <strong>il docente stesso
+ignora il proprio testo e usa la porta corretta</strong>. <code>1233</code> è quasi certamente un refuso di
+battitura (le cifre 2/3 vicine, o un errore di trascrizione del compito). <strong>Lezione operativa</strong>: se
+un esercizio nomina un servizio noto (DNS, NTP, SSH, SMTP, LDAP, POP, IMAPS...) con una porta che
+non corrisponde a quella standard, sospetta un refuso — e se hai la soluzione ufficiale a
+disposizione per verificare, fidati di quella, non del numero scritto nel testo della consegna.</p>
+<h3 id="gotcha-2-snatdnat-invertiti-sulla-riga-smtp-del-router">⚠️ Gotcha 2 — SNAT/DNAT invertiti sulla riga SMTP del Router</h3>
+<pre><code>iptables -t nat -A PREROUTING -i eth3 -o eth1 -s 130.136.5.15 -p tcp --dport 25 -j SNAT --to-destination 172.16.0.1
+</code></pre>
+<p>Due problemi verificabili secondo la sintassi standard di <code>iptables</code>, non solo uno stile diverso dal
+mio:
+1. <strong><code>-j SNAT --to-destination</code></strong> non è una combinazione valida — <code>--to-destination</code> è un'opzione
+   del target <code>DNAT</code> (cambia la destinazione), non di <code>SNAT</code> (che accetta solo <code>--to-source</code>).
+   Caricata così, la regola verrebbe rifiutata da <code>iptables</code> al momento dell'inserimento
+   ("unrecognized option"). L'intento è chiaro dal contesto (tradurre la destinazione del traffico
+   SMTP in arrivo dall'IP pubblico del router verso il server interno): quello che serve è
+   <code>-j DNAT --to-destination 172.16.0.1</code>.
+2. <strong><code>-o eth1</code> in catena <code>PREROUTING</code></strong>: nel punto in cui agisce <code>PREROUTING</code> (prima della
+   decisione di instradamento) l'interfaccia di uscita non è ancora nota — <code>iptables</code> non accetta
+   <code>-o</code> in <code>PREROUTING</code>/<code>INPUT</code> (né <code>-i</code> in <code>OUTPUT</code>/<code>POSTROUTING</code>), qualunque sia la tabella.</p>
+<p>Presa alla lettera, questa riga non si installerebbe. È probabile che sia un refuso da
+copia-incolla della riga SNAT del Client subito sopra (stesso schema <code>-i .. -o .. -s .. -j SNAT
+--to-...</code>), adattata nell'indirizzo ma non nel target né nell'interfaccia. Versione corretta per
+intento:</p>
+<pre><code>iptables -t nat -A PREROUTING -i eth3 -s 130.136.5.15 -p tcp --dport 25 -j DNAT --to-destination 172.16.0.1
+</code></pre>
+<p>(quest'ultima è una mia correzione di intento, non fa parte del testo ufficiale del docente.)</p>
+<h3 id="gotcha-3-protocollo-sbagliato-sulla-riga-snat-del-client">⚠️ Gotcha 3 — protocollo sbagliato sulla riga SNAT del Client</h3>
+<pre><code>iptables -t nat -A POSTROUTING -p tcp -i eth1 -s 192.168.0.0/24 -o eth3 -j SNAT --to-source 130.136.5.15
+</code></pre>
+<p>Questa riga vuole mascherare l'uscita DNS/NTP dei client verso Internet — ma DNS e NTP sono <strong>UDP</strong>
+(le due coppie FORWARD subito sopra sono infatti correttamente <code>-p udp</code>), mentre qui il match è
+<code>-p tcp</code>: non intercetta i pacchetti UDP a cui è destinata. Probabile anche questo un
+copia-incolla da un contesto TCP (SMTP) non adattato al protocollo. Per intento, andrebbe <code>-p udp</code>
+o nessun vincolo di protocollo.</p>
+<p><strong>Sintassi</strong>: <code>iptables</code> legacy.</p>
+<hr />
+<h2 id="caso-3-8-febbraio-2024-iptables-1-file-per-il-router">Caso 3 — 8 febbraio 2024 (iptables, 1 file per il Router)</h2>
+<h3 id="consegna-originale_2">Consegna originale</h3>
+<blockquote>
+<p>Fate riferimento all'<strong>esercizio su Intrusion Detection</strong> [collegamento a
+<code>Network_Intrusion_Detection.html</code>, stessa data], dopo aver individuato l'attacco (eventualmente
+guardando le soluzioni), gli altri tipi di traffico presenti nel tracciato sono da considerare
+legittimi.
+Consegnate un file <strong><code>ipt.sh</code></strong> coi comandi che permettano di configurare il packet filter del
+<strong>router</strong> per consentire unicamente tali interazioni.</p>
+</blockquote>
+<p>Particolarità di questo esercizio: <strong>non ha un proprio testo di topologia</strong> — rimanda esplicitamente
+all'esercizio NIDS omonimo (stessa data, altro libro Virtuale) per il contesto, e chiede <strong>un solo
+file</strong> (solo il Router, non "ogni host coinvolto" come nel caso 2).</p>
+<h3 id="contesto-dallesercizio-nids-collegato-necessario-per-capire-la-topologia">Contesto dall'esercizio NIDS collegato (necessario per capire la topologia)</h3>
+<p>Dal testo dell'esercizio NIDS "8 febbraio 2024": <em>"il tracciato è raccolto su di un router che ha
+indirizzo con byte finale = 1 su tre subnet diverse"</em>, e la consegna chiede di scrivere due regole
+Suricata per l'attacco individuato (non richieste qui, sono nell'altro libro). La soluzione
+ufficiale di <strong>quell'</strong>esercizio identifica l'attacco: richieste HTTP GET ripetute da
+<code>172.21.1.118</code> verso <code>172.22.2.159</code> su <code>/api/index.html</code>, sempre respinte con <code>401 Unauthorized</code> —
+un tentativo di accesso non autorizzato via HTTP (porta 80). Questo è il traffico da <strong>non</strong>
+considerare legittimo: non compare in nessuna regola della soluzione <code>ipt.sh</code> qui sotto, ed è
+corretto che sia così.</p>
+<h3 id="topologia-dedotta-dagli-indirizzi-nella-soluzione-ufficiale-dal-testo-nids-collegato-nessun-disegno-esplicito-in-questo-html">Topologia (dedotta dagli indirizzi nella soluzione ufficiale + dal testo NIDS collegato — nessun disegno esplicito in questo HTML)</h3>
+<pre><code>rete1 172.21.1.0/24                    rete2 172.22.2.0/24                    rete3 172.23.3.0/24
+Client 172.21.1.118 ------+                                          +------ Host3 172.23.3.187
+                          |                                          |       (server NTP/SSH per rete2;
+                          |     [ROUTER: eth?=172.21.1.1 /            |       client DNS verso router)
+                          +---- 172.22.2.1 / 172.23.3.1] -------------+
+                                       |
+                          Host2 172.22.2.159
+                          (server POP/IMAPS per rete1;
+                           client NTP/SSH verso rete3)
+</code></pre>
+<p>Un solo router con tre interfacce (indirizzo <code>.1</code> su ciascuna subnet), niente NAT, niente Internet
+in questo esercizio — è un router puramente interno a tre reti.</p>
+<h3 id="come-ragionare-solo-sul-router-unico-host-richiesto">Come ragionare (solo sul Router, unico host richiesto)</h3>
+<ul>
+<li><strong>DHCP</strong> (router serve le tre reti): locale al router → INPUT/OUTPUT sulle porte 67/68, senza
+  restrizione di interfaccia (il router lo eroga uniformemente).</li>
+<li><strong>DNS</strong> (router è server DNS per Host3 su rete3): locale al router → INPUT/OUTPUT, ristretto a
+  <code>172.23.3.187 ↔ 172.23.3.1</code>.</li>
+<li><strong>NTP</strong> (Host3 è server NTP per Host2): il router non è né sorgente né destinazione → <strong>FORWARD</strong>.</li>
+<li><strong>SSH</strong> (stessa coppia Host3→Host2): <strong>FORWARD</strong>.</li>
+<li><strong>POP/IMAPS</strong> (Host2 è server per Client su rete1): <strong>FORWARD</strong>.</li>
+<li><strong>HTTP (porta 80, l'attacco)</strong>: nessuna regola — resta bloccato dalla policy di default.</li>
+</ul>
+<h3 id="iptsh-soluzione-ufficiale"><code>ipt.sh</code> — soluzione ufficiale</h3>
+<pre><code># flush per partire puliti
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+
+# router = server dhcp per le tre reti
+iptables -I INPUT -p udp --sport 68 --dport 67 -j ACCEPT
+iptables -I OUTPUT -p udp --dport 68 --sport 67 -m state --state ESTABLISHED -j ACCEPT
+
+
+# router = server dns per rete .3
+iptables -I INPUT -p udp -s 172.23.3.187 -d 172.23.3.1 --dport 53 -j ACCEPT
+iptables -I OUTPUT -p udp -d 172.23.3.187 -s 172.23.3.1 --sport 53 -m state --state ESTABLISHED -j ACCEPT
+
+# host su rete 3 = server NTP per client su rete 2
+iptables -I FORWARD -p udp -s 172.22.2.159 -d 172.23.3.187 --dport 123 --sport 123 -j ACCEPT
+iptables -I FORWARD -p udp -d 172.22.2.159 -s 172.23.3.187 --dport 123 --sport 123 -m state --state ESTABLISHED -j ACCEPT
+
+# host su rete 3 = server ssh per client su rete 2
+iptables -I FORWARD -p tcp -s 172.22.2.159 -d 172.23.3.187 --dport 22 -j ACCEPT
+iptables -I FORWARD -p tcp -d 172.22.2.159 -s 172.23.3.187 --sport 22 -m state --state ESTABLISHED -j ACCEPT
+
+# host su rete 2 = server POP per client su rete 1
+iptables -I FORWARD -p tcp -s 172.21.1.118 -d 172.22.2.159 --dport 110 -j ACCEPT
+iptables -I FORWARD -p tcp -d 172.21.1.118 -s 172.22.2.159 --sport 110 -m state --state ESTABLISHED -j ACCEPT
+
+# host su rete 2 = server IMAPS per client su rete 1
+iptables -I FORWARD -p tcp -s 172.21.1.118 -d 172.22.2.159 --dport 993 -j ACCEPT
+iptables -I FORWARD -p tcp -d 172.21.1.118 -s 172.22.2.159 --sport 993 -m state --state ESTABLISHED -j ACCEPT
+
+# detfault deny tranne loopback (e per il contesto virtualbox, eth0)
+iptables -I INPUT -i lo -j ACCEPT
+iptables -I OUTPUT -o lo -j ACCEPT
+iptables -I INPUT -i eth0 -j ACCEPT
+iptables -I OUTPUT -o eth0 -j ACCEPT
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+</code></pre>
+<p>(<code>detfault</code> è un refuso di battitura nel commento originale del docente — "default" — segnalato
+solo per completezza di trascrizione, ininfluente sul funzionamento.)</p>
+<h3 id="perche-funziona_2">Perché funziona</h3>
+<p><strong>NTP con <code>--dport 123 --sport 123</code> nella stessa regola</strong> (non la coppia asimmetrica dport/sport
+vista altrove): non è un errore, è una caratteristica reale del protocollo NTP, che a differenza
+della maggior parte dei servizi non usa porte effimere lato client — client e server comunicano
+entrambi sulla porta 123. Da qui la necessità di specificare <strong>entrambi</strong> i match nella stessa
+regola invece della coppia dport-richiesta/sport-risposta.</p>
+<p><strong>Qui <code>-I</code> non crea il problema visto nel caso 1</strong>, anche se lo stile è identico (tutte le regole
+con <code>-I</code>, quindi ogni nuova entra in testa e l'ordine finale nella catena è <strong>inverso</strong> rispetto
+all'ordine di scrittura: <code>eth0</code>/<code>lo</code> finiscono per essere valutati per primi, DHCP per ultimo). La
+differenza è che qui <strong>nessuna consegna richiede un ordine specifico</strong>, e le regole non si
+sovrappongono nel traffico che intercettano (porte e coppie IP diverse, match disgiunti) — quindi
+l'ordine relativo tra regole ACCEPT è irrilevante: conta solo che la policy DROP finale sia
+impostata per ultima. Contrasta questo con il caso 1, dove l'ordine era invece parte esplicita del
+test.</p>
+<p><strong>Nessuna regola per la porta 80 (l'attacco)</strong>: non serve un DROP esplicito, la policy di default
+lo scarta già — coerente col principio "scrivi solo ciò che deve passare" di tutto questo pool.</p>
+<p><strong>Un solo file (<code>ipt.sh</code>, solo Router)</strong>: a differenza del caso 2, qui il servizio "vero" (POP,
+IMAPS, NTP, SSH) gira su host che <strong>non sono richiesti in consegna</strong> (<code>ipt-server</code>,
+<code>ipt-client</code>...) — la valutazione si concentra solo sul router che fa da packet filter centrale.
+Non presumere che ogni esercizio richieda sempre "un file per host": leggi la consegna.</p>
+<p><strong>Sintassi</strong>: <code>iptables</code> legacy. Nessun NAT. <strong>Gotcha</strong>: nessuno di sostanza oltre al refuso di
+battitura nel commento; nota comunque che le regole FORWARD non usano <code>-i</code>/<code>-o</code> (a differenza del
+caso 2) — funziona perché gli indirizzi coinvolti sono host singoli e non sottoreti, ma è una
+semplificazione: se in un esercizio simile gli indirizzi fossero intere subnet, l'assenza di
+<code>-i</code>/<code>-o</code> diventerebbe rischiosa (regole più permissive di quanto intendi).</p>
+<hr />
+<h2 id="caso-4-13-giugno-2024-iptables-routerserver">Caso 4 — 13 giugno 2024 (iptables, Router+Server)</h2>
+<h3 id="consegna-originale_3">Consegna originale</h3>
+<blockquote>
+<p>Si consideri la rete illustrata: <em>(immagine, vedi sotto)</em>
+su cui devono essere consentiti unicamente i seguenti tipi di traffico:
+1. accesso da parte dei client alla porta TCP 993 del server
+2. accesso da parte di qualsiasi host su internet alla porta TCP 25 del server
+3. navigazione sicura dei client sul web (internet, porta TCP 443)
+4. accesso da parte dei client alla porta UDP 53 del router</p>
+<p>Si realizzino due script per la configurazione con iptables dei filtri necessari, rispettivamente
+<strong><code>ipt-router.sh</code></strong> per le regole da installare sul router e <strong><code>ipt-server.sh</code></strong> per le regole da
+installare sul server.</p>
+</blockquote>
+<p>Topologia (dal disegno originale):</p>
+<pre><code>Client_n (eth1) ---- Rete privata 172.20.0.0/20 ---- eth1(172.20.15.254) [ROUTER: eth1,eth2] eth2(1.1.1.1) ---- Rete pubblica 1.1.1.0/28 ---- eth1(1.1.1.14) [SERVER]
+                                                              eth3 (137.204.1.15)
+                                                                |
+                                                            Internet
+</code></pre>
+<p>(più client sulla stessa rete privata, rappresentati come pila di rettangoli tratteggiati nel
+disegno originale — stesso stile grafico del "Client" del caso 2.)</p>
+<p><strong>Particolarità</strong>: si chiedono solo <strong>due</strong> script (Router, Server) — nessuno script Client
+richiesto, a differenza del caso 2 dove ogni host coinvolto doveva avere le sue regole. Non
+generalizzare "un file per host" da un esercizio all'altro: dipende dalla consegna specifica.</p>
+<h3 id="come-ragionare_1">Come ragionare</h3>
+<ul>
+<li><strong>Punto 1</strong> (client → server:993, IMAPS): il Server è endpoint → INPUT/OUTPUT locale sul Server;
+  il Router fa FORWARD. Punto sottile: la rete "pubblica" <code>1.1.1.0/28</code> del server <strong>non ha
+  instradamento di ritorno</strong> verso la rete privata dei client (<code>172.20.0.0/20</code> non è raggiungibile
+  da quel segmento) — quindi il Router deve <strong>SNAT-are</strong> il traffico client in uscita verso il
+  server con un proprio indirizzo su quella rete pubblica (<code>1.1.1.1</code>), altrimenti le risposte del
+  server non saprebbero come tornare a un IP privato non instradabile lì.</li>
+<li><strong>Punto 2</strong> (internet → server:25, SMTP): il Server ha già un indirizzo instradabile
+  pubblicamente (<code>1.1.1.14</code>, sulla rete dichiarata "pubblica") → raggiungibile direttamente via
+  FORWARD, <strong>nessun NAT necessario</strong> — diverso dal caso del 12 gennaio 2026 (più avanti in questo
+  file), dove il server aveva IP privato e serviva DNAT: qui il segnale "serve NAT" non è la parola
+  "indiretto" nel testo, ma la topologia stessa (l'indirizzo del server è già pubblico).</li>
+<li><strong>Punto 3</strong> (client → internet:443): masquerade/SNAT classico in uscita — il client privato deve
+  uscire con l'indirizzo pubblico del router sull'interfaccia Internet (<code>137.204.1.15</code>).</li>
+<li><strong>Punto 4</strong> (client → router:53, DNS): il Router stesso è server DNS → INPUT/OUTPUT locale sul
+  Router, nessun forwarding.</li>
+</ul>
+<h3 id="ipt-routersh-soluzione-ufficiale"><code>ipt-router.sh</code> — soluzione ufficiale</h3>
+<pre><code>1. accesso da parte dei client alla porta TCP 993 del server
+
+iptables -t nat -A POSTROUTING -s 172.20.0.0/20 -d 1.1.1.14 -j SNAT --to-source 1.1.1.1
+iptables -A FORWARD -p tcp -s 172.20.0.0/20 -d 1.1.1.14 -i eth1 -o eth2 --dport 993 -j ACCEPT
+iptables -A FORWARD -p tcp -s 1.1.1.14 -d 1.1.1.1 -i eth2 -o eth1 --sport 993 -m state --state ESTABLISHED -j ACCEPT
+
+2. accesso da parte di qualsiasi host su internet alla porta TCP 25 del server
+
+iptables -A FORWARD -p tcp -i eth3 -o eth2 -d 1.1.1.14 --dport 25 -j ACCEPT
+iptables -A FORWARD -p tcp -i eth2 -o eth3 -s 1.1.1.14 --sport 25 -m state --state ESTABLISHED -j ACCEPT
+
+3. navigazione sicura dei client sul web (internet, porta TCP 443)
+
+iptables -t nat -A POSTROUTING -s 172.20.0.0/20 -i eth1 -o eth3 --to-source 137.204.1.15
+iptables -A FORWARD -p tcp -s 172.20.0.0/20 -i eth1 -o eth3 --dport 443 -j ACCEPT
+iptables -A FORWARD -p tcp -d 137.204.1.15 -i eth3 -o eth1 --sport 443 -m state --state ESTABLISHED -j ACCEPT
+
+4. accesso da parte dei client alla porta UDP 53 del router
+
+iptables -A INPUT -p udp -s 172.20.0.0/20 -i eth1 --dport 53 -j ACCEPT
+iptables -A OUTPUT -p udp -d 172.20.0.0/20 -o eth1 --sport 53 -m state --state ESTABLISHED -j ACCEPT
+</code></pre>
+<h3 id="ipt-serversh-soluzione-ufficiale"><code>ipt-server.sh</code> — soluzione ufficiale</h3>
+<pre><code>1. accesso da parte dei client alla porta TCP 993 del server
+
+iptables -A INPUT -p tcp -s 1.1.1.1 -i eth1 --dport 993 -j ACCEPT
+iptables -A OUTPUT -p tcp -d 1.1.1.1 -o eth1 --sport 993 -m state --state ESTABLISHED -j ACCEPT
+
+2. accesso da parte di qualsiasi host su internet alla porta TCP 25 del server
+
+iptables -A INPUT -p tcp -i eth1 --dport 25 -j ACCEPT
+iptables -A OUTPUT -p tcp -o eth1 --sport 25 -m state --state ESTABLISHED -j ACCEPT
+</code></pre>
+<h3 id="perche-funziona_3">Perché funziona</h3>
+<p><strong>Il Server vede come sorgente <code>1.1.1.1</code> (il Router), non l'IP reale del client, per il punto 1.</strong>
+È l'effetto diretto del SNAT sul Router: dopo la traduzione, il pacchetto che arriva al Server ha
+sorgente <code>1.1.1.1</code>. Per questo <code>ipt-server.sh</code> filtra <code>-s 1.1.1.1</code> e non un range di client — il
+Server, dietro un NAT, <strong>non vede mai gli indirizzi originali</strong>: i suoi filtri vanno scritti pensando
+a come appare il pacchetto <em>dopo</em> la traduzione, esattamente come nel caso del 12 gennaio 2026 (più
+avanti) con il DNAT del server pubblicato indirettamente. È lo stesso principio applicato al lato
+opposto della connessione (qui è la sorgente ad essere tradotta, lì la destinazione).</p>
+<p><strong>Il punto 2 (SMTP) non ha SNAT/DNAT sul Router</strong>: l'IP del server è già instradabile pubblicamente,
+quindi non serve alcuna traduzione — il Router fa da semplice inoltro (FORWARD). Il Server vede
+davvero l'IP del mittente originale (nessuna restrizione <code>-s</code> in <code>ipt-server.sh</code> per questo punto,
+coerente con "qualsiasi host di Internet").</p>
+<h3 id="gotcha-1-snat-senza-j-snat-nel-punto-3">⚠️ Gotcha 1 — SNAT senza <code>-j SNAT</code> nel punto 3</h3>
+<pre><code>iptables -t nat -A POSTROUTING -s 172.20.0.0/20 -i eth1 -o eth3 --to-source 137.204.1.15
+</code></pre>
+<p>Confrontala con la riga SNAT corretta del punto 1 (<code>... -j SNAT --to-source 1.1.1.1</code>): qui manca
+<strong><code>-j SNAT</code></strong> prima di <code>--to-source</code>. Senza il target esplicito, <code>--to-source</code> è un'opzione del
+modulo <code>SNAT</code> che non viene caricato — <code>iptables</code> la rifiuterebbe come opzione non riconosciuta al
+momento del caricamento della regola. Versione corretta per intento (mia correzione, non del
+docente):</p>
+<pre><code>iptables -t nat -A POSTROUTING -s 172.20.0.0/20 -i eth1 -o eth3 -j SNAT --to-source 137.204.1.15
+</code></pre>
+<h3 id="gotcha-2-nessuna-policyflush-esplicita-in-questa-soluzione">⚠️ Gotcha 2 — nessuna policy/flush esplicita in questa soluzione</h3>
+<p>A differenza di tutti gli altri casi di questo file, né <code>ipt-router.sh</code> né <code>ipt-server.sh</code> mostrano
+<code>iptables -F</code> o <code>iptables -P ... DROP</code> — solo le regole ACCEPT/SNAT/FORWARD dei quattro punti. Non
+è detto sia un errore (l'esercizio potrebbe assumere chain già vuote/default-drop da un setup
+comune del laboratorio), ma <strong>non affidarti a questa omissione il giorno dell'esame</strong>: se la
+consegna non dice esplicitamente che le policy di default sono già impostate, aggiungi comunque tu
+il flush iniziale e le policy DROP finali, come fanno tutte le altre soluzioni ufficiali di questo
+pool.</p>
+<p><strong>Sintassi</strong>: <code>iptables</code> legacy — ultimo esercizio del pool prima del passaggio a <code>nftables</code> (il
+caso successivo, 10 luglio 2025, è il primo etichettato esplicitamente "(NFTables)").</p>
+<hr />
+<h2 id="caso-5-10-luglio-2025-nftables-bastionalg-router">Caso 5 — 10 luglio 2025, NFTables (Bastion/ALG, Router)</h2>
+<h3 id="consegna-originale_4">Consegna originale</h3>
+<blockquote>
+<p>In figura è rappresentata un'architettura firewall in cui il Server viene reso accessibile
+<strong>indirettamente</strong>, attraverso un application level gateway (ALG) installato sul <strong>Bastion</strong>.
+L'unico traffico consentito è quello delle connessioni da Internet verso il Server, che quindi
+prevedono una connessione da Internet alla porta <strong>8443</strong> del Bastion, a cui segue (se l'ALG lo
+consente) una connessione dal Bastion alla porta <strong>443</strong> del Server.
+Le reti lato Bastion (<code>172.18.0.0/29</code>) e lato Server (<code>172.16.1.0/28</code>) sono <strong>private</strong>, ma
+comunque il <strong>Router è il default gateway</strong> per le macchine di entrambe le reti.</p>
+<p>Consegnate: un file <strong><code>bastion.nft</code></strong> con la configurazione nftables del packet filter del
+Bastion; un file <strong><code>router.nft</code></strong> con la configurazione nftables del packet filter del router.</p>
+</blockquote>
+<p>Topologia (dal disegno originale):</p>
+<pre><code>Bastion (eth1: 172.18.0.2) ---- Rete 172.18.0.0/29 ---- eth1(172.18.0.1) [R: eth1,eth2] eth2(172.16.1.1) ---- Rete 172.16.1.0/28 ---- eth1(172.16.1.2) [Server]
+                                                              eth3 (130.136.77.88)
+                                                                |
+                                                            Internet
+</code></pre>
+<h3 id="come-ragionare_2">Come ragionare</h3>
+<ul>
+<li><strong>Il Bastion non è un router</strong>: ha <strong>una sola interfaccia</strong> (<code>eth1</code>) verso tutto il resto (sia
+  Internet sia Server, entrambi raggiunti attraverso il Router, che è il suo default gateway). Non
+  può quindi distinguere "traffico da Internet" da "traffico dal Server" con <code>-i</code>/<code>-o</code> (ne ha una
+  sola) — deve farlo per <strong>indirizzo</strong>: qualunque cosa non provenga dalle due reti private note è
+  "da fuori".</li>
+<li><strong>L'ALG termina davvero la connessione, non la inoltra passivamente</strong>: sulla 8443 il Bastion è
+  <strong>server</strong> (INPUT, riceve connessioni nuove); verso il Server sulla 443 il Bastion è <strong>client</strong>
+  (OUTPUT, apre lui una connessione nuova se l'ALG decide di proseguire). Per questo il Bastion non
+  ha bisogno di una catena <code>FORWARD</code> funzionante — è dichiarata ma vuota, con un commento esplicito
+  ("bastion non è un router") proprio per rendere visibile che non inoltra nulla.</li>
+<li><strong>Il Router fa DNAT</strong> (Internet → <code>130.136.77.88:8443</code> diventa <code>172.18.0.2:8443</code>) e <strong>FORWARD</strong>
+  per entrambi i segmenti che attraversa (Internet↔Bastion, Bastion↔Server). <strong>Nessun SNAT</strong>: la
+  consegna dice esplicitamente che il Router è il gateway di default di entrambe le reti private —
+  chi riceve un pacchetto da un indirizzo "sconosciuto" lo rispedirà comunque al proprio gateway di
+  default, che sa esattamente dove trovare quella rete. Mascherare la sorgente sarebbe qui
+  superfluo (lo dice anche un commento nella soluzione ufficiale).</li>
+</ul>
+<h3 id="routernft-soluzione-ufficiale"><code>router.nft</code> — soluzione ufficiale</h3>
+<pre><code>flush chain filter INPUT
+flush chain filter OUTPUT
+flush chain filter FORWARD
+flush chain nat PREROUTING
+flush chain nat POSTROUTING
+
+# nota: poichè è detto esplicitamente che router è il default gateway delle due reti private, e i pacchetti sono smistati solo dal router in figura, non è necessario mascherare gli indirizzi sorgente (chi riceve i pacchetti li manderà al default gateway in quanto provenienti da una rete &quot;sconosciuta&quot;, ma il default gateway sa precisamente dove trovarla)
+
+table ip nat {
+
+    # fa eccezione ovviamente Internet, che non ha instradamento verso la rete privata del bastion host
+    # quindi sarà il router a ricevere i pacchetti e dovrà modificarne la destinazione
+
+    chain PREROUTING {
+        type nat hook prerouting priority dstnat;
+        iif eth3 ip daddr 130.136.77.88 tcp dport 8443 dnat to 172.18.0.2
+    }
+}
+
+table ip filter {
+
+    chain INPUT {
+        # default comuni: tutto drop tranne loopback
+        type filter hook input priority filter; policy drop;
+        iif lo accept
+    }
+
+    chain OUTPUT {
+        # default comuni: tutto drop tranne loopback
+        type filter hook output priority filter; policy drop;
+        oif lo accept
+    }
+
+    chain FORWARD {
+        # default comuni: tutto drop
+        type filter hook forward priority filter; policy drop;
+
+        # movimento bidirezionale di pacchetti internet &lt;--&gt; bastion
+        # nuovi da internet verso il bastion (già con ip giusto, prerouting è prima di forward)
+
+        iif eth3 oif eth1 ip daddr 172.18.0.2 tcp dport 8443 accept
+        iif eth1 oif eth3 ip saddr 172.18.0.2 tcp sport 8443 ct state established accept
+
+        # movimento bidirezionale di pacchetti bastion &lt;--&gt; server
+        # nuovi da bastion verso server
+
+        iif eth1 oif eth2 ip saddr 172.18.0.2 ip daddr 172.16.1.2 tcp dport 443 accept
+        iif eth2 oif eth1 ip daddr 172.18.0.2 ip saddr 172.16.1.2 tcp sport 443 ct state established accept
+
+    }
+
+}
+</code></pre>
+<h3 id="bastionnft-soluzione-ufficiale"><code>bastion.nft</code> — soluzione ufficiale</h3>
+<pre><code>flush chain filter INPUT
+flush chain filter OUTPUT
+flush chain filter FORWARD
+
+
+table ip filter {
+
+    chain INPUT {
+        # default comuni: tutto drop tranne loopback
+        type filter hook input priority filter; policy drop;
+        iif lo accept
+
+        # bastion riceve pacchetti nuovi da internet  sulla porta 8443
+        iif eth1 ip saddr != {172.18.0.0/29, 172.16.1.0/28} ip daddr 172.18.0.2 tcp dport 8443 accept
+
+        # bastion riceve pacchetti DI RISPOSTA dal server dalla porta 443
+        iif eth1 ip saddr 172.16.1.2 ip daddr 172.18.0.2 tcp sport 443 ct state established accept
+    }
+
+    chain OUTPUT {
+        # default comuni: tutto drop tranne loopback
+        type filter hook output priority filter; policy drop;
+        oif lo accept
+
+        # bastion emette pacchetti DI RISPOSTA verso internet dalla porta 8443
+        oif eth1 ip daddr != {172.18.0.0/29, 172.16.1.0/28} ip saddr 172.18.0.2 tcp sport 8443 ct state established accept
+
+        # bastion emette pacchetti nuovi verso il server alla porta 443
+        oif eth1 ip daddr 172.16.1.2 ip saddr 172.18.0.2 tcp dport 443 accept
+    }
+
+    chain FORWARD {
+        # bastion non è un router
+        type filter hook forward priority filter; policy drop;
+    }
+
+}
+
+# nota: poichè è detto esplicitamente che router è il default gateway delle due reti private, e i pacchetti sono smistati solo dal router in figura, non è necessario mascherare gli indirizzi sorgente (chi riceve i pacchetti li manderà al default gateway in quanto provenienti da una rete &quot;sconosciuta&quot;, ma il default gateway sa precisamente dove trovarla)
+</code></pre>
+<h3 id="perche-funziona_4">Perché funziona</h3>
+<p><strong><code>ip saddr != {172.18.0.0/29, 172.16.1.0/28}</code></strong> è l'idioma chiave di questo esercizio: un
+<strong>insieme anonimo</strong> (<code>{...}</code>) con <strong>negazione</strong> (<code>!=</code>). Si legge "l'indirizzo sorgente non è in
+nessuna di queste due reti private" = "viene da fuori, cioè da Internet". È la soluzione
+nftables al problema del Bastion single-homed: dove un router vero userebbe interfacce diverse per
+distinguere i segmenti, un host con un solo collegamento fisico deve farlo leggendo l'indirizzo.
+Ritroverai lo stesso idioma nel caso successivo (30 ottobre 2025).</p>
+<p><strong><code>table ip nat</code> con catena <code>PREROUTING</code>, <code>type nat hook prerouting priority dstnat</code></strong>: a
+differenza di <code>iptables</code> (dove <code>nat</code>/<code>PREROUTING</code> esistono già), in <code>nftables</code> dichiari tu tabella,
+tipo, hook e priorità. <code>prerouting</code> agisce <strong>prima</strong> della decisione di instradamento — necessario
+per il DNAT, che deve cambiare la destinazione <strong>prima</strong> che il kernel decida dove instradare il
+pacchetto.</p>
+<p><strong>Le regole <code>FORWARD</code> sul Router guardano <code>172.18.0.2</code> (l'IP del Bastion), non <code>130.136.77.88</code>
+(l'IP pubblico)</strong>: perché <code>prerouting</code> (hook <code>dstnat</code>) accade <strong>prima</strong> di <code>forward</code> nel percorso
+del pacchetto — quando il filtro in <code>FORWARD</code> esamina il pacchetto, il DNAT lo ha già tradotto.
+Stesso principio già visto nel caso del 12 gennaio 2026: scrivi il filtro pensando a come appare il
+pacchetto <strong>dopo</strong> che <code>prerouting</code> lo ha già modificato.</p>
+<p><strong>Nessun <code>policy accept;</code>/<code>policy drop;</code> esplicito sulla catena NAT <code>PREROUTING</code></strong>: in nftables, se
+ometti la policy di una catena base, il default è <code>accept</code> — qui non è un errore (le catene NAT
+traducono soltanto, non giudicano il destino finale del pacchetto: quello lo decide <code>FORWARD</code>), ma
+è comunque buona pratica scriverla esplicitamente per chiarezza. Tienilo a mente come confronto: nel
+caso successivo (30 ottobre 2025) trovi un errore reale nella tabella NAT, non solo un'omissione di
+stile — la differenza tra i due sarà più chiara mettendoli a confronto.</p>
+<p><strong>Sintassi</strong>: <code>nftables</code> — primo esercizio del pool esplicitamente in questa sintassi (l'etichetta
+"(NFTables)" nel titolo lo conferma). <strong>Gotcha</strong>: nessun refuso di sostanza rilevato in questo caso.</p>
+<hr />
+<h2 id="caso-6-30-ottobre-2025-nftables-router-webserver-db">Caso 6 — 30 ottobre 2025 (NFTables, Router + Webserver + DB)</h2>
+<h3 id="consegna-originale_5">Consegna originale</h3>
+<blockquote>
+<p>Si consideri la rete in figura.
+Il webserver, collocato su rete privata, deve:
+- essere raggiungibile attraverso il Router R da Internet sulla porta <strong>TCP/443</strong>
+- poter interrogare i DNS pubblici su Internet
+- potersi connettere al DB server, sul quale Postgres è in ascolto sulla porta <strong>TCP/5432</strong></p>
+<p>Si consegnino un file <strong><code>router.nft</code></strong> con la configurazione nftables del Router R e un file
+<strong><code>webserver.nft</code></strong> con la configurazione nftables del webserver, che consentano le interazioni
+sopra descritte, e null'altro oltre al traffico indispensabile al funzionamento degli host.</p>
+</blockquote>
+<p>Topologia (dal disegno originale):</p>
+<pre><code>Internet ---- eth2(130.136.129.54) [R] eth1(172.28.1.1) ---- Rete 172.28.1.0/24 ---- eth1(172.28.1.9) [webserver] eth2(10.0.115.9) ---- Rete 10.0.115.0/24 ---- eth1(10.0.115.6) [DB server]
+</code></pre>
+<p><strong>Nessun <code>dbserver.nft</code> richiesto</strong> — come nel caso 5, la consegna limita esplicitamente il numero
+di host da configurare.</p>
+<h3 id="come-ragionare_3">Come ragionare</h3>
+<p>Il webserver ha <strong>due interfacce fisiche</strong> (a differenza del Bastion del caso 5, che ne aveva una
+sola): <code>eth1</code> verso il Router (e, attraverso di lui, verso Internet) ed <code>eth2</code> — un collegamento
+<strong>dedicato</strong> — verso il DB server. Questo cambia il ragionamento su <code>eth2</code> (dove basta un match
+diretto sull'unico peer noto, <code>10.0.115.6</code>, senza bisogno di set/negazione) ma non su <code>eth1</code>, dove
+il webserver è comunque "single-homed verso l'esterno": la stessa interfaccia porta sia il traffico
+locale al Router sia quello che il Router continua a inoltrare verso/da Internet, quindi serve di
+nuovo l'idioma <code>ip saddr/daddr != {reti private}</code> per distinguere "da Internet" da "dalla propria
+rete".</p>
+<ul>
+<li><strong>HTTPS da Internet</strong>: DNAT sul Router (l'IP pubblico <code>130.136.129.54:443</code> diventa
+  <code>172.28.1.9:443</code>); FORWARD sul Router; INPUT/OUTPUT locale sul webserver.</li>
+<li><strong>DNS del webserver verso Internet</strong>: il webserver ha IP privato, non instradabile su Internet →
+  serve SNAT sul Router in uscita (<code>snat to 130.136.129.54</code>); FORWARD sul Router; OUTPUT/INPUT
+  locale sul webserver.</li>
+<li><strong>Postgres verso il DB server</strong>: nessun NAT (collegamento dedicato, privato, solo tra webserver e
+  DB) — il webserver è <strong>client</strong> (OUTPUT <code>dport 5432</code> + INPUT established), il Router non è
+  coinvolto (traffico che non lo attraversa nemmeno, è sul link diretto webserver↔DB... nella
+  topologia reale il Router non ha interfaccia su quella rete, quindi non compare in <code>router.nft</code>
+  per questo punto).</li>
+</ul>
+<h3 id="webservernft-soluzione-ufficiale"><code>webserver.nft</code> — soluzione ufficiale</h3>
+<pre><code>flush ruleset
+
+table filter{
+    chain forward{
+        type filter hook forward priority filter; policy drop;
+    }
+
+    chain input{
+        type filter hook input priority filter; policy drop;
+        iif lo accept;
+
+        iif eth2 ip saddr 10.0.115.6 tcp sport 5432 ct state established accept
+
+        iif eth1 ip saddr !{172.28.1.0/24, 10.0.115.0/24} tcp dport 443 accept
+        iif eth1 ip saddr !{172.28.1.0/24, 10.0.115.0/24} udp sport 53 ct state established accept
+    }
+
+    chain output{
+        type filter hook output priority filter; policy drop;
+        oif lo accept;
+
+        oif eth2 ip daddr 10.0.115.6 tcp dport 5432 accept
+
+        oif eth1 ip daddr !{172.28.1.0/24, 10.0.115.0/24} tcp sport 443 ct state established accept
+        oif eth1 ip daddr !{172.28.1.0/24, 10.0.115.0/24} udp dport 53 accept
+    }
+}
+</code></pre>
+<h3 id="routernft-soluzione-ufficiale_1"><code>router.nft</code> — soluzione ufficiale</h3>
+<pre><code>flush ruleset
+
+table filter{
+    chain forward{
+        type filter hook forward priority filter; policy drop;
+
+        iif eth2 oif eth1 ip saddr !{172.28.1.0/24, 10.0.115.0/24} ip daddr 172.28.1.9 tcp dport 443 accept
+        iif eth1 oif eth2 ip daddr !{172.28.1.0/24, 10.0.115.0/24} ip saddr 172.28.1.9 tcp sport 443 ct state established accept
+
+        iif eth1 oif eth2 ip daddr !{172.28.1.0/24, 10.0.115.0/24} ip saddr 172.28.1.9 udp dport 53 accept
+        iif eth2 oif eth1 ip saddr !{172.28.1.0/24, 10.0.115.0/24} ip daddr 172.28.1.9 udp sport 53 ct state established accept
+    }
+
+    chain input{
+        type filter hook input priority filter; policy drop;
+        iif lo accept;
+    }
+
+    chain output{
+        type filter hook output priority filter; policy drop;
+        oif lo accept;
+    }
+}
+
+table nat{
+    chain prerouting{
+        type filter hook prerouting priority nat; policy drop;
+        iif eth2 oif eth1 ip daddr 130.136.129.54 tcp dport 443 dnat to 172.28.1.9
+    }
+
+    chain postrouting{
+        type filter hook postrouting priority nat; policy drop;
+        iif eth1 oif eth2 ip saddr 172.28.1.9 ip daddr !{172.28.1.0/24, 10.0.115.0/24} udp dport 53 snat to 130.136.129.54
+    }
+}
+</code></pre>
+<h3 id="perche-funziona_5">Perché funziona</h3>
+<p>Stesso principio del caso 5 per <code>ip saddr/daddr != {...}</code> (distinguere "da/verso Internet" quando
+un host è single-homed verso l'esterno), e stesso principio del 12 gennaio 2026 per il fatto che le
+regole <code>forward</code> sul Router guardano l'indirizzo <strong>dopo</strong> il DNAT (<code>172.28.1.9</code>, non
+<code>130.136.129.54</code>) perché <code>prerouting</code> precede <code>forward</code> nel percorso del pacchetto.</p>
+<p>Da notare un dettaglio interessante nella direzione delle regole <code>forward</code> per il DNS: la richiesta
+del webserver esce con <code>iif eth1 oif eth2</code> (entra dal lato webserver, esce verso Internet) e la
+risposta rientra con <code>iif eth2 oif eth1</code> — le interfacce del Router in questo esercizio sono:
+<code>eth1</code> verso il webserver (rete <code>172.28.1.0/24</code>), <code>eth2</code> verso Internet. Verificalo sempre contro il
+disegno prima di scrivere <code>-i</code>/<code>-o</code> o <code>iif</code>/<code>oif</code>: invertirle è l'errore più facile da fare e più
+difficile da notare rileggendo, perché la regola resta sintatticamente valida — semplicemente non
+farà mai match.</p>
+<h3 id="gotcha-sintassi-nat-probabilmente-errata-nella-tabella-nat">⚠️ Gotcha — sintassi NAT probabilmente errata nella tabella <code>nat</code></h3>
+<pre><code>table nat{
+    chain prerouting{
+        type filter hook prerouting priority nat; policy drop;
+        ...
+        dnat to 172.28.1.9
+    }
+    chain postrouting{
+        type filter hook postrouting priority nat; policy drop;
+        ...
+        snat to 130.136.129.54
+    }
+}
+</code></pre>
+<p>Confrontata con l'altro esercizio di questo pool in nftables (10 luglio 2025, caso 5), che scrive
+correttamente <code>type nat hook prerouting priority dstnat;</code>, questa tabella ha <strong>due problemi
+cumulativi</strong> secondo la sintassi standard di nftables:
+1. <strong><code>type filter</code> invece di <code>type nat</code></strong>: gli statement <code>dnat to</code>/<code>snat to</code> sono validi solo dentro
+   catene dichiarate di tipo <code>nat</code> — dentro una catena <code>type filter</code>, <code>nft -c -f</code> dovrebbe rifiutarli
+   con un errore ("you must specify a table of type nat" o simile).
+2. <strong><code>priority nat</code></strong>: non è un nome di priorità valido per gli hook <code>prerouting</code>/<code>postrouting</code> —
+   quelli standard sono <strong><code>dstnat</code></strong> (prerouting, valore -100) e <strong><code>srcnat</code></strong> (postrouting, valore
+   100). <code>nat</code> come identificatore letterale di priorità non è tra quelli riconosciuti.</p>
+<p><code>policy drop;</code> su una catena NAT è inoltre concettualmente insolito (le catene NAT traducono, non
+giudicano il destino finale del pacchetto — quello lo fa <code>filter</code>/<code>forward</code>) — non è di per sé un
+errore quanto i primi due punti, ma rinforza l'impressione che questa tabella sia stata scritta
+riadattando in fretta un template pensato per <code>type filter</code>, senza cambiare <code>type</code>/<code>priority</code>.</p>
+<p>⚠️ Non è stato possibile verificare con <code>nft -c -f</code> (binario non disponibile in questo ambiente) —
+ma la sintassi contraddice sia la documentazione nftables sia l'altro esercizio in nftables di
+questo stesso pool. Trattala con sospetto: se ti ricapita questo pattern, riscrivi con</p>
+<pre><code>chain prerouting { type nat hook prerouting priority dstnat; ... }
+chain postrouting { type nat hook postrouting priority srcnat; ... }
+</code></pre>
+<p>e verifica con <code>nft -c -f nomefile.nft</code> prima di fidartene alla lettera (questa riscrittura è una
+mia correzione di intento, non fa parte del testo ufficiale).</p>
+<p><strong>Sintassi</strong>: <code>nftables</code>.</p>
+<hr />
+<h2 id="caso-7-12-gennaio-2026-nftables-nat-pubblicazione-indiretta">Caso 7 — 12 gennaio 2026 (NFTables, NAT + pubblicazione indiretta)</h2>
+<blockquote>
+<p>Stessa giornata d'esame di <code>trace-2026-01-12.pcapng</code> in NIDS e dell'esercizio AIDE in
+Integrity/privesc. Soluzione ufficiale recuperata dall'allegato "Soluzione" nascosto nella pagina
+(tarball <code>nft_20260112</code>: <code>client.nft</code>, <code>router.nft</code>, <code>server.nft</code>, nessun report scritto
+richiesto per questo esercizio).</p>
+</blockquote>
+<h3 id="consegna-originale_6">Consegna originale</h3>
+<p>Topologia:</p>
+<pre><code>CLIENT (rete privata 10.20.0.0/22) ---- eth1 [ROUTER] eth2 ---- SERVER (192.168.1.7, rete privata)
+                                          eth3 (130.136.1.1, pubblico)
+                                            |
+                                        Internet
+</code></pre>
+<p>Le reti private <strong>non sono instradate automaticamente</strong> nemmeno tra loro; le reti pubbliche
+(Internet inclusa) sono raggiungibili dalle altre. Uniche interazioni consentite:
+1. accesso <strong>(necessariamente indiretto)</strong> da Internet al server in <strong>HTTPS (TCP/443)</strong>
+2. accesso di tutti i client a Internet per <strong>query DNS (UDP/53)</strong></p>
+<p>Consegna: <code>client.nft</code>, <code>router.nft</code>, <code>server.nft</code> (un file per host).</p>
+<h3 id="perche-qui-serve-anche-il-nat-non-solo-il-filtro">Perché qui serve anche il NAT, non solo il filtro</h3>
+<p>Differenza chiave rispetto ai casi puramente di filtro: la parola "<strong>indiretto</strong>" nella consegna è
+la chiave — il server ha un IP <strong>privato</strong> (<code>192.168.1.7</code>), quindi Internet non può indirizzarlo
+direttamente: serve <strong>pubblicare</strong> il servizio dietro l'IP pubblico del router (<code>130.136.1.1</code>) e
+lasciare che sia il router a tradurre. Stesso discorso all'inverso per i client: escono con un IP
+privato non instradabile su Internet, quindi il router deve <strong>mascherarli</strong> dietro il proprio IP
+pubblico.</p>
+<h3 id="routernft-nat-filtro-insieme"><code>router.nft</code> — NAT + filtro insieme</h3>
+<pre><code class="language-nft">table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        # Pubblicazione indiretta del server HTTPS:
+        # Internet -&gt; 130.136.1.1:443 viene tradotto verso 192.168.1.7:443.
+        iif eth3 ip daddr 130.136.1.1 tcp dport 443 dnat to 192.168.1.7:443
+    }
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        # I client privati possono uscire su Internet solo per DNS UDP.
+        oif eth3 ip saddr 10.20.0.0/22 udp dport 53 snat to 130.136.1.1
+    }
+}
+
+table inet filter {
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+        iif eth1 oif eth3 ip saddr 10.20.0.0/22 udp dport 53 accept
+        oif eth1 iif eth3 ip daddr 10.20.0.0/22 udp sport 53 ct state established accept
+        iif eth3 oif eth2 ip daddr 192.168.1.7 tcp dport 443 accept
+        oif eth3 iif eth2 ip saddr 192.168.1.7 tcp sport 443 ct state established accept
+    }
+    chain input { type filter hook input priority filter; policy drop; iif &quot;lo&quot; accept }
+    chain output { type filter hook output priority filter; policy drop; oif &quot;lo&quot; accept }
+}
+</code></pre>
+<p><strong>Cosa fa ciascun pezzo, meccanismo + visione:</strong>
+- <strong><code>table ip nat</code> con due catene, <code>prerouting</code> e <code>postrouting</code></strong>: in nftables (a differenza di
+  iptables, dove le catene NAT built-in esistono già) devi dichiarare tu la catena, il suo <code>hook</code>
+  (a quale punto del percorso del pacchetto si aggancia) e la sua <code>priority</code>. <code>prerouting</code> agisce
+  <strong>prima</strong> che il kernel decida come instradare il pacchetto (giusto per il DNAT: bisogna cambiare
+  la destinazione <em>prima</em> di instradare) — <code>postrouting</code> agisce <strong>dopo</strong>, quando il pacchetto sta
+  per uscire (giusto per il SNAT: si riscrive la sorgente solo all'ultimo, dopo che tutto il resto
+  del filtraggio/instradamento è già stato deciso). Nota qui il contrasto coi due gotcha già visti:
+  questa catena scrive correttamente <code>type nat hook ... priority dstnat/srcnat</code>, esattamente lo
+  schema che manca nel caso 6.
+- <strong><code>dnat to 192.168.1.7:443</code></strong>: chiunque su Internet contatti <code>130.136.1.1:443</code>, il router riscrive
+  la destinazione nel pacchetto con l'IP privato reale del server — è la "pubblicazione indiretta"
+  richiesta dal testo: dall'esterno si vede solo l'IP pubblico del router, mai quello del server.
+- <strong><code>snat to 130.136.1.1</code></strong>: i pacchetti DNS in uscita dai client (IP sorgente <code>10.20.0.0/22</code>, non
+  instradabile su Internet) vengono riscritti con l'IP pubblico del router come sorgente — è
+  l'equivalente concettuale del <code>MASQUERADE</code> di iptables, ma con IP fisso invece che "usa
+  l'IP dell'interfaccia in quel momento".
+- <strong><code>table inet filter</code>, chain <code>forward</code></strong>: qui il filtro vero e proprio, stessa logica sempre
+  ribadita in questo file (chi attraversa il router va in <code>forward</code>, non <code>input</code>/<code>output</code>) — nota
+  che le regole guardano <code>ip daddr 192.168.1.7</code> (l'IP <strong>dopo</strong> il DNAT, non l'IP pubblico): il
+  filtro va scritto pensando a come appare il pacchetto <strong>dopo</strong> che <code>prerouting</code> lo ha già tradotto,
+  perché <code>prerouting</code> (hook <code>dstnat</code>) accade prima di <code>forward</code> nel percorso del pacchetto — lo
+  stesso principio ritrovato nei casi 5 e 6.
+- <strong><code>define NET_CLIENTS</code>/<code>SERVER_IP</code>/<code>PUBLIC_IP</code></strong> in cima al file originale: variabili nominate
+  (analogo del <code>$GOOD_NET</code> visto in Suricata) — non usate nelle righe finali di questa trascrizione
+  ma dichiarate per readability, sostituiscile ai valori letterali se vuoi un file più leggibile.</p>
+<h3 id="clientnft-e-servernft-solo-filtro-nessun-nat"><code>client.nft</code> e <code>server.nft</code> — solo filtro, nessun NAT</h3>
+<p>I due host finali non fanno traduzione (non sono il router), solo <code>input</code>/<code>output</code> locali:</p>
+<pre><code class="language-nft"># client.nft (estratto)
+chain output {
+    type filter hook output priority filter; policy drop;
+    oif &quot;lo&quot; accept
+    oif eth1 ip daddr != 10.20.0.0/22 udp dport 53 accept   # query DNS verso l'esterno
+}
+</code></pre>
+<pre><code class="language-nft"># server.nft (estratto)
+chain input {
+    type filter hook input priority filter; policy drop;
+    iifname &quot;lo&quot; accept
+    # Dopo il DNAT del router la destinazione locale e' 192.168.1.7,
+    # ma la sorgente rimane l'host pubblico esterno originale.
+    iif eth1 ip saddr != 192.168.1.0/28 tcp dport 443 accept
+}
+</code></pre>
+<p>Punto sottile su <code>server.nft</code>: il server non sa (né deve sapere) dell'IP pubblico del router — vede
+arrivare il traffico già tradotto dal DNAT, con sorgente ancora l'IP pubblico originale del client
+Internet (il <strong>DNAT cambia solo la destinazione</strong>, mai la sorgente) — per questo la regola filtra
+<code>ip saddr != 192.168.1.0/28</code> (accetta tutto ciò che non viene dalla propria rete locale), non un
+IP specifico: dal punto di vista del server, "chiunque da fuori la mia rete" è la definizione
+corretta di "traffico da Internet", il router si è già occupato di instradarlo correttamente.</p>
+<blockquote>
+<p>⚠️ Riga sospetta nel file originale del prof, trascritta fedelmente: <code>client.nft</code> ha
+<code>... ct state established :accept</code> (con <code>:</code> prima di <code>accept</code>) — sintassi che non risulta valida
+in nftables standard. Probabile refuso nel file consegnato dal prof stesso; se lo riusi come
+riferimento, verifica con <code>nft -c -f client.nft</code> (check di sintassi senza applicare) prima di
+fidartene alla lettera.</p>
+</blockquote>
+<p><strong>Sintassi</strong>: <code>nftables</code>.</p>
+<hr />
+<h2 id="indice-riassuntivo">Indice riassuntivo</h2>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Host richiesti</th>
+<th>Sintassi</th>
+<th>NAT?</th>
+<th>Soluzione</th>
+<th>Gotcha principali</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11 giu 2021</td>
+<td>1 (host singolo/router)</td>
+<td>iptables</td>
+<td>no</td>
+<td>ufficiale</td>
+<td><code>FORWARD</code> default ACCEPT dedotto dal testo</td>
+</tr>
+<tr>
+<td>13 set 2023</td>
+<td>3 (Client/Router/Server)</td>
+<td>iptables</td>
+<td>sì</td>
+<td>ufficiale (ritrovata 15/07/2026)</td>
+<td>porta NTP 1233→123 nel testo; SNAT/DNAT invertiti; protocollo sbagliato su una SNAT</td>
+</tr>
+<tr>
+<td>8 feb 2024</td>
+<td>1 (solo Router)</td>
+<td>iptables</td>
+<td>no</td>
+<td>ufficiale</td>
+<td>dipende da esercizio NIDS collegato per la topologia; NTP dport=sport=123</td>
+</tr>
+<tr>
+<td>13 giu 2024</td>
+<td>2 (Router, Server)</td>
+<td>iptables</td>
+<td>sì</td>
+<td>ufficiale</td>
+<td>SNAT senza <code>-j SNAT</code>; nessuna policy/flush esplicita</td>
+</tr>
+<tr>
+<td>10 lug 2025</td>
+<td>2 (Bastion, Router)</td>
+<td>nftables</td>
+<td>sì (solo DNAT)</td>
+<td>ufficiale</td>
+<td>nessuno di sostanza — primo caso nftables del pool</td>
+</tr>
+<tr>
+<td>30 ott 2025</td>
+<td>2 (Router, Webserver)</td>
+<td>nftables</td>
+<td>sì</td>
+<td>ufficiale</td>
+<td><code>type filter</code>/<code>priority nat</code> invece di <code>type nat</code>/<code>dstnat</code>/<code>srcnat</code></td>
+</tr>
+<tr>
+<td>12 gen 2026</td>
+<td>3 (Client/Router/Server)</td>
+<td>nftables</td>
+<td>sì</td>
+<td>ufficiale</td>
+<td><code>ct state established :accept</code> (refuso <code>:</code> sospetto)</td>
+</tr>
+</tbody>
+</table>
+<p>Per l'algoritmo generale da applicare a qualunque variante il giorno dell'esame, vedi
+<code>procedura_operativa_iptables.md</code>; per il documento di riferimento rapido da aprire per primo,
+<code>guida_esame_iptables.md</code>.</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

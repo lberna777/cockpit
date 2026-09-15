@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_moduloD8.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">appunti_moduloD8.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/ESAME DIRITTO/02 - Appunti Grezzi/appunti_moduloD8.md">Apri il file originale</a></p>
+<article class="prosa"><p>Obbiettivo: approfondimento della disciplina di protezione dei dati personali e i suoi strumenti: applicazione del GDPR, definizioni fondamentali, soggetti coinvolti, principi e basi giuridiche, obblighi del titolare, diritti dell'interessato, misure di sicurezza, violazioni, DPIA, DPO, trasferimenti di dati extra UE e sanzioni</p>
+<p><strong>Norme di riferimento</strong></p>
+<p>Regolamento UE 2016/679 --&gt; GDPR (<strong>General Data Protection Regulation</strong>)</p>
+<p>D.lgs 196/2003 --&gt; Codice Privacy (aggiornato a settembre 2018 per adeguarlo al regolamento)</p>
+<p><strong>COSA TUTELA IL GDPR</strong></p>
+<p>Il GDPR protegge i <strong>diritti e le libertà fondamentali delle persone fisiche</strong>, in particolare il diritto alla <strong>protezione dei dati personali</strong>, che deve essere garantito a <strong>tutti</strong></p>
+<p><strong>NON</strong> si applica alle persone <strong>giuridiche</strong> (= aziende, società, enti)
+<strong>NON</strong> si applica ai <strong>dati anonimi</strong>, se ne risulta effettivamenete impossibile identificare la persona</p>
+<p>Si applica <strong>indipendentemente dal modo</strong> in cui vengono trattati i dati. Sia <strong>manualmente</strong> come un piccolo giornale indipendente che raccoglie manualmente informazioni di nuovi iscritti in forma cartacea, che <strong>automaticamente</strong> come un grande sito che accetta membri nuovi di una newsletter</p>
+<p>Essendo un regolamento <strong>europeo</strong>, tutela i dati degli europei, raccolti da <strong>europei e non</strong>. il titolare che effettua il trattamento dei dati può anche <strong>non risiedere in Europa</strong> ma, se tratta dati di cittadini europei, deve trattarli secondo il <strong>GDPR</strong> </p>
+<p><strong>MA COS'E' UN DATO PERSONALE</strong></p>
+<p>Qualsiasi informazione riguardante una persona fisica identifica o possibilmente identificabile (identificabile = persona che può essere identificata direttamente o non, con un particolare riferimento identificativo (nome, numero di id, dati di ubicazione, id online, elementi caratteristici, fisiologia, genetica, psichica, economia, culturale o sociale)</p>
+<p>Questi dati personali si dividono in dati:</p>
+<ul>
+<li>Comuni</li>
+<li>Sensibili</li>
+</ul>
+<p><strong>IL CONCETTO DI TRATTAMENTO DEI DATI - cosa significa trattamento?</strong></p>
+<p>Il trattamento è qualsiasi operazione o insieme di operazioni, automatizzate o non che viene applicato a dati personali o insiemi di dati personali. tra queste:</p>
+<ul>
+<li><strong>profilazione</strong> --&gt; utilizzo dei dati per analizzare o prevedere aspetti riguardati il rendimento professionale, la salute, situazione economica, preferenze, interessi, comportamento, ubicazione o spostamenti di una detta persona fisica</li>
+<li><strong>pseudonimizzazione</strong> --&gt; Trattamento dei dati in modo che i dati non siano più riconducibili a un interessato specifico senza aggiungere informazioni. a condizione che queste informazioni aggiuntive siano conservate separatamente e ne venga garantita la non attribuzione a una persona fisica identificata o identificabile</li>
+</ul>
+<p>La pseudonimizzazione limita il rischio di identificare persone fisiche, mentre la profilazione cerca di "mappare" comportamenti individuali. Un’organizzazione può adottare entrambe queste pratiche per motivi diversi, garantendo al contempo il rispetto delle norme del GDPR.</p>
+<p><strong>I SOGGETTI COINVOLTI NEL TRATTAMENTO</strong></p>
+<pre><code>TITOLARE DEL TRATTAMENTO
+</code></pre>
+<p>La persona <strong>fisica o giuridica</strong>, che singolarmente o insieme ad altri, determina <strong>finalità e mezzi</strong> del trattamento dei dati personali</p>
+<pre><code>RESPONSABILE DEL TRATTAMENTO
+</code></pre>
+<p>La persona <strong>fisica o giuridica</strong> che <strong>tratta dati personali per conto del titolare del trattamento</strong> 
+Non decide autonomamente <strong>finalità e mezzi</strong> del trattamento, ma <strong>segue le direttive del titolare</strong>
+Esiste un contratto specifico di <strong>trattamento dei dati personali</strong> che si stipula tra titolare e responsabile</p>
+<pre><code>INTERESSATO
+</code></pre>
+<p>Persona <strong>fisica</strong> a cui si riferiscono <strong>i dati personali</strong> [es. utente, cliente, paziente]</p>
+<pre><code>SOGGETTO AUTORIZZATO
+</code></pre>
+<p>Persona <strong>fisica</strong>, collaboratore di <strong>titolare o responsabile</strong> che si occupa nell'effettivo di trattare i dati personali. <strong>nessuna autonomia decisionale</strong>. è nelle sue mani il compito di <strong>trattare i dati personali in modo conforme al GDPR e rispettoso dei principi e istruzioni impartitegli</strong></p>
+<p><strong>OBBLIGHI DEL TITOLARE DEL TRATTAMENTO</strong></p>
+<ol>
+<li>Porre <strong>al primo posto</strong> la <strong>privacy dei dati</strong> degli utenti. ha l'obbligo di integrare la <strong>protezione dei dati personali</strong> fin dalla progettazione e durante tutto il ciclo di vita dei <strong>sistemi, processi, prodotti o servizi</strong> in cui saranno utilizzati i dati</li>
+<li>Fare in modo di raccogliere <strong>solo e unicamente</strong> i dati <strong>necessari alle finalità</strong> del trattamento. Questo obbligo vale per la <strong>quantità</strong> di dati, la <strong>portata</strong> del trattamento, il <strong>periodo</strong> di conservazione dei dati e la loro <strong>accessibilità</strong></li>
+</ol>
+<p>(cosa significa che per impostazione predefinita, <strong>non</strong> siano resi <strong>accessibili dati</strong> personali a un <strong>numero indefinito</strong> di persone fisiche senza l'intervento della persona fisica?)</p>
+<p>(SPPROFONDISCI ART 25 DEL REGOLAMENTO, COSA MI POSSONO CHIEDERE?)</p>
+<p><strong>PRINCIPI FONDAMENTALI DA APPLICARE AL TRATTAMENTO DEI DATI</strong></p>
+<p>I dati personali devono essere:</p>
+<ol>
+<li>Trattati in modo <strong>lecito, corretto e trasparente</strong> </li>
+<li>Raccolti per <strong>finalità determinate, esplicite e legittime</strong> e successivamento <strong>trattati in modo che non sia incompatibile con tali finalità</strong></li>
+<li><strong>Esatti</strong> e, se sbagliati <strong>aggiornati</strong>, devono essere adottate tutte le misure ragionevoli per <strong>cancellare o rettificare</strong> dati inesatti</li>
+<li><strong>adeguati pertinenti e limitati</strong> a quanto <strong>necessari rispetto alle finalità</strong> per cui sono trattati</li>
+<li><strong>conservati</strong> in una <strong>forma che consenta l'identificazione</strong> solo per l'arco di tempo <strong>necessario</strong> al conseguimento delle <strong>finalità</strong> per cui sono trattati</li>
+<li>trattati in modo da <strong>garantire un'adeguata sicurezza</strong> dei dati personali, compresa la <strong>protezione da terzi non autorizzati o illeciti o perdita/distruzione accidentale dei dati</strong></li>
+<li>il <strong>titolare del trattamento</strong> deve dimostrare di essere competente riguardo questi principi e deve poterlo <strong>comprovare e dimostrare</strong></li>
+</ol>
+<p><strong>SU QUALI BASI SI DETERMINA SE IL TRATTAMENTO E' LECITO?</strong></p>
+<p>Il trattamento è lecito <strong>solo se</strong> ricorre <strong>almeno una</strong> delle seguenti condizioni:</p>
+<ol>
+<li>L'interessato ha <strong>espresso esplicitamente il consenso</strong> al trattamento dei propri dati per una o più specifiche finalità</li>
+<li>il trattamento è <strong>necessario all'esecuzione di un contratto</strong> in cui l'<strong>interessato è parte</strong></li>
+<li>il trattamento è <strong>necessario per adempiere a un obbligo legale</strong> che interessa il <strong>titolare del trattamento</strong></li>
+<li>il trattamento è necessario <strong>per la salvaguardia di interessi vitali</strong> dell'interessato o di un'altra persona fisica</li>
+<li>il trattamento è necessario per l'esecuzione di un <strong>compito di interesse pubblico</strong> o <strong>connesso all'esercizio di pubblici poteri</strong> di cui è investito il titolare del trattamento;</li>
+<li>il trattamento è <strong>necessario per il perseguimento del legittimo interesse</strong> del titolare del trattamento o di terzi, a condizione che non prevalgano gli interessi o i diritti e le libertà fondamentali dell'interessato che richiedono la protezione dei dati personali, in particolare se l'interessato è un minore. [la regola 6 non si applica al trattamento di dati effettuato dalle autorità pubbliche nell'esecuzione dei loro compiti]
+(aggiungi esempi chiari per le varie situazioni, specie per 3,4,5,6)</li>
+</ol>
+<p><strong>CONDIZIONI PER IL CONSENSO</strong></p>
+<p>Se il trattameno si basa sul <strong>consenso</strong> il titolare deve poterlo <strong>dimostrare</strong></p>
+<p>Se il consenso è prestato nel <strong>contesto di una dichiarazione scritta</strong>, la richeista deve essere presentata in modo <strong>chiaramente distinguibile</strong> dalle altre materie (ovvero?), <strong>comprensibile e facilmente accessibile, usando un linguaggio semplice e chiaro</strong>, pena la non valenza delle parti delle dichiarazione che non rispettano questo vincolo</p>
+<p>l'interessato <strong>ha diritto di revocare il proprio consenso</strong> in <strong>qualsiasi momento</strong>. con la stessa facilità con cui è accordato</p>
+<p>(spiega meglio l'ultima postilla sulla valutazione del prestamento libero del consenso e l'esecuzione di un contratto)</p>
+<p><strong>consenso dei minori</strong>
+Per l'offerta diretta di servizi della società dell'informazione ai minori, il trattamento è lecito ove il minore abbia almeno <strong>16 anni</strong>. Per età inferiore, il consenso deve essere prestato o autorizzato dal <strong>titolare della responsabilità genitoriale</strong>. </p>
+<p>Gli stati membri possono localmente abbassare la soglia di età minima, <strong>ma non sotto i 13 anni</strong>, in <strong>italia</strong>, è fissata a <strong>14</strong></p>
+<p><strong>TRATTAMENTO DEI DATI SENSIBILI - art9</strong></p>
+<p>è <strong>vietato</strong> trattare dati personali che rivelino, <strong>origine razziale, etnica, opinioni politiche, convinzioni religiose o filosofiche, appartenenza sindacale, dati genetici o biometrici</strong>, interessati a <strong>identificare in modo univoco una persona fisica</strong>.
+Questi sono comunemente denominati <strong>dati sensibili</strong></p>
+<p><strong>eccezioni:</strong>
+(schematizza tutte le eccezzioni, spiegale poi con esempi singoli che facciano intendere meglio)</p>
+<p><strong>L'IMPORTANZA DELL'INFORMATIVA</strong></p>
+<p><strong>PRIMA</strong> di raccogliere i dati, deve essere fornita un'<strong>informatica con con un conenuto minimo necessario:</strong></p>
+<ul>
+<li>identità e contatti del <strong>titolare del trattamento</strong></li>
+<li>dati di contatto del <strong>responsabile della protezione dei dati (se nominato)</strong></li>
+<li><strong>finalità del trattamento e basi giuridiche del trattamento</strong></li>
+<li><strong>se il titolare vuole trasferire</strong> dati personali a un <strong>paese terzo o organizzazione internazionale</strong> (anche se europeo?)</li>
+<li><strong>periodo di conservazione</strong></li>
+<li><strong>diritti dell'interessato</strong></li>
+<li><strong>diritto di revocare il consenso in qualsiasi momento</strong></li>
+<li><strong>diritto di proporre reclamo a un autorità</strong></li>
+<li>se la comunicazione di dati personali è fonde di un <strong>obbligo legale o contratturale</strong> o è un <strong>requisito necessario</strong> per la conclusione di un contratto</li>
+<li>Se i dati fanno parte di un <strong>processo decisionale automatizzato</strong>, ovvero nel momento in cui i dati sono presi per prendere scelte sulla loro base, occorre specificare se il processo decisionale è automatizzato o meno</li>
+</ul>
+<p><strong>DIRITTI DELL'INTERESSATO</strong></p>
+<p>(includi i due art del regolamento elencati, spiega perchè e dove sono utili e vengono segnati da leggere attentamento. poi schematizza i diritti dell'interssato per nome del diritto, e nel pratico cosa esso consente di fare)</p>
+<p><strong>REGISTRI DELLE ATTIVITA' DI TRACCIAMENTO</strong></p>
+<p>Quando si è obbligati a tenerli?
+- Imprese con più di 250 dipendenti
+- imprese con meno di 250 dipendenti <strong>se</strong> il trattamento dei dati può presentare un <strong>rischio per i diritti e libertà dell'interessato</strong>. il trattamento <strong>non sia occasionale</strong> o includa il trattamento di <strong>particolari categorie di dati</strong> (fornisci esempi per ogni casistica)</p>
+<p>I registri vanno tenuti <strong>in forma scritta</strong>, anche elettronica, e devono essere <strong>messi a disposizione</strong> in caso di controllo. </p>
+<pre><code>Registro del Titolare
+</code></pre>
+<p>Devono contenere <strong>nome e dati di contatto del ditolare e del DPO(?)</strong>, le <strong>finalità</strong> del trattamento, le <strong>categorie di interessati e di dati</strong> personali, <strong>categorie dei destinatari</strong>, eventuali <strong>trasferimenti</strong> in paesi terzi, termini ultimi per la <strong>cancellazione</strong>, e <strong>descrizione</strong> delle <strong>misure di sicurezza</strong></p>
+<pre><code>Registro del Responsabile
+</code></pre>
+<p>Deve contenere <strong>nomi e dati di contatto</strong> del responsabile e del titolare per cui agisce e del DPO, <strong>categorie dei trattamenti</strong> effettuati, trasferimenti verso paesi terzi, e descrizioni di <strong>misure di sicurezza tecniche e organizzative (quindi più approfondite di quelle del registro del titolare?)</strong></p>
+<p><strong>MISURE DI SICUREZZA</strong></p>
+<p>Il titolare deve <strong>attuare misure tecniche e organizzative adeguate</strong> per garantire, e poter dimostrare che <strong>il trattamento è effettuato conformemnete al Regolamento (GDPR)</strong> - ART24</p>
+<p>nel valutare l'adeguatezza del livello di sicurezza, si tiene <strong>particolarmente conto</strong> dei <strong>rischi</strong> presentati dal trattamento, che possono derivare principalmente da:
+distruzione, perdita, modifica, divulgazione non autorizzata o accesso in modo accidentale o illegale a dati personali trattati.</p>
+<p><strong>Esempi di misure di sicurezza</strong>:</p>
+<ul>
+<li><strong>Pseudonimizzazione</strong> e <strong>cifratura</strong> dei dati personali;</li>
+<li>Capacità di assicurare su base permanente la <strong>riservatezza</strong>, l'<strong>integrità</strong>, la <strong>disponibilità</strong> e la <strong>resilienza</strong> dei sistemi e dei servizi di trattamento;</li>
+<li>Capacità di <strong>ripristinare tempestivamente</strong> la disponibilità e l'accesso dei dati personali in caso di <strong>incidente fisico o tecnico</strong>;</li>
+<li>Procedura per <strong>testare, verificare e valutare regolarmente</strong> l'efficacia delle misure tecniche e organizzative al fine di <strong>garantire la sicurezza</strong> del trattamento.</li>
+</ul>
+<p><strong>DATA BREACH (Violazione dei Dati)</strong></p>
+<h3 id="notifica-al-garante-art-33">Notifica al Garante (art. 33)</h3>
+<p>In caso di violazione dei dati personali, il <strong>titolare deve notificare</strong> la violazione al <strong>Garante privacy</strong> senza ingiustificato ritardo e, ove possibile, entro <strong>72 ore</strong> dal momento in cui ne è venuto a conoscenza, <strong>a meno che sia improbabile che la violazione dei dati personali presenti un rischio per i diritti e le libertà delle persone fisiche</strong>.</p>
+<p>(quindi non obbligatoriamente per dati non importanti e che non compromettono rischi per diritti e libertà dell'individuo?)</p>
+<p>Se la notifica non avviene entro 72 ore, è corredata dei <strong>motivi del ritardo</strong>.</p>
+<p>Il <strong>responsabile</strong> del trattamento deve <strong>informare il titolare</strong> del trattamento <strong>senza ingiustificato ritardo</strong> dopo essere venuto a conoscenza della violazione.
+(quindi anche più di 72 ore però?)</p>
+<h3 id="comunicazione-allinteressato-art-34">Comunicazione all'Interessato (art. 34)</h3>
+<p>Quando la violazione dei dati personali <strong>può presentare un rischio elevato</strong> per i diritti e le libertà delle persone fisiche, il titolare del trattamento deve <strong>comunicare la violazione all'interessato</strong> senza ingiustificato ritardo.</p>
+<p>La comunicazione <strong>non è richiesta</strong> se:</p>
+<ul>
+<li>il titolare ha attuato misure di protezione tecniche e organizzative adeguate e tali misure erano state applicate ai dati oggetto della violazione (es. <strong>cifratura</strong>);</li>
+<li>il titolare ha successivamente adottato misure atte a <strong>scongiurare</strong> il sopraggiungere di un rischio elevato;</li>
+<li>la comunicazione richiederebbe <strong>sforzi sproporzionati</strong>: in tal caso si deve procedere a una <strong>comunicazione pubblica</strong> o a una misura simile, tramite la quale gli interessati sono informati con analoga efficacia.</li>
+</ul>
+<p>(quindi se i tuoi dati sono idealmente al sicuro (ma magari qualcuno potrebbe comunque decriptarli per esempio) non sono obbligati a dirglielo comunque)</p>
+<p><strong>DPIA - DATA PROTECTION IMPACT ASSESMENT</strong></p>
+<p>La valutazione d'impatto sulla protezione dei Dati ha lo scopo di <strong>identificare i rischi per la protezione dei dati personali</strong> e di <strong>valutare</strong> se il trattamento dei dati è compatibile con <strong>le disposizioni del regolamento</strong></p>
+<p>necessaria quando il trattamento dei dati personali comporta un alto rischio per i diritti e le libertà delle persone fisiche. Ciò può accadere in diversi casi, come ad esempio:</p>
+<ul>
+<li><strong>Trattamento di dati sensibili</strong>: come i dati sulla salute, le convinzioni religiose, le opinioni politiche, ecc.</li>
+<li><strong>Trattamento di dati di minori</strong>: come i dati dei bambini o degli adolescenti.</li>
+<li><strong>Trattamento di dati per la profilazione</strong>: come l'uso di algoritmi per creare profili personalizzati.</li>
+<li><strong>Trattamento di dati per la sorveglianza</strong>: come l'uso di telecamere o di altri dispositivi di sorveglianza.</li>
+</ul>
+<p><strong>Contenuto della DPIA</strong>:</p>
+<ul>
+<li><strong>descrizione</strong> sistematica dei trattamenti previsti e delle finalità del trattamento;</li>
+<li>valutazione della <strong>necessità e proporzionalità</strong> dei trattamenti in relazione alle finalità;</li>
+<li>valutazione dei <strong>rischi</strong> per i diritti e le libertà degli interessati;</li>
+<li><strong>misure</strong> previste per affrontare i rischi (garanzie, misure di sicurezza, meccanismi per garantire la protezione dei dati personali e dimostrare la conformità al regolamento).</li>
+</ul>
+<p><strong>DPO - Data Protection Officer</strong></p>
+<p>Svolge numerosi compiti di <strong>supporto all'applicazione</strong> del Regolamento.</p>
+<p><strong>Caratteristiche</strong>:</p>
+<ul>
+<li>Deve essere persona <strong>esperta</strong> sulla <strong>normativa</strong> e <strong>prassi</strong> della protezione dei dati;</li>
+<li>Può essere un <strong>dipendente</strong> del Titolare o del Responsabile del trattamento o un <strong>soggetto esterno</strong> con cui si stipula un contratto di servizi;</li>
+<li><strong>Non</strong> deve essere in <strong>conflitto di interesse</strong>;</li>
+<li><strong>Non</strong> deve ricevere <strong>istruzioni</strong> dal Titolare o dal Responsabile del trattamento;</li>
+<li>I suoi <strong>dati</strong> devono essere <strong>pubblicati</strong> e <strong>comunicati al Garante</strong>.</li>
+</ul>
+<p><strong>Quando deve essere nominato il DPO</strong> (art. 37)?</p>
+<ul>
+<li>il trattamento è effettuato da un'<strong>autorità pubblica</strong> o da un organismo pubblico (eccettuate le autorità giurisdizionali);</li>
+<li>le <strong>attività principali</strong> del titolare o del responsabile consistono in trattamenti che, per loro natura, ambito e/o finalità, richiedono il <strong>monitoraggio regolare e sistematico degli interessati su larga scala</strong>;</li>
+<li>le <strong>attività principali</strong> consistono nel trattamento, su <strong>larga scala</strong>, di <strong>categorie particolari di dati personali</strong> (art. 9) o di dati relativi a condanne penali e a reati.</li>
+</ul>
+<p>(quindi quando non è necessario?)</p>
+<p>(schematizza i compiti minimi del DPO)</p>
+<p>(Inserisci il capitolo su codici di condotta e certificazioni, spiegando cosa sono nel concreto oltre a perchè siano utili)</p>
+<p><strong>TRASFERIMENTO DEI DATI EXTRA UE</strong></p>
+<p>l trasferimento di dati extra UE può avvenire soltanto se il titolare e il responsabile del trattamento rispettano le condizioni del Regolamento. Le regole sono applicate al fine di assicurare che il livello di protezione delle persone fisiche garantito dal regolamento <strong>non sia pregiudicato</strong>.</p>
+<p>(spiegami come si svolge la decisione della leggittimità del trasferimento dei dati in un certo paese)</p>
+<h3 id="deroghe-in-mancanza-delle-condizioni-precedenti">Deroghe (in mancanza delle condizioni precedenti):</h3>
+<ul>
+<li><strong>consenso dell'interessato</strong>, dopo essere stato informato dei possibili rischi;</li>
+<li><strong>trasferimento necessario all'esecuzione di un contratto</strong> concluso tra l'interessato e il titolare del trattamento;</li>
+<li><strong>trasferimento necessario per la conclusione o l'esecuzione di un contratto</strong> stipulato tra il titolare del trattamento e un'altra persona fisica o giuridica;</li>
+<li><strong>trasferimento necessario</strong> per importanti motivi di <strong>interesse pubblico</strong>;</li>
+<li>trasferimento necessario per accertare, esercitare o difendere un <strong>diritto in sede giudiziaria</strong>;</li>
+<li>trasferimento necessario per tutelare gli <strong>interessi vitali</strong> dell'interessato o di altre persone;</li>
+<li>trasferimento effettuato a partire <strong>da un registro pubblico</strong>.</li>
+</ul>
+<p>(inserisci un piccolo schema che includa i rapporti EU-USA)</p>
+<h2 id="22-sanzioni">§22 — Sanzioni</h2>
+<p>[fonte: PDF pp. 57-58]</p>
+<h3 id="sanzioni-gdpr-art-83">Sanzioni GDPR (art. 83)</h3>
+<p>Per alcune violazioni (es. obblighi del titolare o del responsabile del trattamento) sono previste sanzioni amministrative pecuniarie <strong>fino a 10.000.000 EUR</strong>, o per le imprese, <strong>fino al 2% del fatturato mondiale totale annuo</strong> dell'esercizio precedente, <strong>se superiore</strong>.</p>
+<p>Per altre violazioni (es. principi di base, diritti degli interessati, trasferimenti extra UE) sono previste sanzioni amministrative pecuniarie <strong>fino a 20.000.000 EUR</strong>, o per le imprese, <strong>fino al 4% del fatturato mondiale totale annuo</strong> dell'esercizio precedente, <strong>se superiore</strong>.</p>
+<h3 id="illeciti-penali-nel-codice-privacy">Illeciti penali nel Codice Privacy</h3>
+<ul>
+<li><strong>Trattamento illecito di dati</strong> (art. 167);</li>
+<li><strong>Comunicazione e diffusione illecita di dati personali oggetto di trattamento su larga scala</strong> (art. 167-bis);</li>
+<li><strong>Acquisizione fraudolenta di dati personali oggetto di trattamento su larga scala</strong> (art. 167-ter);</li>
+<li><strong>Falsità nelle dichiarazioni al Garante e interruzione dell'esecuzione dei compiti o dell'esercizio dei poteri del Garante</strong> (art. 168);</li>
+<li><strong>Pene accessorie</strong>: pubblicazione della sentenza sul sito internet del Ministero della Giustizia (art. 172 e art. 36 c.p., c. 2,3).</li>
+</ul>
+<h2 id="23-il-garante-per-la-protezione-dei-dati-personali">§23 — Il Garante per la Protezione dei Dati Personali</h2>
+<p>[fonte: PDF pp. 60-61]</p>
+<p>Il Garante per la protezione dei dati personali è un'<strong>autorità amministrativa indipendente</strong>, organo collegiale composto da <strong>quattro membri eletti dal Parlamento</strong> (2 dalla Camera, 2 dal Senato). Il Collegio rimane in carica per un <strong>mandato di sette anni non rinnovabile</strong>.</p>
+<p><strong>Compiti (sintesi)</strong>:</p>
+<ul>
+<li>Verifica l'applicazione della normativa privacy;</li>
+<li>Esamina i reclami e le segnalazioni e decide sui ricorsi;</li>
+<li>Può vietare il trattamento illecito dei dati e disporne il blocco;</li>
+<li>Segnala a Governo e Parlamento l'opportunità di interventi normativi;</li>
+<li>Partecipa alla discussione su iniziative normative con audizioni in Parlamento;</li>
+<li>Esprime pareri;</li>
+<li>Denuncia fatti perseguibili d'ufficio;</li>
+<li>Predispone una relazione annuale.</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

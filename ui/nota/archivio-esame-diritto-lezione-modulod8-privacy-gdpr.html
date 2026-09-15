@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lezione_moduloD8_privacy_gdpr.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">lezione_moduloD8_privacy_gdpr.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/ESAME DIRITTO/03 - Lezioni/lezione_moduloD8_privacy_gdpr.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lezione-modulo-d8-privacy-e-protezione-dei-dati-personali">Lezione — Modulo D8: Privacy e Protezione dei Dati Personali</h1>
+<p><strong>Corso</strong>: Diritto dell'Informatica T<br />
+<strong>Materiale</strong>: <code>08_DirInfo_2026_Privacy_DEF.pdf</code> (63 slide, prof. Claudia Cevenini)<br />
+<strong>Normative di riferimento</strong>: Reg. UE 2016/679 (GDPR), D.Lgs. 196/2003 s.m.i. (Codice Privacy)</p>
+<hr />
+<h2 id="obiettivo">Obiettivo</h2>
+<p>Saper spiegare l'intera disciplina della protezione dei dati personali: ambito di applicazione del GDPR, definizioni fondamentali, soggetti coinvolti, principi e basi giuridiche del trattamento, obblighi del titolare, diritti dell'interessato, misure di sicurezza, violazioni, DPIA, DPO, trasferimenti extra UE e sanzioni.</p>
+<hr />
+<h2 id="1-norme-di-riferimento">§1 — Norme di Riferimento</h2>
+<p>[fonte: PDF p. 2]</p>
+<p>Il quadro normativo di riferimento è composto da due fonti principali:</p>
+<p><strong>Reg. UE 2016/679</strong> — detto GDPR (<em>General Data Protection Regulation</em>). È in vigore dal 25 maggio 2016 e <strong>si applica direttamente</strong> in tutti gli Stati Membri dell'UE dal <strong>25 maggio 2018</strong>. Lascia un <strong>margine di autonomia</strong> agli Stati Membri su determinati ambiti.</p>
+<p><strong>D.Lgs. 196/2003</strong> — detto Codice Privacy. È stato <strong>aggiornato a settembre 2018</strong> per adeguarlo al Regolamento.</p>
+<blockquote>
+<p><strong>Attenzione</strong>: il Regolamento non è l'unica fonte a cui attenersi. Si devono rispettare anche il Codice Privacy aggiornato e ogni altra normativa pertinente (es. Statuto dei lavoratori). Occorre tenere conto delle Linee Guida del Comitato Europeo per la Protezione dei Dati e dei Provvedimenti del Garante. [fonte: PDF p. 59]</p>
+</blockquote>
+<hr />
+<h2 id="2-cosa-tutela-il-regolamento">§2 — Cosa Tutela il Regolamento</h2>
+<p>[fonte: PDF p. 3]</p>
+<p>Il Regolamento <strong>protegge i diritti e le libertà fondamentali delle persone fisiche</strong>, in particolare il <strong>diritto alla protezione dei dati personali</strong>. Tale diritto deve essere garantito a <strong>chiunque</strong>.</p>
+<p>Il GDPR si applica ai trattamenti di dati personali delle <strong>persone fisiche</strong> (=individui) e <strong>NON</strong> delle persone giuridiche (=società, enti e associazioni).</p>
+<p><strong>NON</strong> si applica ai <strong>dati anonimi</strong>, da cui sia impossibile identificare una persona.</p>
+<hr />
+<h2 id="3-ambito-di-applicazione-materiale">§3 — Ambito di Applicazione Materiale</h2>
+<p>[fonte: PDF p. 4]</p>
+<p>Il Regolamento <strong>si applica</strong> al trattamento di dati personali:
+- interamente o parzialmente <strong>automatizzato</strong>, e
+- <strong>non automatizzato</strong> di dati personali contenuti in un archivio o destinati a figurarvi.</p>
+<p>Il Regolamento <strong>non si applica</strong> al trattamento effettuato:
+- da <strong>persone fisiche</strong> per l'esercizio di <strong>attività esclusivamente personali o domestiche</strong>;
+- dalle <strong>autorità competenti</strong> a fini di prevenzione, indagine, accertamento o perseguimento di <strong>reati</strong> o esecuzione di <strong>sanzioni penali</strong>, salvaguardia contro minacce alla <strong>sicurezza pubblica</strong> e la prevenzione delle stesse.</p>
+<hr />
+<h2 id="4-ambito-di-applicazione-territoriale">§4 — Ambito di Applicazione Territoriale</h2>
+<p>[fonte: PDF p. 5]</p>
+<p>Il Regolamento si applica al trattamento di dati personali:</p>
+<ol>
+<li>
+<p>effettuato da <strong>titolare o responsabile stabilito nell'UE</strong>, indipendentemente dal luogo di trattamento dei dati;</p>
+</li>
+<li>
+<p>effettuato da <strong>titolare o responsabile non stabilito nell'UE</strong>, se riguarda <strong>dati di interessati che si trovano nell'UE</strong>, per:
+   - l'<strong>offerta di beni o la prestazione di servizi</strong>, o
+   - il <strong>monitoraggio del loro comportamento</strong> all'interno dell'UE.</p>
+</li>
+</ol>
+<hr />
+<h2 id="5-il-concetto-di-dato-personale">§5 — Il Concetto di Dato Personale</h2>
+<p>[fonte: PDF p. 6]</p>
+<p><strong>«Qualsiasi informazione riguardante una persona fisica identificata o identificabile (=interessato); si considera identificabile la persona fisica che può essere identificata, direttamente o indirettamente, con particolare riferimento a un identificativo come il nome, un numero di identificazione, dati relativi all'ubicazione, un identificativo online o a uno o più elementi caratteristici della sua identità fisica, fisiologica, genetica, psichica, economica, culturale o sociale»</strong></p>
+<p><strong>IMPORTANTE</strong>: I dati personali si distinguono in <strong>"comuni"</strong> e <strong>"sensibili"</strong> (= altre categorie di dati).</p>
+<hr />
+<h2 id="6-il-concetto-di-trattamento">§6 — Il Concetto di Trattamento</h2>
+<p>[fonte: PDF p. 7]</p>
+<p><strong>«Qualsiasi operazione o insieme di operazioni, compiute con o senza l'ausilio di processi automatizzati e applicate a dati personali o insiemi di dati personali»</strong>, come: raccolta, registrazione, organizzazione, strutturazione, conservazione, adattamento o modifica, estrazione, consultazione, uso, comunicazione mediante trasmissione, diffusione o qualsiasi altra forma di messa a disposizione, raffronto o interconnessione, limitazione, cancellazione o distruzione.</p>
+<h3 id="attivita-specifiche-di-trattamento">Attività specifiche di trattamento</h3>
+<p>[fonte: PDF p. 8]</p>
+<p><strong>Profilazione</strong>: qualsiasi forma di trattamento automatizzato di dati personali consistente nell'utilizzo di tali dati per valutare determinati aspetti personali relativi a una persona fisica, in particolare per analizzare o prevedere aspetti riguardanti il rendimento professionale, la situazione economica, la salute, le preferenze personali, gli interessi, l'affidabilità, il comportamento, l'ubicazione o gli spostamenti di detta persona fisica.</p>
+<p><strong>Pseudonimizzazione</strong>: il trattamento dei dati personali in modo tale che i dati personali non possano più essere attribuiti a un interessato specifico senza l'utilizzo di informazioni aggiuntive, a condizione che tali informazioni aggiuntive siano conservate separatamente e soggette a misure tecniche e organizzative intese a garantire che tali dati personali non siano attribuiti a una persona fisica identificata o identificabile.</p>
+<hr />
+<h2 id="7-i-soggetti-coinvolti-nel-trattamento">§7 — I Soggetti Coinvolti nel Trattamento</h2>
+<p>[fonte: PDF pp. 9, 14, 17]</p>
+<h3 id="titolare-del-trattamento">Titolare del trattamento</h3>
+<p>La persona fisica o giuridica, l'autorità pubblica, il servizio o altro organismo che, <strong>singolarmente o insieme ad altri, determina le finalità e i mezzi del trattamento</strong> di dati personali.</p>
+<blockquote>
+<p><strong>Nota</strong>: il Titolare tratta dati per <strong>PROPRIO conto</strong> — es. una società che tratta i dati dei propri clienti e dipendenti.</p>
+</blockquote>
+<h3 id="responsabile-del-trattamento">Responsabile del trattamento</h3>
+<p>La persona fisica o giuridica, l'autorità pubblica, il servizio o altro organismo che <strong>tratta dati personali per conto del titolare</strong> del trattamento.</p>
+<blockquote>
+<p>Es. consulente del lavoro che tratta dati dei dipendenti delle società per cui elabora le buste paga; call center che contatta i clienti dei propri committenti; fornitore di servizi cloud che tratta dati per conto dei propri clienti.</p>
+</blockquote>
+<p>Il Responsabile:
+- deve fornire <strong>garanzie sufficienti</strong> per mettere in atto <strong>misure tecniche e organizzative adeguate</strong>;
+- può nominare a sua volta un <strong>sub-responsabile solo</strong> con <strong>autorizzazione</strong> scritta, specifica o generale, del titolare;
+- deve trattare i dati personali soltanto su <strong>istruzione documentata</strong> del titolare del trattamento.</p>
+<p><strong>ATTENZIONE</strong>: Non confondere il <strong>"Responsabile del trattamento"</strong> (= <em>data processor</em>) con il <strong>"Responsabile della protezione dei dati"</strong> (<em>Data Protection Officer</em>)!</p>
+<h4 id="come-e-nominato-il-responsabile-del-trattamento">Come è nominato il Responsabile del trattamento?</h4>
+<p>Occorre un <strong>contratto</strong> o altro atto giuridico che vincoli il responsabile al titolare e che stipuli: la materia disciplinata, la durata del trattamento, la natura del trattamento, la finalità del trattamento, il tipo di dati personali, le categorie di interessati, gli obblighi e i diritti del titolare del trattamento.</p>
+<blockquote>
+<p><strong>Attenzione</strong> a non confondere il contratto di servizi (incarico/mandato professionale o termini e condizioni di servizio) e il contratto per il trattamento dei dati personali (questo).</p>
+</blockquote>
+<h3 id="interessato">Interessato</h3>
+<p>Persona fisica cui si riferiscono i dati personali. [es. utente, cliente, paziente]</p>
+<h3 id="soggetto-autorizzatodesignato">Soggetto Autorizzato/Designato</h3>
+<p>Collaboratore o dipendente del Titolare o del Responsabile, che opera sotto la loro autorità. Il titolare o il responsabile individuano le modalità più opportune per autorizzare al trattamento le persone che operano sotto la propria autorità diretta. V. Codice Privacy, art. 2-<em>quaterdecies</em>.</p>
+<hr />
+<h2 id="8-obblighi-del-titolare-del-trattamento">§8 — Obblighi del Titolare del Trattamento</h2>
+<p>[fonte: PDF pp. 10-13]</p>
+<h3 id="privacy-by-design-protezione-dei-dati-fin-dalla-progettazione">Privacy by Design (Protezione dei dati fin dalla progettazione)</h3>
+<p>Il titolare del trattamento deve mettere in atto <strong>misure tecniche e organizzative adeguate</strong>, quali la pseudonimizzazione, allo scopo di:
+- attuare in modo efficace i principi di <strong>protezione dei dati</strong>, quali la <strong>minimizzazione</strong>;
+- integrare nel trattamento le necessarie <strong>garanzie</strong> al fine di soddisfare i <strong>requisiti</strong> del Regolamento e <strong>tutelare</strong> i diritti degli interessati.</p>
+<p>Tale obbligo deve essere adempiuto:
+- sia <strong>al momento di determinare i mezzi del trattamento</strong>,
+- sia <strong>all'atto del trattamento stesso</strong>.</p>
+<p>(Obbligo indicato anche come <em>data protection by design</em> o <em>privacy by design</em>) — <strong>STUDIARE ART. 25 DEL REGOLAMENTO</strong></p>
+<h3 id="privacy-by-default-protezione-dei-dati-per-impostazione-predefinita">Privacy by Default (Protezione dei dati per impostazione predefinita)</h3>
+<p>Il titolare del trattamento deve mettere in atto <strong>misure tecniche e organizzative adeguate</strong> per garantire che siano trattati, per impostazione predefinita, <strong>solo i dati personali necessari per ogni specifica finalità</strong> del trattamento. Tale obbligo vale per la <strong>quantità</strong> dei dati personali raccolti, la <strong>portata</strong> del trattamento, il <strong>periodo</strong> di conservazione e l'<strong>accessibilità</strong>.</p>
+<p>In particolare, per impostazione predefinita, <strong>non</strong> siano resi <strong>accessibili dati</strong> personali a un <strong>numero indefinito</strong> di persone fisiche senza l'intervento della persona fisica.</p>
+<p>(Obbligo indicato anche come <em>data protection by default</em> o <em>privacy by default</em>) — <strong>STUDIARE ART. 25 DEL REGOLAMENTO</strong></p>
+<hr />
+<h2 id="9-principi-applicabili-al-trattamento-art-5-gdpr">§9 — Principi Applicabili al Trattamento (art. 5 GDPR)</h2>
+<p>[fonte: PDF pp. 18-20]</p>
+<p>I dati personali devono essere:</p>
+<ol>
+<li>
+<p><strong>Liceità, correttezza e trasparenza</strong>: trattati in modo lecito, corretto e trasparente nei confronti dell'interessato.</p>
+</li>
+<li>
+<p><strong>Limitazione della finalità</strong>: raccolti per finalità determinate, esplicite e legittime, e successivamente trattati in modo che non sia incompatibile con tali finalità. Un ulteriore trattamento a fini di archiviazione nel pubblico interesse, di ricerca scientifica o storica o a fini statistici non è considerato incompatibile con le finalità iniziali.</p>
+</li>
+<li>
+<p><strong>Minimizzazione dei dati</strong>: adeguati, pertinenti e limitati a quanto necessario rispetto alle finalità per le quali sono trattati.</p>
+</li>
+<li>
+<p><strong>Esattezza</strong>: esatti e, se necessario, aggiornati; devono essere adottate tutte le misure ragionevoli per cancellare o rettificare tempestivamente i dati inesatti rispetto alle finalità per le quali sono trattati.</p>
+</li>
+<li>
+<p><strong>Limitazione della conservazione</strong>: conservati in una forma che consenta l'identificazione degli interessati per un arco di tempo non superiore al conseguimento delle finalità per le quali sono trattati. Periodi più lunghi sono possibili solo a fini di archiviazione nel pubblico interesse, di ricerca scientifica o storica o a fini statistici.</p>
+</li>
+<li>
+<p><strong>Integrità e riservatezza</strong>: trattati in maniera da garantire un'adeguata sicurezza dei dati personali, compresa la protezione da trattamenti non autorizzati o illeciti e dalla perdita, dalla distruzione o dal danno accidentali.</p>
+</li>
+<li>
+<p><strong>Responsabilizzazione</strong> (<em>accountability</em>): il titolare del trattamento è competente per il rispetto di questi principi e deve essere in grado di <strong>comprovarlo</strong>, <strong>dimostrarlo</strong>.</p>
+</li>
+</ol>
+<hr />
+<h2 id="10-liceita-del-trattamento-basi-giuridiche-art-6-gdpr">§10 — Liceità del Trattamento — Basi Giuridiche (art. 6 GDPR)</h2>
+<p>[fonte: PDF pp. 21-22]</p>
+<p>Il trattamento è <strong>lecito solo se</strong> e nella misura in cui ricorre <strong>almeno una</strong> delle seguenti condizioni (<strong>basi giuridiche del trattamento</strong>):</p>
+<ol>
+<li>l'interessato ha espresso il <strong>consenso</strong> al trattamento dei propri dati personali per una o più specifiche finalità;</li>
+<li>il trattamento è <strong>necessario all'esecuzione di un contratto</strong> di cui l'interessato è parte o all'esecuzione di <strong>misure precontrattuali</strong> adottate su richiesta dello stesso;</li>
+<li>il trattamento è <strong>necessario per adempiere un obbligo legale</strong> al quale è soggetto il titolare del trattamento;</li>
+<li>il trattamento è <strong>necessario per la salvaguardia degli interessi vitali</strong> dell'interessato o di un'altra persona fisica;</li>
+<li>il trattamento è necessario per l'esecuzione di un <strong>compito di interesse pubblico</strong> o <strong>connesso all'esercizio di pubblici poteri</strong> di cui è investito il titolare del trattamento;</li>
+<li>il trattamento è <strong>necessario per il perseguimento del legittimo interesse</strong> del titolare del trattamento o di terzi, a condizione che non prevalgano gli interessi o i diritti e le libertà fondamentali dell'interessato che richiedono la protezione dei dati personali, in particolare se l'interessato è un minore. [la regola 6 non si applica al trattamento di dati effettuato dalle autorità pubbliche nell'esecuzione dei loro compiti]</li>
+</ol>
+<hr />
+<h2 id="11-condizioni-per-il-consenso">§11 — Condizioni per il Consenso</h2>
+<p>[fonte: PDF pp. 23-24]</p>
+<p>Se il trattamento è basato sul <strong>consenso</strong>, il titolare del trattamento deve essere in grado di <strong>dimostrare</strong> che l'interessato ha prestato il proprio consenso al trattamento dei propri dati personali.</p>
+<p>Se il consenso è prestato nel contesto di una dichiarazione scritta che riguarda anche altre questioni, la richiesta di consenso è presentata in modo <strong>chiaramente distinguibile</strong> dalle altre materie, in forma <strong>comprensibile</strong> e <strong>facilmente accessibile</strong>, utilizzando un <strong>linguaggio semplice</strong> e <strong>chiaro</strong>. Nessuna parte di una tale dichiarazione che costituisca una violazione del Regolamento è vincolante.</p>
+<p>L'interessato ha il <strong>diritto di revocare</strong> il proprio consenso <strong>in qualsiasi momento</strong>. La revoca del consenso <strong>non pregiudica la liceità del trattamento basata sul consenso prima della revoca</strong>. Prima di esprimere il proprio consenso, l'interessato è informato di ciò. Il consenso è <strong>revocato con la stessa facilità con cui è accordato</strong>.</p>
+<p>Nel valutare se il consenso sia stato liberamente prestato, si tiene nella massima considerazione l'eventualità che l'<strong>esecuzione di un contratto</strong>, compresa la <strong>prestazione di un servizio</strong>, sia <strong>condizionata</strong> alla prestazione del <strong>consenso</strong> al trattamento di dati personali <strong>non necessario</strong> all'esecuzione di tale contratto.</p>
+<h3 id="consenso-dei-minori">Consenso dei minori</h3>
+<p>[fonte: PDF p. 25]</p>
+<p>Per l'offerta diretta di servizi della società dell'informazione ai minori, il trattamento è lecito ove il minore abbia almeno <strong>16 anni</strong>. Per età inferiore, il consenso deve essere prestato o autorizzato dal <strong>titolare della responsabilità genitoriale</strong>. Gli Stati Membri possono stabilire un'età inferiore purché <strong>non inferiore ai 13 anni</strong>. In <strong>Italia</strong> è fissata a <strong>14 anni</strong> (art. 2-<em>quinquies</em> Codice Privacy).</p>
+<hr />
+<h2 id="12-trattamento-di-categorie-particolari-di-dati-personali-art-9-gdpr">§12 — Trattamento di Categorie Particolari di Dati Personali (art. 9 GDPR)</h2>
+<p>[fonte: PDF pp. 26-30]</p>
+<p>È <strong>vietato</strong> trattare dati personali che rivelino l'<strong>origine razziale o etnica</strong>, le <strong>opinioni politiche</strong>, le <strong>convinzioni religiose o filosofiche</strong>, l'<strong>appartenenza sindacale</strong>, dati <strong>genetici</strong>, dati <strong>biometrici</strong> intesi a identificare in modo univoco una persona fisica, dati relativi alla <strong>salute</strong>, dati relativi alla <strong>vita sessuale</strong> o all'<strong>orientamento sessuale</strong> della persona.</p>
+<p>Si tratta dei dati comunemente denominati <strong>"sensibili"</strong>.</p>
+<h3 id="eccezioni-il-divieto-non-vale-nei-seguenti-casi">Eccezioni (il divieto non vale nei seguenti casi):</h3>
+<p>A. l'interessato ha prestato il proprio <strong>consenso esplicito</strong> per una o più <strong>finalità specifiche</strong>;
+B. il trattamento è necessario per assolvere gli <strong>obblighi</strong> ed esercitare i <strong>diritti</strong> specifici del titolare o dell'interessato in materia di <strong>diritto del lavoro</strong> e della <strong>sicurezza e protezione sociale</strong>, nella misura autorizzata dal diritto UE o degli Stati Membri o da un <strong>contratto collettivo</strong>;
+C. il trattamento è necessario per tutelare un <strong>interesse vitale</strong> dell'interessato o di un'altra persona fisica qualora l'interessato si trovi nell'<strong>incapacità fisica o giuridica</strong> di prestare il proprio consenso;
+D. il trattamento è effettuato da una <strong>fondazione, associazione</strong> o altro organismo <strong>senza scopo di lucro</strong> che persegua finalità politiche, filosofiche, religiose o sindacali, con adeguate garanzie, riguardante unicamente i propri membri/ex membri/persone con regolari contatti, a condizione che i dati non siano comunicati all'esterno senza consenso;
+E. il trattamento riguarda <strong>dati personali resi manifestamente pubblici dall'interessato</strong>;
+F. il trattamento è necessario per <strong>accertare, esercitare o difendere un diritto in sede giudiziaria</strong> o ogniqualvolta le autorità giurisdizionali esercitino le loro funzioni giurisdizionali;
+G. il trattamento è necessario per motivi di <strong>interesse pubblico rilevante</strong> sulla base del diritto UE o nazionale;
+H. il trattamento è necessario per finalità di <strong>medicina preventiva o del lavoro, valutazione della capacità lavorativa, diagnosi, assistenza o terapia sanitaria o sociale</strong> o gestione dei sistemi e servizi sanitari o sociali;
+I. il trattamento è necessario per motivi di <strong>interesse pubblico nel settore della sanità pubblica</strong>;
+J. il trattamento è necessario a fini di <strong>archiviazione nel pubblico interesse, di ricerca scientifica o storica o a fini statistici</strong>.</p>
+<p>Gli Stati Membri possono mantenere o introdurre <strong>ulteriori condizioni</strong>, comprese limitazioni, con riguardo al trattamento di dati <strong>genetici</strong>, dati <strong>biometrici</strong> o dati relativi alla <strong>salute</strong>.</p>
+<hr />
+<h2 id="13-informativa-artt-12-13-e-14-gdpr">§13 — Informativa (artt. 12, 13 e 14 GDPR)</h2>
+<p>[fonte: PDF pp. 31-32]</p>
+<p><strong>PRIMA</strong> di raccogliere i dati deve essere fornita un'informativa con un contenuto minimo (leggere gli artt. 12, 13 e 14 del Regolamento):</p>
+<ul>
+<li>l'identità e i dati di contatto del <strong>titolare</strong> del trattamento;</li>
+<li>i dati di contatto del responsabile della protezione dei dati (<strong>DPO</strong> o <strong>RPD</strong>) se nominato;</li>
+<li>le <strong>finalità</strong> del trattamento e la <strong>base giuridica</strong> del trattamento;</li>
+<li>eventuali <strong>destinatari</strong> o eventuali <strong>categorie</strong> di destinatari dei dati personali;</li>
+<li>l'<strong>intenzione</strong> del titolare di trasferire dati personali a un <strong>paese terzo</strong> o a un'organizzazione internazionale;</li>
+<li>il <strong>periodo di conservazione</strong> dei dati personali o, se non possibile, i <strong>criteri</strong> utilizzati per determinare tale periodo;</li>
+<li>i <strong>diritti</strong> dell'interessato (accesso, rettifica, cancellazione, limitazione, opposizione, portabilità);</li>
+<li>il diritto di <strong>revocare</strong> il consenso in qualsiasi momento senza pregiudicare la liceità del trattamento basata sul consenso prestato prima della revoca;</li>
+<li>il diritto di proporre <strong>reclamo</strong> a un'autorità di controllo;</li>
+<li>se la comunicazione di dati personali è un <strong>obbligo legale o contrattuale</strong> oppure un <strong>requisito necessario</strong> per la conclusione di un contratto, e le possibili conseguenze della mancata comunicazione;</li>
+<li>l'esistenza di un <strong>processo decisionale automatizzato</strong>, compresa la <strong>profilazione</strong>.</li>
+</ul>
+<hr />
+<h2 id="14-diritti-dellinteressato-artt-15-22-gdpr">§14 — Diritti dell'Interessato (artt. 15-22 GDPR)</h2>
+<p>[fonte: PDF p. 33]</p>
+<p><strong>Leggere attentamente gli artt. da 15 a 22 del Regolamento.</strong></p>
+<ul>
+<li>Diritto di <strong>accesso</strong> (art. 15): l'interessato ha il diritto di ottenere la conferma che sia o meno in corso un trattamento di dati personali che lo riguardano e, in tal caso, di ottenere l'accesso a tali dati.</li>
+<li>Diritto di <strong>rettifica</strong> (art. 16): l'interessato ha il diritto di ottenere dal titolare la rettifica dei dati personali inesatti che lo riguardano.</li>
+<li>Diritto di <strong>integrazione</strong> (art. 16): l'interessato ha il diritto di ottenere l'integrazione dei dati personali incompleti.</li>
+<li>Diritto di <strong>cancellazione</strong> / c.d. <strong>diritto all'oblio</strong> (art. 17): l'interessato ha il diritto di ottenere dal titolare la cancellazione dei dati personali che lo riguardano.</li>
+<li>Diritto di <strong>limitazione</strong> del trattamento (art. 18): l'interessato ha il diritto di ottenere dal titolare la limitazione del trattamento.</li>
+<li>Diritto alla <strong>portabilità</strong> dei dati (art. 20): l'interessato ha il diritto di ricevere in un formato strutturato, di uso comune e leggibile da dispositivo automatico i dati personali che lo riguardano.</li>
+<li>Diritto di <strong>opposizione</strong> (art. 21): l'interessato ha il diritto di opporsi in qualsiasi momento al trattamento dei dati personali che lo riguardano.</li>
+</ul>
+<hr />
+<h2 id="15-registri-delle-attivita-di-trattamento-art-30-gdpr">§15 — Registri delle Attività di Trattamento (art. 30 GDPR)</h2>
+<p>[fonte: PDF pp. 34-36]</p>
+<p><strong>Chi deve tenerli?</strong>
+- Tutte le imprese od organizzazioni con <strong>più di 250 dipendenti</strong>.
+- Le imprese od organizzazioni con <strong>meno di 250 dipendenti se</strong>: il trattamento che esse effettuano possa presentare un <strong>rischio</strong> per i diritti e le libertà dell'interessato, il trattamento <strong>non</strong> sia <strong>occasionale</strong>, o includa il trattamento di <strong>categorie particolari di dati</strong>.</p>
+<p><strong>Come vanno tenuti?</strong> In <strong>forma scritta</strong>, anche in <strong>formato elettronico</strong>. Devono essere messi a disposizione in caso di controllo.</p>
+<p><strong>Contenuto del Registro del Titolare</strong>: nome e dati di contatto del titolare e del DPO, finalità del trattamento, categorie di interessati e di dati personali, categorie di destinatari, trasferimenti verso paesi terzi, termini ultimi per la cancellazione, descrizione generale delle misure di sicurezza.</p>
+<p><strong>Contenuto del Registro del Responsabile</strong>: nome e dati di contatto del responsabile (e di ogni titolare per cui agisce) e del DPO, categorie dei trattamenti effettuati per conto di ogni titolare, trasferimenti verso paesi terzi, descrizione generale delle misure di sicurezza tecniche e organizzative.</p>
+<hr />
+<h2 id="16-misure-di-sicurezza-art-32-gdpr">§16 — Misure di Sicurezza (art. 32 GDPR)</h2>
+<p>[fonte: PDF pp. 37-40]</p>
+<p>Tenuto conto della natura, dell'ambito di applicazione, del contesto e delle finalità del trattamento, nonché dei rischi aventi probabilità e gravità diverse per i diritti e le libertà delle persone fisiche, il <strong>titolare</strong> del trattamento deve attuare <strong>misure tecniche e organizzative adeguate</strong> per garantire, ed essere in grado di dimostrare, che il trattamento è effettuato conformemente al Regolamento. Le misure sono riesaminate e aggiornate se necessario. — <strong>STUDIARE ART. 24 DEL REGOLAMENTO</strong></p>
+<p>Nel valutare l'adeguato livello di sicurezza, si tiene conto in special modo dei <strong>rischi</strong> presentati dal trattamento che derivano in particolare da: distruzione, perdita, modifica, divulgazione non autorizzata o accesso in modo accidentale o illegale a dati personali trattati.</p>
+<p><strong>Esempi di misure di sicurezza</strong>:
+- <strong>Pseudonimizzazione</strong> e <strong>cifratura</strong> dei dati personali;
+- Capacità di assicurare su base permanente la <strong>riservatezza</strong>, l'<strong>integrità</strong>, la <strong>disponibilità</strong> e la <strong>resilienza</strong> dei sistemi e dei servizi di trattamento;
+- Capacità di <strong>ripristinare tempestivamente</strong> la disponibilità e l'accesso dei dati personali in caso di <strong>incidente fisico o tecnico</strong>;
+- Procedura per <strong>testare, verificare e valutare regolarmente</strong> l'efficacia delle misure tecniche e organizzative al fine di <strong>garantire la sicurezza</strong> del trattamento.</p>
+<p>L'adesione a un codice di condotta approvato o a un meccanismo di certificazione approvato può essere utilizzata come elemento per dimostrare la conformità alla normativa.</p>
+<hr />
+<h2 id="17-violazione-dei-dati-data-breach-artt-33-34-gdpr">§17 — Violazione dei Dati (Data Breach) (artt. 33-34 GDPR)</h2>
+<p>[fonte: PDF pp. 41-42]</p>
+<h3 id="notifica-al-garante-art-33">Notifica al Garante (art. 33)</h3>
+<p>In caso di violazione dei dati personali, il <strong>titolare deve notificare</strong> la violazione al <strong>Garante privacy</strong> senza ingiustificato ritardo e, ove possibile, entro <strong>72 ore</strong> dal momento in cui ne è venuto a conoscenza, <strong>a meno che sia improbabile che la violazione dei dati personali presenti un rischio per i diritti e le libertà delle persone fisiche</strong>.</p>
+<p>Se la notifica non avviene entro 72 ore, è corredata dei <strong>motivi del ritardo</strong>.</p>
+<p>Il <strong>responsabile</strong> del trattamento deve <strong>informare il titolare</strong> del trattamento <strong>senza ingiustificato ritardo</strong> dopo essere venuto a conoscenza della violazione.</p>
+<h3 id="comunicazione-allinteressato-art-34">Comunicazione all'Interessato (art. 34)</h3>
+<p>Quando la violazione dei dati personali <strong>può presentare un rischio elevato</strong> per i diritti e le libertà delle persone fisiche, il titolare del trattamento deve <strong>comunicare la violazione all'interessato</strong> senza ingiustificato ritardo.</p>
+<p>La comunicazione <strong>non è richiesta</strong> se:
+- il titolare ha attuato misure di protezione tecniche e organizzative adeguate e tali misure erano state applicate ai dati oggetto della violazione (es. <strong>cifratura</strong>);
+- il titolare ha successivamente adottato misure atte a <strong>scongiurare</strong> il sopraggiungere di un rischio elevato;
+- la comunicazione richiederebbe <strong>sforzi sproporzionati</strong>: in tal caso si deve procedere a una <strong>comunicazione pubblica</strong> o a una misura simile, tramite la quale gli interessati sono informati con analoga efficacia.</p>
+<hr />
+<h2 id="18-valutazione-dimpatto-sulla-protezione-dei-dati-dpia-art-35-gdpr">§18 — Valutazione d'Impatto sulla Protezione dei Dati — DPIA (art. 35 GDPR)</h2>
+<p>[fonte: PDF pp. 43-45]</p>
+<p><em>(DPIA = Data Protection Impact Assessment)</em></p>
+<p>Quando un tipo di trattamento, allorché prevede in particolare l'uso di <strong>nuove tecnologie</strong>, considerati la natura, l'oggetto, il contesto e le finalità del trattamento, <strong>può presentare un rischio elevato</strong> per i diritti e le libertà delle persone fisiche, il <strong>titolare</strong> del trattamento deve effettuare, <strong>prima</strong> di procedere al trattamento, una <strong>valutazione dell'impatto dei trattamenti previsti sulla protezione dei dati personali</strong>.</p>
+<p>Una singola valutazione può esaminare un <strong>insieme di trattamenti simili</strong> che presentano rischi elevati analoghi.</p>
+<p><strong>Quando occorre la DPIA</strong> (in particolare):
+- <strong>valutazione sistematica</strong> e globale di aspetti personali relativi a persone fisiche, basata su un trattamento automatizzato, compresa la <strong>profilazione</strong>, e sulla quale si fondano decisioni che hanno <strong>effetti giuridici</strong> o incidono in modo significativo su dette persone fisiche;
+- il trattamento, su larga scala, di <strong>categorie particolari di dati personali</strong> o di dati relativi a condanne penali e a reati;
+- la <strong>sorveglianza sistematica</strong> su larga scala di una zona accessibile al <strong>pubblico</strong>.</p>
+<p><strong>Contenuto della DPIA</strong>:
+- <strong>descrizione</strong> sistematica dei trattamenti previsti e delle finalità del trattamento;
+- valutazione della <strong>necessità e proporzionalità</strong> dei trattamenti in relazione alle finalità;
+- valutazione dei <strong>rischi</strong> per i diritti e le libertà degli interessati;
+- <strong>misure</strong> previste per affrontare i rischi (garanzie, misure di sicurezza, meccanismi per garantire la protezione dei dati personali e dimostrare la conformità al regolamento).</p>
+<hr />
+<h2 id="19-responsabile-della-protezione-dei-dati-dpo-artt-37-39-gdpr">§19 — Responsabile della Protezione dei Dati — DPO (artt. 37-39 GDPR)</h2>
+<p>[fonte: PDF pp. 46-49]</p>
+<p>Comunemente detto <strong>DPO</strong> (<em>Data Protection Officer</em>). Svolge numerosi compiti di <strong>supporto all'applicazione</strong> del Regolamento.</p>
+<p><strong>Caratteristiche</strong>:
+- Deve essere persona <strong>esperta</strong> sulla <strong>normativa</strong> e <strong>prassi</strong> della protezione dei dati;
+- Può essere un <strong>dipendente</strong> del Titolare o del Responsabile del trattamento o un <strong>soggetto esterno</strong> con cui si stipula un contratto di servizi;
+- <strong>Non</strong> deve essere in <strong>conflitto di interesse</strong>;
+- <strong>Non</strong> deve ricevere <strong>istruzioni</strong> dal Titolare o dal Responsabile del trattamento;
+- I suoi <strong>dati</strong> devono essere <strong>pubblicati</strong> e <strong>comunicati al Garante</strong>.</p>
+<p><strong>Quando deve essere nominato il DPO</strong> (art. 37)?
+- il trattamento è effettuato da un'<strong>autorità pubblica</strong> o da un organismo pubblico (eccettuate le autorità giurisdizionali);
+- le <strong>attività principali</strong> del titolare o del responsabile consistono in trattamenti che, per loro natura, ambito e/o finalità, richiedono il <strong>monitoraggio regolare e sistematico degli interessati su larga scala</strong>;
+- le <strong>attività principali</strong> consistono nel trattamento, su <strong>larga scala</strong>, di <strong>categorie particolari di dati personali</strong> (art. 9) o di dati relativi a condanne penali e a reati.</p>
+<p>Un <strong>gruppo imprenditoriale</strong> può nominare un <strong>unico DPO</strong>, a condizione che sia facilmente raggiungibile da ciascuno stabilimento.</p>
+<p><strong>Compiti minimi del DPO</strong> (art. 39):
+- <strong>Informare</strong> e fornire <strong>consulenza</strong> al titolare, al responsabile e ai dipendenti sugli obblighi del regolamento;
+- <strong>Sorvegliare</strong> l'osservanza del Regolamento, di altre norme UE o nazionali sulla protezione dei dati e delle politiche del titolare/responsabile;
+- Fornire, se richiesto, un <strong>parere</strong> in merito alla <strong>valutazione d'impatto</strong> sulla protezione dei dati e sorvegliarne lo svolgimento;
+- <strong>Cooperare</strong> con l'autorità di controllo (Garante privacy);
+- Fungere da <strong>punto di contatto</strong> per l'autorità di controllo.</p>
+<hr />
+<h2 id="20-codici-di-condotta-e-certificazioni-artt-40-43-gdpr">§20 — Codici di Condotta e Certificazioni (artt. 40-43 GDPR)</h2>
+<p>[fonte: PDF pp. 50-51]</p>
+<p><strong>Codici di condotta</strong>: l'elaborazione di codici di condotta può contribuire alla corretta applicazione del Regolamento, in funzione delle specificità dei vari settori di trattamento e delle esigenze specifiche delle micro, piccole e medie imprese. Possono essere elaborati da associazioni e altri organismi rappresentanti le categorie di titolari o responsabili.</p>
+<p><strong>Certificazioni</strong>: il Regolamento incoraggia l'istituzione di <strong>meccanismi di certificazione</strong> della protezione dei dati nonché di <strong>sigilli</strong> e <strong>marchi di protezione dei dati</strong> allo scopo di dimostrare la <strong>conformità</strong> al regolamento dei trattamenti effettuati dai titolari e dai responsabili del trattamento.</p>
+<hr />
+<h2 id="21-trasferimenti-di-dati-extra-ue-artt-44-ss-gdpr">§21 — Trasferimenti di Dati Extra UE (artt. 44 ss. GDPR)</h2>
+<p>[fonte: PDF pp. 52-56]</p>
+<p><strong>Principio generale</strong>: il trasferimento di dati extra UE può avvenire soltanto se il titolare e il responsabile del trattamento rispettano le condizioni del Regolamento. Le regole sono applicate al fine di assicurare che il livello di protezione delle persone fisiche garantito dal regolamento <strong>non sia pregiudicato</strong>.</p>
+<h3 id="condizioni-ordinarie">Condizioni ordinarie:</h3>
+<ol>
+<li><strong>Decisione di adeguatezza</strong>: la Commissione Europea stabilisce che determinati Paesi garantiscono un livello di protezione adeguato — non occorrono autorizzazioni specifiche;</li>
+<li><strong>Garanzie adeguate</strong>: manca una decisione di adeguatezza ma il titolare o il responsabile del trattamento forniscono garanzie adeguate, es. <strong>norme vincolanti d'impresa</strong> (norme giuridicamente vincolanti adottate a livello di gruppo di impresa), <strong>clausole contrattuali tipo</strong> adottate dalla Commissione o da un'autorità di controllo.</li>
+</ol>
+<h3 id="deroghe-in-mancanza-delle-condizioni-precedenti">Deroghe (in mancanza delle condizioni precedenti):</h3>
+<ul>
+<li><strong>consenso dell'interessato</strong>, dopo essere stato informato dei possibili rischi;</li>
+<li><strong>trasferimento necessario all'esecuzione di un contratto</strong> concluso tra l'interessato e il titolare del trattamento;</li>
+<li><strong>trasferimento necessario per la conclusione o l'esecuzione di un contratto</strong> stipulato tra il titolare del trattamento e un'altra persona fisica o giuridica;</li>
+<li><strong>trasferimento necessario</strong> per importanti motivi di <strong>interesse pubblico</strong>;</li>
+<li>trasferimento necessario per accertare, esercitare o difendere un <strong>diritto in sede giudiziaria</strong>;</li>
+<li>trasferimento necessario per tutelare gli <strong>interessi vitali</strong> dell'interessato o di altre persone;</li>
+<li>trasferimento effettuato a partire <strong>da un registro pubblico</strong>.</li>
+</ul>
+<h3 id="trasferimenti-ue-usa">Trasferimenti UE-USA</h3>
+<p>Nel tempo le condizioni di liceità dei trasferimenti verso gli USA hanno sperimentato alterne vicende:
+- <strong>Safe Harbor</strong> — invalidato nel 2015 dalla Corte di Giustizia Europea (c.d. <strong>"Schrems I"</strong>);
+- <strong>Privacy Shield</strong> — invalidato nel 2020 dalla Corte di Giustizia Europea (c.d. <strong>"Schrems II"</strong>);
+- Attualmente: <strong>Data Privacy Framework</strong> — il 10 luglio 2023 la Commissione europea ha adottato la decisione di adeguatezza del quadro normativo sulla privacy dei dati UE-USA. Sulla base di questa decisione, i dati personali possono circolare liberamente dall'UE alle società negli Stati Uniti che partecipano al Data Privacy Framework.</p>
+<hr />
+<h2 id="22-sanzioni">§22 — Sanzioni</h2>
+<p>[fonte: PDF pp. 57-58]</p>
+<h3 id="sanzioni-gdpr-art-83">Sanzioni GDPR (art. 83)</h3>
+<p>Per alcune violazioni (es. obblighi del titolare o del responsabile del trattamento) sono previste sanzioni amministrative pecuniarie <strong>fino a 10.000.000 EUR</strong>, o per le imprese, <strong>fino al 2% del fatturato mondiale totale annuo</strong> dell'esercizio precedente, <strong>se superiore</strong>.</p>
+<p>Per altre violazioni (es. principi di base, diritti degli interessati, trasferimenti extra UE) sono previste sanzioni amministrative pecuniarie <strong>fino a 20.000.000 EUR</strong>, o per le imprese, <strong>fino al 4% del fatturato mondiale totale annuo</strong> dell'esercizio precedente, <strong>se superiore</strong>.</p>
+<h3 id="illeciti-penali-nel-codice-privacy">Illeciti penali nel Codice Privacy</h3>
+<ul>
+<li><strong>Trattamento illecito di dati</strong> (art. 167);</li>
+<li><strong>Comunicazione e diffusione illecita di dati personali oggetto di trattamento su larga scala</strong> (art. 167-bis);</li>
+<li><strong>Acquisizione fraudolenta di dati personali oggetto di trattamento su larga scala</strong> (art. 167-ter);</li>
+<li><strong>Falsità nelle dichiarazioni al Garante e interruzione dell'esecuzione dei compiti o dell'esercizio dei poteri del Garante</strong> (art. 168);</li>
+<li><strong>Pene accessorie</strong>: pubblicazione della sentenza sul sito internet del Ministero della Giustizia (art. 172 e art. 36 c.p., c. 2,3).</li>
+</ul>
+<hr />
+<h2 id="23-il-garante-per-la-protezione-dei-dati-personali">§23 — Il Garante per la Protezione dei Dati Personali</h2>
+<p>[fonte: PDF pp. 60-61]</p>
+<p>Il Garante per la protezione dei dati personali è un'<strong>autorità amministrativa indipendente</strong>, organo collegiale composto da <strong>quattro membri eletti dal Parlamento</strong> (2 dalla Camera, 2 dal Senato). Il Collegio rimane in carica per un <strong>mandato di sette anni non rinnovabile</strong>.</p>
+<p><strong>Compiti (sintesi)</strong>:
+- Verifica l'applicazione della normativa privacy;
+- Esamina i reclami e le segnalazioni e decide sui ricorsi;
+- Può vietare il trattamento illecito dei dati e disporne il blocco;
+- Segnala a Governo e Parlamento l'opportunità di interventi normativi;
+- Partecipa alla discussione su iniziative normative con audizioni in Parlamento;
+- Esprime pareri;
+- Denuncia fatti perseguibili d'ufficio;
+- Predispone una relazione annuale.</p>
+<hr />
+<h2 id="riferimenti-normativi">Riferimenti Normativi</h2>
+<table>
+<thead>
+<tr>
+<th>Articolo / Norma</th>
+<th>Contenuto (come descritto nel PDF)</th>
+<th>Rilevanza per il corso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reg. UE 2016/679, art. 4</td>
+<td>Definizioni: dato personale, trattamento, profilazione, pseudonimizzazione, titolare, responsabile, interessato</td>
+<td>Fondamento del modulo</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 5</td>
+<td>Principi applicabili al trattamento (7 principi)</td>
+<td>Alta — da sapere a memoria</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 6</td>
+<td>Liceità del trattamento — 6 basi giuridiche</td>
+<td>Alta — da sapere a memoria</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 9</td>
+<td>Categorie particolari di dati (dati sensibili) — divieto e deroghe A-J</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, artt. 12-14</td>
+<td>Informativa — contenuto minimo</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, artt. 15-22</td>
+<td>Diritti dell'interessato</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 24</td>
+<td>Misure di sicurezza — obblighi del titolare</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 25</td>
+<td>Privacy by design e by default</td>
+<td>Alta — segnalata dalla prof</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 30</td>
+<td>Registri delle attività di trattamento</td>
+<td>Media</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 32</td>
+<td>Misure di sicurezza — cosa fare</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, artt. 33-34</td>
+<td>Notifica e comunicazione violazioni dei dati</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 35</td>
+<td>DPIA — quando e come</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, artt. 37-39</td>
+<td>DPO — nomina, caratteristiche, compiti</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 44 ss.</td>
+<td>Trasferimenti extra UE</td>
+<td>Media</td>
+</tr>
+<tr>
+<td>Reg. UE 2016/679, art. 83</td>
+<td>Sanzioni</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>D.Lgs. 196/2003, art. 2-<em>quinquies</em></td>
+<td>Consenso minori: età min. 14 anni in Italia</td>
+<td>Media</td>
+</tr>
+<tr>
+<td>D.Lgs. 196/2003, art. 2-<em>quaterdecies</em></td>
+<td>Attribuzione funzioni a soggetti designati</td>
+<td>Bassa</td>
+</tr>
+<tr>
+<td>D.Lgs. 196/2003, artt. 167-168</td>
+<td>Illeciti penali</td>
+<td>Media</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="casi-e-scenari">Casi e Scenari</h2>
+<p>[fonte: PDF — esempi espliciti della professoressa]</p>
+<p><strong>Titolare vs Responsabile</strong>: Una società che tratta i dati dei propri clienti e dipendenti = <strong>Titolare</strong>. Il consulente del lavoro che elabora le buste paga di quella società usando i dati dei dipendenti = <strong>Responsabile</strong> (tratta per conto del Titolare).</p>
+<p><strong>Responsabile del trattamento vs DPO</strong>: Non confondere. Il Responsabile è chi tratta dati per conto del Titolare (data processor). Il DPO è il consulente esperto in normativa privacy, che non deve ricevere istruzioni e non deve essere in conflitto di interesse.</p>
+<p><strong>Consenso condizionato al servizio</strong>: È vietato condizionare la prestazione di un servizio al consenso per trattamenti non necessari all'esecuzione del contratto. Il consenso così ottenuto non è considerato liberamente prestato.</p>
+<p><strong>Minori</strong>: WhatsApp ha vietato l'uso dell'app ai minori di 16 anni senza autorizzazione dei genitori.</p>
+<p><strong>Trasferimenti UE-USA</strong>: Safe Harbor (invalidato 2015 — Schrems I) → Privacy Shield (invalidato 2020 — Schrems II) → Data Privacy Framework (valido dal 10 luglio 2023).</p>
+<p><strong>Sanzioni</strong>: Google è stata multata dal Garante francese (CNIL) per 50 milioni EUR (2% fatturato) per violazione dei principi di trasparenza e basi giuridiche del consenso.</p>
+<hr />
+<h2 id="domande-di-autoverifica">Domande di Autoverifica</h2>
+<p><em>(Tipo esame — rispondere in forma discorsiva prima di scrivere gli appunti grezzi)</em></p>
+<ol>
+<li>
+<p>Qual è la differenza tra dato personale "comune" e dato "sensibile" (categoria particolare)? Fai tre esempi per ciascuna categoria e spiega perché il trattamento dei dati sensibili è soggetto a disciplina più restrittiva.</p>
+</li>
+<li>
+<p>Un'azienda vuole profilare i propri clienti per finalità di marketing. Indica quali basi giuridiche del trattamento potrebbe invocare (art. 6 GDPR) e spiega perché alcune potrebbero essere più problematiche di altre. Cosa cambia se vengono trattati anche dati relativi alla salute?</p>
+</li>
+<li>
+<p>Descrivi la differenza tra "privacy by design" e "privacy by default" (art. 25 GDPR), con un esempio concreto per ciascuno. Quando devono essere attuate queste misure?</p>
+</li>
+<li>
+<p>Un'azienda subisce un attacco hacker che comporta la divulgazione non autorizzata dei dati personali di 500 clienti. Descrivi la procedura di gestione della violazione: chi deve fare cosa, entro quali termini, e in quali casi la comunicazione all'interessato può essere omessa.</p>
+</li>
+<li>
+<p>Quando un'organizzazione è obbligata a nominare un DPO? Quali caratteristiche deve avere e quali sono i suoi compiti minimi secondo il GDPR? Perché il DPO non deve ricevere istruzioni dal Titolare?</p>
+</li>
+</ol>
+<hr />
+<h2 id="riepilogo">Riepilogo</h2>
+<ul>
+<li>Il <strong>GDPR</strong> (Reg. UE 2016/679) si applica direttamente in tutta l'UE dal 25 maggio 2018 e tutela i diritti fondamentali delle persone fisiche in materia di trattamento dei dati personali; il <strong>Codice Privacy</strong> (D.Lgs. 196/2003) è lo strumento nazionale di adeguamento.</li>
+<li>Il trattamento è lecito solo se fondato su <strong>almeno una delle sei basi giuridiche</strong> dell'art. 6 GDPR; per i dati sensibili (art. 9) vige un <strong>divieto generale</strong> con deroghe tassative che richiedono in genere il <strong>consenso esplicito</strong> o altra condizione qualificata.</li>
+<li>Il <strong>principio di responsabilizzazione</strong> (<em>accountability</em>) impone al Titolare non solo di rispettare i principi dell'art. 5 GDPR (liceità, minimizzazione, esattezza, limitazione della conservazione, integrità/riservatezza) ma di <strong>saperlo dimostrare</strong>, attraverso misure di sicurezza adeguate, registri delle attività, DPIA ove necessaria e, in certi casi, nomina del DPO.</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

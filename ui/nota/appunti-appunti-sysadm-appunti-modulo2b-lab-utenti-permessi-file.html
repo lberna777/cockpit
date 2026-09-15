@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_modulo2B_lab_utenti_permessi_file.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_modulo2B_lab_utenti_permessi_file.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SYSADM/appunti_modulo2B_lab_utenti_permessi_file.md">Apri il file originale</a></p>
+<article class="prosa"><pre><code># Appunti — LAB Utenti, Permessi e File
+</code></pre>
+<p><strong>Modulo</strong>: 2B | <strong>Corso</strong>: Lab Amministrazione di Sistemi T</p>
+<hr />
+<h2 id="file-di-configurazione-utenti">File di configurazione utenti</h2>
+<p><strong>/etc/skel</strong> — scheletro della home. Quando <code>useradd -m</code> crea la home di un nuovo utente, copia al suo interno tutto il contenuto di questa directory. È il punto in cui aggiungere file che ogni nuovo utente deve avere per default (<code>.bashrc</code> preconfigurato, <code>.vimrc</code>, ecc.).</p>
+<p><strong>/etc/default/useradd</strong> — valori di default per <code>useradd</code> quando non vengono passate opzioni esplicite. Qui è definita, ad esempio, la shell di default (spesso <code>sh</code>, ecco perché bisogna sempre passare <code>-s /bin/bash</code> a mano).</p>
+<p><strong>/etc/login.defs</strong> — configurazione più bassa: policy globali di sistema. Contiene le regole su scadenza password, intervallo UID per gli utenti fisici (1000–60000), umask di default.</p>
+<hr />
+<h2 id="directory-collaborativa-con-sgid">Directory collaborativa con SGID</h2>
+<h3 id="perche-i-nuovi-utenti-hanno-uid-1004-e-1005">Perché i nuovi utenti hanno UID 1004 e 1005?</h3>
+<p>Gli UID vengono assegnati in incremento e <strong>non si riutilizzano automaticamente</strong>. Se hai creato e poi eliminato utenti con UID 1001, 1002, 1003, quei numeri rimangono "usati" nella storia del sistema. I prossimi utenti creati prendono il primo UID libero a partire dall'ultimo assegnato. È un comportamento intenzionale: evita che un nuovo utente erediti per sbaglio i permessi di uno vecchio su file rimasti nel filesystem.</p>
+<h3 id="sotto-quale-utente-viene-creata-la-directory">Sotto quale utente viene creata la directory?</h3>
+<pre><code class="language-bash">sudo mkdir /home/programmatori
+</code></pre>
+<p><code>sudo</code> esegue come <code>root</code>. La directory viene quindi creata con <code>root</code> come proprietario. Non è vagrant — è root. Puoi verificarlo con <code>ls -la /home/</code> che mostrerà <code>root root</code> come owner:group prima del passo successivo.</p>
+<h3 id="cosa-fa-chgrp-programmatori-homeprogrammatori">Cosa fa <code>chgrp programmatori /home/programmatori</code>?</h3>
+<p>Cambia il <strong>gruppo proprietario</strong> della directory. Dopo questo comando la directory ha <code>root</code> come utente proprietario e <code>programmatori</code> come gruppo proprietario. È questo che permette ai membri del gruppo di entrarci — i permessi del blocco "group" si applicano a tutti i membri di <code>programmatori</code>.</p>
+<h3 id="cose-bashrc">Cos'è <code>.bashrc</code>?</h3>
+<p><code>.bashrc</code> è uno script che Bash esegue automaticamente ogni volta che apri una nuova sessione interattiva (ogni <code>su - nome</code>, ogni nuovo terminale). Contiene configurazioni personali dell'utente: alias, variabili d'ambiente, e — nel nostro caso — la umask. Il punto iniziale del nome (<code>.bashrc</code>) lo rende un file nascosto — non compare in <code>ls</code>, solo in <code>ls -a</code>.</p>
+<h3 id="cose-umask-e-perche-serve">Cos'è <code>umask</code> e perché serve?</h3>
+<p>Quando crei un file, Linux parte da un massimo teorico e <strong>sottrae</strong> la umask per calcolare i permessi effettivi:</p>
+<ul>
+<li>File: massimo <code>666</code> (rw-rw-rw-) − umask <code>0002</code> = <code>664</code> (rw-rw-r--)</li>
+<li>Directory: massimo <code>777</code> (rwxrwxrwx) − umask <code>0002</code> = <code>775</code> (rwxrwxr-x)</li>
+</ul>
+<p>Con la umask di default <code>0022</code> i file vengono creati con permessi <code>644</code> (rw-r--r--): il gruppo può solo leggere, non scrivere. Per la collaborazione serve che il gruppo possa scrivere, quindi si usa <code>0002</code> che rimuove solo la scrittura agli "others".</p>
+<p>Senza questa modifica, maria creerebbe un file con permessi <code>644</code> e piero non potrebbe modificarlo anche essendo nel gruppo <code>programmatori</code>.</p>
+<h3 id="cosa-fa-sudo-tee-a">Cosa fa <code>sudo tee -a</code>?</h3>
+<p>Il problema: non puoi fare <code>sudo echo "..." &gt;&gt; /home/maria/.bashrc</code> perché il redirect <code>&gt;&gt;</code> viene gestito dalla shell dell'utente corrente (vagrant), non da sudo — quindi non ha i permessi per scrivere nella home di maria.</p>
+<p>La soluzione è <code>tee</code>: è un comando che legge da stdin e scrive su file. Passandogli <code>sudo</code>, è <code>tee</code> (con privilegi root) a aprire il file, non la shell.</p>
+<pre><code class="language-bash">echo &quot;umask 0002&quot; | sudo tee -a /home/maria/.bashrc
+#                        ^^^^^
+#                        tee apre il file come root
+#        ^^^^^^^^^^^^^^^
+#        la stringa arriva via pipe a tee
+</code></pre>
+<p><code>-a</code> sta per <strong>append</strong> — aggiunge in fondo senza sovrascrivere il contenuto esistente del <code>.bashrc</code>.</p>
+<h3 id="perche-chmod-02770-ha-quattro-cifre">Perché <code>chmod 02770</code> ha quattro cifre?</h3>
+<p>I permessi in ottale sono sempre <strong>quattro cifre</strong>, non tre. La prima cifra (quella davanti) codifica i <strong>bit speciali</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Prima cifra</th>
+<th>Effetto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Nessun bit speciale (default implicito nelle forme a 3 cifre)</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>Sticky bit</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><strong>SGID</strong></td>
+</tr>
+<tr>
+<td><code>4</code></td>
+<td>SUID</td>
+</tr>
+</tbody>
+</table>
+<p><code>02770</code> = SGID (<code>2</code>) + rwxrwx--- (<code>770</code>).</p>
+<p>Quando scrivi <code>chmod 770</code> stai implicitamente scrivendo <code>chmod 0770</code> — la prima cifra zero viene omessa perché nessun bit speciale è attivo.</p>
+<h3 id="perche-il-sgid-e-indispensabile">Perché il SGID è indispensabile?</h3>
+<p>Senza SGID sulla directory, quando maria crea un file il gruppo proprietario del file è <code>maria</code> (il suo gruppo primario). Piero non è nel gruppo <code>maria</code> — cadrebbe nel blocco "others" che ha <code>---</code>. Non potrebbe né leggere né scrivere.</p>
+<p>Con SGID attivo sulla directory, il file viene creato con gruppo <code>programmatori</code> invece del gruppo primario di maria. Piero è in <code>programmatori</code> e quindi può accedervi.</p>
+<pre><code>Senza SGID: maria crea file → gruppo = maria    → piero: others → ---
+Con SGID:   maria crea file → gruppo = programmatori → piero: group → rw-
+</code></pre>
+<h3 id="i-quattro-meccanismi-che-cooperano">I quattro meccanismi che cooperano</h3>
+<table>
+<thead>
+<tr>
+<th>Meccanismo</th>
+<th>Perché serve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gruppo <code>programmatori</code></td>
+<td>Definisce chi appartiene alla "squadra"</td>
+</tr>
+<tr>
+<td><code>chmod 02770</code></td>
+<td>SGID attivo + solo owner e group possono accedere alla directory</td>
+</tr>
+<tr>
+<td>SGID sulla directory</td>
+<td>I file creati dentro ereditano il gruppo <code>programmatori</code> automaticamente</td>
+</tr>
+<tr>
+<td><code>umask 0002</code> nel <code>.bashrc</code></td>
+<td>I nuovi file hanno permessi <code>664</code> — il gruppo può scrivere, non solo leggere</td>
+</tr>
+</tbody>
+</table>
+<p>Togliere uno solo di questi quattro elementi rompe la collaborazione.</p>
+<h3 id="risultato-del-test">Risultato del test</h3>
+<pre><code>-rw-rw-r-- 1 maria programmatori ...  file_di_maria.txt
+</code></pre>
+<p>Il gruppo <code>programmatori</code> (non <code>maria</code>) comparso automaticamente sul file è la prova che SGID funziona. Piero può leggere e scrivere perché:
+1. è nel gruppo <code>programmatori</code>
+2. i permessi del blocco group sono <code>rw-</code>
+3. quei permessi si applicano a lui perché il gruppo del file è <code>programmatori</code></p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo2B]]</li>
+<li>[[guida_lab_modulo2B_lab_utenti_permessi_file]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

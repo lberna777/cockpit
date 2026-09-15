@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PIANO_ULTIMO_GIORNO.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">PIANO_ULTIMO_GIORNO.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/PIANO_ULTIMO_GIORNO.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="piano-ultimo-giorno-16072026">PIANO ULTIMO GIORNO — 16/07/2026</h1>
+<blockquote>
+<p>Esame: <strong>Laboratorio di Sicurezza Informatica T — 17/07/2026, ore 14:00.</strong>
+Questo è l'unico documento decisionale per domani. Leggilo per primo, poi esegui.
+Prova doppia, stessa seduta, <strong>entrambe devono essere sufficienti</strong>: quiz teorico 40% (45 min,
+niente materiale, penalità sulle sbagliate) + prova pratica 60% (2h, materiale consentito → la
+chiavetta con questa cartella).</p>
+</blockquote>
+<hr />
+<h2 id="1-fotografia-onesta-dello-stato">1. Fotografia onesta dello stato</h2>
+<h3 id="prova-pratica-60-le-5-tipologie">Prova pratica (60%) — le 5 tipologie</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Tipologia</th>
+<th>Stato reale</th>
+<th>Giudizio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S3</td>
+<td>Web vulnerabilities</td>
+<td>Lab completo su VM (sessione 41). Ma nel pool solo <strong>XSS riflesso</strong> è risolto per intero; SQLi, path traversal/LFI sono solo accennati, senza modello svolto. Nessun <code>guida_esame</code>/<code>procedura</code>.</td>
+<td><strong>DA RIFINIRE</strong></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>Binary exploitation</td>
+<td>Il più solido: <strong>4 esercizi hands-on annotati</strong> (write_var, secret_function, remoto, returnlib shellcode+SUID, ret2libc) + modello pool. DRILL 12/02/2026 (il più recente) non ancora fatto.</td>
+<td><strong>PRONTA</strong></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>Iptables/NFTables</td>
+<td>Kit completo appena costruito e auditato (guida_esame + procedura + modello 7/7 + 2 template). Ma: Es1-2 su VM + <strong>1 solo</strong> esercizio pool risolto a mano (13/06/2024). Kit <strong>mai stress-testato</strong> su un secondo caso in autonomia.</td>
+<td><strong>DA RIFINIRE (il più fragile)</strong></td>
+</tr>
+<tr>
+<td>S10</td>
+<td>Network Intrusion Detection</td>
+<td>3 esercizi reali hands-on, kit maturo rivisto più volte. Nessuna teoria formale (scelta deliberata). ARP scoperto hands-on.</td>
+<td><strong>PRONTA</strong></td>
+</tr>
+<tr>
+<td>S11</td>
+<td>Integrity/privesc</td>
+<td>Kit auditato "autosufficiente ad alta confidenza", <strong>3/9 varianti</strong> pool hands-on. Cracking password (rockyou) e alcune varianti non ancora praticate.</td>
+<td><strong>PRONTA (rifinibile)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>La prova pratica è la parte messa <strong>bene</strong>. Con la chiavetta e questi kit, sei attrezzato per tutte e 5.</p>
+<h3 id="quiz-teorico-40-qui-e-il-problema-vero">Quiz teorico (40%) — QUI È IL PROBLEMA VERO</h3>
+<p>Il quiz copre <strong>tutto il programma</strong> (15 moduli S1-S15), inclusi i comandi visti in lab. Stato copertura teorica formale (lezione + appunti):</p>
+<ul>
+<li><strong>Coperti</strong>: S1, S2, S3, S4, S5 (5 moduli) — ma il ripasso è <strong>scaduto</strong> (vedi §2).</li>
+<li><strong>Solo pratica, zero teoria formale</strong>: S10, S11.</li>
+<li><strong>MAI COPERTI, zero materiale</strong>: <strong>S6, S7, S8, S9, S12, S13, S14, S15 → 8 moduli su 15 (~53% del programma).</strong></li>
+</ul>
+<p>Cosa significa in numeri: se le 30-40 domande sono distribuite sul programma, <strong>grossomodo metà del quiz</strong> cade su moduli mai studiati formalmente (crypto/TLS S12-S15, sicurezza fisica/cloud S6, backdoor S7, filtraggio attacchi S8, PAM/demoni S9). Con la <strong>penalità sulle risposte sbagliate</strong>, tirare a indovinare alla cieca ha valore atteso negativo.</p>
+<p><strong>Questo è il rischio dominante e finora il più trascurato.</strong> La prova pratica può andare benissimo e l'esame fallire comunque sul 40% teorico. Domani il baricentro dello studio va spostato qui.</p>
+<hr />
+<h2 id="2-il-vincolo-di-tempo-leggi-cosa-e-impossibile">2. Il vincolo di tempo (leggi: cosa è impossibile)</h2>
+<p><strong>Assunzione</strong> (esplicita, non un dato certo): domani è una giornata di studio piena, stimo <strong>~8-10h effettive</strong>. Regola su questa cifra ma non contarci al minuto.</p>
+<p>Cosa è <strong>matematicamente impossibile</strong> in un giorno, accettalo subito:
+- Costruire lezioni solide da zero per 8 moduli mai visti. Non si fa. Al massimo <strong>infarinatura</strong>: leggere per riconoscere vero/falso, non per padroneggiare.
+- Praticare hands-on tutte le varianti pool mancanti di S5/S11 + il DRILL S4 + il ripasso di tutto. Devi scegliere.
+- Colmare il gap teorico degli 8 moduli fino a "sicurezza". Puntiamo a <strong>ridurre il danno</strong>, non ad azzerarlo.</p>
+<p>Il ripasso pratico è <strong>scaduto</strong> su tutto ciò che è forte (fonte <code>tracker_ripasso.md</code>):
+- <strong>S3 🔴</strong> (mai ripassato dal 26/06), <strong>S4 🔴</strong> (mai dal 02/07), <strong>S1 🔴 / S2 🔴</strong> (teoria, scaduti da fine giugno), <strong>S10</strong> scade proprio il 16/07.
+- Rischio concreto: <strong>perdere punti facili</strong> su roba che sai, solo perché non l'hai rivista.</p>
+<hr />
+<h2 id="3-allocazione-del-tempo-per-domani-in-ordine-di-priorita">3. Allocazione del tempo per domani (in ordine di priorità)</h2>
+<p>Priorità dichiarata: <strong>il collo di bottiglia è il quiz teorico, non la pratica.</strong> Non sovra-investire su S4/S10/S11 che sono già forti. La sequenza sotto è pensata per massimizzare i punti recuperabili.</p>
+<h3 id="blocco-1-infarinatura-teorica-8-moduli-scoperti-3h-priorita-massima">🟥 BLOCCO 1 — Infarinatura teorica 8 moduli scoperti (~3h) — PRIORITÀ MASSIMA</h3>
+<p>Obiettivo: passare da "0%" a "riconosco vero/falso" sugli 8 moduli mai visti. <strong>Non</strong> appunti, <strong>non</strong> lezioni: scrematura mirata.
+- Fonti: PDF in <code>SLIDE TEORIA/SICINF/</code> (leggi solo titoli, definizioni in grassetto, schemi riassuntivi) + <code>glossario_sysadm.md</code> (nel pacchetto, blocco <code>00_trasversale</code>).
+- ~20 min a modulo. Ordine consigliato per resa:
+  1. <strong>S9 (PAM/demoni/autorizzazione), S7 (backdoor), S8 (filtrare attacchi)</strong> — vicini al lab, alta probabilità di domande su comandi/concetti già sfiorati in S10/S11.
+  2. <strong>S12, S13, S14, S15 (comunicazioni, TLS/OpenSSL, crittografia, gpg)</strong> — concetti definitori (simmetrico vs asimmetrico, hash, rainbow table, handshake TLS, firma): rendono molto nel formato vero/falso.
+  3. <strong>S6 (sicurezza fisica e cloud)</strong> — per ultimo, spesso domande a buon senso.
+- Per ognuno annota 3-5 fatti-chiave su un foglio (per rinfrescarli prima delle 14:00). Non serve capire tutto: serve sapere quando un'affermazione è falsa.</p>
+<h3 id="blocco-2-ripasso-attivo-del-gia-forte-2h-non-perdere-punti-facili">🟧 BLOCCO 2 — Ripasso attivo del già-forte (~2h) — non perdere punti facili</h3>
+<p>Ripasso = <strong>rispondere a domande senza guardare</strong>, non rileggere.
+- <strong>S3, S4, S10</strong>: rivedi <code>guida_esame_*</code>/<code>modello_*</code> (S10 e i modelli S3/S4 nel pacchetto), poi chiuditi il file e ripeti a voce il procedimento. S4 e S10 bastano 20-30 min l'uno.
+- <strong>S1, S2</strong>: teoria scaduta e rilevante al quiz (enumerazione/nmap, autenticazione) — 20 min di scrematura appunti a testa.</p>
+<h3 id="blocco-3-consolidare-s5-il-kit-piu-fragile-15-2h">🟨 BLOCCO 3 — Consolidare S5, il kit più fragile (~1.5-2h)</h3>
+<ul>
+<li>Rileggi <code>guida_esame_iptables.md</code> + <code>procedura_operativa_iptables.md</code> + i due <code>template_ipt-*</code>.</li>
+<li><strong>Valore marginale più alto della giornata sul lato pratica</strong>: risolvi <strong>a mano</strong> un secondo caso pool diverso dal 13/06/2024 — consigliato <strong>8 feb 2024 (solo Router)</strong> perché più semplice e stress-testa il kit senza costarti troppo. Se il tempo stringe, salta l'esercizio e limitati alla rilettura: il kit c'è.</li>
+</ul>
+<h3 id="blocco-4-rifinitura-s11-45-min-solo-se-in-orario">🟩 BLOCCO 4 — Rifinitura S11 (~45 min, solo se in orario)</h3>
+<ul>
+<li>Rileggi <code>guida_esame_privesc.md</code>. Se hai energia, prova <strong>l'unico vettore non ancora praticato ad alto rendimento</strong>: cracking di una password in <code>/etc/shadow</code> con <code>john</code>/<code>rockyou</code> (la nota rockyou.txt gzippata è già nel kit). Un solo giro, non di più.</li>
+</ul>
+<h3 id="blocco-5-logistica-stop-45-min-la-sera">⬜ BLOCCO 5 — Logistica + stop (~45 min, la sera)</h3>
+<p>Vedi checklist §4. <strong>Poi smetti e dormi.</strong> Sei arrivato stanco da sessione 52: un cervello riposato al quiz vale più di un'ora extra stanotte.</p>
+<blockquote>
+<p><strong>Se la giornata è più corta del previsto</strong>: taglia nell'ordine BLOCCO 4 → esercizio pratico del BLOCCO 3 → S1/S2 del BLOCCO 2. <strong>Non tagliare mai il BLOCCO 1</strong>: è dove si gioca la sufficienza del 40%.</p>
+</blockquote>
+<hr />
+<h2 id="4-checklist-mattina-1707-prima-delle-1400">4. Checklist mattina 17/07 (prima delle 14:00)</h2>
+<p><strong>Chiavetta / materiale pratico (per il 60%)</strong>
+- [ ] Copiata <code>~/esame_security_17-07/</code> <strong>intera</strong> su chiavetta USB.
+- [ ] <strong>Verificata su un PC diverso</strong>: infila la chiavetta e apri almeno un <code>.md</code> (es. <code>03_iptables_nftables/guida_esame_iptables.md</code>) per confermare che si legga davvero. Una chiavetta che non monta all'esame = 60% perso.
+- [ ] I <code>.md</code> si leggono anche senza tool: sono testo puro. Se hai dubbi sull'aula, considera una seconda copia (secondo USB o file leggibili).</p>
+<p><strong>VM (per il 60%)</strong>
+- [ ] <strong>Snapshot pulito</strong> pronto e verificato che <strong>parta</strong> (VirtualBox). Ricorda i residui da sessioni precedenti (utente <code>toor</code>, SUID su <code>cp</code>, banner <code>nftlab.sh</code>): parti da uno snapshot senza queste tracce.
+- [ ] Comando di revert a portata: <code>VBoxManage snapshot &lt;vm&gt; restore &lt;nome&gt;</code> (la GUI è ambigua — vedi <code>00_trasversale/troubleshooting_vm.md</code>, sezioni AIDE + Snapshot).
+- [ ] Clipboard Guest Additions funzionante (fix noto in <code>troubleshooting_vm.md</code>).
+- [ ] <strong>AIDE non è preinstallato</strong> sulla VM privesc: se serve, <code>sudo apt install aide</code> (annotato nel troubleshooting).
+- [ ] Cattura i deliverable <strong>sull'host in tempo reale</strong> durante l'esercizio (screenshot + <code>integrity.txt</code>/<code>web.txt</code>/<code>bof.txt</code> via via), <strong>mai</strong> lasciarli solo dentro la VM: un revert li cancella (lezione di sessione 51).</p>
+<p><strong>Quiz teorico (per il 40%)</strong>
+- [ ] Niente materiale: la teoria dev'essere <strong>in testa</strong>. Rileggi il foglio dei fatti-chiave del BLOCCO 1 poco prima.
+- [ ] <strong>Conferma la regola esatta della penalità</strong> (quanto toglie una sbagliata, se l'omessa vale 0). Strategia: rispondi dove hai confidenza ragionevole; sui moduli-infarinatura, <strong>lascia in bianco</strong> se sei nel buio totale e la penalità sulle sbagliate è pesante — meglio 0 che negativo.</p>
+<p><strong>Generale</strong>
+- [ ] Controlla aula e orario, arriva presto.
+- [ ] Documento d'identità / credenziali richieste.</p>
+<hr />
+<h2 id="5-rischi-residui-accettati-per-mancanza-di-tempo-messi-in-chiaro-non-sorvolati">5. Rischi residui (accettati per mancanza di tempo — messi in chiaro, non sorvolati)</h2>
+<ol>
+<li><strong>8 moduli teorici resteranno a livello infarinatura.</strong> Sul quiz, su questi ti affidi a riconoscimento + eliminazione, con la penalità gestita col bianco strategico. Impossibile di più in un giorno: è un rischio accettato, non un errore da correggere.</li>
+<li><strong>Kit S5 non stress-testato a sufficienza.</strong> Se all'esame esce una topologia pool mai vista, ti appoggi a <code>procedura_operativa_iptables.md</code> §0.5 (da dove viene ogni pezzo di una regola) e ai template. Il secondo esercizio del BLOCCO 3 serve proprio a ridurre questo rischio.</li>
+<li><strong>S3 pool sottile.</strong> Se esce SQL injection o path traversal invece di XSS, non hai un modello risolto: ti appoggi a <code>guida_lab_moduloS3_web_security.md</code> (hai già fatto il lab) e al ragionamento sul meccanismo. Rischio medio.</li>
+<li><strong>Stanchezza.</strong> Sei arrivato provato. Il piano è volutamente sostenibile e chiude presto la sera: rispettalo.</li>
+</ol>
+<p><strong>In una riga</strong>: la pratica è pronta, il quiz teorico è il fronte scoperto — domani il tempo va speso lì più che a lucidare ciò che già brilla.</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>es_01_conta_estensioni.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  esercizio · LAS</p>
+<h1 class="titolo-pagina">es_01_conta_estensioni.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/esercizi/SYSADM/es_01_conta_estensioni.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="esercizio-01-conta-estensioni-top-5">Esercizio 01 — Conta Estensioni (Top 5)</h1>
+<p><strong>Modulo</strong>: 0B — Pipe, Redirect e Filtri<br />
+<strong>Data</strong>: 2026-05-11<br />
+<strong>Difficoltà</strong>: intermedio</p>
+<hr />
+<h2 id="obiettivo">Obiettivo</h2>
+<p>Dato un direttorio (con sottodirettori), contare quante volte appare ciascuna estensione di file e mostrare le 5 più frequenti.</p>
+<p><strong>Definizione di estensione</strong>: la stringa che segue l'<strong>ultimo</strong> carattere punto nel nome del file.<br />
+Esempio: <code>my.example.c</code> → estensione <code>c</code> (non <code>example</code>).</p>
+<p><strong>Comandi da usare</strong>: <code>ls -R</code>, <code>rev</code>, <code>cut</code>, <code>grep</code>, <code>sort</code>, <code>uniq</code>, <code>head</code></p>
+<hr />
+<h2 id="pipeline-finale">Pipeline Finale</h2>
+<pre><code class="language-bash">ls -R 2&gt;/dev/null | grep -v ':$' | grep -v '^$' | grep '\.' | rev | cut -d'.' -f1 | rev | sort | uniq -c | sort -rn | head -5
+</code></pre>
+<hr />
+<h2 id="spiegazione-passo-per-passo">Spiegazione Passo per Passo</h2>
+<h3 id="1-ls-r-2devnull">1. <code>ls -R 2&gt;/dev/null</code></h3>
+<p><code>ls -R</code> lista ricorsivamente tutti i file nelle sottodirectory.<br />
+Quando l'output è piped (non va a terminale), <code>ls</code> mette un file per riga invece di formattarli in colonne.<br />
+<code>2&gt;/dev/null</code> redirige lo <strong>stderr</strong> (file descriptor 2) verso <code>/dev/null</code> (il cestino del sistema), eliminando i messaggi "Permission denied" che appaiono sulle directory non accessibili. Senza questo redirect, gli errori si mischiano all'output e falsano i conteggi.</p>
+<p>Output esempio:</p>
+<pre><code>.:
+data.txt
+my.example.c
+src
+
+./src:
+hw.c
+hw.h
+</code></pre>
+<h3 id="2-grep-v">2. <code>grep -v ':$'</code></h3>
+<p>Rimuove le <strong>intestazioni delle directory</strong> — le righe che <code>ls -R</code> stampa per indicare in quale cartella si trova (es. <code>./src:</code>).<br />
+Queste righe si riconoscono perché finiscono con <code>:</code>.</p>
+<ul>
+<li><code>$</code> è un'<strong>ancora di fine riga</strong>: il pattern <code>:$</code> significa "due punti nell'ultima posizione".</li>
+<li><code>-v</code> inverte la selezione: passa solo le righe che <strong>non</strong> corrispondono al pattern.</li>
+</ul>
+<p>Senza questo filtro anche <code>./src:</code> verrebbe trattata come un "file" con estensione <code>src:</code>.</p>
+<h3 id="3-grep-v">3. <code>grep -v '^$'</code></h3>
+<p>Rimuove le <strong>righe vuote</strong> che <code>ls -R</code> inserisce come separatore tra una directory e la successiva.</p>
+<ul>
+<li><code>^</code> è un'<strong>ancora di inizio riga</strong>.</li>
+<li><code>^$</code> = inizio riga immediatamente seguito da fine riga = riga vuota.</li>
+</ul>
+<h3 id="4-grep">4. <code>grep '\.'</code></h3>
+<p>Mantiene solo le righe che contengono un punto — cioè i file che hanno un'estensione.<br />
+Elimina automaticamente i nomi di directory (es. <code>src</code>) che non hanno estensione.</p>
+<p>Il <code>\.</code> usa il backslash per rendere il punto <strong>letterale</strong>: in regex, <code>.</code> senza backslash significa "qualsiasi carattere". Con <code>\.</code> cerchiamo proprio il carattere punto.</p>
+<h3 id="5-rev">5. <code>rev</code></h3>
+<p>Rovescia ogni riga carattere per carattere.</p>
+<pre><code>my.example.c  →  c.elpmaxe.ym
+data.txt      →  txt.atad
+hw.c          →  c.wh
+</code></pre>
+<p>L'obiettivo è portare l'estensione (la parte dopo l'<strong>ultimo</strong> punto) in <strong>prima posizione</strong>, così il passo successivo può usare <code>cut</code> che lavora dal primo campo.</p>
+<h3 id="6-cut-d-f1">6. <code>cut -d'.' -f1</code></h3>
+<p>Taglia la riga usando il punto come delimitatore (<code>-d'.'</code>) e prende il <strong>primo campo</strong> (<code>-f1</code>), cioè tutto quello che precede il primo punto.</p>
+<p>Dopo il <code>rev</code> del passo precedente, il primo campo è proprio l'estensione rovesciata:</p>
+<pre><code>c.elpmaxe.ym  →  c
+txt.atad      →  txt
+c.wh          →  c
+</code></pre>
+<h3 id="7-rev-secondo">7. <code>rev</code> (secondo)</h3>
+<p>Rovescia di nuovo per rimettere le stringhe nel verso corretto. In questo caso le estensioni sono già brevi e simmetriche (<code>c</code>, <code>txt</code>, <code>h</code>) ma il doppio <code>rev</code> è necessario per correttezza generale (es. un'estensione come <code>html</code> diventerebbe <code>lmth</code> senza di esso).</p>
+<p>A questo punto l'output è una lista di estensioni, una per riga:</p>
+<pre><code>txt
+c
+c
+h
+</code></pre>
+<h3 id="8-sort">8. <code>sort</code></h3>
+<p>Ordina le righe alfabeticamente. Serve perché il passo successivo (<code>uniq -c</code>) conta solo righe <strong>consecutive</strong> uguali. Senza <code>sort</code>, due occorrenze di <code>c</code> separate da <code>txt</code> verrebbero contate come <code>1 c</code>, <code>1 c</code> invece di <code>2 c</code>.</p>
+<pre><code>c
+c
+h
+txt
+</code></pre>
+<h3 id="9-uniq-c">9. <code>uniq -c</code></h3>
+<p>Conta le occorrenze consecutive uguali e le prefissa con il conteggio:</p>
+<pre><code>      2 c
+      1 h
+      1 txt
+</code></pre>
+<h3 id="10-sort-rn">10. <code>sort -rn</code></h3>
+<p>Secondo <code>sort</code>, questa volta per <strong>ordinare i risultati per frequenza</strong>:
+- <code>-n</code>: ordine <strong>numerico</strong> (senza, <code>10</code> verrebbe prima di <code>2</code> perché <code>1</code> &lt; <code>2</code> in ordine lessicografico)
+- <code>-r</code>: ordine <strong>inverso</strong> (decrescente) — la più frequente per prima</p>
+<pre><code>      2 c
+      1 txt
+      1 h
+</code></pre>
+<h3 id="11-head-5">11. <code>head -5</code></h3>
+<p>Mostra solo le prime 5 righe — le 5 estensioni più comuni.</p>
+<hr />
+<h2 id="setup-per-il-test">Setup per il Test</h2>
+<pre><code class="language-bash">mkdir -p ~/test_ext/src
+touch ~/test_ext/data.txt ~/test_ext/my.example.c
+touch ~/test_ext/src/hw.c ~/test_ext/src/hw.h
+cd ~/test_ext
+</code></pre>
+<p>Output atteso:</p>
+<pre><code>      2 c
+      1 txt
+      1 h
+</code></pre>
+<hr />
+<h2 id="variante-dalla-root-del-sistema">Variante: dalla root del sistema</h2>
+<pre><code class="language-bash">cd /
+ls -R 2&gt;/dev/null | grep -v ':$' | grep -v '^$' | grep '\.' | rev | cut -d'.' -f1 | rev | sort | uniq -c | sort -rn | head -5
+</code></pre>
+<p>Il risultato varia in base ai pacchetti installati sulla VM. Il <code>2&gt;/dev/null</code> è necessario perché da <code>/</code> ci sono directory non accessibili all'utente normale.</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

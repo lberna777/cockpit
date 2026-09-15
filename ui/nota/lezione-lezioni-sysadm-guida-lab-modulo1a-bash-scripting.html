@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_lab_modulo1A_bash_scripting.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">guida_lab_modulo1A_bash_scripting.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/guida_lab_modulo1A_bash_scripting.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modulo-1a-variabili-condizioni-loop-bash">Modulo 1A — Variabili, Condizioni, Loop Bash</h1>
+<p><strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Prerequisito</strong>: Moduli 0A e 0B completati<br />
+<strong>VM</strong>: <code>cd ~/sysAdmin-lab &amp;&amp; vagrant up --provider=virtualbox &amp;&amp; vagrant ssh</code></p>
+<hr />
+<h2 id="cose-uno-script-bash">Cos'è uno script Bash</h2>
+<p>Finora hai usato i comandi uno alla volta nel terminale. Uno script Bash è semplicemente un file di testo che contiene una sequenza di comandi — la shell li esegue in ordine, uno dopo l'altro, come se li stessi digitando tu.</p>
+<p>Questo è il punto di partenza dell'automazione: invece di ripetere 20 comandi ogni volta, scrivi lo script una volta e lo esegui quando serve.</p>
+<hr />
+<h2 id="parte-1-il-primo-script">Parte 1 — Il primo script</h2>
+<h3 id="11-creare-la-directory-di-lavoro">1.1 Creare la directory di lavoro</h3>
+<pre><code class="language-bash">mkdir ~/lab1A &amp;&amp; cd ~/lab1A
+</code></pre>
+<h3 id="12-creare-ed-eseguire-il-primo-script">1.2 Creare ed eseguire il primo script</h3>
+<pre><code class="language-bash">cat &gt; saluto.sh &lt;&lt; 'EOF'
+#!/bin/bash
+echo &quot;Ciao, sono uno script Bash&quot;
+echo &quot;La data di oggi è: $(date)&quot;
+echo &quot;Sono l'utente: $(whoami)&quot;
+EOF
+</code></pre>
+<p>La prima riga <code>#!/bin/bash</code> si chiama <strong>shebang</strong>: dice al sistema operativo quale interprete usare per eseguire questo file. Senza di essa il sistema non saprebbe che è uno script Bash.</p>
+<p>Rendi lo script eseguibile e lancialo:</p>
+<pre><code class="language-bash">chmod +x saluto.sh
+./saluto.sh
+</code></pre>
+<p><strong>Output atteso</strong>: tre righe con il messaggio, la data corrente e il nome utente.</p>
+<p>Nota: <code>$(comando)</code> è la sintassi per la <strong>command substitution</strong> — il risultato del comando viene inserito inline nella stringa. <code>$(date)</code> esegue <code>date</code> e inserisce il suo output lì.</p>
+<hr />
+<h2 id="parte-2-variabili">Parte 2 — Variabili</h2>
+<h3 id="21-assegnare-e-leggere-variabili">2.1 Assegnare e leggere variabili</h3>
+<pre><code class="language-bash">cat &gt; variabili.sh &lt;&lt; 'EOF'
+#!/bin/bash
+NOME=&quot;vagrant&quot;
+ETA=25
+SALUTO=&quot;Benvenuto&quot;
+
+echo &quot;$SALUTO, $NOME!&quot;
+echo &quot;Hai $ETA anni.&quot;
+echo &quot;Il nome ha ${#NOME} caratteri.&quot;
+EOF
+chmod +x variabili.sh
+./variabili.sh
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>Benvenuto, vagrant!
+Hai 25 anni.
+Il nome ha 7 caratteri.
+</code></pre>
+<p>Regole fondamentali sulle variabili:
+- Assegnazione: <code>VARIABILE=valore</code> — <strong>senza spazi</strong> intorno a <code>=</code>
+- Lettura: <code>$VARIABILE</code> oppure <code>${VARIABILE}</code> (le graffe sono necessarie in contesti ambigui)
+- <code>${#VARIABILE}</code> restituisce la lunghezza della stringa
+- Per convenzione le variabili in Bash si scrivono in MAIUSCOLO</p>
+<hr />
+<h3 id="22-variabili-speciali">2.2 Variabili speciali</h3>
+<pre><code class="language-bash">cat &gt; argomenti.sh &lt;&lt; 'EOF'
+#!/bin/bash
+echo &quot;Nome dello script: $0&quot;
+echo &quot;Primo argomento: $1&quot;
+echo &quot;Secondo argomento: $2&quot;
+echo &quot;Numero di argomenti: $#&quot;
+echo &quot;Tutti gli argomenti: $@&quot;
+EOF
+chmod +x argomenti.sh
+./argomenti.sh ciao mondo
+</code></pre>
+<p><strong>Output atteso</strong>:</p>
+<pre><code>Nome dello script: ./argomenti.sh
+Primo argomento: ciao
+Secondo argomento: mondo
+Numero di argomenti: 2
+Tutti gli argomenti: ciao mondo
+</code></pre>
+<p>Queste variabili speciali (<code>$0</code>, <code>$1</code>, <code>$#</code>, <code>$@</code>) sono fondamentali: permettono agli script di ricevere input dall'esterno senza hardcodare i valori.</p>
+<hr />
+<h3 id="23-variabili-dambiente">2.3 Variabili d'ambiente</h3>
+<p>Alcune variabili esistono già nel sistema senza doverle definire:</p>
+<pre><code class="language-bash">echo $HOME
+echo $USER
+echo $PATH
+echo $SHELL
+</code></pre>
+<p><code>$PATH</code> è particolarmente importante: è la lista di directory in cui la shell cerca i programmi quando digiti un comando. Quando scrivi <code>ls</code>, la shell cerca <code>ls</code> in ogni directory elencata in <code>$PATH</code>.</p>
+<hr />
+<h2 id="parte-3-condizioni">Parte 3 — Condizioni</h2>
+<h3 id="31-struttura-ifthenelse">3.1 Struttura if/then/else</h3>
+<pre><code class="language-bash">cat &gt; controllo_numero.sh &lt;&lt; 'EOF'
+#!/bin/bash
+NUMERO=10
+
+if [ $NUMERO -gt 5 ]; then
+    echo &quot;$NUMERO è maggiore di 5&quot;
+else
+    echo &quot;$NUMERO non è maggiore di 5&quot;
+fi
+EOF
+chmod +x controllo_numero.sh
+./controllo_numero.sh
+</code></pre>
+<p><strong>Output atteso</strong>: <code>10 è maggiore di 5</code></p>
+<p>La struttura è:</p>
+<pre><code class="language-bash">if [ condizione ]; then
+    # comandi se vero
+elif [ altra_condizione ]; then
+    # comandi se altra condizione vera
+else
+    # comandi se tutto falso
+fi
+</code></pre>
+<p><code>fi</code> chiude il blocco <code>if</code> (è "if" al contrario — convenzione Bash).</p>
+<hr />
+<h3 id="32-operatori-di-confronto">3.2 Operatori di confronto</h3>
+<p>Per i <strong>numeri</strong> si usano flag letterali:</p>
+<table>
+<thead>
+<tr>
+<th>Operatore</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-eq</code></td>
+<td>uguale (equal)</td>
+</tr>
+<tr>
+<td><code>-ne</code></td>
+<td>diverso (not equal)</td>
+</tr>
+<tr>
+<td><code>-gt</code></td>
+<td>maggiore di (greater than)</td>
+</tr>
+<tr>
+<td><code>-lt</code></td>
+<td>minore di (less than)</td>
+</tr>
+<tr>
+<td><code>-ge</code></td>
+<td>maggiore o uguale</td>
+</tr>
+<tr>
+<td><code>-le</code></td>
+<td>minore o uguale</td>
+</tr>
+</tbody>
+</table>
+<p>Per le <strong>stringhe</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Operatore</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>=</code></td>
+<td>uguale</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>diverso</td>
+</tr>
+<tr>
+<td><code>-z</code></td>
+<td>stringa vuota (zero length)</td>
+</tr>
+<tr>
+<td><code>-n</code></td>
+<td>stringa non vuota</td>
+</tr>
+</tbody>
+</table>
+<p>Per i <strong>file</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Operatore</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-f file</code></td>
+<td>esiste ed è un file regolare</td>
+</tr>
+<tr>
+<td><code>-d dir</code></td>
+<td>esiste ed è una directory</td>
+</tr>
+<tr>
+<td><code>-e path</code></td>
+<td>esiste (file o directory)</td>
+</tr>
+<tr>
+<td><code>-r file</code></td>
+<td>esiste ed è leggibile</td>
+</tr>
+<tr>
+<td><code>-x file</code></td>
+<td>esiste ed è eseguibile</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="33-condizioni-su-file">3.3 Condizioni su file</h3>
+<pre><code class="language-bash">cat &gt; controllo_file.sh &lt;&lt; 'EOF'
+#!/bin/bash
+FILE=$1
+
+if [ -z &quot;$FILE&quot; ]; then
+    echo &quot;Errore: devi specificare un file come argomento&quot;
+    exit 1
+fi
+
+if [ -f &quot;$FILE&quot; ]; then
+    echo &quot;$FILE esiste ed è un file&quot;
+elif [ -d &quot;$FILE&quot; ]; then
+    echo &quot;$FILE esiste ed è una directory&quot;
+else
+    echo &quot;$FILE non esiste&quot;
+fi
+EOF
+chmod +x controllo_file.sh
+
+./controllo_file.sh /etc/hostname
+./controllo_file.sh /etc
+./controllo_file.sh /file_inesistente
+./controllo_file.sh
+</code></pre>
+<p><strong>Output atteso</strong> (una riga per ogni invocazione):</p>
+<pre><code>/etc/hostname esiste ed è un file
+/etc esiste ed è una directory
+/file_inesistente non esiste
+Errore: devi specificare un file come argomento
+</code></pre>
+<p>Nota <code>exit 1</code>: termina lo script con codice di uscita 1 (errore). Per convenzione <code>exit 0</code> indica successo, qualsiasi altro valore indica errore. I codici di uscita sono fondamentali negli script di automazione per sapere se un'operazione è andata a buon fine.</p>
+<hr />
+<h2 id="parte-4-loop">Parte 4 — Loop</h2>
+<h3 id="41-loop-for">4.1 Loop for</h3>
+<pre><code class="language-bash">cat &gt; loop_for.sh &lt;&lt; 'EOF'
+#!/bin/bash
+for FRUTTO in mela pera banana arancia; do
+    echo &quot;Frutto: $FRUTTO&quot;
+done
+EOF
+chmod +x loop_for.sh
+./loop_for.sh
+</code></pre>
+<p><strong>Output atteso</strong>: quattro righe, una per ogni frutto.</p>
+<p>Il for itera su una lista di elementi. La sintassi è:</p>
+<pre><code class="language-bash">for VARIABILE in lista_elementi; do
+    # comandi
+done
+</code></pre>
+<hr />
+<h3 id="42-loop-for-su-file">4.2 Loop for su file</h3>
+<pre><code class="language-bash">cat &gt; loop_file.sh &lt;&lt; 'EOF'
+#!/bin/bash
+for FILE in /etc/*.conf; do
+    echo &quot;Trovato file di configurazione: $FILE&quot;
+done
+EOF
+chmod +x loop_file.sh
+./loop_file.sh
+</code></pre>
+<p><strong>Output atteso</strong>: una riga per ogni file <code>.conf</code> in <code>/etc</code>. Il <code>*</code> è un wildcard: la shell espande <code>*.conf</code> nella lista di tutti i file che corrispondono al pattern prima di passarla al loop.</p>
+<hr />
+<h3 id="43-loop-for-numerico">4.3 Loop for numerico</h3>
+<pre><code class="language-bash">cat &gt; loop_numerico.sh &lt;&lt; 'EOF'
+#!/bin/bash
+for I in $(seq 1 5); do
+    echo &quot;Iterazione numero $I&quot;
+done
+EOF
+chmod +x loop_numerico.sh
+./loop_numerico.sh
+</code></pre>
+<p><strong>Output atteso</strong>: cinque righe numerate da 1 a 5.</p>
+<p><code>seq 1 5</code> genera la sequenza di numeri da 1 a 5. <code>$(seq 1 5)</code> la inserisce come lista nel for.</p>
+<hr />
+<h3 id="44-loop-while">4.4 Loop while</h3>
+<pre><code class="language-bash">cat &gt; loop_while.sh &lt;&lt; 'EOF'
+#!/bin/bash
+CONTATORE=1
+
+while [ $CONTATORE -le 5 ]; do
+    echo &quot;Contatore: $CONTATORE&quot;
+    CONTATORE=$((CONTATORE + 1))
+done
+EOF
+chmod +x loop_while.sh
+./loop_while.sh
+</code></pre>
+<p><strong>Output atteso</strong>: cinque righe con il contatore che va da 1 a 5.</p>
+<p><code>$((espressione))</code> è la sintassi per l'<strong>aritmetica</strong> in Bash. <code>CONTATORE=$((CONTATORE + 1))</code> incrementa la variabile di 1 ad ogni iterazione.</p>
+<hr />
+<h2 id="parte-5-script-completo">Parte 5 — Script completo</h2>
+<p>Metti insieme tutto quello che hai imparato in uno script che analizza i file di una directory:</p>
+<pre><code class="language-bash">cat &gt; analizza_dir.sh &lt;&lt; 'EOF'
+#!/bin/bash
+DIRECTORY=$1
+
+if [ -z &quot;$DIRECTORY&quot; ]; then
+    echo &quot;Uso: $0 &lt;directory&gt;&quot;
+    exit 1
+fi
+
+if [ ! -d &quot;$DIRECTORY&quot; ]; then
+    echo &quot;Errore: $DIRECTORY non è una directory&quot;
+    exit 1
+fi
+
+echo &quot;=== Analisi di: $DIRECTORY ===&quot;
+
+CONTATORE_FILE=0
+CONTATORE_DIR=0
+
+for ELEMENTO in &quot;$DIRECTORY&quot;/*; do
+    if [ -f &quot;$ELEMENTO&quot; ]; then
+        CONTATORE_FILE=$((CONTATORE_FILE + 1))
+    elif [ -d &quot;$ELEMENTO&quot; ]; then
+        CONTATORE_DIR=$((CONTATORE_DIR + 1))
+    fi
+done
+
+echo &quot;File trovati: $CONTATORE_FILE&quot;
+echo &quot;Directory trovate: $CONTATORE_DIR&quot;
+echo &quot;Totale elementi: $((CONTATORE_FILE + CONTATORE_DIR))&quot;
+EOF
+chmod +x analizza_dir.sh
+
+./analizza_dir.sh /etc
+./analizza_dir.sh /var/log
+./analizza_dir.sh
+</code></pre>
+<p>Leggi lo script riga per riga prima di eseguirlo — devi essere in grado di spiegare cosa fa ogni parte.</p>
+<hr />
+<h2 id="esercizio-finale">Esercizio finale</h2>
+<p>Scrivi uno script <code>cerca_file.sh</code> che:
+1. Riceve come primo argomento un nome di file (o pattern) e come secondo argomento una directory
+2. Se gli argomenti mancano, stampa un messaggio di utilizzo ed esce con errore
+3. Cerca tutti i file che corrispondono al pattern nella directory specificata
+4. Per ogni file trovato, stampa se è leggibile o no</p>
+<p><strong>Suggerimento</strong>: usa un loop <code>for</code> con il pattern come wildcard, e i test <code>-r</code> e <code>-f</code> per verificare i permessi.</p>
+<hr />
+<h2 id="riepilogo">Riepilogo</h2>
+<table>
+<thead>
+<tr>
+<th>Sintassi</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VAR=valore</code></td>
+<td>Assegna variabile (no spazi)</td>
+</tr>
+<tr>
+<td><code>$VAR</code> / <code>${VAR}</code></td>
+<td>Legge variabile</td>
+</tr>
+<tr>
+<td><code>$1</code>, <code>$2</code>, <code>$#</code>, <code>$@</code></td>
+<td>Argomenti dello script</td>
+</tr>
+<tr>
+<td><code>$(comando)</code></td>
+<td>Command substitution</td>
+</tr>
+<tr>
+<td><code>$((espressione))</code></td>
+<td>Aritmetica</td>
+</tr>
+<tr>
+<td><code>if [ cond ]; then ... fi</code></td>
+<td>Condizionale</td>
+</tr>
+<tr>
+<td><code>for VAR in lista; do ... done</code></td>
+<td>Loop su lista</td>
+</tr>
+<tr>
+<td><code>while [ cond ]; do ... done</code></td>
+<td>Loop con condizione</td>
+</tr>
+<tr>
+<td><code>exit 0</code> / <code>exit 1</code></td>
+<td>Termina con successo / errore</td>
+</tr>
+<tr>
+<td><code>-gt</code>, <code>-lt</code>, <code>-eq</code></td>
+<td>Confronto numerico</td>
+</tr>
+<tr>
+<td><code>-f</code>, <code>-d</code>, <code>-e</code>, <code>-r</code></td>
+<td>Test su file</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="connessione-con-security">Connessione con Security</h2>
+<p>Gli script Bash sono la base di quasi tutti i tool di automazione offensiva e difensiva:
+- Script di enumerazione che ciclano su una lista di host con <code>for</code>
+- Script di monitoring che controllano in loop con <code>while</code> se un servizio è attivo
+- Script di risposta agli incidenti che verificano con <code>if</code> la presenza di file sospetti</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo1A]]</li>
+<li>[[appunti_modulo1A_bash_scripting]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

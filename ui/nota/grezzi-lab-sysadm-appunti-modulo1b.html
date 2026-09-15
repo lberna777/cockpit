@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_modulo1B.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi</p>
+<h1 class="titolo-pagina">Appunti_modulo1B.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo1B.md">Apri il file originale</a></p>
+<article class="prosa"><p><strong>FUNZIONI</strong></p>
+<p>blocco di comandi a cui affido un nome specifico per poterlo riutilizzare</p>
+<pre><code class="language-bash">cat &gt; funzione_base.sh &lt;&lt; 'EOF'
+[](#cb2-2)#!/bin/bash
+[](#cb2-3)
+[](#cb2-4)saluta() {
+    [](#cb2-5)    echo &quot;Ciao, sono la funzione saluta&quot;
+    [](#cb2-6)    echo &quot;La data è: $(date)&quot;
+[](#cb2-7)}
+[](#cb2-8)
+[](#cb2-9)echo &quot;Prima della chiamata&quot;
+[](#cb2-10)saluta
+[](#cb2-11)echo &quot;Dopo la chiamata&quot;
+[](#cb2-12)saluta
+[](#cb2-13)EOF
+[](#cb2-14)chmod +x funzione_base.sh
+[](#cb2-15)./funzione_base.sh
+</code></pre>
+<p>Così creo la funziona saluta, che viene richiamata scrivendo semplicemente "saluta", senza le virgolette. la creazione tramite nomeFunzione() { <em>contenuto</em> } è congrua con la creazione di funzioni in C</p>
+<p><strong>ARGOMENTI DELLA FUNZIONE</strong></p>
+<p>Gli argomenti della funzione sono propri di questa, non appartengono allo script dove viene creata e usata. si assegnano al lancio, <strong>nomeFunzione argomento.</strong>        Per terminare con esito una funzione uso <strong>return N</strong> a differenza della terminazione con esito di uno script tramite <strong>exit N</strong></p>
+<pre><code>cat &gt; funzione_argomenti.sh &lt;&lt; 'EOF'
+[](#cb5-2)#!/bin/bash
+[](#cb5-3)
+[](#cb5-4)descrivi_file() {
+    [](#cb5-5)    FILE=$1
+    [](#cb5-6)    if [ -z &quot;$FILE&quot; ]; then
+        [](#cb5-7)        echo &quot;Errore: nessun file specificato&quot;
+        [](#cb5-8)        return 1
+    [](#cb5-9)    fi
+    [](#cb5-10)    if [ -f &quot;$FILE&quot; ]; then
+        [](#cb5-11)        echo &quot;$FILE: è un file regolare&quot;
+    [](#cb5-12)    elif [ -d &quot;$FILE&quot; ]; then
+        [](#cb5-13)        echo &quot;$FILE: è una directory&quot;
+    [](#cb5-14)    else
+        [](#cb5-15)        echo &quot;$FILE: non esiste&quot;
+    [](#cb5-16)    fi
+[](#cb5-17)}
+[](#cb5-18)
+[](#cb5-19)descrivi_file /etc/hostname
+[](#cb5-20)descrivi_file /etc
+[](#cb5-21)descrivi_file /file_inesistente
+[](#cb5-22)descrivi_file
+[](#cb5-23)EOF
+[](#cb5-24)chmod +x funzione_argomenti.sh
+[](#cb5-25)./funzione_argomenti.sh
+</code></pre>
+<p><strong>VARIABILI DELLA FUNZIONE</strong></p>
+<p>le variabili in bash sono sempre globali se non specificato diversamente tramite <strong>local</strong>. è buona pratica nelle funzioni usare sempre variabili <strong>local</strong></p>
+<pre><code>cat &gt; variabili_locali.sh &lt;&lt; 'EOF'
+[](#cb7-2)#!/bin/bash
+[](#cb7-3)
+[](#cb7-4)funzione_test() {
+    [](#cb7-5)    GLOBALE=&quot;sono globale&quot;
+    [](#cb7-6)    local LOCALE=&quot;sono locale&quot;
+    [](#cb7-7)    echo &quot;Dentro la funzione: GLOBALE=$GLOBALE, LOCALE=$LOCALE&quot;
+[](#cb7-8)}
+[](#cb7-9)
+[](#cb7-10)funzione_test
+[](#cb7-11)echo &quot;Fuori dalla funzione: GLOBALE=$GLOBALE&quot;
+[](#cb7-12)echo &quot;Fuori dalla funzione: LOCALE=$LOCALE&quot;
+[](#cb7-13)EOF
+[](#cb7-14)chmod +x variabili_locali.sh
+[](#cb7-15)./variabili_locali.sh
+</code></pre>
+<p><strong>RESTITUIRE QUALCOSA DIVERSO DA UN INTERO TRAMITE UNA FUNZIONe</strong></p>
+<p>Di base possiamo mandare segnali indietro dalla funzione solo tramite numeri interi tramite <strong>return</strong>. possiamo utilizzare echo però per passare un valore stringa</p>
+<pre><code>cat &gt; funzione_ritorno.sh &lt;&lt; 'EOF'
+[](#cb9-2)#!/bin/bash
+[](#cb9-3)
+[](#cb9-4)ottieni_estensione() {
+    [](#cb9-5)    local FILE=$1
+    [](#cb9-6)    echo &quot;${FILE##*.}&quot;
+[](#cb9-7)}
+[](#cb9-8)
+[](#cb9-9)ESTENSIONE=$(ottieni_estensione &quot;documento.pdf&quot;)
+[](#cb9-10)echo &quot;Estensione: $ESTENSIONE&quot;
+[](#cb9-11)
+[](#cb9-12)ESTENSIONE=$(ottieni_estensione &quot;script.sh&quot;)
+[](#cb9-13)echo &quot;Estensione: $ESTENSIONE&quot;
+[](#cb9-14)EOF
+[](#cb9-15)chmod +x funzione_ritorno.sh
+[](#cb9-16)./funzione_ritorno.sh
+</code></pre>
+<p><code>${FILE##*.}</code> è una <strong>parameter expansion</strong>: rimuove tutto fino all’ultimo <code>.</code> compreso, lasciando solo l’estensione. È introdotto qui come esempio utile — una panoramica completa delle parameter expansion è materiale avanzato.</p>
+<p>DOMANDA: perchè passiamo documento.pdf alla funzione tra virgolette? prima gli argomenti passati alla funzione non erano racchiusi in virgolette, non gli dovremmo passare \$FILE?</p>
+<p><strong>IL COSTRUTTO CASE</strong></p>
+<p>&gt; #!/bin/bash<br />
+&gt; GIORNO=\$1<br />
+&gt;<br />
+&gt; case \$GIORNO in<br />
+&gt; lunedi|martedi|mercoledi|giovedi|venerdi)<br />
+&gt; echo "\$GIORNO è un giorno lavorativo"<br />
+&gt; ;;<br />
+&gt; sabato|domenica)<br />
+&gt; echo "\$GIORNO è un giorno festivo"<br />
+&gt; ;;<br />
+&gt; *)<br />
+&gt; echo "Giorno non riconosciuto: \$GIORNO"<br />
+&gt; ;;<br />
+&gt; esac<br />
+&gt; EOF<br />
+vagrant@bookworm:~/Lab1B\$ chmod +x case_bash.sh<br />
+vagrant@bookworm:~/Lab1B\$ ./case_bash.sh lunedi<br />
+lunedi è un giorno lavorativo<br />
+vagrant@bookworm:~/Lab1B\$ ./case_bash.sh domenica<br />
+domenica è un giorno festivo<br />
+vagrant@bookworm:~/Lab1B\$ ./case_bash.sh stocazzo<br />
+Giorno non riconosciuto: stocazzo</p>
+<p>il costrutto <strong>CASE</strong> si sfrutta similmento allo switch in C si creano delle condizioni possibili che condizionano una risposta piuttosto che un altra, tramite return o la stampa a video con echo. Il caso * indica tutto quello che non è racchiuso nei casi precedentemente selezionati. si istanza con <strong>case \$VARIABILE in</strong></p>
+<p>la struttura dei casi è <strong>CASE1 | CASE2 | CASE3 | ...)</strong></p>
+<p>dopo la conseguenza dell' entrata in un caso o gruppo di casi, ci sono <strong>le doppie virgolette ;;</strong> che indicano la chiusura del blocco</p>
+<p>è essenziale <strong>l'esac</strong> prima della fine del file, <strong>chiude il costrutto case, esattamente come fi chiude il costrutto if</strong></p>
+<p><strong>ESEMPIO 2</strong></p>
+<p>vagrant@bookworm:~/Lab1B\$ cat &gt; case_file.sh &lt;&lt; 'EOF'<br />
+&gt; #!/bin/bash<br />
+&gt; FILE=\$1<br />
+&gt;<br />
+&gt; if [ -z \$FILE ]; then<br />
+&gt; echo "\$FILE non è un file, uso: \$0 &lt;file&gt;"<br />
+&gt; exit 1<br />
+&gt; fi<br />
+&gt;<br />
+&gt; case \$FILE in<br />
+&gt; *.sh)<br />
+&gt; echo "\$FILE: script bash"<br />
+&gt; ;;<br />
+&gt; *.conf|*.cfg)<br />
+&gt; echo "\$FILE: file di configurazione"<br />
+&gt; ;;<br />
+&gt; *.log)<br />
+&gt; echo "\$FILE: file di log"<br />
+&gt; ;;<br />
+&gt; *.txt|*.md)<br />
+&gt; echo "\$FILE: file di testo"<br />
+&gt; ;;<br />
+&gt; *)<br />
+&gt; echo "\$FILE: tipo non riconosciuto"<br />
+&gt; ;;<br />
+&gt; esac<br />
+&gt; EOF<br />
+vagrant@bookworm:~/Lab1B\$ chmod +x case_file.sh<br />
+vagrant@bookworm:~/Lab1B\$ ./case_file.sh script.sh<br />
+script.sh: script bash<br />
+vagrant@bookworm:~/Lab1B\$ ./case_file.sh syslog.log<br />
+syslog.log: file di log<br />
+vagrant@bookworm:~/Lab1B\$ ./case_file.sh README.md<br />
+README.md: file di testo<br />
+vagrant@bookworm:~/Lab1B\$ ./case_file.sh stocazzo.txt<br />
+stocazzo.txt: file di testo<br />
+vagrant@bookworm:~/Lab1B\$ ./case_file.sh stoca<br />
+stoca: tipo non riconosciuto</p>
+<p>vagrant@bookworm:~/Lab1B\$ ./case_file.sh<br />
+ non è un file, uso: ./case_file.sh &lt;file&gt;</p>
+<p>Mi è chiaro il ragionamento e il funzionamento, tranne del primo if. non capisco, controlla se la variabile esiste ma non capisco ne perchè ne a cosa serva visto che dice che usa il file stesso dello script ma non fa nulla</p>
+<p><strong>PARENTESI QUADRE DOPPIE PER COMODITA</strong></p>
+<p>cat &gt; test_combinati.sh &lt;&lt; 'EOF'  </p>
+<h1 id="binbash">!/bin/bash</h1>
+<p>FILE=\$1</p>
+<p>if [ -f "\$FILE" ] &amp;&amp; [ -r "\$FILE" ]; then<br />
+    echo "\$FILE esiste ed è leggibile"<br />
+fi</p>
+<p>if [ -z "\$FILE" ] || [ ! -e "\$FILE" ]; then<br />
+    echo "Argomento mancante o file inesistente"<br />
+fi<br />
+EOF<br />
+chmod +x test_combinati.sh<br />
+./test_combinati.sh /etc/hostname<br />
+./test_combinati.sh /file_inesistente<br />
+./test_combinati.sh</p>
+<p>Operatore Significato (nota: replica la tabella)<br />
+[ cond1 ] &amp;&amp; [ cond2 ] AND — vero se entrambe le condizioni sono vere<br />
+[ cond1 ] \|\| [ cond2 ] OR — vero se almeno una condizione è vera<br />
+[ ! cond ] NOT — inverte la condizione</p>
+<p>per sopperire alla macchinosità delle condizioni sommate or/and il bash consente l'uso delle doppie quadre, un costrutto più robusto</p>
+<pre><code>cat &gt; double_bracket.sh &lt;&lt; 'EOF'
+[](#cb16-2)#!/bin/bash
+[](#cb16-3)NOME=$1
+[](#cb16-4)
+[](#cb16-5)if [[ -n &quot;$NOME&quot; &amp;&amp; &quot;$NOME&quot; != root ]]; then
+    [](#cb16-6)    echo &quot;Utente valido e non root: $NOME&quot;
+[](#cb16-7)fi
+[](#cb16-8)
+[](#cb16-9)if [[ &quot;$NOME&quot; == *&quot;admin&quot;* ]]; then
+    [](#cb16-10)    echo &quot;$NOME contiene la parola admin&quot;
+[](#cb16-11)fi
+[](#cb16-12)EOF
+[](#cb16-13)chmod +x double_bracket.sh
+[](#cb16-14)./double_bracket.sh vagrant
+[](#cb16-15)./double_bracket.sh sysadmin
+</code></pre>
+<p>Differenze principali tra <code>[ ]</code> e <code>[[ ]]</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Aspetto</th>
+<th><code>[ ]</code></th>
+<th><code>[[ ]]</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AND/OR</td>
+<td><code>[ c1 ] &amp;&amp; [ c2 ]</code></td>
+<td><code>[[ c1 &amp;&amp; c2 ]]</code> — si può scrivere dentro</td>
+</tr>
+<tr>
+<td>Pattern matching</td>
+<td>non supportato</td>
+<td><code>[[ "$VAR" == *.sh ]]</code>funziona</td>
+</tr>
+<tr>
+<td>Variabili non quotate</td>
+<td>possono dare errori</td>
+<td>gestite correttamente</td>
+</tr>
+<tr>
+<td>Portabilità</td>
+<td>POSIX — funziona ovunque</td>
+<td>solo Bash — non funziona in sh puro</td>
+</tr>
+</tbody>
+</table>
+<p>OR [ c1 ] &amp;&amp; [ c2 ] [[ c1 &amp;&amp; c2 ]] — si può scrivere dentro<br />
+Pattern matching non supportato [[ "\$VAR" == *.sh ]] funziona<br />
+Variabili non quotate possono dare errori gestite correttamente<br />
+Portabilità POSIX — funziona ovunque solo Bash — non funziona in sh puro</p>
+<p><strong>RESTITUZIONE DEL VALORE DI USCITA DI UNA FUNZIONE CON \$?</strong></p>
+<p>Ogni funzione in bash restituisce un codice di uscita, per convenzione 0 se indica un successo, qualsiasi altro numero per indicare errori. attraverso <strong>\$?.</strong> E' essenziale usarlo la riga immediatamente successiva alla funziona che si vuole analizzare poichè viene sovrascritto da ogni nuovo codice di uscita di qualunque funziona successiva a quella interessata.</p>
+<p><strong>SCRIPT FINALE</strong> </p>
+<p>vagrant@bookworm:~/Lab1B\$ cat &gt; diagnostica.sh &lt;&lt; 'EOF'<br />
+&gt; #!/bin/bash<br />
+&gt;<br />
+&gt; # ---- funzioni ----<br />
+&gt;<br />
+&gt; controlla_servizio() {<br />
+&gt; local SERVIZIO=\$1<br />
+&gt; if systemctl is-active --quiet "\$SERVIZIO"; then<br />
+&gt; echo " [OK] \$SERVIZIO è attivo"<br />
+&gt; return 0<br />
+&gt; else<br />
+&gt; echo " [KO] \$SERVIZIO non è attivo"<br />
+&gt; return 1<br />
+&gt; fi<br />
+&gt; }<br />
+&gt;<br />
+&gt; controlla_file() {<br />
+&gt; local FILE=\$1<br />
+&gt; local TIPO<br />
+&gt;<br />
+&gt; case \$FILE in<br />
+&gt; *.conf) TIPO="configurazione" ;;<br />
+&gt; *.log) TIPO="log" ;;<br />
+&gt; *.sh) TIPO="script" ;;<br />
+&gt; *) TIPO="generico" ;;<br />
+&gt; esac<br />
+&gt; if [[ -f "\$FILE" &amp;&amp; -r "\$FILE" ]]; then<br />
+&gt; echo " [OK] \$FILE (\$TIPO) - leggibile"<br />
+&gt; elif [ -f "\$FILE" ]; then<br />
+&gt; echo " [!] \$FILE (\$TIPO) - esiste ma non è leggibile"<br />
+&gt; else<br />
+&gt; echo " [KO] \$FILE - non trovato"<br />
+&gt; fi<br />
+&gt; }<br />
+&gt;<br />
+&gt; # ---- main ----<br />
+&gt;<br />
+&gt; echo "=== Diagnostica sistema ==="<br />
+&gt; echo ""<br />
+&gt;<br />
+&gt; echo "&gt;&gt; Servizi:"<br />
+&gt; controlla_servizio ssh<br />
+&gt; controlla_servizio cron<br />
+&gt;<br />
+&gt; echo ""<br />
+&gt; echo "&gt;&gt; File critici:"<br />
+&gt; controlla_file /etc/hostname<br />
+&gt; controlla_file /etc/ssh/sshd_config<br />
+&gt; controlla_file /var/log/auth.log<br />
+&gt; controlla_file /file_inesistente.conf<br />
+&gt; EOF<br />
+vagrant@bookworm:~/Lab1B\$ chmod +x diagnostica.sh<br />
+vagrant@bookworm:~/Lab1B\$ ./diagnostica.sh<br />
+\=== Diagnostica sistema ===</p>
+<p>&gt;&gt; Servizi:<br />
+ [OK] ssh è attivo<br />
+ [OK] cron è attivo</p>
+<p>&gt;&gt; File critici:<br />
+ [OK] /etc/hostname (generico) - leggibile<br />
+ [OK] /etc/ssh/sshd_config (generico) - leggibile<br />
+ [!] /var/log/auth.log (log) - esiste ma non è leggibile<br />
+ [KO] /file_inesistente.conf - non trovato</p>
+<p>Ho capito molto di questo script finale, il costrutto case usato nella identificazione del file, questa volta in maniera più semplice tramite una variabile locale. così come l'uso delle doppi quadre per poter concatenare delle condizioni nell'if. non mi è chiara però la funzione controlla_servizio ne nei dati che prende in input ne come li controlla.</p>
+<p><strong>SCRIPT IN AUTONOMIA</strong></p>
+<p>Ho scritto questo:</p>
+<p>vagrant@bookworm:~/Lab1B\$ cat &gt; classifica_dir.sh &lt;&lt; 'EOF'<br />
+&gt; #!/bin/bash<br />
+&gt;<br />
+&gt; DIR=\$1<br />
+&gt;<br />
+&gt; if [ !-d "\$DIR" ]; then<br />
+&gt; echo " [KO] \$DIR non è una directory"<br />
+&gt; exit 1<br />
+&gt; fi<br />
+&gt;<br />
+&gt; # ---- funzioni ----<br />
+&gt;<br />
+&gt; classifica_file() {<br />
+&gt; local FILE=\$1<br />
+&gt; local TIPO<br />
+&gt;<br />
+&gt; case \$FILE in<br />
+&gt; *.conf) TIPO="configurazione" ;;<br />
+&gt; *.log) TIPO="log" ;;<br />
+&gt; *.sh) TIPO="script" ;;<br />
+&gt; *) TIPO="generico" ;;<br />
+&gt; esac<br />
+&gt;<br />
+&gt; echo " \$FILE è un file, di tipo \$TIPO"<br />
+&gt; }<br />
+&gt;<br />
+&gt; # ---- main ----<br />
+&gt; for FILE in \$DIR/*; do<br />
+&gt; if [ -f "\$FILE" ]; then<br />
+&gt; classifica_file \$FILE<br />
+&gt; fi<br />
+&gt; done<br />
+&gt; EOF<br />
+vagrant@bookworm:~/Lab1B\$ chmod +x ./classifica_dir.sh<br />
+vagrant@bookworm:~/Lab1B\$ ./classifica_dir.sh /bin/bash<br />
+./classifica_dir.sh: line 5: [: !-d: unary operator expected<br />
+vagrant@bookworm:~/Lab1B\$</p>
+<p>sono conscio che non funzioni, ma l'errore è strettamente legato alla negazione della clausola con !-d, la versione corretta sarà una combinazione diversa di questi caratteri. per quanto riguarda le richieste, sistemato questo dovrebbe adempiere a tutto, tranne il conto separato di quanti file e quanti directory trovo nel path, perchè l'ho letto alla fine e avrei dovuto dichiarare precedentemente le variabili</p>
+<p>&nbsp;</p>
+<h2 id="riepilogo-sintattico">Riepilogo sintattico</h2>
+<table>
+<thead>
+<tr>
+<th>Sintassi</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nome() { ... }</code></td>
+<td>Dichiara una funzione</td>
+</tr>
+<tr>
+<td><code>nome arg1 arg2</code></td>
+<td>Chiama una funzione con argomenti</td>
+</tr>
+<tr>
+<td><code>local VAR=valore</code></td>
+<td>Variabile locale alla funzione</td>
+</tr>
+<tr>
+<td><code>return N</code></td>
+<td>Termina la funzione con exit code N</td>
+</tr>
+<tr>
+<td><code>$(funzione arg)</code></td>
+<td>Cattura l’output di una funzione come stringa</td>
+</tr>
+<tr>
+<td><code>case $VAR in p) ;; esac</code></td>
+<td>Confronto su pattern multipli</td>
+</tr>
+<tr>
+<td><code>p1\\|p2)</code></td>
+<td>OR tra pattern in case</td>
+</tr>
+<tr>
+<td><code>*)</code></td>
+<td>Pattern catch-all in case</td>
+</tr>
+<tr>
+<td><code>[ c1 ] &amp;&amp; [ c2 ]</code></td>
+<td>AND tra condizioni</td>
+</tr>
+<tr>
+<td><code>[ c1 ] \\|\\| [ c2 ]</code></td>
+<td>OR tra condizioni</td>
+</tr>
+<tr>
+<td><code>[[ c1 &amp;&amp; c2 ]]</code></td>
+<td>AND dentro doppie parentesi</td>
+</tr>
+<tr>
+<td><code>[[ "$VAR" == *pattern* ]]</code></td>
+<td>Pattern matching in doppie parentesi</td>
+</tr>
+<tr>
+<td><code>$?</code></td>
+<td>Exit code dell’ultimo comando eseguito</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo1B_funzioni_case_test]]</li>
+<li>[[guida_lab_modulo1B_funzioni_case_test]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

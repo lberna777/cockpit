@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_modulo0A_filesystem.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_modulo0A_filesystem.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SYSADM/appunti_modulo0A_filesystem.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="virtual-machine-con-vagrant">Virtual Machine con Vagrant</h1>
+<p>Ho inizializzato una cartella di lavoro per amministrazione di sistemi, successivamente inizializzato la virtual machine (OS: Linux-Debian) e avviata con:</p>
+<pre><code class="language-bash">vagrant up --provider=virtualbox
+</code></pre>
+<p>Successivamente sono entrato nella VM tramite SSH:</p>
+<pre><code class="language-bash">vagrant ssh
+</code></pre>
+<hr />
+<h2 id="valutazione-della-situazione-iniziale">Valutazione della situazione iniziale</h2>
+<p>Ho valutato la situazione attuale con i comandi <code>pwd</code>, <code>whoami</code>, <code>id</code>.</p>
+<p>Questi mi hanno detto rispettivamente:
+- <strong><code>pwd</code></strong> — la directory dove mi trovo (<code>/home/nomeutente</code>)
+- <strong><code>whoami</code></strong> — il mio nome utente (<code>vagrant</code>)
+- <strong><code>id</code></strong> — ID utente, Group ID primario e i gruppi a cui partecipa il mio utente (<code>uid=1000</code>, <code>gid=1000</code>, <code>groups=1000</code>)</p>
+<hr />
+<h2 id="struttura-del-filesystem-ls">Struttura del filesystem — <code>ls /</code></h2>
+<h3 id="binari-ed-eseguibili-i-programmi-veri-e-propri">Binari ed eseguibili — i programmi veri e propri</h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bin</code></td>
+<td>Comandi essenziali utilizzabili da tutti gli utenti</td>
+</tr>
+<tr>
+<td><code>sbin</code></td>
+<td>Comandi di sistema riservati all'utente root</td>
+</tr>
+<tr>
+<td><code>usr</code></td>
+<td>Contiene la maggior parte dei programmi installati</td>
+</tr>
+<tr>
+<td><code>lib</code></td>
+<td>Librerie condivise da cui dipendono i binari</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configurazione-il-cervello-del-sistema">Configurazione — il cervello del sistema</h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>etc</code></td>
+<td>Contiene tutti i file di configurazione del sistema; utile a capire il funzionamento di un servizio</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dati-utente">Dati utente</h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>home</code></td>
+<td>Comprende una sotto-directory per ogni utente normale (non root)</td>
+</tr>
+<tr>
+<td><code>root</code></td>
+<td>Home esclusiva di root</td>
+</tr>
+</tbody>
+</table>
+<h3 id="filesystem-virtuali-privi-di-file-reali-sono-interfacce-al-kernel">Filesystem virtuali — privi di file reali, sono interfacce al kernel</h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>proc</code></td>
+<td>Informazioni sui processi in esecuzione</td>
+</tr>
+<tr>
+<td><code>sys</code></td>
+<td>Interfaccia all'hardware e ai driver del kernel</td>
+</tr>
+<tr>
+<td><code>dev</code></td>
+<td>Rappresentazione dei dispositivi fisici</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dati-variabili-e-temporanei">Dati variabili e temporanei</h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>var</code></td>
+<td>Contiene tutto ciò che varia nel tempo: log, database, code di stampa…</td>
+</tr>
+<tr>
+<td><code>tmp</code></td>
+<td>File temporanei, svuotati ad ogni riavvio</td>
+</tr>
+<tr>
+<td><code>run</code></td>
+<td>Dati di runtime dei servizi</td>
+</tr>
+</tbody>
+</table>
+<h3 id="nota-vagrant">Nota Vagrant</h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vagrant</code></td>
+<td>Mount della cartella di installazione della VM (nel mio caso <code>/sysAdmin-lab</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="analisi-delle-cartelle-principali">Analisi delle cartelle principali</h2>
+<h3 id="ls-etc"><code>ls /etc</code></h3>
+<p>Mi dà accesso ai file di configurazione di sistema. Noto che molti finiscono in <code>.d</code> o <code>.conf</code>:
+- <strong><code>.conf</code></strong> — file di configurazione singoli
+- <strong><code>.d</code></strong> — directory che contengono frammenti di configurazione, che il sistema legge e unisce. Serve a far sì che più pacchetti possano scrivere le loro regole senza sovrascriversi</p>
+<p>Posso leggere informazioni sul sistema tramite:
+- <code>cat /etc/debian_version</code> — per vedere la versione dell'OS
+- <code>cat /etc/hostname</code> — per vedere il nome della macchina</p>
+<h3 id="ls-varlog"><code>ls /var/log</code></h3>
+<p>Mi dà accesso ai registri, che tengono nota di tutto quello che accade nel sistema:
+- <strong><code>syslog</code></strong> — il log generale del sistema
+- <strong><code>auth.log</code></strong> — registra ogni autenticazione nel sistema, al login o all'uso di <code>sudo</code>
+- <strong><code>btmp</code></strong> — registra i tentativi di login falliti</p>
+<hr />
+<h2 id="permessi-ls-la">Permessi — <code>ls -la ~</code></h2>
+<p>Uso il comando <code>ls</code> con le opzioni <code>-l</code> e <code>-a</code>, raggruppate in <code>-la</code>, con argomento <code>~</code> (che indica <code>/home/vagrant</code>, la mia cartella utente).</p>
+<p>Ogni elemento è identificato da una stringa di 10 caratteri:</p>
+<pre><code>d  rwx  rwx  rwx
+│   │    │    │
+│   │    │    └── permessi degli utenti esterni al gruppo del creatore
+│   │    └─────── permessi del gruppo
+│   └──────────── permessi del proprietario
+└──────────────── tipo: (d) directory | (-) file | (l) link
+</code></pre>
+<p>I permessi sono: <strong>r</strong> (lettura), <strong>w</strong> (scrittura), <strong>x</strong> (esecuzione del file come programma, oppure accesso/ingresso se è una directory).</p>
+<h3 id="permessi-di-default-alla-creazione">Permessi di default alla creazione</h3>
+<p>Linux assegna permessi automaticamente quando si crea un nuovo oggetto:
+- <strong>Directory</strong> → <code>rwxr-xr-x</code>
+- <strong>File</strong> → <code>rw-r--r--</code></p>
+<p>Un file non è eseguibile finché non lo si dichiara esplicitamente tale.</p>
+<hr />
+<h2 id="chmod-modifica-dei-permessi"><code>chmod</code> — modifica dei permessi</h2>
+<pre><code class="language-bash">chmod NNN nomefile
+</code></pre>
+<p>Ogni cifra rappresenta un blocco di permessi (proprietario, gruppo, esterni) ed è la somma dei valori dei permessi attivi:</p>
+<table>
+<thead>
+<tr>
+<th>Permesso</th>
+<th>Valore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lettura (r)</td>
+<td>4</td>
+</tr>
+<tr>
+<td>scrittura (w)</td>
+<td>2</td>
+</tr>
+<tr>
+<td>esecuzione/accesso (x)</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>Se voglio tutti i permessi → <code>4+2+1 = 7</code></p>
+<h3 id="differenza-chiave-tra-r-e-x-su-una-directory">Differenza chiave tra <code>r</code> e <code>x</code> su una directory</h3>
+<p>Con <code>r</code> posso <strong>vedere</strong> quali nomi di file sono dentro alla cartella — lo faccio tramite <code>ls</code>.<br />
+Con <code>x</code> posso <strong>attraversare</strong> la cartella, entrandoci con <code>cd</code> e accedere ai file al suo interno.</p>
+<p>Vanno spesso di pari passo. L'unico caso utile di <code>x</code> senza <code>r</code> è per permettere a qualcuno di accedere a un file specifico dentro una directory se ne conosce già il nome esatto, senza poter vedere cos'altro c'è dentro.</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

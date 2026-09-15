@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_moduloS5_firewall_iptables.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">appunti_moduloS5_firewall_iptables.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/03_iptables_nftables/appunti_moduloS5_firewall_iptables.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-s5-firewall-teoria-configurazione-del-packet-filter-linux">Appunti — Modulo S5: Firewall — Teoria + Configurazione del Packet Filter Linux</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Lezione di riferimento</strong>: <code>lezione_moduloS5_firewall_iptables.md</code>
+<strong>Stato</strong>: lezione letta e appunti consolidati — <strong>lab su VM non ancora eseguito</strong> (nessun esercizio pratico riportato nei grezzi)</p>
+<hr />
+<h2 id="il-concetto-di-firewall">Il concetto di firewall</h2>
+<p>Il firewall è un'architettura, non un comando singolo: il punto di passaggio obbligato tra un "dentro" e un "fuori", con una politica di <strong>default deny</strong> — passa solo ciò che è esplicitamente autorizzato.</p>
+<blockquote>
+<p><strong>Domanda</strong>: spiega il termine "topologia di rete".
+<strong>Risposta</strong>: è semplicemente <em>come sono collegati fisicamente/logicamente i dispositivi di una rete tra loro</em> — chi parla con chi, attraverso quali cavi/segmenti/router. Il motivo per cui conta per il firewall: una regola scritta bene su un firewall non serve a nulla se la <strong>topologia</strong> lascia un'altra strada per raggiungere la rete interna senza passare da lì (un modem dimenticato, una VPN non filtrata, un dispositivo con doppia interfaccia di rete che fa da ponte). Per questo l'efficacia del firewall dipende da <em>dove</em> è collocato nella rete, non solo da <em>cosa</em> gli scrivi dentro — è il motivo per cui esistono le topologie viste più sotto (screened subnet, DMZ): non bastano le regole, serve che la topologia costringa fisicamente il traffico a passare dal punto controllato.</p>
+</blockquote>
+<h3 id="precisazione-cose-un-packet-filter-rispetto-al-firewall">Precisazione: cos'è un packet filter rispetto al firewall</h3>
+<blockquote>
+<p>I tuoi appunti dicono: <em>"un package filter (che immagino sia una proprietà filtro del firewall)..."</em>
+<strong>Correzione</strong>: il Packet Filter (PF) non è una "proprietà" del firewall — è <strong>uno dei tre tipi fondamentali</strong> in cui un firewall può essere implementato, alla pari di <strong>Application-Level Gateway (ALG)</strong> e <strong>Circuit-Level Gateway (CLG)</strong> (li vedi meglio più sotto, sezione Topologie). Il PF è il tipo più semplice: esamina solo gli header dei pacchetti (indirizzi, porte, flag) — è quello che poi configuri concretamente con <code>iptables</code>/<code>nft</code> in questo modulo. "Firewall" è il concetto architetturale generale; "packet filter" è una delle possibili implementazioni concrete di quel concetto.</p>
+</blockquote>
+<h2 id="pov-attaccante-pov-difensore">POV attaccante / POV difensore</h2>
+<p>Un packet filter "puro" ha limiti strutturali sfruttabili: non vede dentro il payload (non distingue una richiesta HTTP legittima da una con SQL injection nel parametro), è cieco a protocolli che negoziano dinamicamente le connessioni (es. FTP, dove il comando che apre il canale dati viaggia nel payload, non nell'header), ed è vulnerabile a manipolazioni di basso livello come la frammentazione (i frammenti dopo il primo non contengono l'header di trasporto, quindi non attivano le regole che lo controllano — evasione classica) o lo spoofing dell'indirizzo sorgente.</p>
+<p>La contromisura è o un componente più intelligente (un ALG che capisce il protocollo) o un irrigidimento della policy (scartare i pacchetti frammentati, verificare la coerenza tra subnet e interfaccia). Per l'esame pratico: il primo passo davanti a un esercizio iptables/nftables non è "che regola scrivo" ma "che tipo di traffico devo lasciare passare, e quale strumento (PF, stateful, ALG) serve per farlo con precisione".</p>
+<h2 id="iptables-sintassi-e-modello-concettuale"><code>iptables</code> — sintassi e modello concettuale</h2>
+<p>Forma fissa del comando:</p>
+<pre><code>iptables [-t &lt;tabella&gt;] -CMD [catena] [match] [-j &lt;target&gt;]
+</code></pre>
+<p>Se ometti <code>-t</code> si assume <code>filter</code>. I comandi (<code>-L</code>, <code>-A</code>, <code>-I [n]</code>, <code>-D [n]</code>, <code>-R n</code>, <code>-F</code>, <code>-P</code>) sono verbi sulla catena nel suo complesso.</p>
+<blockquote>
+<p><strong>Domanda</strong>: questi comandi (<code>-L</code>, <code>-A</code>, ecc.) vanno al posto di <code>-CMD</code> nel comando, oppure dopo <code>-CMD</code> in <code>[catena]</code>?
+<strong>Risposta</strong>: vanno esattamente al posto di <code>-CMD</code> — sono il comando stesso, non un argomento che lo segue. Lo schema <code>[-t &lt;tabella&gt;] -CMD [catena] [match] [-j &lt;target&gt;]</code> si legge da sinistra a destra come slot successivi da riempire: primo slot (opzionale) la tabella, secondo slot il comando/verbo, terzo slot (dove richiesto) la catena su cui quel comando opera, poi i match, infine il target. Esempi concreti per chiarire la posizione di ciascuno:
+<code>bash
+iptables -L INPUT              # -CMD=-L, [catena]=INPUT — elenca le regole della catena INPUT
+iptables -A FORWARD -p tcp --dport 80 -j ACCEPT   # -CMD=-A, [catena]=FORWARD, poi i match (-p, --dport), poi -j ACCEPT
+iptables -P INPUT DROP         # -CMD=-P, [catena]=INPUT, poi l'argomento della policy (DROP) — qui non c'è [match]/[-j], perché -P non filtra pacchetti: imposta solo il comportamento di default
+iptables -F                    # -CMD=-F, nessuna catena = svuota TUTTE le catene della tabella</code>
+Quindi la regola pratica: <code>[catena]</code> è sempre il primo argomento <em>dopo</em> il verbo (quando il verbo la richiede), mai qualcosa che "segue" il verbo in un secondo comando separato — è tutta una singola invocazione di <code>iptables</code>.</p>
+</blockquote>
+<p>I match sono i criteri "se": <code>-s</code>/<code>-d</code>, <code>-p</code>, <code>--sport</code>/<code>--dport</code>, <code>--tcp-flags mask comp</code>. Alcuni match richiedono un'estensione esplicita (<code>-m mac --mac-source</code>, <code>-m iprange --src-range</code>).</p>
+<h2 id="nftnftables-lo-stesso-modello-sintassi-diversa-zero-default"><code>nft</code>/nftables — lo stesso modello, sintassi diversa, zero default</h2>
+<p><code>nftables</code> ha rimpiazzato <code>iptables</code> (e <code>arptables</code>, <code>ip6tables</code>, <code>ebtables</code>) come sistema di default nel kernel Linux dal 2014; <code>iptables</code> resta rilevante per sistemi legacy o perché altri strumenti lo invocano indirettamente.</p>
+<p><strong><code>nft</code> non ha nulla di predefinito</strong>: dove <code>iptables</code> ti dà già tabelle e le cinque catene builtin pronte, in <code>nft</code> crei esplicitamente tabella, poi catena specificando tipo, hook e priority.</p>
+<blockquote>
+<p><strong>Domanda</strong>: puoi chiarire ed esemplificare meglio la struttura del comando <code>nft</code>? La trovo confusa scritta solo in prosa.
+<strong>Risposta</strong>: scomponiamola in tre comandi separati, uno per livello, sullo stesso esempio concreto (un firewall che accetta SSH e il traffico di ritorno, droppa il resto in ingresso):
+```bash</p>
+<h1 id="1-crea-la-tabella-contenitore-di-primo-livello-per-una-famiglia-di-protocollo-qui-ip-ipv4">1. crea la tabella (contenitore di primo livello, per una "famiglia" di protocollo — qui ip = IPv4)</h1>
+<p>nft add table ip firewall</p>
+<h1 id="2-crea-la-catena-dentro-quella-tabella-dichiarando-dovequandocon-che-default-agisce">2. crea la catena DENTRO quella tabella, dichiarando dove/quando/con che default agisce</h1>
+<p>nft add chain ip firewall input { type filter hook input priority 0 \; policy drop \; }</p>
+<h1 id="tabella-nome-catena-tipo-hook-a-cui-si-aggancia-ordine-tra-catene-sullo-stesso-hook-comportamento-se-nessuna-regola-fa-match">^tabella  ^nome catena  ^tipo   ^hook a cui si aggancia  ^ordine tra catene sullo stesso hook  ^comportamento se nessuna regola fa match</h1>
+<h1 id="3-aggiungi-le-regole-dentro-quella-catena">3. aggiungi le regole DENTRO quella catena</h1>
+<p>nft add rule ip firewall input tcp dport 22 accept
+nft add rule ip firewall input ct state established,related accept
+<code>``
+Il punto concettuale:</code>table<code>è solo un contenitore (non fa nulla da sola);</code>chain<code>è dove dici *quando* intervenire (hook) e *cosa fare se nessuna regola scatta* (policy);</code>rule<code>è dove metti la logica vera e propria "se match allora azione". In</code>iptables<code>questi tre livelli esistono lo stesso, ma li dai per scontati (la tabella</code>filter<code>e le catene</code>INPUT<code>/</code>FORWARD<code>/ecc. esistono già) — in</code>nft` li devi dichiarare tutti e tre esplicitamente, uno dentro l'altro, prima di poter scrivere la prima regola.</p>
+</blockquote>
+<h2 id="nat-dnat-snat-masquerade-redirect">NAT — DNAT, SNAT, MASQUERADE, REDIRECT</h2>
+<ul>
+<li><code>DNAT --to-destination</code> (in <code>PREROUTING</code>/<code>OUTPUT</code>): cambia la destinazione — port forwarding verso un server interno.</li>
+<li><code>SNAT --to-source</code> (in <code>POSTROUTING</code>/<code>INPUT</code>): cambia la sorgente — una rete privata che esce con un solo IP pubblico.</li>
+<li><code>REDIRECT</code>: caso particolare di DNAT, dirotta alla macchina locale (proxy trasparente).</li>
+<li><code>MASQUERADE</code>: caso particolare di SNAT, solo in <code>POSTROUTING</code>, assegna automaticamente l'indirizzo dell'interfaccia di uscita — comodo quando quell'indirizzo può cambiare (es. IP dinamico).</li>
+</ul>
+<p>Esempio: <code>iptables -t nat -A PREROUTING -i ppp0 -d &lt;ip_pubblico&gt; -p tcp --dport 2222 -j DNAT --to-destination 192.168.0.1:22</code>.</p>
+<h2 id="conntrack-e-stateful-filtering">conntrack e stateful filtering</h2>
+<p>Un PF puro è <strong>stateless</strong>. <code>conntrack</code> riconosce che una sequenza di pacchetti appartiene alla stessa connessione (tupla protocollo/IP sorgente/IP destinazione/porte), indipendentemente dal fatto che il protocollo sia connection-oriented o meno. Stati: <code>NEW</code>, <code>ESTABLISHED</code>, <code>RELATED</code>, <code>INVALID</code>.</p>
+<h2 id="i-cinque-hook-di-netfilter">I cinque hook di netfilter</h2>
+<blockquote>
+<p><strong>Domanda</strong>: cos'è un hook di netfilter?
+<strong>Risposta</strong>: è un <strong>punto di aggancio nello stack di rete del kernel</strong> — un posto preciso nel codice che gestisce i pacchetti dove il kernel si ferma un istante e chiede "qualcuno ha registrato una funzione da eseguire qui?" prima di proseguire. Netfilter definisce cinque di questi punti nel percorso che un pacchetto IP attraversa; iptables/nft non fanno altro che registrare le tue regole <em>a uno di questi punti specifici</em>. È per questo che la catena in cui scrivi una regola non è un dettaglio organizzativo ma decide <em>quando esattamente</em> nel ciclo di vita del pacchetto la regola viene valutata.</p>
+</blockquote>
+<p><code>PREROUTING</code> scatta appena il pacchetto entra, prima di ogni decisione di instradamento. Poi si biforca: <code>INPUT</code> se il pacchetto è per il sistema locale, <code>FORWARD</code> se va inoltrato altrove. Il traffico generato localmente entra da <code>OUTPUT</code>. Tutto ciò che sta per lasciare il sistema converge su <code>POSTROUTING</code>.</p>
+<h2 id="topologie-e-collocazioni-perche-non-basta-un-firewall-solo">Topologie e collocazioni — perché non basta un firewall solo</h2>
+<blockquote>
+<p><strong>Domanda</strong>: questa sezione era di difficile comprensione — troppe sigle (BH, PF, DMZ, ALG, CLG, "screened subnet/single-homed") introdotte senza spiegarle prima.
+<strong>Risposta</strong>: hai ragione, riprendiamola con un piccolo glossario prima, poi lo schema di ogni topologia.</p>
+<p><strong>Glossario</strong>:
+- <strong>PF</strong> = Packet Filter (visto sopra: filtra solo header, tipicamente integrato nei router)
+- <strong>ALG</strong> (Application-Level Gateway) = un proxy che capisce il protocollo applicativo (HTTP, FTP...) e può quindi permettere/negare comandi specifici, non solo header
+- <strong>CLG</strong> (Circuit-Level Gateway) = un intermediario che spezza la connessione a livello di trasporto (diventa lui stesso l'endpoint del traffico) ma inoltra i payload senza esaminarli — meno intelligente di un ALG, ma anche più leggero
+- <strong>BH</strong> (Bastion Host) = un sistema <strong>dedicato</strong> a far girare il software firewall — tipicamente implementa un ALG o un CLG (un PF di solito sta già integrato nel router, non ha bisogno di un host dedicato)
+- <strong>DMZ</strong> (Demilitarized Zone, zona demilitarizzata) = una sottorete "cuscinetto" tra Internet e la rete privata, dove si mettono i server che devono essere raggiungibili dall'esterno, isolati dal resto della rete interna</p>
+<p><strong>Le topologie, in ordine di complessità crescente</strong>:
+1. <strong>Screened single-homed BH</strong>: un solo PF (tipicamente sul router) lascia passare traffico solo verso il BH; il BH implementa l'ALG/CLG. Il BH però condivide fisicamente la stessa rete degli host interni: se comprometti <em>sia</em> il PF <em>sia</em> il BH, sei dentro alla rete interna — due sistemi da compromettere, ma non fisicamente separati.
+2. <strong>Screened dual-homed BH</strong>: uguale, ma il BH ha <strong>due schede di rete</strong> e separa <em>fisicamente</em> due segmenti — nasce la DMZ, dove vivono i server pubblici. Compromettere il solo PF esterno non basta più per arrivare alla rete interna, perché il BH è l'unico ponte fisico tra i due segmenti.
+3. <strong>Screened subnet</strong>: due PF router (uno "outside" verso Internet, uno "inside" verso la rete privata), con la DMZ in mezzo. Nasconde del tutto l'esistenza della subnet privata da chi sta fuori (ostacola l'enumerazione), e lascia che il traffico "banale" tra Internet e DMZ non debba necessariamente passare dal BH.</p>
+<p>Il compromesso di fondo: più layer di separazione aggiungi (dalla 1 alla 3), più sistemi in sequenza un attaccante deve compromettere per arrivare alla rete privata, ma più cresce la complessità di gestione. All'estremo opposto ci sono i <strong>Personal Firewall</strong>, installati sulla singola macchina invece che al perimetro: massima precisione (sanno <em>quale processo</em> genera un pacchetto, cosa impossibile a un PF di rete puro), ma persa la centralizzazione — spesso configurati "learning by doing", con un volume di alert che finisce ignorato.</p>
+</blockquote>
+<hr />
+<h2 id="connessioni">Connessioni</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi.</p>
+</blockquote>
+<ul>
+<li><strong>Con S1 (Enumerazione)</strong>: le regole firewall scritte qui sono esattamente ciò che un <code>nmap</code> esterno vede come porte "filtered" invece di "closed"/"open".</li>
+<li><strong>Con S4 (Binary exploits)</strong>: <code>secret_function_remote</code> (es2b) esponeva un servizio in rete senza controllo di provenienza — è il tipo di superficie che una regola d'ingresso ristretta per sorgente avrebbe limitato.</li>
+<li><strong>Con S10 (Network Intrusion Detection, non ancora fatto)</strong>: il firewall è prevenzione (blocca/lascia passare secondo policy); un NIDS come Suricata è rilevazione per ciò che il firewall lascia passare perché conforme alla policy ma comunque anomalo.</li>
+</ul>
+<h2 id="domande-di-autoverifica-risposte">Domande di autoverifica — Risposte</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi — Lorenzo non ha ancora risposto alle domande della lezione. Da fare prima di considerare il modulo solido, in aggiunta (non sostituzione) dell'esecuzione del lab su VM.</p>
+</blockquote>
+<ol>
+<li><strong>Falso</strong> — un PF stateless non vede il payload, quindi non può leggere il comando che nel Control Channel FTP annuncia la porta del Data Channel: serve un ALG o un meccanismo di tracking dedicato al protocollo.</li>
+<li><strong>Vero</strong> — <code>nft</code> non ha nulla di predefinito, va creato tutto esplicitamente (visto sopra).</li>
+<li><strong>Risposta corretta: (a)</strong> <code>ct state established,related accept</code>.</li>
+<li><strong>Falso</strong> — è buona pratica riservare <code>DROP</code>/<code>ACCEPT</code> alla tabella <code>filter</code>; <code>nat</code>/<code>mangle</code> servono a modificare, non a giudicare il destino finale.</li>
+<li><strong>Falso</strong> — <code>RETURN</code> in una catena custom torna alla catena chiamante (riprende dalla regola successiva al salto); <code>RETURN</code> in una catena builtin equivale invece alla default policy di quella catena. Sono due effetti diversi con lo stesso comando, a seconda del tipo di catena in cui gira.</li>
+</ol>
+<h2 id="riepilogo">Riepilogo</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi.</p>
+</blockquote>
+<ul>
+<li>Un firewall è un'architettura con una policy (default deny) e una topologia (DMZ, segmentazione) — le regole più corrette non salvano una topologia che lascia altre strade aperte.</li>
+<li><code>iptables</code> e <code>nft</code> condividono lo stesso modello concettuale (tabelle per tipo di decisione, catene agganciate agli hook di netfilter, regole in ordine) — <code>nft</code> lo rende esplicito dove <code>iptables</code> lo dava per scontato.</li>
+<li>conntrack rende il filtraggio stateful: una regola sola per NEW/ESTABLISHED invece di una coppia simmetrica per ogni servizio.</li>
+</ul>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[guida_lab_moduloS5_firewall_iptables]]</li>
+<li>[[lezione_moduloS5_firewall_iptables]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

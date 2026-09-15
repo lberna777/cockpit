@@ -1,0 +1,53 @@
+# Referto ambiente UniCode
+
+Radice: `/home/lorenzo/cockpit/Vault/UniCode`
+Risolta per: file di configurazione /home/lorenzo/.config/unicode/root
+Python: 3.13.5
+
+## Struttura attesa
+[  ok  ] profilo/
+[  ok  ] stato/
+[  ok  ] log/
+[  ok  ] corsi/
+[  ok  ] piano/
+[  ok  ] plans/handoffs/
+[  ok  ] scripts/
+[  ok  ] CLAUDE.md
+[  ok  ] profilo/studente.md
+[  ok  ] profilo/errori.md
+[  ok  ] stato/corrente.md
+[  ok  ] stato/giornata.md
+[  ok  ] stato/tracker.md
+[  ok  ] piano/codici.txt
+[  ok  ] scripts/paths.py
+[  ok  ] scripts/briefing.py
+[  ok  ] scripts/giornata.py
+[  ok  ] scripts/session_start.sh
+[  ok  ] scripts/session_end.sh
+[  ok  ] stato/briefing.md
+
+## Residui della struttura precedente
+Nessuno. La migrazione risulta completata.
+
+## Voci di primo livello non previste
+  - ARCHIVIO
+
+## Automatismi
+[  ok  ] hook SessionStart in .claude/settings.json
+[  ok  ] hook SessionEnd in .claude/settings.json
+[  ok  ] consolidamento serale  — timer systemd
+
+## Comandi che citano percorsi superati
+[ NOTA ] .claude/commands/appunti.md  — corrente.md
+[ NOTA ] .claude/commands/chiudi.md  — corrente.md
+[ NOTA ] .claude/commands/lab.md  — corrente.md
+[ NOTA ] .claude/commands/lezione.md  — corrente.md
+[ NOTA ] .claude/commands/stato.md  — corrente.md
+
+## Codici corso attivi
+FI2, CALC, MATAP, LAS, SO, IDS, TLC, ELT, CA, RETI, WEB, ELN
+
+## Verdetto
+Ambiente allineato.
+
+_Incolla questo referto in chat per il riallineamento._

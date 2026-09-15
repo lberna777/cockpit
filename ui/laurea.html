@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laurea · cockpit</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="index.html">Oggi</a>
+    <a href="laurea.html" aria-current="page">Laurea</a>
+    <a href="corsi.html">Corsi</a>
+    <a href="materiali.html">Materiali</a>
+    <a href="workflow.html">Workflow</a>
+    <a href="diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<h1 class="titolo-pagina">Il punto sulla laurea</h1>
+
+<section class="griglia" data-entra>
+  <article class="scheda">
+    <p class="metrica__etichetta">CFU acquisiti</p>
+    <p class="metrica__valore" data-conta="81">0</p>
+    <p class="tenue">su 180</p>
+  </article>
+  <article class="scheda">
+    <p class="metrica__etichetta">Rimanenti</p>
+    <p class="metrica__valore" data-conta="96">0</p>
+    <p class="tenue">dodici esami, più 3 di prova finale</p>
+  </article>
+  <article class="scheda">
+    <p class="metrica__etichetta">Media alla data</p>
+    <p class="metrica__valore">92,4 / 110</p>
+  </article>
+  <article class="scheda">
+    <p class="metrica__etichetta">Avanzamento</p>
+    <svg viewBox="0 0 120 120" class="arco" role="img" aria-label="CFU acquisiti sul totale">
+      <circle class="arco__traccia" cx="60" cy="60" r="52" fill="none" stroke-width="9"/>
+      <circle class="arco__valore" cx="60" cy="60" r="52" fill="none" stroke-width="9"
+              transform="rotate(-90 60 60)"
+              data-arco="0.45"/>
+    </svg>
+    <p class="tenue">Orizzonte: sessione estiva 2028</p>
+  </article>
+</section>
+
+<section class="sezione" data-entra>
+  <h2>Le tre sessioni</h2>
+  <ol class="fasi">
+    <li class="fase">
+      <p class="fase__codice">S1</p>
+      <p class="fase__finestra">gennaio–febbraio 2027</p>
+      <p class="fase__cfu">30 CFU</p>
+      <p class="fase__esami">
+<a href="corsi/FI2.html">FI2</a> · <a href="corsi/CALC.html">CALC</a> · <a href="corsi/MATAP.html">MATAP</a> · <a href="corsi/LAS.html">LAS</a>      </p>
+    </li>
+    <li class="fase">
+      <p class="fase__codice">S2</p>
+      <p class="fase__finestra">giugno–luglio 2027</p>
+      <p class="fase__cfu">33 CFU</p>
+      <p class="fase__esami">
+<a href="corsi/SO.html">SO</a> · <a href="corsi/IDS.html">IDS</a> · <a href="corsi/TLC.html">TLC</a> · <a href="corsi/ELT.html">ELT</a>      </p>
+    </li>
+    <li class="fase">
+      <p class="fase__codice">S3</p>
+      <p class="fase__finestra">gennaio–febbraio 2028</p>
+      <p class="fase__cfu">33 CFU</p>
+      <p class="fase__esami">
+<a href="corsi/CA.html">CA</a> · <a href="corsi/RETI.html">RETI</a> · <a href="corsi/WEB.html">WEB</a> · <a href="corsi/ELN.html">ELN</a>      </p>
+    </li>
+  </ol>
+</section>
+
+<section class="sezione" data-entra>
+  <h2>Catene di dipendenza</h2>
+  <p class="tenue">Un esame in testa a una catena non si sposta: ritardarlo ritarda tutto ciò che gli sta sotto, anche a sessioni di distanza.</p>
+  <div class="catene-cornice"><svg viewBox="0 0 670 246" role="img" aria-label="Catene di dipendenza fra gli esami" class="catene"><text x="20" y="24" class="catene__sessione">S1</text><text x="230" y="24" class="catene__sessione">S2</text><text x="440" y="24" class="catene__sessione">S3</text><path class="catene__arco" d="M 148.0 119.0 C 189.0 119.0, 189.0 119.0, 230.0 119.0" fill="none"/><path class="catene__arco" d="M 148.0 119.0 C 294.0 119.0, 294.0 181.0, 440.0 181.0" fill="none"/><path class="catene__arco" d="M 148.0 57.0 C 189.0 57.0, 189.0 181.0, 230.0 181.0" fill="none"/><path class="catene__arco" d="M 148.0 181.0 C 294.0 181.0, 294.0 57.0, 440.0 57.0" fill="none"/><path class="catene__arco" d="M 358.0 57.0 C 399.0 57.0, 399.0 119.0, 440.0 119.0" fill="none"/><g class="catene__nodo"><rect x="440" y="40" width="128" height="34" rx="9"/><text x="504.0" y="61.0">CA</text></g><g class="catene__nodo"><rect x="20" y="40" width="128" height="34" rx="9"/><text x="84.0" y="61.0">CALC</text></g><g class="catene__nodo"><rect x="440" y="102" width="128" height="34" rx="9"/><text x="504.0" y="123.0">ELN</text></g><g class="catene__nodo"><rect x="230" y="40" width="128" height="34" rx="9"/><text x="294.0" y="61.0">ELT</text></g><g class="catene__nodo"><rect x="20" y="102" width="128" height="34" rx="9"/><text x="84.0" y="123.0">FI2</text></g><g class="catene__nodo"><rect x="230" y="102" width="128" height="34" rx="9"/><text x="294.0" y="123.0">IDS</text></g><g class="catene__nodo"><rect x="20" y="164" width="128" height="34" rx="9"/><text x="84.0" y="185.0">MATAP</text></g><g class="catene__nodo"><rect x="230" y="164" width="128" height="34" rx="9"/><text x="294.0" y="185.0">SO</text></g><g class="catene__nodo"><rect x="440" y="164" width="128" height="34" rx="9"/><text x="504.0" y="185.0">WEB</text></g></svg></div>
+</section>
+
+<section class="sezione" data-entra>
+  <h2>Date degli appelli</h2>
+  <p class="avviso-vuoto"><strong>Da compilare.</strong> Nessuna data di appello è ancora nel piano:
+  finché la tabella è vuota, ogni conteggio di settimane ragiona sulla finestra di sessione,
+  con un margine d'errore di settimane.</p>
+  <table class="tabella">
+    <thead><tr><th>Esame</th><th>Sessione</th><th>Primo appello</th><th>Secondo appello</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="corsi/FI2.html">FI2</a></td>
+        <td class="tenue">S1</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/CALC.html">CALC</a></td>
+        <td class="tenue">S1</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/MATAP.html">MATAP</a></td>
+        <td class="tenue">S1</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/LAS.html">LAS</a></td>
+        <td class="tenue">S1</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/SO.html">SO</a></td>
+        <td class="tenue">S2</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/IDS.html">IDS</a></td>
+        <td class="tenue">S2</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/TLC.html">TLC</a></td>
+        <td class="tenue">S2</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/ELT.html">ELT</a></td>
+        <td class="tenue">S2</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/CA.html">CA</a></td>
+        <td class="tenue">S3</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/RETI.html">RETI</a></td>
+        <td class="tenue">S3</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/WEB.html">WEB</a></td>
+        <td class="tenue">S3</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><a href="corsi/ELN.html">ELN</a></td>
+        <td class="tenue">S3</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "";</script>
+<script src="assets/indice.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

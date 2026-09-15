@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_modulo2A.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi</p>
+<h1 class="titolo-pagina">Appunti_modulo2A.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo2A.md">Apri il file originale</a></p>
+<article class="prosa"><p>All'interno di linux, ogni cosa è un numero, compresi gli utenti. I vari  <strong>vagrant, root</strong>... sono tutte conversioni raccolte in /etc/passwd</p>
+<p>Per informarci sui numeri che ci riguardano usiamo <strong>id</strong></p>
+<p><strong>uid=1000(vagrant) gid=1000(vagrant) groups=1000(vagrant)</strong></p>
+<p>che ci restituisce il nostro numero personale, del gruppo a cui apparteniamo (non ricordo cosa cambia tra gid e goups)</p>
+<p>Per vedere tutti gli utenti disponibili sul pc eseguiamo <strong>cat /etc/passwd</strong></p>
+<p>Otteniamo stringhe di questo tipo:</p>
+<p>vagrant:x:1000:1000:,,,:/home/vagrant:/bin/bash<br />
+   | | | | | | |<br />
+  nome | UID GID GECOS home shell<br />
+        |<br />
+      password (sempre "x" — la vera hash è in /etc/shadow)</p>
+<p>(inserisci lo schema fatto bene al posto di questo)</p>
+<p>I vari UID seguono una convenzione che vede 0 dedicato esclusivamente all'utente root, i numeri da 1 a 999 per i deamon e utenti creati dal computer internamente per far funzionare cose, i numeri da 1000 in poi sono invece dedicati a utenti fisici reali</p>
+<p><strong>STORAGE DELLA PASSWORD</strong></p>
+<p><strong>Le password non sono in <code>/etc/passwd</code> (leggibile da tutti) ma in <code>/etc/shadow</code>, accessibile solo da root. Contiene gli hash delle password e le politiche di scadenza.</strong></p>
+<p>accedo tramite</p>
+<pre><code>sudo cat /etc/shadow | grep vagrant
+</code></pre>
+<p>e ottengo righe di questo tipo (serve una spiegazione dettagliata della composizione</p>
+<pre><code>vagrant:$6$abc123...:19800:0:99999:7:::
+   |        |          |   |   |   |
+  nome    hash pw    gg ult  min max warn
+</code></pre>
+<p>&nbsp;</p>
+<p><strong>GESTIONE DEGLI UTENTI</strong></p>
+<p>posso creare un utente da zero tramite:</p>
+<pre><code>sudo useradd -m -s /bin/bash alice
+</code></pre>
+<p>dove uso -m per indicare di creare la directory /home/alice e -s per assegnare bash come shell di login, evitando di usare sh o altro</p>
+<p>I profili sono proteggibili tramite password tramite:</p>
+<pre><code>sudo passwd alice
+</code></pre>
+<p>Se invece mi interessa modificare un utente esistente e i suoi privilegi:</p>
+<pre><code>sudo usermod -aG sudo bob
+</code></pre>
+<p>(aggiungi una lista di cose fattibili tramite usermod, non credo proprio che -aG sia l'unico flag)</p>
+<p>Posso muovermi tra un utente e l'altro con:</p>
+<pre><code>su - alice
+</code></pre>
+<p>(l'uso del trattino è necessario per spostarci completamente nell'ambiente completo di alice, con le proprie variabili di ambiente e directory, senza si cambia "nome" senza cambiare ambiente dall'utente precedente)</p>
+<p>Infine posso cancellare un utente (comprendendo o meno la sua directory home) tramite: </p>
+<pre><code>sudo userdel -r alice
+</code></pre>
+<p>dove -r indica proprio la pulizia della cartella home o meno</p>
+<p><strong>PROPRIETA' DI UN FILE</strong></p>
+<p>Alla creazione di esso, un file viene legato all'utente che lo ha creato e al suo gruppo, di seguito vediamo come impostare un creatore diverso dall'originale a un file e come fare la stessa operazione relativamente al gruppo di appartenenza del creatore</p>
+<pre><code># Creare un file come vagrant
+[](#cb18-6)echo &quot;file di vagrant&quot; &gt; file_vagrant.txt
+[](#cb18-7)ls -la file_vagrant.txt
+[](#cb18-8)# output: -rw-r--r-- 1 vagrant vagrant ...
+[](#cb18-9)
+[](#cb18-10)# Cambiare il proprietario ad alice
+[](#cb18-11)sudo chown alice file_vagrant.txt
+[](#cb18-12)ls -la file_vagrant.txt
+[](#cb18-13)# output: -rw-r--r-- 1 alice vagrant ...
+[](#cb18-14)
+[](#cb18-15)# Cambiare sia proprietario che gruppo in un solo comando
+[](#cb18-16)sudo chown alice:alice file_vagrant.txt
+[](#cb18-17)ls -la file_vagrant.txt
+[](#cb18-18)# output: -rw-r--r-- 1 alice alice ...
+[](#cb18-19)
+[](#cb18-20)# Cambiare solo il gruppo
+[](#cb18-21)sudo chgrp vagrant file_vagrant.txt
+[](#cb18-22)ls -la file_vagrant.txt
+[](#cb18-23)# output: -rw-r--r-- 1 alice vagrant ...
+</code></pre>
+<p><strong>L'IMPORTANZA DEL COMANDO SUDO</strong></p>
+<p><strong><code>sudo</code> (superuser do) permette a un utente autorizzato di eseguire un singolo comando come root, senza diventare root permanentemente. La configurazione che stabilisce chi può usare <code>sudo</code> e per quali comandi sta in <code>/etc/sudoers</code>.</strong></p>
+<p>attraverso <strong>sudo -l</strong>  ho accesso a tutti i comandi che posso eseguire come <strong>sudo</strong> (non ho capito cosa ottengo materialmente da questo comando ti allego il mio output e aggiungi un analisis dettagliata negli appunti finali)</p>
+<p>vagrant@bookworm:~/Lab2A\$ sudo -l<br />
+Matching Defaults entries for vagrant on bookworm:<br />
+    env_reset, mail_badpass,<br />
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin,<br />
+    use_pty</p>
+<p>User vagrant may run the following commands on bookworm:<br />
+    (ALL) NOPASSWD: ALL</p>
+<p>(come mai posso usare sudo dal profilo vagrant anche se quando chiedo groups vagrant mi dice vagrant : vagrant e non vagrant : vagrant sudo?)</p>
+<p>(ho modo di vedere una lista solo degli user fisici del pc?)</p>
+<p><strong>ESERCIZIO FINALE</strong></p>
+<p>vagrant@bookworm:~/Lab2A\$ sudo groupadd progetto<br />
+vagrant@bookworm:~/Lab2A\$ sudo useradd -m -s /bin/bash alice<br />
+vagrant@bookworm:~/Lab2A\$ sudo useradd -m -s /bin/bash bob<br />
+vagrant@bookworm:~/Lab2A\$ sudo usermod -aG progetto alice<br />
+vagrant@bookworm:~/Lab2A\$ sudo usermod -aG progetto bob<br />
+vagrant@bookworm:~/Lab2A\$ groups alice<br />
+alice : alice progetto<br />
+vagrant@bookworm:~/Lab2A\$ groups bob<br />
+bob : bob progetto<br />
+vagrant@bookworm:~/Lab2A\$ sudo mkdir /srv/progetto<br />
+vagrant@bookworm:~/Lab2A\$ sudo chown root:progetto /srv/progetto</p>
+<p>(perchè cambio possessore (o creatore?) della directory?)</p>
+<p>vagrant@bookworm:~/Lab2A\$ sudo chmod 770 /srv/progetto<br />
+vagrant@bookworm:~/Lab2A\$ ls -la /srv/</p>
+<p>(srv è una cartella preesistente? cosa sono gli altri ifle oltre progetto?)<br />
+total 12<br />
+drwxr-xr-x 3 root root 4096 Apr 21 15:00 .<br />
+drwxr-xr-x 19 root root 4096 Apr 15 16:03 ..<br />
+drwxrwx--- 2 root progetto 4096 Apr 21 15:00 progetto<br />
+vagrant@bookworm:~/Lab2A\$ su - alice<br />
+Password:<br />
+su: Authentication failure<br />
+vagrant@bookworm:~/Lab2A\$ sudo passwd alice<br />
+New password:<br />
+Retype new password:<br />
+passwd: password updated successfully<br />
+vagrant@bookworm:~/Lab2A\$ sudo passwd bob<br />
+New password:<br />
+Retype new password:<br />
+passwd: password updated successfully<br />
+vagrant@bookworm:~/Lab2A\$ su - alice<br />
+Password:<br />
+alice@bookworm:~\$ cd /srv/progetto/<br />
+alice@bookworm:/srv/progetto\$ echo "file di alice" &gt; alice.txt<br />
+alice@bookworm:/srv/progetto\$ ls -la</p>
+<p>(ugualmente qua, cosa sono gli altri due file oltre a alice.txt? in questo caso sono sicuro la cartella non esistesse prima perchè l'ho creata io)<br />
+total 12<br />
+drwxrwx--- 2 root progetto 4096 Apr 21 15:03 .<br />
+drwxr-xr-x 3 root root 4096 Apr 21 15:00 ..<br />
+-rw-r--r-- 1 alice alice 14 Apr 21 15:03 alice.txt<br />
+alice@bookworm:/srv/progetto\$ exit<br />
+logout<br />
+vagrant@bookworm:~/Lab2A\$ su - bob<br />
+Password:<br />
+bob@bookworm:~\$ cd /srv/progetto/<br />
+bob@bookworm:/srv/progetto\$ cat alice.txt<br />
+file di alice<br />
+bob@bookworm:/srv/progetto\$ exit<br />
+logout<br />
+vagrant@bookworm:~/Lab2A\$ sudo useradd -m -s /bin/bash sconosciuto<br />
+vagrant@bookworm:~/Lab2A\$ sudo passwd sconosciuto<br />
+New password:<br />
+Retype new password:<br />
+passwd: password updated successfully<br />
+vagrant@bookworm:~/Lab2A\$ su - sconosciuto<br />
+Password:<br />
+sconosciuto@bookworm:~\$ cd /srv/progetto/<br />
+-bash: cd: /srv/progetto/: Permission denied<br />
+sconosciuto@bookworm:~\$ exit<br />
+logout</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo2A_utenti_permessi]]</li>
+<li>[[guida_lab_modulo2A_utenti_permessi]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

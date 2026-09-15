@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_lab_modulo2B_lab_utenti_permessi_file.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  lezione</p>
+<h1 class="titolo-pagina">guida_lab_modulo2B_lab_utenti_permessi_file.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeLezioni/LEZIONI SYSADM/guida_lab_modulo2B_lab_utenti_permessi_file.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="lab-utenti-permessi-e-file">LAB — Utenti, Permessi e File</h1>
+<p><strong>Modulo</strong>: 2B | <strong>Corso</strong>: Lab Amministrazione di Sistemi T<br />
+<strong>Prerequisiti</strong>: Modulo 2A completato (useradd, chmod, umask, SUID/SGID)<br />
+<strong>VM</strong>: <code>cd ~/sysAdmin-lab &amp;&amp; vagrant up --provider=virtualbox &amp;&amp; vagrant ssh</code><br />
+<strong>Fonte</strong>: LAB "Esempi di gestione utenti, permessi e file [31 marzo]"</p>
+<hr />
+<h2 id="prima-di-iniziare-cosa-trovi-in-questo-lab">Prima di iniziare — cosa trovi in questo lab</h2>
+<p>Il lab ha 6 esercizi. Il Modulo 2B copre i primi due:</p>
+<ol>
+<li><strong>Osservare</strong> <code>/etc/skel</code>, <code>/etc/default/useradd</code>, <code>/etc/login.defs</code></li>
+<li><strong>Creare</strong> una directory collaborativa con SGID per due utenti</li>
+</ol>
+<p>Gli esercizi 3–6 (dd, fuser/lsof, script con find) sono nel Modulo 2C.</p>
+<hr />
+<h2 id="esercizio-1-osservare-i-file-di-configurazione-utenti">Esercizio 1 — Osservare i file di configurazione utenti</h2>
+<h3 id="etcskel"><code>/etc/skel</code></h3>
+<p>Quando <code>useradd -m</code> crea la home di un utente, copia al suo interno tutto il contenuto di <code>/etc/skel</code>. È il "template" della home.</p>
+<pre><code class="language-bash">ls -la /etc/skel
+</code></pre>
+<p>Output tipico su Debian:</p>
+<pre><code>drwxr-xr-x  2 root root 4096 ...  .
+drwxr-xr-x 77 root root 4096 ...  ..
+-rw-r--r--  1 root root  220 ...  .bash_logout
+-rw-r--r--  1 root root 3526 ...  .bashrc
+-rw-r--r--  1 root root  807 ...  .profile
+</code></pre>
+<p>Ogni utente creato con <code>-m</code> parte con questi tre file nella propria home. Se vuoi che tutti i nuovi utenti abbiano ad esempio un <code>.vimrc</code> preconfigurato, basta aggiungerlo qui:</p>
+<pre><code class="language-bash">sudo cp ~/.vimrc /etc/skel/.vimrc
+# → tutti i nuovi utenti avranno .vimrc già configurato
+</code></pre>
+<h3 id="etcdefaultuseradd"><code>/etc/default/useradd</code></h3>
+<p>Contiene i valori di default usati da <code>useradd</code> quando non specifichi un'opzione:</p>
+<pre><code class="language-bash">cat /etc/default/useradd
+</code></pre>
+<p>Campi principali:</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Esempio</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GROUP</code></td>
+<td><code>100</code></td>
+<td>GID del gruppo di default (se non si usa <code>-U</code>)</td>
+</tr>
+<tr>
+<td><code>HOME</code></td>
+<td><code>/home</code></td>
+<td>Directory genitore delle home</td>
+</tr>
+<tr>
+<td><code>INACTIVE</code></td>
+<td><code>-1</code></td>
+<td>Giorni dopo scadenza password prima di bloccare l'account (<code>-1</code> = mai)</td>
+</tr>
+<tr>
+<td><code>EXPIRE</code></td>
+<td>``</td>
+<td>Data di scadenza account (vuoto = nessuna)</td>
+</tr>
+<tr>
+<td><code>SHELL</code></td>
+<td><code>/bin/sh</code></td>
+<td>Shell di default (ecco perché si passa sempre <code>-s /bin/bash</code> esplicitamente)</td>
+</tr>
+<tr>
+<td><code>SKEL</code></td>
+<td><code>/etc/skel</code></td>
+<td>Directory template da cui copiare i file</td>
+</tr>
+</tbody>
+</table>
+<h3 id="etclogindefs"><code>/etc/login.defs</code></h3>
+<p>Configurazione più bassa — policy globali di sistema per la gestione degli account:</p>
+<pre><code class="language-bash">grep -v '^#' /etc/login.defs | grep -v '^$'
+</code></pre>
+<p>Campi rilevanti:</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valore tipico</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PASS_MAX_DAYS</code></td>
+<td><code>99999</code></td>
+<td>Giorni massimi prima che la password scada</td>
+</tr>
+<tr>
+<td><code>PASS_MIN_DAYS</code></td>
+<td><code>0</code></td>
+<td>Giorni minimi prima di poter cambiare password</td>
+</tr>
+<tr>
+<td><code>PASS_WARN_AGE</code></td>
+<td><code>7</code></td>
+<td>Giorni di preavviso prima della scadenza</td>
+</tr>
+<tr>
+<td><code>UID_MIN</code></td>
+<td><code>1000</code></td>
+<td>UID minimo per utenti fisici (ecco la convenzione 1000+)</td>
+</tr>
+<tr>
+<td><code>UID_MAX</code></td>
+<td><code>60000</code></td>
+<td>UID massimo per utenti fisici</td>
+</tr>
+<tr>
+<td><code>UMASK</code></td>
+<td><code>022</code></td>
+<td>Umask di default per le sessioni di login</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Connessione con la teoria</strong>: questi valori sono i default da cui parte <code>useradd</code>. Si sovrascrivono per singolo utente con <code>chage</code> (politiche password) o con i parametri di <code>useradd</code>/<code>usermod</code> alla creazione.</p>
+</blockquote>
+<hr />
+<h2 id="esercizio-2-directory-collaborativa-con-sgid">Esercizio 2 — Directory collaborativa con SGID</h2>
+<p><strong>Obiettivo</strong>: creare due utenti (<code>maria</code> e <code>piero</code>) che possano collaborare in una directory condivisa — creare file leggibili e scrivibili da entrambi — senza toccare i file personali dell'uno o dell'altro.</p>
+<h3 id="passo-1-creare-gli-utenti">Passo 1 — Creare gli utenti</h3>
+<pre><code class="language-bash">sudo useradd -m -s /bin/bash maria
+sudo useradd -m -s /bin/bash piero
+sudo passwd maria
+sudo passwd piero
+</code></pre>
+<p>Verifica: dopo questi comandi, ogni utente ha il proprio gruppo privato omonimo. <code>maria</code> ha gruppo primario <code>maria</code>, <code>piero</code> ha gruppo primario <code>piero</code>. Se ora creassero file con permessi di gruppo aperti (<code>664</code>), solo l'altro membro del loro rispettivo gruppo potrebbe accedervi — ma <code>maria</code> non è nel gruppo <code>piero</code> e viceversa. Da soli non possono ancora collaborare.</p>
+<pre><code class="language-bash"># Conferma: ognuno è l'unico membro del proprio gruppo
+grep maria /etc/group
+grep piero /etc/group
+</code></pre>
+<h3 id="passo-2-allargare-la-umask">Passo 2 — Allargare la umask</h3>
+<p>Di default la umask è <code>0022</code>, che produce file con permessi <code>644</code> (il gruppo non può scrivere). Per la collaborazione serve che i file creati siano scrivibili dal gruppo, quindi umask <code>0002</code>:</p>
+<pre><code class="language-bash"># Aggiungere umask 0002 al .bashrc di entrambi gli utenti
+echo &quot;umask 0002&quot; | sudo tee -a /home/maria/.bashrc
+echo &quot;umask 0002&quot; | sudo tee -a /home/piero/.bashrc
+</code></pre>
+<p>Con umask <code>0002</code>, i file creati avranno permessi <code>664</code> (rw-rw-r--) e le directory <code>775</code> (rwxrwxr-x) — il gruppo può leggere e scrivere.</p>
+<h3 id="passo-3-creare-il-gruppo-e-aggiungervi-gli-utenti">Passo 3 — Creare il gruppo e aggiungervi gli utenti</h3>
+<pre><code class="language-bash">sudo groupadd programmatori
+sudo usermod -aG programmatori maria
+sudo usermod -aG programmatori piero
+</code></pre>
+<p>Verifica:</p>
+<pre><code class="language-bash">groups maria   # maria : maria programmatori
+groups piero   # piero : piero programmatori
+</code></pre>
+<blockquote>
+<p><strong>Nota</strong>: la modifica ai gruppi è attiva alla prossima sessione di login. Se fai <code>su - maria</code> subito dopo, il gruppo <code>programmatori</code> potrebbe non essere ancora attivo nella sessione. Per forzarlo senza ri-login: <code>newgrp programmatori</code>.</p>
+</blockquote>
+<h3 id="passo-4-creare-la-directory-collaborativa-con-sgid">Passo 4 — Creare la directory collaborativa con SGID</h3>
+<pre><code class="language-bash">sudo mkdir /home/programmatori
+sudo chgrp programmatori /home/programmatori
+</code></pre>
+<p>Ora i permessi: vogliamo che owner e gruppo possano fare tutto, gli altri nulla. E soprattutto, vogliamo il <strong>SGID</strong> — così i file creati dentro ereditano automaticamente il gruppo <code>programmatori</code> invece del gruppo primario del creatore.</p>
+<pre><code class="language-bash">sudo chmod 02770 /home/programmatori
+</code></pre>
+<p>Il <code>2</code> davanti attiva il SGID. Verificare:</p>
+<pre><code class="language-bash">ls -la /home/
+# drwxrws--- 2 root programmatori 4096 ...  programmatori
+#        ^
+#        's' = SGID attivo
+</code></pre>
+<blockquote>
+<p><strong>Perché SGID è fondamentale qui</strong>: senza SGID, maria crea un file e il gruppo proprietario è <code>maria</code> (il suo gruppo primario). Piero è nel gruppo <code>programmatori</code>, non nel gruppo <code>maria</code> — non può scrivere quel file. Con SGID, il file viene creato col gruppo <code>programmatori</code> — entrambi ci possono accedere.</p>
+</blockquote>
+<h3 id="passo-5-test">Passo 5 — Test</h3>
+<pre><code class="language-bash"># Come maria
+su - maria
+cd /home/programmatori
+touch file_di_maria.txt
+echo &quot;contenuto di maria&quot; &gt; file_di_maria.txt
+ls -la
+# -rw-rw-r-- 1 maria programmatori ...  file_di_maria.txt
+#                    ^^^^^^^^^^^^^
+#                    gruppo programmatori, non maria — grazie a SGID
+exit
+
+# Come piero
+su - piero
+cd /home/programmatori
+cat file_di_maria.txt        # → &quot;contenuto di maria&quot; ✓
+echo &quot;aggiunta di piero&quot; &gt;&gt; file_di_maria.txt   # → funziona ✓
+exit
+
+# Come vagrant (fuori dal gruppo)
+cd /home/programmatori        # → Permission denied ✓
+</code></pre>
+<h3 id="riepilogo-dei-meccanismi-che-cooperano">Riepilogo dei meccanismi che cooperano</h3>
+<table>
+<thead>
+<tr>
+<th>Meccanismo</th>
+<th>Ruolo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gruppo <code>programmatori</code></td>
+<td>Definisce chi può accedere alla directory</td>
+</tr>
+<tr>
+<td><code>chmod 2770</code></td>
+<td>SGID + rwxrwx--- (solo group e owner, nessun altro)</td>
+</tr>
+<tr>
+<td>SGID sulla directory</td>
+<td>I file creati dentro ereditano il gruppo <code>programmatori</code></td>
+</tr>
+<tr>
+<td><code>umask 0002</code> nel <code>.bashrc</code></td>
+<td>I nuovi file hanno permessi <code>664</code> — il gruppo può scrivere</td>
+</tr>
+</tbody>
+</table>
+<p>Questi quattro elementi si completano a vicenda. Togliere uno qualsiasi rompe la collaborazione:
+- Senza SGID: i file hanno il gruppo primario del creatore, l'altro non può scriverci
+- Senza umask 0002: i file hanno permessi <code>644</code>, il gruppo può solo leggere
+- Senza chmod 770: la directory è accessibile a chiunque (o a nessuno)
+- Senza il gruppo condiviso: non esiste un soggetto comune a cui dare i permessi</p>
+<hr />
+<h2 id="connessione-con-security">Connessione con Security</h2>
+<ul>
+<li>Una directory <code>777</code> al posto di <code>2770</code> rimuove la protezione verso gli esterni — qualsiasi utente del sistema può accedere, modificare, cancellare</li>
+<li>Il SGID su eseguibili (non directory) è un vettore di privilege escalation: se un programma con SGID è vulnerabile, un attaccante può acquisire i privilegi del gruppo proprietario</li>
+<li><code>find / -perm -2000 -type f</code> elenca tutti i file con SGID attivo sul sistema — uno dei controlli base di un audit</li>
+</ul>
+<hr />
+<h2 id="riepilogo-comandi">Riepilogo comandi</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ls -la /etc/skel</code></td>
+<td>Vedi il template delle home utente</td>
+</tr>
+<tr>
+<td><code>cat /etc/default/useradd</code></td>
+<td>Default di useradd</td>
+</tr>
+<tr>
+<td><code>grep -v '^#' /etc/login.defs \| grep -v '^$'</code></td>
+<td>Policy globali account (senza commenti)</td>
+</tr>
+<tr>
+<td><code>echo "umask 0002" &gt;&gt; ~/.bashrc</code></td>
+<td>Imposta umask persistente per un utente</td>
+</tr>
+<tr>
+<td><code>sudo groupadd nome</code></td>
+<td>Crea un nuovo gruppo</td>
+</tr>
+<tr>
+<td><code>sudo usermod -aG gruppo utente</code></td>
+<td>Aggiunge utente al gruppo</td>
+</tr>
+<tr>
+<td><code>sudo chgrp gruppo directory</code></td>
+<td>Assegna gruppo proprietario alla directory</td>
+</tr>
+<tr>
+<td><code>sudo chmod 02770 directory</code></td>
+<td>SGID + rwxrwx---</td>
+</tr>
+<tr>
+<td><code>chmod g+s directory</code></td>
+<td>Imposta SGID in simbolico</td>
+</tr>
+<tr>
+<td><code>newgrp gruppo</code></td>
+<td>Attiva un nuovo gruppo nella sessione corrente senza re-login</td>
+</tr>
+<tr>
+<td><code>find / -perm -2000 -type f</code></td>
+<td>Lista file con SGID attivo (audit)</td>
+</tr>
+</tbody>
+</table>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[Appunti_modulo2B]]</li>
+<li>[[appunti_modulo2B_lab_utenti_permessi_file]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

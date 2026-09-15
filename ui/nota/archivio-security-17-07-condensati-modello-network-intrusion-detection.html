@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>modello_network_intrusion_detection.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">modello_network_intrusion_detection.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/04_network_intrusion_detection/modello_network_intrusion_detection.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modello-risolto-network-intrusion-detection">Modello Risolto — Network Intrusion Detection</h1>
+<blockquote>
+<p>Fonte: <code>SIMULAZIONI ESAMI/SICINF/Network_Intrusion_Detection.html</code> (Virtuale), esercizio dell'
+<strong>11 gennaio 2024</strong>. Consegna e testo di analisi sono quelli reali della soluzione ufficiale.
+Il formato dei file da consegnare è cambiato leggermente nelle sessioni più recenti (vedi nota in
+fondo), ma il procedimento di analisi è identico.</p>
+</blockquote>
+<hr />
+<h2 id="consegna-originale">Consegna originale</h2>
+<blockquote>
+<p>Scaricate il tracciato di traffico <code>dump.pcap</code>. Analizzate il tracciato con Wireshark (suggerimento:
+fate uso dell'ordinamento per distinguere diversi tipi di attacco). Identificate <strong>quattro tipi di
+interazione</strong> verso il server <code>10.10.10.10</code>. Scrivete una regola per Suricata che permetta di
+registrare la FLAG nel file degli eventi.</p>
+</blockquote>
+<p><strong>Consegna</strong>: un file <code>attacks.txt</code> con la descrizione dei quattro tipi di interazione individuati (se
+sono o no attacchi, di che tipo, che porte/indirizzi coinvolgono), e uno screenshot <code>suricata.png</code> che
+mostri il comando con cui si estrae la FLAG dal file eventi di Suricata.</p>
+<hr />
+<h2 id="soluzione-modello">Soluzione modello</h2>
+<h3 id="metodo-di-analisi-wireshark">Metodo di analisi (Wireshark)</h3>
+<p>Il trucco è <strong>ordinare per colonna</strong>, non scorrere il pcap pacchetto per pacchetto:</p>
+<ol>
+<li><strong>Ordinando per indirizzo sorgente</strong>: si nota una grande quantità di pacchetti tutti provenienti
+   da <code>10.10.10.10</code> diretti a <strong>porte di destinazione variabili</strong> → segnatura tipica di <strong>port scan</strong>
+   (es. nmap).</li>
+<li><strong>Ordinando per protocollo</strong>: emergono una normale connessione <strong>SSH</strong> legittima da <code>10.10.10.10</code>,
+   e una connessione <strong>Telnet</strong> (in chiaro) il cui payload applicativo contiene la flag.</li>
+<li><strong>Ordinando per porta di destinazione</strong>: si nota una grande quantità di pacchetti diretti alla
+   porta <strong>80</strong>, provenienti da sorgenti <strong>multiple e variabili</strong> → segnatura tipica di <strong>DDoS</strong>
+   (Distributed Denial of Service) verso il servizio web.</li>
+</ol>
+<h3 id="attackstxt"><code>attacks.txt</code></h3>
+<pre><code>Analisi del tracciato dump.pcap (Wireshark), ordinato per sorgente / protocollo / porta destinazione:
+
+1. PORT SCAN — grande quantità di pacchetti da 10.10.10.10 verso 10.10.10.10... 
+   [nota: sorgente dello scan] con porte di destinazione variabili e crescenti,
+   nessuna risposta applicativa: tipica scansione delle porte (es. nmap SYN scan).
+
+2. CONNESSIONE SSH LEGITTIMA — sessione SSH regolare (porta 22) da 10.10.10.10,
+   traffico cifrato, nessuna anomalia nel pattern: interazione legittima.
+
+3. CONNESSIONE TELNET — protocollo Telnet (porta 23), traffico in chiaro,
+   payload applicativo contenente la stringa FLAG: questo è il traffico
+   da intercettare per estrarre la flag.
+
+4. DDoS — grande volume di pacchetti diretti alla porta 80 del server,
+   provenienti da un elevato numero di sorgenti diverse e variabili:
+   pattern tipico di Distributed Denial of Service contro il servizio web.
+
+REGOLA SURICATA (per intercettare/registrare la flag nel traffico Telnet):
+alert tcp 10.10.0.0/16 any -&gt; 10.10.10.10 23 (msg:&quot;Flag&quot;; content:&quot;FLAG&quot;; sid:30202030; rev:1;)
+</code></pre>
+<h3 id="estrazione-della-flag-da-evejson-equivalente-a-suricatapng">Estrazione della flag da <code>eve.json</code> (equivalente a <code>suricata.png</code>)</h3>
+<p>Per vedere il contenuto applicativo (payload) nei log di Suricata va abilitata l'opzione
+<code>payload-printable</code> nella sezione <code>eve-log</code> di <code>/etc/suricata/suricata.yaml</code>. Poi si esegue Suricata
+in modalità offline sul pcap con la regola sopra, e si estrae la flag dal log eventi:</p>
+<pre><code>sudo suricata -r dump.pcap -c /etc/suricata/suricata.yaml -S exam.rules -l /tmp/out
+cat /tmp/out/eve.json | jq -r 'select(.event_type==&quot;alert&quot;) | .payload_printable' | grep FLAG
+</code></pre>
+<hr />
+<h2 id="perche-funziona-meccanismo-non-solo-comandi">Perché funziona (meccanismo, non solo comandi)</h2>
+<p>Suricata <strong>non "capisce" da sola</strong> cosa è un attacco: bisogna prima fare l'analisi umana con
+Wireshark per capire <em>quale traffico</em> è anomalo (qui: il payload Telnet con la flag), e solo dopo si
+scrive una regola che lo intercetti <strong>specificamente</strong> — matchando protocollo/porta (<code>tcp ... 23</code>) e
+contenuto del payload (<code>content:"FLAG"</code>). La regola non "rileva un attacco" in astratto: rileva
+esattamente il pattern di traffico che l'analisi manuale ha già identificato come rilevante. Questo è
+il motivo per cui il primo passo (ordinamento in Wireshark per sorgente/protocollo/porta) è la parte
+più importante dell'esercizio — la regola Suricata finale è quasi sempre corta e semplice una volta
+capito cosa cercare.</p>
+<blockquote>
+<p><strong>Nota sul formato di consegna più recente</strong> (dal 2025 in poi): gli esercizi più recenti chiedono
+<code>report.txt</code> (equivalente ad <code>attacks.txt</code>, più esteso: include anche il traffico <em>innocuo</em>
+individuato), i file <code>suricata.yaml</code> e <code>exam.rules</code> usati, e il file <code>eve.json</code> risultante con
+l'alert presente — invece del solo screenshot. Il contenuto richiesto è lo stesso (analisi +
+regola + prova che la regola funzioni), cambia solo la forma di consegna (file di configurazione
+reali invece di uno screenshot del comando).</p>
+</blockquote>
+<hr />
+<h2 id="secondo-caso-arp-spoofing-attacco-sotto-il-livello-ip-12-gennaio-2026">Secondo caso: ARP spoofing — attacco sotto il livello IP (12 gennaio 2026)</h2>
+<blockquote>
+<p>Fonte: <code>Network_Intrusion_Detection.html</code>, esercizio <code>trace-2026-01-12.pcapng</code> (prova d'esame
+passata più recente al 09/07/2026). Soluzione ufficiale del prof recuperata dall'allegato
+"Soluzione" nascosto nella stessa pagina HTML (tarball <code>ids_20260112</code>, non solo testo/screenshot).
+Caso interessante perché <strong>diverso in natura</strong> dal primo modello sopra: lì l'attacco viveva nel
+payload applicativo (Telnet in chiaro); qui l'attacco vive <strong>sotto</strong> IP, a livello ARP — Suricata
+non può vederlo affatto, e la regola finale è un'approssimazione dichiarata, non un rilevamento.</p>
+</blockquote>
+<h3 id="perche-arp-va-trattato-diversamente-da-tcpudp">Perché ARP va trattato diversamente da TCP/UDP</h3>
+<p>ARP non ha porte né "stream" da seguire (niente Follow Stream). Le uniche due leve sono:
+- <strong>opcode</strong>: <code>1</code>=request ("chi ha X?", rischio enumerazione/scan), <code>2</code>=reply ("X è mio", rischio
+  spoofing — è un'affermazione, non una domanda, ed è quella che gli altri host credono vera).
+- <strong>relazione MAC↔IP</strong>: un host reale dichiara un solo IP nelle sue reply. Un MAC che ne dichiara
+  più di uno sta mentendo su più identità (a meno che non sia un router/NAT).</p>
+<p>In questo pcap conviveva<strong>no due fasi distinte dello stesso attaccante</strong> (<code>172.21.1.129</code>, MAC
+<code>08:00:27:3b:72:ff</code>), facilmente confuse se ci si ferma alla prima pista trovata:
+1. <strong>Fase 1 — ricognizione</strong>: 1302 richieste ARP (<code>opcode==1</code>), una per ciascuno dei 255 IP
+   possibili della subnet <code>/24</code> — scan a tappeto per scoprire chi è vivo.
+2. <strong>Fase 2 — poisoning mirato</strong>: 510 reply ARP non richieste (<code>opcode==2</code>, gratuite — nessuna
+   request corrispondente), inviate in <strong>unicast</strong> a ciascuno dei 5 host realmente vivi (scoperti
+   in fase 1), dichiarando falsamente che i loro IP sono al MAC dell'attaccante.</p>
+<p>Il modo per non fermarsi alla fase 1 (facile da trovare, ma non è il cuore dell'esercizio secondo
+la soluzione del prof): <strong>far quadrare i numeri</strong>. Protocol Hierarchy segnalava 1966 pacchetti ARP
+totali; isolando la fase 1 (<code>arp.src.proto_ipv4==&lt;attaccante&gt;</code>) se ne spiegano solo 1302 — il
+residuo di 664 va sempre investigato invertendo il filtro (<code>arp and not (...)</code>), mai ignorato.</p>
+<p>Comando chiave per isolare la fase 2 (raggruppa le reply per MAC sorgente e IP dichiarato):</p>
+<pre><code>tshark -r &lt;file&gt; -Y &quot;arp.opcode==2&quot; -T fields -e arp.src.hw_mac -e arp.src.proto_ipv4 \
+  | sort | uniq -c | sort -rn
+</code></pre>
+<p>Un MAC che compare con <strong>più IP diversi</strong> nell'output è la firma dello spoofing.</p>
+<h3 id="la-regola-suricata-unapprossimazione-dichiarata-non-un-rilevamento">La regola Suricata — un'approssimazione dichiarata, non un rilevamento</h3>
+<p>Suricata analizza solo dagli header IP in su: non esiste sintassi per condizionare un alert sul
+contenuto di un pacchetto ARP o su un MAC address. La soluzione ufficiale non prova a inseguire
+l'attacco — lo approssima con un elenco di indirizzi noti-buoni/noti-cattivi, verificato con
+Conversations sui protocolli legittimi (step 2-3 della procedura), <strong>non</strong> dedotto per simmetria
+dall'analisi ARP (scorciatoia comoda ma da evitare — vedi <code>procedura_operativa_NIDS.md</code>, regola
+d'oro in cima al file):</p>
+<pre><code class="language-yaml"># suricata.yaml, vars -&gt; address-groups
+GOOD_NET: &quot;[172.21.1.1,172.21.1.65,172.21.1.140,172.21.1.153,172.21.1.172]&quot;
+BAD_NET: &quot;[172.21.1.129]&quot;
+</code></pre>
+<pre><code># exam.rules
+alert ip $GOOD_NET any &lt;&gt; $GOOD_NET any (msg:&quot;Traffico lecito&quot;; sid:1000001; rev:1;)
+alert ip $BAD_NET any &lt;&gt; any any (msg:&quot;TRAFFICO SOSPETTO&quot;; sid:1000002; rev:1;)
+</code></pre>
+<p>Risultato verificato: 112 alert sid 1000001 (traffico lecito tra i 5 host), <strong>2</strong> alert sid
+1000002 — entrambi su DHCP legittimo tra l'attaccante e il server (non sul poisoning, che resta
+invisibile a Suricata). Dimostra bene il limite da scrivere nel report: la regola 2 rileva "è
+coinvolto l'IP sospetto", non "sta succedendo qualcosa di malevolo".</p>
+<h3 id="gotcha-incontrati-validi-per-qualunque-esercizio-suricata">Gotcha incontrati (validi per qualunque esercizio Suricata)</h3>
+<ul>
+<li><strong><code>grep -c "&lt;sid&gt;"</code> su <code>eve.json</code> dà sempre 0</strong> anche se la regola funziona: nel JSON il campo
+  si chiama <code>signature_id</code>, annidato dentro <code>"alert":{...}</code> — <code>sid</code> è solo il nome nella sintassi
+  della regola. Usa <code>grep -c '"signature_id":&lt;numero&gt;'</code>. Se il dubbio persiste, verifica prima
+  che ci siano alert <em>di qualunque tipo</em> con <code>grep -c '"event_type":"alert"' eve.json</code>.</li>
+<li>Variabili custom (<code>$GOOD_NET</code>, <code>$BAD_NET</code>) vanno definite in <code>suricata.yaml</code> <strong>senza</strong> <code>#</code>
+  davanti (a differenza delle alternative <code>#HOME_NET: ...</code> già presenti nel file, che sono
+  varianti disattivate tra cui scegliere) — e lanciare Suricata con <code>-c &lt;tuo-yaml&gt;</code>, non quello
+  di default, altrimenti le variabili non esistono e la regola non parsa.</li>
+</ul>
+<hr />
+<h2 id="terzo-caso-buffer-overflow-probe-via-smtp-padding-incrementale-10-luglio-2025">Terzo caso: buffer-overflow probe via SMTP, padding incrementale (10 luglio 2025)</h2>
+<blockquote>
+<p>Fonte: stesso HTML, <code>trace-2025-07-10.pcapng</code>. Soluzione ufficiale recuperata da un allegato
+collegato <strong>senza</strong> la dicitura "Soluzione" visibile (link diretto dopo il testo dell'esercizio,
+<code>report.txt</code>+<code>suricata.yaml</code>+<code>exam.rules</code>+<code>eve.json</code> in uno zip) — tienilo a mente: la ricerca
+del link va fatta per <strong>ogni</strong> pcap del pool, non solo dove compare la parola "Soluzione".</p>
+</blockquote>
+<p><strong>Traffico legittimo</strong>: ARP request/reply tra 6 host su 3 subnet diverse, ICMP ping tra due host,
+HTTP GET legittimo, DNS. Punto di metodo dal report ufficiale: <em>"il fatto che alcuni di questi
+scambi siano più consistenti di altri non è motivo sufficiente per classificarli come tentativi di
+DoS, in quanto si tratta sempre di dialoghi completi 1:1"</em> — cioè volume alto da solo non basta,
+serve anche guardare se è un dialogo normale (richiesta→risposta, sorgente unica) o un pattern
+degenere (tante sorgenti verso una vittima, o richieste mai risposte).</p>
+<p><strong>Attacco — variante nuova rispetto al primo caso (S10, sessione 47)</strong>: buffer-overflow probe via
+<strong>SMTP</strong> (non HTTP), nel campo <code>DATA</code> del payload — ma qui il padding <strong>cresce di 1 byte alla
+volta</strong> ad ogni tentativo (non un'unica stringa lunga fissa come <code>AAAA...BBBB</code>), seguito sempre da
+un marcatore fisso a 4 byte (<code>ABCD</code>). È lo stesso obiettivo del primo caso (trovare l'offset esatto
+del return address via trial-and-error) ma con una <strong>strategia di ricerca diversa</strong>: incrementale
+invece che a payload singolo — riconoscerlo richiede guardare la <strong>sequenza</strong> di più pacchetti
+consecutivi (lunghezza del padding che cresce ad ogni richiesta), non un singolo pacchetto isolato.</p>
+<pre><code>alert tcp 192.168.101.129 any -&gt; 192.168.103.172 25 (msg:&quot;ALERT ATTACCO DI BOF VIA SMTP&quot;; content:&quot;ABCD&quot;; sid:100001;)
+</code></pre>
+<p>Nota: regola volutamente semplice — matcha solo sul marcatore fisso <code>ABCD</code> in porta 25/tcp, non
+serve intercettare ogni singola lunghezza di padding, il marcatore finale è invariante e basta.</p>
+<hr />
+<h2 id="quarto-caso-arp-scan-tcp-port-scan-combinati-10-settembre-2025">Quarto caso: ARP scan + TCP port scan combinati (10 settembre 2025)</h2>
+<blockquote>
+<p>Fonte: stesso HTML, <code>dump_20250910.pcapng</code>. ⚠️ <strong>Attenzione</strong>: l'esercizio gemello
+<code>dump_20251030.pcapng</code> (30 ottobre 2025) ha testo e allegato-soluzione <strong>identici byte per byte</strong>
+a questo — anche il testo dell'esercizio del 30/10 contiene per errore il nome del file del
+10/09 nel comando <code>gunzip</code>. Sembra un refuso di chi ha preparato la pagina (pagina duplicata e
+non aggiornata), non due esercizi realmente distinti — se ti capita <code>dump_20251030.pcapng</code>
+all'esame, trattalo come questo stesso caso.</p>
+</blockquote>
+<p><strong>Traffico legittimo</strong>: DNS tra 3 host e i rispettivi router, ARP (alcune richieste legittime
+mescolate a quelle dello scan), ICMP, HTTP, SMTP — stesso schema "rumore di fondo multiplo" degli
+altri casi.</p>
+<p><strong>Attacco — combinazione di DUE tecniche mai viste insieme finora</strong>:
+1. <strong>IP scan via ARP</strong> (stessa firma della fase 1 del nostro caso di oggi, 12/01/2026): il router
+   riceve richieste ARP per tutti gli IP delle subnet coinvolte — ricognizione degli host vivi.
+2. <strong>Port scan TCP</strong>: la sorgente <code>10.33.33.174</code> manda <strong>SYN</strong> verso gli host "vivi" trovati al
+   punto 1, su tutte le porte comuni. Il segnale è nella <strong>risposta</strong>: quasi sempre <strong>TCP RST</strong>
+   (porta chiusa, connessione rifiutata immediatamente) tranne che su <code>80</code> e <code>443</code> (porte
+   effettivamente aperte, lì la connessione si comporta diversamente) — è il fingerprint classico
+   di un TCP SYN scan (es. <code>nmap -sS</code>): tante connessioni tentate, quasi tutte respinte a vuoto,
+   un numero ristretto che "risponde per bene".</p>
+<pre><code>alert tcp 10.33.33.174 any -&gt; $HOME_NET any (msg:&quot;Scanning detected&quot;; sid:10000001; rev:1;)
+</code></pre>
+<p>Nota metodologica dal report ufficiale: <em>"in assenza di criteri più specifici, si può scrivere una
+regola per allertare di qualsiasi pacchetto provenga dall'host attaccante"</em> — stesso principio di
+approssimazione già visto con <code>$BAD_NET</code> nel secondo caso (quando il pattern esatto è complesso da
+esprimere in una singola regola di contenuto, la scorciatoia accettabile è "flagga la sorgente
+nota", non provare a descrivere ogni singola porta/pacchetto dello scan).</p>
+<hr />
+<h2 id="quinto-caso-identificazione-di-protocollo-non-ricerca-di-un-attacco-10-febbraio-2023">Quinto caso: identificazione di protocollo (non ricerca di un attacco) — 10 febbraio 2023</h2>
+<blockquote>
+<p>Fonte: stesso HTML, <code>esame_10_febbraio_2023.pcapng</code>. <strong>Tipo di compito diverso dagli altri 4</strong>:
+qui non si cerca "l'attacco", si identifica un protocollo/servizio a partire dal traffico.</p>
+</blockquote>
+<p><strong>Consegna</strong>: il pcap mostra diversi tentativi di autenticazione su un protocollo non dichiarato.
+Identificare: protocollo, i 2 IP coinvolti, la/le porte. Hint ufficiale: <em>"avete un tool valido per
+recuperare queste informazioni"</em> — cioè <strong>Statistics → Protocol Hierarchy</strong> (lo stesso primo passo
+della procedura standard, qui è sufficiente da solo per rispondere, senza bisogno di Follow Stream
+o analisi di frequenza).</p>
+<p><strong>Risposta</strong>: protocollo <strong>TELNET</strong> (testo in chiaro, per questo "tentativi di autenticazione" si
+vedono direttamente nel payload), IP <code>192.168.56.1</code> ↔ <code>192.168.56.8</code>, porta <strong>23</strong>.</p>
+<p><strong>Regola con feature mai vista prima — <code>flowbits</code>:</strong></p>
+<pre><code>alert tcp 192.168.56.1 41852 -&gt; 192.168.56.8 23 (msg:&quot;Flag detected&quot;; flow:from_client; flowbits:set,logged_in; content:&quot;sec:sec&quot;; sid:100005; rev:1;)
+</code></pre>
+<ul>
+<li><code>flow:from_client</code> — matcha solo pacchetti nella direzione client→server della connessione (a
+  differenza delle regole viste finora, che non specificavano una direzione all'interno del flow).</li>
+<li><code>flowbits:set,logged_in</code> — <strong>imposta un flag con nome</strong> (<code>logged_in</code>) associato a quella
+  connessione, leggibile/testabile da <strong>altre regole successive</strong> (<code>flowbits:isset,logged_in</code>) —
+  serve a incatenare condizioni stateful su più pacchetti/regole della stessa sessione (es. "alert
+  solo se PRIMA è avvenuto il login" — qui la regola <em>marca</em> il momento del login, non lo usa
+  ancora, ma è il building block per farlo).</li>
+<li><code>content:"sec:sec"</code> — il pattern di login catturato in chiaro nel payload Telnet.</li>
+<li>Con <code>payload-printable</code> abilitato in <code>suricata.yaml</code>, <code>eve.json</code> contiene il payload leggibile
+  dei pacchetti — da lì si ricostruisce la flag frammentata (stessa tecnica del compito MQTT visto
+  in <code>COMPITI_security.md</code>, mai ancora eseguita hands-on).</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

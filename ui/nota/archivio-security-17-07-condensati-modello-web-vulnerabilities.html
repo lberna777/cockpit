@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>modello_web_vulnerabilities.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">modello_web_vulnerabilities.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/01_web_vulnerabilities/modello_web_vulnerabilities.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="modello-risolto-web-vulnerabilities">Modello Risolto — Web Vulnerabilities</h1>
+<blockquote>
+<p>Fonte: <code>SIMULAZIONI ESAMI/SICINF/web_vulnerabilities.html</code> (Virtuale), esercizio del
+<strong>13 giugno 2024</strong> (Cross-Site Scripting riflesso). Consegna e screenshot sono quelli reali della
+soluzione ufficiale.</p>
+</blockquote>
+<hr />
+<h2 id="consegna-originale">Consegna originale</h2>
+<blockquote>
+<p>Predisposizione: importare/lanciare il container docker fornito, collegarsi via browser
+all'indirizzo IP del container.</p>
+<p><strong>Challenge</strong>: vulnerabilità Cross-Site Scripting (Client Side, vista a lezione). Obiettivo:
+sfruttare la XSS ed eseguire un <code>alert</code> o <code>prompt</code> JavaScript. <strong>Non è possibile usare tool di
+scansione automatica, non è consentito alcun bruteforce.</strong></p>
+</blockquote>
+<p><strong>Modalità di consegna</strong>:
+1. Un file <code>payload.(png|jpg)</code> che mostra l'esecuzione del payload e il relativo alert.
+2. Un file <code>web.txt</code> che descrive: i passi che hanno portato a scoprire la vulnerabilità, e — dal
+   punto di vista del sysadmin — come mitigarla/risolverla.</p>
+<blockquote>
+<p>Il livello di dettaglio della descrizione è criterio di valutazione.</p>
+</blockquote>
+<hr />
+<h2 id="soluzione-modello">Soluzione modello</h2>
+<h3 id="payloadpng-screenshot-reale-trascrizione"><code>payload.png</code> (screenshot reale — trascrizione)</h3>
+<p>URL nella barra degli indirizzi:</p>
+<pre><code>http://172.17.0.2/xss/xss_exam.php?name=&lt;img src=&quot;x&quot; onerror=&quot;alert()&quot;&gt;
+</code></pre>
+<p>Risultato: un dialog JavaScript nativo del browser compare sopra la pagina "ULISSE Research Team",
+con intestazione <code>172.17.0.2</code> — prova che il codice JavaScript iniettato è stato eseguito dal
+browser nel contesto della pagina.</p>
+<h3 id="webtxt"><code>web.txt</code></h3>
+<pre><code>VULNERABILITÀ: Cross-Site Scripting (XSS) Riflesso
+
+PASSI ESEGUITI:
+1. Navigata l'applicazione e individuato il parametro GET &quot;name&quot; nella
+   pagina xss_exam.php: il suo valore viene restituito (riflesso) nel
+   corpo della risposta HTML (es. &quot;Hello &lt;valore&gt;&quot;).
+2. Verificato che i caratteri speciali &lt; &gt; &quot; non vengono codificati
+   (HTML-encoded) nell'output: provando name=&lt;b&gt;test&lt;/b&gt; il tag &lt;b&gt;
+   viene interpretato dal browser invece di essere mostrato come
+   testo — conferma l'assenza di sanitizzazione/escaping in output.
+3. Costruito un payload che sfrutta un tag &lt;img&gt; con attributo
+   onerror, che si attiva automaticamente perché src=&quot;x&quot; non è
+   un'immagine valida (non serve alcuna interazione dell'utente):
+   &lt;img src=&quot;x&quot; onerror=&quot;alert()&quot;&gt;
+4. Iniettato il payload nel parametro GET tramite URL:
+   http://172.17.0.2/xss/xss_exam.php?name=&lt;img src=&quot;x&quot; onerror=&quot;alert()&quot;&gt;
+5. Il browser esegue il JavaScript iniettato, mostrando l'alert:
+   prova dell'esecuzione arbitraria di codice lato client nel
+   contesto (origin) dell'applicazione vulnerabile.
+
+MITIGAZIONE (punto di vista sysadmin/sviluppatore):
+- Effettuare l'escaping HTML di ogni input utente riflesso in output
+  (convertire &lt; &gt; &quot; ' &amp; nelle rispettive HTML entity) prima di
+  inserirlo nel markup della risposta — è il fix specifico per questo
+  bug.
+- Impostare una Content-Security-Policy (CSP) restrittiva che vieti
+  script inline e limiti le fonti di script consentite: riduce
+  l'impatto anche se in futuro un altro punto di input sfugge alla
+  sanitizzazione.
+- Validare/whitelistare il formato atteso del parametro lato server
+  (es. solo caratteri alfanumerici per un campo &quot;nome&quot;), rifiutando
+  input contenenti metacaratteri HTML come &lt; e &gt;.
+</code></pre>
+<hr />
+<h2 id="perche-funziona-meccanismo-non-solo-comandi">Perché funziona (meccanismo, non solo comandi)</h2>
+<p>La causa è la mancanza di <strong>output encoding</strong>: il server prende il valore del parametro <code>name</code> e lo
+inserisce <strong>letteralmente</strong> nell'HTML della risposta, senza convertire i caratteri speciali HTML
+nelle entity corrispondenti. Il browser quindi non vede più una stringa di testo "nome utente", ma un
+vero tag <code>&lt;img&gt;</code> da interpretare. L'attributo <code>onerror</code> è un <em>event handler</em> HTML: si attiva quando il
+browser fallisce nel caricare la risorsa indicata da <code>src</code> — qui <code>src="x"</code> è deliberatamente non
+valida, per garantire che l'errore (e quindi l'esecuzione del JS) scatti sempre, senza bisogno di
+alcuna azione dell'utente (a differenza di un <code>onclick</code>, che richiederebbe un click).</p>
+<p>Questo è <strong>XSS riflesso</strong> (reflected): il payload non viene salvato sul server (a differenza dello
+XSS <em>stored</em>), ma viaggia nell'URL stesso e viene "riflesso" indietro nella risposta immediata — per
+questo la prova di sfruttamento è un URL, non un'azione persistente sul sito.</p>
+<blockquote>
+<p><strong>Nota</strong>: gli altri esercizi in questo file coprono altre vulnerabilità server-side (path
+traversal/LFI in "vuln-file-browser", "vuln-decoder", "vuln-finder", SQL injection in "union.sh") —
+stessa struttura di consegna (screenshot dell'exploit + <code>web.txt</code> con passi e mitigazione), ma la
+soluzione specifica non è recuperabile dall'export HTML (allegati esterni non incorporati). Se vuoi
+un modello anche per SQL injection o path traversal, te lo risolvo su richiesta usando lo stesso
+procedimento.</p>
+</blockquote></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

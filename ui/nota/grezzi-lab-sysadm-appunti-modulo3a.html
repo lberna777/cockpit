@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appunti_modulo3A.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  grezzi</p>
+<h1 class="titolo-pagina">Appunti_modulo3A.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/APPUNTI GREZZI/Lab - sysAdm/Appunti_modulo3A.md">Apri il file originale</a></p>
+<article class="prosa"><p><strong>DEMONI (daemon)</strong></p>
+<p>I daemons sono processi di sistema che <strong>si avviano e arrestano automaticamente</strong>, non sono collegati a <strong>nessun terminale</strong> e girano <strong>a nome di un utente specifico</strong> (esistono UID dedicati ai demoni) e <strong>senza una shell interattiva</strong> (cioè?)</p>
+<p>Gli <strong>amministratori di sistema</strong> lavorano interagendo con essi e devono poterne <strong>configurare avvio e arresto automatici, verificarne lo stato, tenere un log delle sue esecuzioni, operarli manualmente</strong></p>
+<p><strong>TIPOLOGIE DI PROCESSI</strong></p>
+<p>Oltre ai processi istanziati dagli <strong>utenti interattivi (noi)</strong> su un sistema Linux esistono <strong>tre fonti principali di processi:</strong></p>
+<ul>
+<li><strong>procedure di avvio del sistema</strong></li>
+<li><strong>pianificatori periodici e sporadici</strong></li>
+<li><strong>demoni di gestione degli eventi</strong></li>
+</ul>
+<p>(Domande: le prime sono le procedute che sono automatizzate ad ogni avvio del sistema? un po' tipo i programmi all'avvio su windows? i pianificatori periodici e sporadici sono azioni, script (?) che salvo come ripetibili in automatico dopo determinato tempo? o che pianifico per un certo istante di tempo?)</p>
+<hr />
+<p><strong>IL SISTEMA INIT</strong></p>
+<p>Init è il processo con <strong>PID = 1</strong>, è avviato dal kernel ed è responsabile (direttamente o indirettamente, cioe?) di tutti gli altri processi</p>
+<p>(non capisco questa parte della lezione, sysVinit, Upstart e Systemd sono tutti tipi di init diversi nel tempo? e ora si usa Systemd?)</p>
+<p><strong>SYSTEMD - concetti fondamentali</strong></p>
+<p>Si occupa della gestione del sistema tramite <strong>unit,</strong> ovvero dei file di configurazione con nome nella forma        <strong>nome.tipo</strong></p>
+<p><strong>tipi possibili:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.service</code></td>
+<td>controllo e monitoraggio di un demone</td>
+</tr>
+<tr>
+<td><code>.socket</code></td>
+<td>attivazione via canale IPC (porta di rete, socket UNIX)</td>
+</tr>
+<tr>
+<td><code>.target</code></td>
+<td>gruppo di unit — <strong>sostituisce il concetto di runlevel</strong></td>
+</tr>
+<tr>
+<td><code>.timer</code></td>
+<td>attività legate al tempo (sostituisce cron)</td>
+</tr>
+<tr>
+<td><code>.device</code></td>
+<td>punti di accesso a dispositivi hardware</td>
+</tr>
+<tr>
+<td><code>.mount</code> / <code>.automount</code></td>
+<td>punti di montaggio filesystem</td>
+</tr>
+<tr>
+<td><code>.slice</code></td>
+<td>gestione risorse via cgroup</td>
+</tr>
+</tbody>
+</table>
+<p>come posso accedervi?</p>
+<pre><code>/lib/systemd/system/        ← libreria di riferimento (pacchetti software)
+/usr/lib/systemd/system/    ← stessa cosa su alcune distro
+/etc/systemd/system/        ← personalizzazioni locali (priorità massima)
+</code></pre>
+<p>&nbsp;</p>
+<hr />
+<p><strong>GESTIONE DEI SERVIZI TRAMITE systemctl</strong></p>
+<p><strong>Operazioni eseguibili a runtime (cioè?)</strong></p>
+<pre><code>systemctl start   nomeservizio    # avvia
+systemctl stop    nomeservizio    # ferma
+systemctl restart nomeservizio    # stop + start
+systemctl reload  nomeservizio    # ricarica configurazione senza restart
+systemctl status  nomeservizio    # mostra stato, PID, log recenti
+</code></pre>
+<p><strong>Operazioni di configurazione persistenti (entrano in funzione al prossimo boot)</strong></p>
+<pre><code>systemctl enable  nomeservizio    # avvio automatico al boot
+systemctl disable nomeservizio    # disabilita avvio automatico (ma manuale rimane possibile)
+systemctl mask    nomeservizio    # neutralizza completamente (impedisce anche start manuale)
+systemctl unmask  nomeservizio    # ripristina
+</code></pre>
+<p><strong>Ispezione della configurazione (non capisco in che contesto servono?)</strong></p>
+<pre><code>systemctl list-units                      # tutte le unit attive
+systemctl list-units -t service           # solo i servizi attivi
+systemctl list-unit-files -t service      # tutti i servizi installati (anche inattivi)
+systemctl list-unit-files -t service --state=enabled  # solo quelli abilitati al boot
+systemctl --state=failed                  # unit in stato failed
+</code></pre>
+<p><strong>TARGET - selezione del livello a cui si vuole runnare il processo (credo?)</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code>poweroff.target</code></td>
+<td>Spegnimento</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>rescue.target</code></td>
+<td>Single user mode</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>multi-user.target</code></td>
+<td>Multi-utente, senza GUI</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>graphical.target</code></td>
+<td>Multi-utente con GUI</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>reboot.target</code></td>
+<td>Riavvio</td>
+</tr>
+</tbody>
+</table>
+<p>ho capito che va usato in combo con systemctl ma non capisco a cosa serva, ne cosa modifica nel tangibile, ne se dovrei eseguire questi cambiamenti prima di avviarlo o se necessitino di un reboot</p>
+<p><strong>CONTESTUALIZZIAMO SYSTEMCTL</strong></p>
+<p>Di base il comando opera sul service manager disistema e quindi <strong>richiede i privilegi di root</strong>, ma <strong>ogni utente</strong> ha un proprio <strong>service manager</strong>, attivabile così:</p>
+<pre><code>systemctl --user start   mioservizio
+systemctl --user enable  mioservizio    # avvio automatico al login (non al boot)
+</code></pre>
+<p>come si relaziona al service manager principale? cosa vedo di diverso? che differenze ho?</p>
+<hr />
+<p><strong>STRUTTURA DI UN FILE UNIT</strong></p>
+<p>(domanda: a cosa servono? in che contesto si usano? chi li legge? l'unico altro pezzo di lezione che parlava di unit era "ispezione della configurazione" ma non ho capito niente come a questo punto avrai letto dalle domande)</p>
+<pre><code>[Unit]
+Description=Il mio servizio di esempio
+Requires=network.target
+After=network.target
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/mioprogramma --opzione
+ExecStop=/usr/bin/mioprogramma --stop
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p><strong>SEZIONE 1 - [UNIT]</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Requires=B</code></td>
+<td>B deve essere attiva; se B fallisce, questa si ferma</td>
+</tr>
+<tr>
+<td><code>Wants=B</code></td>
+<td>come Requires ma tollerante: se B fallisce, questa continua</td>
+</tr>
+<tr>
+<td><code>After=B</code></td>
+<td>avvia <em>dopo</em> B (Wants/Requires non implicano l’ordine temporale!)</td>
+</tr>
+<tr>
+<td><code>Conflicts=B</code></td>
+<td>mutuamente esclusivi con B</td>
+</tr>
+<tr>
+<td><code>OnFailure=C</code></td>
+<td>avvia C se questa fallisce</td>
+</tr>
+<tr>
+<td><code>WantedBy=</code> (in [Install])</td>
+<td>crea automaticamente un Wants nella unit indicata all’<code>enable</code></td>
+</tr>
+</tbody>
+</table>
+<p>(non c'ho capito un cazzo, cosa significano ste B, ste C, ma non sto capedo l'utilità e l'ulitizzo generale del file direi)</p>
+<pre><code>ExecStart=/usr/bin/mio-configuratore
+[](#cb8-2)ExecStop=/usr/bin/mio-de-configuratore
+</code></pre>
+<pre><code>Restart=on-failure    # riavvia se termina con exit code non zero o segnale non clean
+[](#cb9-2)Restart=always        # riavvia sempre, tranne se fermato da systemctl stop
+</code></pre>
+<hr />
+<p><strong>ESECUZIONI PIANIFICATE</strong></p>
+<p><strong>una tantum - at</strong></p>
+<p><strong>at</strong> ci permette di pianificare un comando da eseguire <strong>una sola volta</strong> in un <strong>momento futu****ro</strong></p>
+<pre><code>sudo apt install at           # installa se non presente
+
+# Pianificare
+echo &quot;/bin/comando&quot; | at now + 30 minutes
+echo &quot;/bin/comando&quot; | at 14:30
+echo &quot;/bin/comando&quot; | at midnight 31.12.2025
+
+# Gestire la coda
+atq                           # lista job in coda
+atrm &lt;job_id&gt;                 # rimuove un job
+</code></pre>
+<p>per poter cancellare un comando pianificato, è necessario conoscere l**'ID** del <strong>job</strong></p>
+<pre><code>ATJOB=$(mktemp)
+echo &quot;/bin/comando&quot; | at now + 30 minutes 2&gt;&amp;1 | grep '^job ' | cut -f2 -d' ' &gt; $ATJOB
+# Per cancellare:
+atrm $(cat $ATJOB)
+</code></pre>
+<p>domanda: non mi è chiaro il meccanismo per la cancellazione, come si applica nel pratico?</p>
+<p><strong>esecuzione periodica - cron</strong></p>
+<p><strong>cron</strong> legge i file <strong>crontab</strong> ogni minuto e lancia i <strong>task pianificati</strong></p>
+<pre><code>crontab -l        # mostra il crontab dell'utente corrente
+crontab -e        # edita il crontab
+crontab FILE      # sostituisce il crontab con FILE
+</code></pre>
+<p><strong>Sintassi crontab</strong>:</p>
+<pre><code>MINUTO  ORA  G.MESE  MESE  G.SETTIMANA  &lt;comando&gt;
+</code></pre>
+<p>Esempi:</p>
+<pre><code>30 4 1,15 * 6     /bin/backup    # alle 4:30 del giorno 1, 15 e ogni sabato
+*/10 8-18 * * 1-5 /home/las/lavora.sh  # ogni 10 min, 8-18h, lun-ven
+0 0 1 1 *         /usr/sbin/auguri    # 1 gennaio a mezzanotte
+</code></pre>
+<p>&nbsp;come funziona l'uso degli asterischi qua? nello specifico non capisco la sintassi della seconda riga di questo codice</p>
+<p><strong>Crontab di sistema</strong> (<code>/etc/crontab</code>) ha un campo aggiuntivo per specificare l’utente:</p>
+<pre><code>30 4 * * * root /usr/sbin/backup
+</code></pre>
+<p>come funziona e a cosa serve materialmente il crontab di sistema? e cosa intendi per manipolazione programmatica del crontab? tutto quel codice non l'ho capito</p>
+<p><strong>sostituzione moderna di cron e at - TIMER SYSTEMD</strong></p>
+<p>Si può integrare l'esecuzione una tantum in futuro o la ripetizione di esecuzioni nel tempo direttamente nei file UNIT che legge systemd. Questo avviene mediante due file, uno con il servizio da eseguire e uno con il timer che lo attiva.</p>
+<pre><code>[Unit]
+Description=Il mio script periodico
+
+[Service]
+Type=oneshot
+ExecStart=/path/to/script.sh
+</code></pre>
+<p><code>/etc/systemd/system/myscript.timer</code>:</p>
+<pre><code>[Unit]
+Description=Timer per myscript
+
+[Timer]
+OnCalendar=*-*-* 04:30:00    # ogni giorno alle 4:30
+Persistent=true               # esegue anche se la macchina era spenta
+
+[Install]
+WantedBy=timers.target
+</code></pre>
+<p>&nbsp;il file si esegue allo scadere DEL timer, in questo caso replicando un <strong>cron</strong> con esecuzione periodica, che devo startare (solo manualmente?) all'avvio con:</p>
+<pre><code>sudo systemctl enable --now myscript.timer   # attiva il timer subito e al boot
+systemctl list-timers                         # mostra tutti i timer attivi
+</code></pre>
+<p>per quanto riguarda le ripetizioni <strong>una-tantum (come con at):</strong></p>
+<pre><code>systemd-run --on-active=30m /path/to/script.sh           # tra 30 minuti
+systemd-run --on-calendar=&quot;2025-12-24 11:00:00&quot; /path/to/script.sh
+systemd-run --user --on-active=1m /bin/cmd               # come utente normale
+</code></pre>
+<p>sfrutto il contatore che controlla da quanto è acceso il sistema?</p>
+<p><strong>Sintassi OnCalendar</strong>:</p>
+<pre><code>DayOfWeek YYYY-MM-DD HH:MM:SS
+</code></pre>
+<ul>
+<li><code>*</code> = qualsiasi valore</li>
+<li><code>A..B</code> = range</li>
+<li><code>A,B,C</code> = lista</li>
+<li><code>/P</code> = incrementi di P unità (es. <code>*/2</code> = ogni 2)</li>
+</ul>
+<p>chiarisci meglio cosa si può effettivamente inserire per riempire questi placeholder?</p>
+<p><strong>MONITORAGGIO - log di sistema</strong></p>
+<p>I log sono un meccanismo indispensabile per la diagnostica di sistema. si aggiornano periodicamente (spesso anche dopo ogni azione sul dispositivo) e tengono traccia di tutto. vanno checkati spesso per integrità dei dati e sarebbe ideale replicarli su macchine esterne alla rete che si amministra.</p>
+<p>su debian questa meccanica è gestita da <strong>rsyslog</strong>, il successore di <strong>syslog</strong> che segue però gli stessi concetti</p>
+<ul>
+<li>I processi inviano messaggi al logger (<strong>rsyslog)</strong></li>
+<li>il loger serializza, fa timestamping (registra date e o) e classifica i messaggi</li>
+<li>il logger smista verso destinazioni configurate (i corretti file di log singoli)</li>
+<li>Ogni messaggio ha una coppia <code>&lt;facility&gt;.&lt;priority&gt;</code>: - <strong>Facility</strong>: argomento del messaggio (<code>auth</code>, <code>cron</code>, <code>daemon</code>, <code>kern</code>, <code>mail</code>, <code>user</code>, <code>local0</code>–<code>local7</code>, …) - <strong>Priority</strong> (decrescente): <code>emerg</code>, <code>alert</code>, <code>crit</code>, <code>err</code>, <code>warning</code>, <code>notice</code>, <code>info</code>, <code>debug</code></li>
+</ul>
+<p>approfondisci la struttura della sintassi di rsyslog e gli esempi che hai fatto? non sono chiari e non considerano le basi dell'argomento. come funziona nel tangibile, le regole cosa riguardano?</p>
+<p>approfondisci l'utilità di systemd-journald, non capisco a cosa serva, non ra systemd il sistema di log? o systemd smista i messaggi e tramite journald li scrive nei log? o interagisce coi log qualdir si voglia?</p>
+<hr />
+<p><strong>Es. 1 - Installare at e pianificare un comando</strong></p>
+<p><strong>//        installo at</strong></p>
+<pre><code>sudo apt install at
+</code></pre>
+<p>//        pianifico un comando tra 30 minuti</p>
+<pre><code>echo &quot;/bin/echo ciao&quot; | at now + 30 minutes
+</code></pre>
+<p>come funziona echo "/bin/echo ciao"? la sintassi corretta per inviare un comando tramite at</p>
+<p>ho notato che l'orario della mia VM è sballato e diverse ore prima di quello che deve essere</p>
+<p>//        verifico la coda dei comandi da eseguire</p>
+<pre><code>atq
+</code></pre>
+<p>//        posso cancellare il job (inserendo N = numero del job)</p>
+<pre><code>atrm N
+</code></pre>
+<p>come ricavo il numero del job?</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[appunti_modulo3A_systemd_servizi]]</li>
+<li>[[lezione_modulo3A_systemd_servizi]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[glossario_sysadm]] · [[concept_maps]] · [[troubleshooting_vm]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -217,7 +217,8 @@ Se un punto non è soddisfatto, correggi prima di procedere. Poi invoca
 
 **6. Collega la nota al grafo**
 
-Invoca `lorenzo-skills:unicode-link-note` per il blocco AUTO-LINKS della guida-lab.
+Invoca `lorenzo-skills:unicode-link-note`: la nota riceve in testa il frontmatter
+`tags: [<COD>, guida-lab]`, e se è la prima nota del corso si aggiunge il suo gruppo colore in Obsidian.
 
 ---
 

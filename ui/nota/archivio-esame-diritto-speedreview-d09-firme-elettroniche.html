@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>speedreview_D09_firme_elettroniche.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">speedreview_D09_firme_elettroniche.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/ESAME DIRITTO/05 - Speedreview/speedreview_D09_firme_elettroniche.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="speed-review-d9-firme-elettroniche-e-documenti-informatici">Speed Review — D9: Firme Elettroniche e Documenti Informatici</h1>
+<blockquote>
+<p>La prof ha segnato esplicitamente i temi prioritari (slide 66-67). Il quiz colpisce su: gerarchia firme, certificato qualificato, valore nel tempo, macroistruzioni, PEC.</p>
+</blockquote>
+<hr />
+<h2 id="1-documenti-e-prova-codice-civile">1. Documenti e prova (codice civile)</h2>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Articolo</th>
+<th>Valore probatorio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Atto pubblico</strong></td>
+<td>2699</td>
+<td>Redatto da pubblico ufficiale; <strong>pubblica fede</strong>, contestabile solo con querela di falso</td>
+</tr>
+<tr>
+<td><strong>Scrittura privata</strong></td>
+<td>2702</td>
+<td>Piena prova della provenienza se <strong>non disconosciuta</strong> o autenticata</td>
+</tr>
+<tr>
+<td><strong>Riproduzioni meccaniche</strong></td>
+<td>2712</td>
+<td>Piena prova se la conformità <strong>non è disconosciuta</strong> (include doc. informatici)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Quadro normativo: c.c., <strong>L. 59/1997 (Bassanini)</strong> prima a riconoscere validità doc. informatici, <strong>CAD</strong> (D.Lgs. 82/2005), <strong>eIDAS</strong> (Reg. 910/2014), regole tecniche, Linee Guida AGID.</li>
+</ul>
+<hr />
+<h2 id="2-firma-digitale-meccanismo">2. Firma digitale — meccanismo</h2>
+<ul>
+<li><strong>Crittografia asimmetrica</strong> (chiave <strong>pubblica</strong> + <strong>privata</strong>). Il mittente firma con la <strong>privata</strong>, il destinatario verifica con la <strong>pubblica</strong>.</li>
+<li>Applicata all'<strong>impronta</strong> (hash) del documento, non all'intero file.</li>
+<li><strong>Certificatore</strong> (terza parte fidata): verifica l'identità, la associa alla chiave pubblica, emette il <strong>certificato</strong>, pubblica revoche/sospensioni nelle liste.</li>
+</ul>
+<hr />
+<h2 id="3-gerarchia-delle-firme-elettroniche-eidas-il-cuore">3. Gerarchia delle firme elettroniche (eIDAS) — IL CUORE</h2>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Definizione</th>
+<th>Valore giuridico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Firma elettronica (semplice)</strong></td>
+<td>Dati elettronici acclusi/connessi usati per firmare</td>
+<td>Non negati effetti né ammissibilità come prova</td>
+</tr>
+<tr>
+<td><strong>Firma elettronica avanzata</strong></td>
+<td>Connessa <strong>unicamente</strong> al firmatario, sotto suo <strong>esclusivo controllo</strong>, identifica ogni modifica</td>
+<td><strong>Scrittura privata</strong> (art. 2702)</td>
+</tr>
+<tr>
+<td><strong>Firma elettronica qualificata</strong></td>
+<td>Avanzata + <strong>dispositivo qualificato</strong> + <strong>certificato qualificato</strong></td>
+<td><strong>Equivalente a firma autografa</strong></td>
+</tr>
+<tr>
+<td><strong>Firma digitale</strong></td>
+<td>Tipo specifico di qualificata (italiana), basata su chiavi crittografiche (CAD art. 1)</td>
+<td><strong>Equivalente a firma autografa</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Modalità operative</strong> di qualificata/digitale: <strong>automatica</strong> (senza presidio continuo), <strong>remota</strong> (su HSM), <strong>autenticata</strong> (da notaio/pubblico ufficiale).</li>
+</ul>
+<h3 id="valore-del-documento-informatico-cad-art-20">Valore del documento informatico (CAD art. 20)</h3>
+<ul>
+<li>Soddisfa la <strong>forma scritta</strong> + efficacia di <strong>scrittura privata</strong> se ha firma <strong>digitale, qualificata o avanzata</strong>, oppure è formato con identificazione informatica + sicurezza/integrità/immodificabilità.</li>
+<li>In <strong>tutti gli altri casi</strong>: idoneità e valore probatorio <strong>liberamente valutabili in giudizio</strong>.</li>
+</ul>
+<h3 id="macroistruzioni-art-4-c3-reg-tecn">⚠️ Macroistruzioni (art. 4 c.3 reg. tecn.)</h3>
+<p>Il documento con firma qualificata/digitale <strong>NON</strong> soddisfa l'immodificabilità se contiene <strong>macroistruzioni, codici eseguibili</strong> (macro, script PDF, JavaScript) che possono modificarlo.</p>
+<hr />
+<h2 id="4-certificato-qualificato-e-validita-nel-tempo">4. Certificato qualificato e validità nel tempo</h2>
+<ul>
+<li><strong>Certificato qualificato</strong>: rilasciato da <strong>prestatore di servizi fiduciari qualificato</strong> (conforme allegato I eIDAS); contiene nome firmatario, validità, limiti d'uso.</li>
+<li><strong>Revoca</strong> (definitiva) / <strong>sospensione</strong> (temporanea): hanno <strong>effetto dalla pubblicazione</strong> nella lista.</li>
+<li>Firma su certificato <strong>revocato/scaduto/sospeso</strong> = <strong>mancata sottoscrizione</strong>.</li>
+<li><strong>MA</strong>: la firma qualificata/digitale resta <strong>valida</strong> se associata a un <strong>riferimento temporale opponibile ai terzi</strong> che la colloca <strong>prima</strong> della scadenza/revoca (art. 62 reg. tecn.).</li>
+<li><strong>Marca temporale</strong> / <strong>riferimento temporale</strong>: provano che il documento esisteva in un certo momento. La <strong>PEC</strong> costituisce validazione temporale.</li>
+</ul>
+<h3 id="pec-dpr-682005">PEC (DPR 68/2005)</h3>
+<ul>
+<li>Trasmissione via PEC = <strong>notificazione a mezzo posta</strong>. Data e ora <strong>opponibili ai terzi</strong>.</li>
+</ul>
+<h3 id="sigillo-elettronico-eidas-art-3">Sigillo elettronico (eIDAS art. 3)</h3>
+<ul>
+<li>Equivalente della firma ma per le <strong>persone giuridiche</strong> (non fisiche). Garantisce <strong>origine e integrità</strong>.</li>
+</ul>
+<hr />
+<h2 id="trappole-mc">⚠️ Trappole MC</h2>
+<ul>
+<li><strong>Firma qualificata</strong> = avanzata + <strong>dispositivo qualificato</strong> + <strong>certificato qualificato</strong> (entrambi). NON "requisiti più stringenti" generici; NON "dispositivo certificato".</li>
+<li>Valore: avanzata → <strong>scrittura privata</strong>; qualificata/digitale → <strong>firma autografa</strong>. Il quiz scambia i livelli.</li>
+<li><strong>Firma digitale</strong> = sottotipo di <strong>qualificata</strong> (non un livello superiore separato).</li>
+<li>Documento con <strong>macro/codice eseguibile</strong> → NON immodificabile (anche con firma qualificata).</li>
+<li>Firma su certificato revocato = <strong>mancata sottoscrizione</strong>, salvo <strong>riferimento temporale opponibile</strong> che la colloca prima.</li>
+<li>Revoca/sospensione: effetto dalla <strong>pubblicazione</strong>.</li>
+<li><strong>PEC</strong> = notificazione a mezzo posta; data/ora opponibili ai terzi.</li>
+<li><strong>Sigillo</strong> = persone giuridiche; <strong>firma</strong> = persone fisiche.</li>
+<li>Atto pubblico (pubblica fede) ≠ scrittura privata (prova se non disconosciuta).</li>
+</ul>
+<hr />
+<h2 id="da-aggiungere-dopo-le-simulazioni">Da aggiungere dopo le simulazioni:</h2>
+<p><br><br><br></p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

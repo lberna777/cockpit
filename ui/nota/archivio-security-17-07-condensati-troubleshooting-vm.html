@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>troubleshooting_vm.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">troubleshooting_vm.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/00_trasversale/troubleshooting_vm.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="troubleshooting-vm-soluzioni-ai-problemi-ricorrenti">Troubleshooting VM — Soluzioni ai problemi ricorrenti</h1>
+<p>Aggiornato a ogni sessione. Prima di chiedere aiuto, cerca qui.</p>
+<hr />
+<h2 id="avvio-vm">Avvio VM</h2>
+<p><strong>Problema</strong>: <code>vagrant up</code> fallisce con errore VirtualBox<br />
+<strong>Soluzione</strong>: Verifica che VirtualBox sia aperto. Se la VM è già in stato "saved", prova <code>vagrant resume</code> invece di <code>vagrant up</code>.</p>
+<p><strong>Problema</strong>: La VM si avvia ma <code>vagrant ssh</code> non si connette<br />
+<strong>Soluzione</strong>:</p>
+<pre><code class="language-bash">vagrant halt
+vagrant up
+vagrant ssh
+</code></pre>
+<hr />
+<h2 id="pacchetti-non-trovati">Pacchetti non trovati</h2>
+<p><strong>Problema</strong>: <code>sudo apt install &lt;pacchetto&gt;</code> → <code>Unable to locate package</code><br />
+<strong>Causa</strong>: La lista dei pacchetti disponibili è vecchia o vuota.<br />
+<strong>Soluzione</strong>:</p>
+<pre><code class="language-bash">sudo apt update
+sudo apt install &lt;pacchetto&gt;
+</code></pre>
+<p><code>apt update</code> va eseguito sempre prima di installare pacchetti, specialmente dopo un lungo periodo di inattività della VM.</p>
+<hr />
+<h2 id="comandi-non-trovati">Comandi non trovati</h2>
+<p><strong>Problema</strong>: <code>locate: command not found</code><br />
+<strong>Soluzione</strong>: <code>sudo apt install plocate &amp;&amp; sudo updatedb</code></p>
+<p><strong>Problema</strong>: <code>fuser: command not found</code><br />
+<strong>Soluzione</strong>: <code>sudo apt install psmisc</code></p>
+<p><strong>Problema</strong>: <code>lsof: command not found</code><br />
+<strong>Soluzione</strong>: <code>sudo apt install lsof</code></p>
+<hr />
+<h2 id="permessi-e-sudo">Permessi e sudo</h2>
+<p><strong>Problema</strong>: <code>Permission denied</code> su file in <code>/home/altroUtente/</code><br />
+<strong>Causa</strong>: I file degli altri utenti non sono leggibili da vagrant.<br />
+<strong>Soluzione</strong>: Usare <code>sudo</code> per operazioni che richiedono accesso a file di altri utenti:</p>
+<pre><code class="language-bash">sudo tar cvpf archivio.tar /home/*
+sudo cat /home/alice/.bashrc
+</code></pre>
+<p><strong>Problema</strong>: <code>sudo echo "..." &gt;&gt; /path/file</code> → <code>Permission denied</code><br />
+<strong>Causa</strong>: Il redirect <code>&gt;&gt;</code> viene gestito dalla shell di vagrant, non da sudo.<br />
+<strong>Soluzione</strong>: Usare <code>tee</code>:</p>
+<pre><code class="language-bash">echo &quot;contenuto&quot; | sudo tee -a /path/file
+</code></pre>
+<p><strong>Problema</strong>: Utente aggiunto a un gruppo con <code>usermod -aG</code> ma il gruppo non risulta attivo<br />
+<strong>Causa</strong>: La modifica ai gruppi è attiva solo alla prossima sessione di login.<br />
+<strong>Soluzione</strong>: Fare logout e re-login, oppure:</p>
+<pre><code class="language-bash">newgrp nomegruppo
+</code></pre>
+<hr />
+<h2 id="filesystem-e-directory">Filesystem e directory</h2>
+<p><strong>Problema</strong>: <code>tar: /newdisk: Cannot open: No such file or directory</code><br />
+<strong>Causa</strong>: La directory di destinazione non esiste.<br />
+<strong>Soluzione</strong>: Crearla prima:</p>
+<pre><code class="language-bash">sudo mkdir /newdisk
+tar -C /newdisk -xvpf archivio.tar
+</code></pre>
+<p><strong>Problema</strong>: <code>rmdir: failed to remove 'dir': Directory not empty</code><br />
+<strong>Soluzione</strong>: Usare <code>rm -r nomedir</code> per cancellare ricorsivamente (attenzione: irreversibile).</p>
+<hr />
+<h2 id="terminale-e-editor">Terminale e editor</h2>
+<p><strong>Problema</strong>: <code>crontab -e</code> → <code>Error opening terminal: xterm-kitty</code><br />
+<strong>Causa</strong>: Il terminale Kitty usa <code>TERM=xterm-kitty</code>, non riconosciuto dalla VM.<br />
+<strong>Soluzione rapida</strong>:</p>
+<pre><code class="language-bash">TERM=xterm-256color crontab -e
+</code></pre>
+<p><strong>Soluzione permanente</strong> (aggiungere al <code>.bashrc</code> sulla VM):</p>
+<pre><code class="language-bash">echo 'export TERM=xterm-256color' &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</code></pre>
+<hr />
+<h2 id="processi-in-background">Processi in background</h2>
+<p><strong>Problema</strong>: Processi rimasti in stato <code>Stopped</code> nel job control (visibili con <code>jobs</code>)<br />
+<strong>Causa frequente</strong>: Comando avviato con <code>&amp;</code> ma poi interrotto, oppure tentativo di usare un comando interattivo come <code>systemctl</code> senza argomenti in background.<br />
+<strong>Soluzione</strong>: Killare i job fermi per indice:</p>
+<pre><code class="language-bash">kill %1 %2   # sostituire con i numeri mostrati da jobs
+</code></pre>
+<hr />
+<h2 id="cartella-condivisa-vagrant">Cartella condivisa /vagrant</h2>
+<p><strong>Problema</strong>: <code>chmod +x /vagrant/script.sh</code> non funziona — il file resta non eseguibile<br />
+<strong>Causa</strong>: <code>/vagrant</code> è montata con filesystem <code>vboxsf</code> che non supporta i permessi Unix.<br />
+<strong>Soluzione</strong>: Copiare il file nella home prima di dargli i permessi, oppure eseguire direttamente con <code>bash</code>:</p>
+<pre><code class="language-bash">cp /vagrant/script.sh ~/
+chmod +x ~/script.sh
+# oppure, senza copiare:
+bash /vagrant/script.sh argomento1 argomento2
+</code></pre>
+<hr />
+<h2 id="errori-comuni-negli-script-bash">Errori comuni negli script bash</h2>
+<p><strong>Problema</strong>: Script non eseguibile → <code>bash: ./script.sh: Permission denied</code><br />
+<strong>Soluzione</strong>:</p>
+<pre><code class="language-bash">chmod +x script.sh
+./script.sh
+</code></pre>
+<p><strong>Problema</strong>: <code>[: unexpected operator</code> o errori nei test<br />
+<strong>Causa frequente</strong>: Spazio mancante dopo <code>[</code> o prima di <code>]</code>, o tra <code>!</code> e l'operatore.<br />
+<strong>Sbagliato</strong>: <code>[!-d dir]</code> — <strong>Corretto</strong>: <code>[ ! -d dir ]</code></p>
+<p><strong>Problema</strong>: <code>PID=!$</code> non cattura il PID del processo in background<br />
+<strong>Causa</strong>: <code>!$</code> è history expansion (ultimo argomento del comando precedente), non il PID. La variabile corretta è <code>$!</code>.<br />
+<strong>Sbagliato</strong>: <code>PID=!$</code> — <strong>Corretto</strong>: <code>PID=$!</code></p>
+<p><strong>Problema</strong>: Incollare il corpo di uno script direttamente nella shell → variabili <code>$1</code>, <code>$THIS</code> vuote, comportamento inatteso<br />
+<strong>Causa</strong>: Le variabili degli argomenti (<code>$1</code>, <code>$2</code>) sono vuote se il codice viene eseguito interattivamente invece che come script con argomenti.<br />
+<strong>Soluzione</strong>: Salvare il codice in un file, renderlo eseguibile, e lanciarlo con gli argomenti corretti:</p>
+<pre><code class="language-bash">chmod +x script.sh
+./script.sh argomento1 argomento2
+</code></pre>
+<p><strong>Problema</strong>: <code>kill $PID</code> non termina un processo in stato <code>T</code> (Stopped)<br />
+<strong>Causa</strong>: Un processo sospeso non può processare segnali finché non viene ripreso — SIGTERM viene recapitato ma resta in coda.<br />
+<strong>Soluzione</strong>: Usare SIGKILL (termina anche i processi stopped) oppure riprendere prima il processo:</p>
+<pre><code class="language-bash">kill -KILL $PID           # opzione 1: forza terminazione immediata
+kill -CONT $PID &amp;&amp; kill $PID  # opzione 2: riprendi, poi termina ordinatamente
+</code></pre>
+<p><strong>Problema</strong>: Script con <code>EOF</code> come ultima riga → <code>command not found: EOF</code><br />
+<strong>Causa</strong>: <code>EOF</code> è rimasto nel file come artefatto di un copy-paste da heredoc. Bash lo interpreta come comando.<br />
+<strong>Soluzione</strong>: Aprire il file con <code>nano</code> e cancellare l'ultima riga contenente solo <code>EOF</code>.</p>
+<p><strong>Problema</strong>: Variabile passata a funzione senza <code>$</code> → il valore non viene scritto nel file atteso<br />
+<strong>Esempio</strong>: <code>conta "$2" "FB" &amp;</code> invece di <code>conta "$2" "$FB" &amp;</code> — passa la stringa letterale <code>"FB"</code> invece del path del file temporaneo.<br />
+<strong>Soluzione</strong>: Verificare che ogni variabile sia preceduta da <code>$</code>. Usare <code>bash -x script.sh</code> per vedere i valori espansi riga per riga.</p>
+<p><strong>Problema</strong>: Variabile vuota in una condizione causa errore<br />
+<strong>Causa</strong>: La variabile non è tra virgolette.<br />
+<strong>Sbagliato</strong>: <code>if [ -z $VAR ]</code> — <strong>Corretto</strong>: <code>if [ -z "$VAR" ]</code></p>
+<hr />
+<h2 id="vm-security-parrot-aggiornamento-di-sistema">VM Security (Parrot) — aggiornamento di sistema</h2>
+<p><strong>Problema</strong>: <code>apt upgrade</code>/<code>full-upgrade</code> sembra bloccarsi a lungo, poi termina con
+<code>dpkg: error processing package parrot-core (--configure): end of file on stdin at conffile prompt</code>
+e lascia 6 pacchetti a metà (<code>parrot-core</code>, <code>parrot-interface</code>, <code>parrot-updater</code>, ecc.).<br />
+<strong>Causa</strong>: l'upgrade ha incontrato una domanda su un file di configurazione
+(<code>Configuration file '/etc/apt/sources.list.d/parrot.list' ... (Y/I/N/O/D/Z)</code>), ma stava girando
+<strong>senza un terminale interattivo</strong> (es. lanciato dall'updater grafico) → non potendo rispondere,
+dpkg si interrompe.<br />
+<strong>Soluzione</strong>: rieseguire la configurazione <strong>in un terminale vero</strong>:</p>
+<pre><code class="language-bash">sudo dpkg --configure -a     # ricompare il prompt: D=diff, poi N (tieni la tua) o Y (versione nuova)
+sudo apt --fix-broken install
+sudo apt-get check           # nessun errore = pulito
+sudo dpkg --audit            # vuoto = nessun pacchetto a metà
+</code></pre>
+<p>In dubbio sul conffile: <code>N</code> (default) tiene la configurazione attuale, scelta sicura e reversibile.</p>
+<p><strong>Problema</strong>: durante l'upgrade, muro di errori <code>vbox_fb.c: ... 'fb_debug_enter' ... Error 1</code>
+(compilazione VirtualBox Guest Additions / <code>vboxvideo</code>).<br />
+<strong>Causa</strong>: le Guest Additions installate non compilano contro i kernel recenti (funzioni rimosse da
+<code>struct fb_ops</code>). <strong>Non blocca l'esame</strong>: boot, rete, terminale e tool funzionano. Si perdono solo
+ridimensionamento finestra, clipboard e cartelle condivise.<br />
+<strong>Soluzione</strong>: ignorabile. Se servono quelle funzioni, reinstallare le Guest Additions dalla ISO
+aggiornata oppure avviare un kernel precedente dal menu GRUB.</p>
+<p><strong>Soluzione che ha funzionato (2026-07-07)</strong>: invece dell'ISO, reinstallare i pacchetti Debian/Parrot
+(ricompilano via DKMS contro il kernel corrente) — usare le varianti <strong><code>-hwe</code></strong> (Hardware Enablement,
+pensate per kernel più recenti di quelli stabili), non quelle base:</p>
+<pre><code class="language-bash">sudo apt install --reinstall virtualbox-guest-utils-hwe virtualbox-guest-x11-hwe
+sudo reboot
+</code></pre>
+<p>Nota: il pacchetto <code>virtualbox-guest-dkms</code> non esiste su Parrot come pacchetto a sé — la parte DKMS
+è già inclusa in <code>-utils</code>/<code>-x11</code>. Dopo il riavvio, il clipboard torna a funzionare.
+⚠️ Un <code>apt upgrade</code> successivo che aggiorna il kernel può far ripresentare lo stesso problema
+(i moduli DKMS restano legati alla versione di kernel per cui sono stati compilati) — se il
+clipboard smette di funzionare di nuovo dopo un upgrade, ripetere questi due comandi.</p>
+<hr />
+<h2 id="vm-security-modulo-s5-nftlabsh-docker-podman">VM Security — Modulo S5 (nftlab.sh / Docker / Podman)</h2>
+<p><strong>Problema</strong>: <code>./nftlab.sh</code> sembra bloccarsi senza output dopo aver stampato poco o nulla.
+<strong>Causa</strong>: nessuna — se Docker sta scaricando/caricando le immagini dei container la prima volta,
+può volerci più di un minuto senza stampare progresso visibile. Non interrompere con Ctrl+C troppo presto.
+<strong>Soluzione</strong>: aspettare; verificare in un secondo terminale con <code>docker images</code>/<code>podman images</code> se
+sono in corso operazioni.</p>
+<p><strong>Problema</strong>: <code>Cannot connect to the Docker daemon at unix:///run/user/1000/podman/podman.sock</code>
+<strong>Causa</strong>: la variabile d'ambiente <code>DOCKER_HOST</code> è impostata (non nei file di shell standard —
+<code>.bashrc</code>/<code>.zshrc</code>/<code>.profile</code> risultavano puliti; probabile hook di un tema/plugin zsh che la
+reimposta ad ogni nuova shell) e punta a un socket Podman che non esiste, anche quando Docker vero
+(<code>docker.io</code>/<code>dockerd</code>) è installato e attivo (<code>systemctl status docker</code> → <code>active (running)</code>).
+<strong>Soluzione</strong>: <code>unset DOCKER_HOST</code> prima di ogni comando <code>docker</code>/alias container in un terminale
+nuovo — va ripetuto a ogni nuovo terminale aperto, non è persistente. Causa radice non identificata
+con certezza (da approfondire con calma se serve fastidio ricorrente, non urgente).</p>
+<p><strong>Problema</strong>: <code>validating compose.yaml: ... Additional property interface_name is not allowed</code>,
+poi (dopo aver aggiornato Docker Compose alla v5.3.0 via <code>~/.docker/cli-plugins/</code>) l'errore cambia in
+<code>interface_name requires Docker Engine v28.1 or later</code>.
+<strong>Causa</strong>: la proprietà Compose <code>interface_name</code> (fissa il nome dell'interfaccia dentro il container,
+usata da <code>nftlab.sh</code> per garantire <code>eth1</code>/<code>eth2</code>/<code>eth3</code> coerenti col diagramma) richiede un <strong>Docker
+Engine</strong> v28.1+, non solo un client/Compose recente. Il pacchetto distro Parrot (<code>docker.io</code>,
+versione <code>26.1.5+dfsg1-9+b13</code>) è troppo vecchio — le istruzioni ufficiali del corso
+(<code>Istruzioni per la configurazione delle VM</code>) dicono di installare <code>docker-compose</code> via apt, senza
+specificare una versione dell'Engine, quindi il gap tra script e pacchetto distro è plausibilmente
+un limite delle istruzioni stesse, non un errore di setup.
+<strong>Soluzione adottata</strong>: rimuovere <code>interface_name</code> (rendendo i nomi delle interfacce quelli di
+default assegnati da Docker, es. <code>eth0</code> invece di <code>eth1</code>) <strong>direttamente dallo script</strong>, non dal
+<code>compose.yaml</code> generato — <code>nftlab.sh</code> rigenera <code>compose.yaml</code> da zero a ogni lancio con un heredoc
+(<code>cat &gt; compose.yaml &lt;&lt;ENDOFCOMPOSEYAML</code> — vedi riga con <code>grep -n "compose.yaml" nftlab.sh</code>), quindi
+modificare il file generato non serve, si perde al lancio successivo:</p>
+<pre><code class="language-bash">sed -i.bak '/interface_name:/d' nftlab.sh
+</code></pre>
+<p>Verificare poi con <code>ip a</code> dentro ogni container quale nome (<code>eth0</code>, <code>eth1</code>, ...) corrisponde a quale
+rete, invece di fidarsi del diagramma originale.</p>
+<p><strong>Problema</strong>: <code>nft add rule filter FORWARD ...</code> → <code>Error: Could not process rule: No such file or directory</code>
+<strong>Causa</strong>: nftables è case-sensitive — la catena era stata creata come <code>forward</code> (minuscolo, dallo
+scheletro dell'esercizio "packet filter su endpoint"), mentre il comando la referenziava come
+<code>FORWARD</code> (maiuscolo, convenzione iptables-style usata nel testo dell'esercizio "packet filter in
+instradamento"). Sono due nomi diversi per nft.
+<strong>Soluzione</strong>: <code>nft list ruleset</code> per vedere il nome esatto (case) di tabelle/catene effettivamente
+create, prima di scrivere <code>add rule</code> — non fidarsi della convenzione di maiuscole/minuscole del testo
+dell'esercizio.</p>
+<hr />
+<h2 id="vm-security-trasferimento-file-da-target-compromesso">VM Security — Trasferimento file da target compromesso</h2>
+<p><strong>Problema</strong>: <code>scp -P &lt;porta&gt; root@&lt;ip&gt;:/path/file .</code> → <code>subsystem request failed on channel 0</code> + <code>scp: Connection closed</code>
+<strong>Causa</strong>: Il server SSH sulla porta non-standard ha il subsystem SFTP disabilitato (configurazione restrittiva intenzionale nel lab).
+<strong>Soluzione</strong>: Usare <code>ssh</code> con <code>cat</code> e redirect — non richiede il subsystem SFTP:</p>
+<pre><code class="language-bash">ssh -p &lt;porta&gt; root@&lt;ip&gt; &quot;cat /root/passwd.bak&quot; &gt; passwd.bak
+ssh -p &lt;porta&gt; root@&lt;ip&gt; &quot;cat /root/shadow.bak&quot; &gt; shadow.bak
+</code></pre>
+<p><strong>Problema</strong>: <code>scp</code> lanciato da dentro una sessione SSH → copia il target su se stesso
+<strong>Causa</strong>: Si è dimenticato di aprire un nuovo terminale locale; il comando gira sulla macchina remota.
+<strong>Soluzione</strong>: Aprire un nuovo terminale sulla propria macchina Parrot e lanciare scp da lì.</p>
+<hr />
+<h2 id="vm-security-ip-target-cambia-dopo-riavvio">VM Security — IP target cambia dopo riavvio</h2>
+<p><strong>Problema</strong>: dopo il riavvio di una VM target, <code>nmap -sn</code> mostra un IP diverso da prima (es. era <code>.100</code>, ora è <code>.102</code>). Il vecchio IP potrebbe ancora comparire nella scansione.
+<strong>Causa</strong>: il DHCP di vboxnet0 assegna un nuovo lease ad ogni boot se quello precedente è scaduto. Il vecchio IP resta visibile brevemente come <strong>ARP ghost</strong> nella cache del gateway <code>.1</code>, poi sparisce.
+<strong>Soluzione</strong>: rilanciare <code>nmap -sn</code> dopo qualche minuto per confermare gli IP aggiornati. Verificare in VirtualBox quante VM sono "Running" per escludere duplicati. Il conteggio definitivo dei target: numero di MAC con vendor Oracle/VirtualBox, escluso il proprio IP (nessun MAC) e il gateway <code>.1</code>.</p>
+<hr />
+<h2 id="vm-security-cupp-non-installabile-per-dns-failure">VM Security — CUPP non installabile per DNS failure</h2>
+<p><strong>Problema</strong>: <code>sudo apt install cupp</code> → <code>Temporary failure resolving 'deb.parrot.sh'</code>
+<strong>Causa</strong>: la VM Parrot non riesce a risolvere i nomi DNS — può succedere se la scheda NAT ha problemi o il resolver è mal configurato.
+<strong>Soluzione rapida</strong>: creare la wordlist manualmente con <code>nano shannon.txt</code> inserendo varianti del target (nome, cognome, anno di nascita, username). Alternativa: usare <code>crunch</code> se disponibile (<code>which crunch</code>). Per ripristinare DNS: <code>ping 8.8.8.8</code> (testa connettività), poi <code>cat /etc/resolv.conf</code> (verifica nameserver configurato).</p>
+<hr />
+<h2 id="vm-security-nmap-su-rete-host-only">VM Security — nmap su rete host-only</h2>
+<p><strong>Problema</strong>: <code>nmap -sn &lt;rete&gt;/24</code> mostra un host in più rispetto alle VM avviate (es. 5 invece di 4)
+<strong>Causa</strong>: Il server DHCP di VirtualBox gira sull'host fisico e risponde ai ping sulla rete host-only. Prende il primo IP del range DHCP (spesso <code>.100</code>). Ha latenza ~10× più bassa delle VM vere.
+<strong>Soluzione</strong>: Ignorarlo — non ha porte aperte interessanti. Identificabile dalla latenza anomala.</p>
+<p><strong>Problema</strong>: <code>nmap -sn</code> lento (~10 secondi per /24) invece dei ~3 secondi attesi
+<strong>Causa</strong>: Lanciato senza <code>sudo</code> — usa TCP/ICMP invece di ARP, meno efficiente su LAN.
+<strong>Soluzione</strong>: <code>sudo nmap -sn &lt;rete&gt;/24</code></p>
+<hr />
+<h2 id="vm-security-hydra-http-get-form-hydra-95">VM Security — Hydra http-get-form (Hydra 9.5)</h2>
+<p><strong>Problema</strong>: <code>hydra ... http-get-form "path:params:condition:H=Cookie: value"</code> → <code>[ERROR] optional parameters must have the format X=value: &lt;condition_string&gt;</code>
+<strong>Causa</strong>: In Hydra 9.5 il parser di http-get-form richiede che la <strong>condition string sia l'ultimo campo</strong>, dopo tutti gli optional (<code>H=</code>, <code>C=</code>, ecc.). Il PDF del prof usa la sintassi Hydra 8.x (condition prima dell'header) che non funziona più.
+<strong>Soluzione</strong>: spostare la condition string in ultima posizione e usare <code>\:</code> per il due punti nell'header Cookie:</p>
+<pre><code class="language-bash">hydra IP \
+  -L users.txt -P passwords.txt \
+  http-get-form \
+  &quot;/path:user=^USER^&amp;pass=^PASS^:H=Cookie\: PHPSESSID=&lt;id&gt;; security=low:Username and/or password incorrect.&quot;
+</code></pre>
+<p>Formato corretto: <code>"path:params:H=header\: value:condition_string"</code></p>
+<p><strong>Problema</strong>: wordlist <code>xato-net-10-million-passwords-100.txt</code> non trovata su Parrot
+<strong>Soluzione</strong>: usare <code>/usr/share/wordlists/fasttrack.txt</code> (222 password comuni, contiene "password")</p>
+<hr />
+<h2 id="vm-security-lab-binary-exploit-s4-compilare-ed-eseguire">VM Security — Lab binary exploit (S4): compilare ed eseguire</h2>
+<p><strong>Problema</strong>: <code>./es.c</code> → <code>bash: ./es.c: Permission denied</code>, poi (dopo <code>chmod +x es.c</code>) <code>./es.c: line 5: char: command not found</code> / <code>syntax error near unexpected token '('</code>
+<strong>Causa</strong>: si sta tentando di eseguire il <strong>sorgente</strong> <code>es.c</code> (testo C), non il programma. La shell prova a interpretarlo come script bash.
+<strong>Soluzione</strong>: si <strong>compila</strong> <code>es.c</code> e si <strong>esegue</strong> <code>es</code> (senza <code>.c</code>):</p>
+<pre><code class="language-bash">gcc -o es -fno-stack-protector -m32 -z execstack es.c
+./es ciao
+</code></pre>
+<p>Regola: in ogni cartella esercizio, prima <code>gcc -o es … es.c</code>, poi si lavora su <code>es</code>.</p>
+<p><strong>Problema</strong>: <code>./es</code> → <code>Permission denied</code> (sul binario, non sul sorgente)
+<strong>Causa</strong>: di solito <strong>non è stato (ri)compilato</strong> — l'<code>es</code> presente è quello fornito nell'archivio <code>pwn_lab.tar.gz</code>, senza bit di esecuzione (e con flag di compilazione ignoti). Nelle cartelle ci sono <code>es.c</code> (sorgente), <code>es_1</code> (binario precompilato dei docenti) ed eventualmente un <code>es</code> dell'archivio.
+<strong>Soluzione</strong>: ricompilare il proprio <code>es</code> (lo crea eseguibile e coi flag noti): <code>gcc -o es … es.c</code>. In alternativa <code>chmod +x es</code>, ma meglio ricompilare per controllare i flag (canary/execstack contano nei gradini 3–4).</p>
+<p><strong>Nota PIE / indirizzi</strong>: i binari del lab sono <strong>PIE</strong>; con ASLR off (<code>echo 0 &gt; /proc/sys/kernel/randomize_va_space</code>) gli indirizzi sono fissi per-run ma <strong>diversi da quelli del PDF</strong>. Ogni indirizzo (<code>secret</code>, <code>system</code>, ritorno) va trovato sul proprio binario con gdb (<code>info functions</code>, <code>p system</code>, <code>x/200xw $esp</code>), mai copiato dalle slide.</p>
+<p><strong>Problema</strong>: l'exploit funziona <strong>dentro</strong> gdb (<code>run $(perl -e ...)</code>) ma fuori, con lo stesso comando su <code>./es</code> da shell, va subito in segfault senza stampare la flag.
+<strong>Causa</strong>: <code>gdb</code> disattiva l'ASLR per il processo debuggato <strong>per default</strong>, indipendentemente dal settaggio di sistema. Se nel frattempo la VM è stata riavviata (reboot, spegnimento accidentale, sospensione/ripristino), <code>randomize_va_space</code> torna al default (<code>2</code>) perché la scrittura in <code>/proc/sys/...</code> <strong>non sopravvive al reboot</strong> — l'indirizzo hardcoded trovato con gdb non è più valido fuori da gdb.
+<strong>Soluzione</strong>: verificare <code>cat /proc/sys/kernel/randomize_va_space</code> prima di ogni sessione post-riavvio; se ≠ <code>0</code>, ridisattivare con <code>sudo su &amp;&amp; echo 0 &gt; /proc/sys/kernel/randomize_va_space &amp;&amp; exit</code>, poi ripetere il comando standalone.</p>
+<p><strong>Problema</strong>: un indirizzo di ritorno/atterraggio composto a mano (little-endian) fa fallire l'exploit in modo "strano" — il crash torna <code>in &lt;funzione&gt;</code> invece di <code>?? ()</code>, come se l'indirizzo non fosse mai arrivato intatto.
+<strong>Causa</strong>: uno dei 4 byte dell'indirizzo è un <strong>"bad character"</strong>: <code>0x20</code> (spazio), <code>0x09</code> (tab), <code>0x0a</code> (newline) o <code>0x00</code> (terminatore). Se il payload passa per <code>$(perl -e '...')</code> <strong>senza virgolette</strong>, bash fa <em>word splitting</em> su spazio/tab/newline e tronca l'argomento esattamente lì; <code>0x00</code> invece termina qualunque stringa C, indipendentemente da come viaggia.
+<strong>Soluzione</strong>: prima di scegliere un indirizzo di atterraggio, controllare i suoi 4 byte little-endian e scartare quelli con <code>0x20</code>/<code>0x09</code>/<code>0x0a</code>/<code>0x00</code> — nella stessa fascia di memoria (es. dentro un NOP sled) ce ne sono quasi sempre altri validi vicini.</p>
+<p><strong>Problema</strong>: un indirizzo di atterraggio sullo stack (non di codice) funziona dentro gdb ma dà <code>Segmentation fault</code> fuori, anche con ASLR disattivata.
+<strong>Causa</strong>: a differenza degli indirizzi di <strong>codice</strong> (<code>.text</code>, fissi con ASLR off), gli indirizzi <strong>sullo stack</strong> dipendono anche da <code>argv</code>/ambiente all'avvio. gdb lancia l'eseguibile con il <strong>percorso assoluto</strong> come <code>argv[0]</code>; da shell si usa spesso <code>./es</code> (più corto) — la differenza di lunghezza (più eventuali differenze nell'ambiente ereditato) sposta la posizione reale del buffer sullo stack, anche di centinaia di byte.
+<strong>Soluzione</strong>: non fidarsi del dump (<code>x/200xw $esp</code>) preso sotto gdb per un exploit che punta allo stack. Far generare un core dump dalla vera esecuzione standalone e analizzare quello: se il binario è <strong>SUID</strong>, il dump non si salva di default (<code>fs.suid_dumpable=0</code>) → <code>sudo sysctl -w fs.suid_dumpable=1</code>, rigenerare il crash, poi <code>coredumpctl list</code> + <code>sudo coredumpctl gdb &lt;PID&gt;</code> (il core appartiene a root, serve sudo). Nel dump si riconosce anche <code>argv[0]</code> come stringa ASCII sullo stack (utile per orientarsi).</p>
+<p><strong>Problema</strong>: <code>find $esp, $esp+20000, "pattern"</code> → <code>Invalid search space, end precedes start.</code>
+<strong>Causa</strong>: aritmetica indirizzi su target <strong>32 bit</strong>. <code>$esp</code> vicino alla cima dello stack (es. <code>0xffffcadc</code>) ha poco margine prima del limite <code>0xffffffff</code>; sommare un valore troppo grande sfora quel limite e "avvolge" (wrap-around) l'indirizzo risultante, che dopo il troncamento a 32 bit diventa numericamente più piccolo di <code>$esp</code> — gdb rifiuta l'intervallo perché sembra invertito.
+<strong>Soluzione</strong>: usare un incremento che stia dentro il margine reale rimasto sotto <code>0xffffffff</code> (es. <code>find $esp, +0x3000, "SHELL="</code>); se non trova nulla, allargare di poco (<code>+0x3500</code>), mai a salti larghi come <code>+20000</code> vicino alla cima dello stack.</p>
+<p><strong>Problema</strong>: <code>x/500s $esp</code> (o conteggi simili) si esaurisce prima di raggiungere la zona <code>argv</code>/<code>envp</code> in cima allo stack, mostrando solo byte grezzi/garbage.
+<strong>Causa</strong>: appena dopo <code>main</code>, <code>$esp</code> è ancora dentro il frame locale, pieno di byte <code>\x00</code> che gdb legge come tante mini-stringhe vuote — il conteggio si esaurisce senza coprire la distanza (spesso migliaia di byte) fino a <code>argv</code>/<code>envp</code>.
+<strong>Soluzione</strong>: preferire <code>find $esp, +lunghezza, "pattern"</code> (es. <code>"SHELL="</code>) invece di scorrere a occhio con <code>x/Ns</code>; è mirato e non soffre del problema del conteggio.</p>
+<p><strong>Problema</strong>: dopo un <code>continue</code> (<code>c</code>) il programma va in <code>SIGSEGV ... in ?? () from /lib32/libc.so.6</code> e i comandi successivi (<code>find</code>, <code>p</code>, ecc.) rispondono <code>No registers.</code> / <code>The program is not being run.</code>
+<strong>Causa</strong>: comportamento atteso, non un bug — si era fermati su un breakpoint (es. <code>b *main</code>) dopo un <code>run</code> <strong>senza payload/argomenti</strong>; proseguendo, il programma raggiunge la <code>strcpy</code>/<code>gets</code> che si aspetta un argomento, trova <code>NULL</code> e crasha nella libc. Una volta morto il processo, i registri non esistono più finché non si fa un nuovo <code>run</code>.
+<strong>Soluzione</strong>: usare il breakpoint solo per leggere la memoria (indirizzi di libreria, stack) subito dopo <code>run</code>, senza proseguire con <code>c</code> se non si è passato un payload valido; per il tentativo vero, rilanciare con <code>run &lt;payload&gt;</code> (eventualmente <code>delete &lt;N&gt;</code> prima per togliere il breakpoint che non serve più).</p>
+<p><strong>Problema</strong>: un indirizzo di una <strong>funzione di libreria</strong> (es. <code>system</code>) contiene un bad character (<code>0x20</code>/<code>0x09</code>/<code>0x0a</code>), ma a differenza di un indirizzo di stack non si può "spostare di qualche byte" per evitarlo — la funzione ha un solo punto d'ingresso valido.
+<strong>Causa</strong>: stesso meccanismo del bad character su indirizzi di stack (<code>$(...)</code> non quotato → word splitting della shell), ma qui il rimedio "scegli un indirizzo vicino" non è applicabile.
+<strong>Soluzione</strong>: quotare l'intera sostituzione di comando: <code>run "$(perl -e '...')"</code> invece di <code>run $(perl -e '...')</code>. Le doppie apici esterne impediscono lo split sui caratteri IFS (spazio/tab/newline) preservandoli come byte letterali del payload; le eventuali apici singole interne (lo script perl) restano un contesto di parsing separato e non ne risentono.</p>
+<hr />
+<h2 id="vm-security-suricata-modulo-s10">VM Security — Suricata (modulo S10)</h2>
+<p><strong>Problema</strong>: <code>suricata -r &lt;pcap&gt; -S exam.rules -l &lt;dir&gt;</code> fallisce con <code>Error: ... The logging directory "&lt;dir&gt;" supplied at the command-line ... doesn't exist. Shutting down the engine.</code>
+<strong>Causa</strong>: Suricata non crea da solo la cartella di output passata a <code>-l</code> — deve già esistere.
+<strong>Soluzione</strong>: <code>mkdir -p &lt;dir&gt;</code> prima di lanciare il comando.</p>
+<p><strong>Problema</strong>: warning <code>unix-manager: Unix socket: UNIX socket bind(/var/run/suricata-command.socket) error: Address already in use</code> all'avvio
+<strong>Causa</strong>: un'altra istanza di Suricata (o un socket residuo) è già presente. Innocuo in modalità offline (<code>-r</code> su un pcap): non impedisce l'analisi né la scrittura dei log/alert.
+<strong>Soluzione</strong>: ignorabile per l'uso da esame (analisi offline di un pcap già dato); verificare solo se si lavora in modalità live su interfaccia.</p>
+<p><strong>Problema</strong>: <code>jq: command not found</code> quando si prova a estrarre <code>payload_printable</code> da <code>eve.json</code> (esercizi flag-extraction, § 3.5 di <code>guida_esame_NIDS.md</code>).
+<strong>Causa</strong>: <code>jq</code> non è installato di default su questa VM (non era nella checklist pre-snapshot originale).
+<strong>Soluzione</strong>: <code>sudo apt install -y jq</code> se c'è rete; altrimenti fallback senza installare nulla, con Python (già presente):</p>
+<pre><code>python3 -c &quot;
+import json
+with open('&lt;dir_output&gt;/eve.json') as f:
+    for line in f:
+        e = json.loads(line)
+        if e.get('event_type') == 'alert':
+            print(e.get('payload_printable'))
+&quot;
+</code></pre>
+<p>Aggiunto <code>jq</code> alla checklist pre-snapshot qui sotto, per non ritrovarselo mancante il giorno dell'esame.</p>
+<hr />
+<h2 id="vm-security-aide-modulo-s11">VM Security — AIDE (modulo S11)</h2>
+<p><strong>Problema</strong>: <code>sudo nano /etc/aide/aide.conf</code> → <code>cd: /etc/aide: No such file or directory</code>, <code>which aide</code> e <code>dpkg -l | grep aide</code> non restituiscono nulla.
+<strong>Causa</strong>: AIDE <strong>non è preinstallato di default</strong> su questa VM (il materiale del lab assume "già installato sulla Kali del laboratorio", non è vero su Parrot in questa configurazione).
+<strong>Soluzione</strong>: <code>sudo apt install aide</code>. Dopo l'installazione compare <code>/etc/aide/aide.conf</code>. Aggiunto alla checklist pre-snapshot qui sotto.</p>
+<p><strong>Nota operativa</strong>: <code>/etc/aide/aide.conf</code> di default <strong>non copre <code>/usr/bin</code></strong> con una regola di monitoraggio reale (solo <code>aide.conf.d/</code> con centinaia di regole per-pacchetto generiche, nessuna delle quali su <code>/usr/bin</code>). Per rilevare modifiche lì, commentare la riga <code>@@x_include /etc/aide/aide.conf.d ...</code> e aggiungere esplicitamente:</p>
+<pre><code>/bin f Full
+/usr/bin f Full
+</code></pre>
+<p><strong>PRIMA</strong> di lanciare <code>sudo aideinit</code> (l'ordine conta: la baseline deve essere creata con le regole già in vigore, altrimenti non cattura il dettaglio necessario). Vedi <code>[[glossario_sysadm]]</code> voce AIDE per il meccanismo completo.</p>
+<p><strong>Problema</strong>: <code>sudo nano /etc/aide/aide.conf</code> → riga aggiunta <code>/usr/bin -f Full</code> (con un trattino prima della <code>f</code>) — sembra plausibile ma non è la sintassi corretta.
+<strong>Causa</strong>: la restrizione di tipo file in AIDE è la lettera <code>f</code> da sola (file regolare), senza trattino. <code>-f</code> non è una sintassi riconosciuta.
+<strong>Soluzione</strong>: scrivere <code>/usr/bin f Full</code> / <code>/etc f Full</code>, nessun trattino. Verificare sempre la riga appena scritta prima di lanciare <code>aideinit</code>.</p>
+<p><strong>Problema (14/07, sessione 51)</strong>: dopo aver installato <code>aide</code> durante un esercizio e preso lo snapshot "VM pulita" <strong>prima</strong> di quell'installazione, il ripristino dello snapshot per l'esercizio successivo elimina anche <code>aide</code> — va reinstallato da capo ogni volta.
+<strong>Causa</strong>: lo snapshot "pulito" era stato preso senza <code>aide</code> già installato; l'installazione fatta <em>dopo</em> vive solo nello stato corrente, non nello snapshot.
+<strong>Soluzione</strong>: dopo aver installato un tool mancante (checklist sotto), prendere un <strong>nuovo</strong> snapshot pulito che lo includa, così i prossimi revert non lo perdono più. Verificare <code>which aide</code> subito dopo ogni revert prima di iniziare un nuovo esercizio della famiglia S11.</p>
+<hr />
+<h2 id="vm-security-snapshot-virtualbox-ripristinogestione">VM Security — Snapshot VirtualBox (ripristino/gestione)</h2>
+<p><strong>Problema</strong>: nel pannello "Snapshots" di VirtualBox Manager (GUI), i pulsanti "Ripristina"/"Elimina" restano grigi/disabilitati, o non si vede nessun albero di snapshot, pur sapendo che uno snapshot esiste.
+<strong>Causa</strong>: comportamento poco chiaro della GUI (serve selezionare esplicitamente la riga dello snapshot nell'albero perché i pulsanti si attivino; a volte il pannello giusto non è nemmeno quello aperto).
+<strong>Soluzione</strong>: usare <code>VBoxManage</code> da terminale sull'host, molto più affidabile della GUI:</p>
+<pre><code>VBoxManage list vms                                   # elenco VM registrate
+VBoxManage snapshot &quot;&lt;NomeVM&gt;&quot; list                    # albero snapshot, &quot;*&quot; = stato corrente
+VBoxManage snapshot &quot;&lt;NomeVM&gt;&quot; restore &quot;&lt;NomeSnapshot&gt;&quot; # ripristina (VM deve essere spenta)
+</code></pre>
+<p><strong>Problema (14/07, sessione 51)</strong>: i deliverable prodotti durante un esercizio (<code>integrity.txt</code>, <code>privesc.png</code>, screenshot in genere) <strong>spariscono</strong> dopo il ripristino di uno snapshot pulito per l'esercizio successivo — persi senza possibilità di recupero (successo con <code>change1</code>, 9 gen 2023, sessione 49: mai trovati nel repo).
+<strong>Causa</strong>: nessuna cartella condivisa/rete configurata di default sulla VM Security — il disco virtuale è l'unico posto dove vivono i file scritti dentro la VM; il revert li sovrascrive con lo stato dello snapshot.
+<strong>Soluzione</strong> (adottata dalla sessione 51 in poi): non lasciare i deliverable dentro la VM fino alla fine.
+- <code>privesc.png</code> → catturato <strong>da Claude sull'host</strong> con <code>grim</code>, puntando alla finestra VirtualBox nel momento della prova (<code>id</code> → <code>uid=0</code>) — non richiede export dalla VM.
+- <code>integrity.txt</code> → scritto da Claude in un file nel repo (<code>esercizi/SICINF/privesc_&lt;data&gt;_&lt;change&gt;/</code>), via via che Lorenzo incolla in chat l'output dei comandi rilevanti — non scritto e lasciato dentro la VM.
+Vedi anche la memoria auto-persistente <code>feedback_deliverable_vm_revert</code>.</p>
+<hr />
+<h2 id="checklist-pre-snapshot-baseline-pulita-vm-security">Checklist pre-snapshot "baseline-pulita" (VM Security)</h2>
+<p>Prima di congelare la baseline, verificare che i tool delle 5 famiglie d'esame ci siano già:</p>
+<pre><code class="language-bash">which nmap suricata jq nikto sqlmap iptables nft tcpdump aide  # enum/web/NIDS/firewall/integrity
+which gcc gdb objdump                                    # binary exploitation
+dpkg -l | grep -E 'libc6-i386|gcc-multilib'             # supporto 32-bit (binari x86_32 del corso)
+</code></pre>
+<p>Tool mancanti tipici su Parrot di default: <strong><code>suricata</code></strong> (NIDS, famiglia d'esame!), <strong><code>jq</code></strong> (estrazione
+flag da <code>eve.json</code>, NIDS), <strong><code>aide</code></strong> (integrity check, famiglia d'esame!) e <strong><code>gcc-multilib</code></strong>. Installarli PRIMA dello snapshot così restano nella baseline:</p>
+<pre><code class="language-bash">sudo apt install -y suricata jq aide gcc-multilib
+</code></pre>
+<p>Snapshot: <code>VBoxManage snapshot "LabSicurezzaInformatica" take "baseline-pulita"</code>.</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

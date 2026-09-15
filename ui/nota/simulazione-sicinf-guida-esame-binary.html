@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guida_esame_binary.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">guida_esame_binary.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/guida_esame_binary.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="guida-esame-binary-exploitation-buffer-overflow-x86_32">Guida Esame — Binary Exploitation (buffer overflow x86_32)</h1>
+<blockquote>
+<p>File da aprire il giorno dell'esame appena riconosci un esercizio di questa tipologia: un
+<strong>eseguibile ELF a 32 bit</strong> (<code>es</code>, <code>bof</code>, <code>esame</code>, <code>secret</code>, <code>secret_func1</code>, …) fornito compilato,
+spesso in <code>.zip</code>/<code>.gz</code>, con consegna del tipo "sfrutta il buffer overflow per <strong>stampare la flag</strong>"
+oppure "per <strong>eseguire lo shellcode / ottenere una shell</strong>". Autosufficiente per ogni combinazione
+di protezioni. Per la sequenza di comandi + le zone grigie vedi <code>procedura_operativa_binary.md</code>;
+per i 7 casi reali già risolti, <code>modello_binary_exploitation.md</code>; per il deliverable,
+<code>template_report_binary.md</code>.</p>
+<p><strong>Principio guida</strong>: ogni <strong>offset</strong> e ogni <strong>indirizzo</strong> li trovi TU con <code>gdb</code>/<code>nm</code> <strong>sul binario
+che hai davanti</strong> — mai copiarli dal testo, dagli appunti o da un altro esercizio. Il testo ti dice
+<em>quale</em> indirizzo cercare e <em>come</em>, non <em>quale numero</em> digitare.</p>
+</blockquote>
+<hr />
+<h2 id="0-i-due-gate-che-non-hai-il-permesso-di-saltare">0. I due gate che NON hai il permesso di saltare</h2>
+<ul>
+<li>⚠️ <strong>Gate A — ASLR disattivata.</strong> <code>cat /proc/sys/kernel/randomize_va_space</code> deve dare <code>0</code>. Se no:
+  <code>echo 0 | sudo tee /proc/sys/kernel/randomize_va_space</code>. <strong>Non sopravvive a un riavvio</strong> e <strong>gdb
+  la disattiva da solo per il processo che debugga</strong>: se l'exploit funziona in gdb ma fallisce fuori
+  con SIGSEGV immediato e nessuna flag, la prima cosa da ricontrollare è che l'ASLR sia ancora off
+  (rifai il comando). È il trabocchetto reale di S4 es2.</li>
+<li>⚠️ <strong>Gate B — non fermarti alla prima funzione "segreta".</strong> Il binario ne contiene di solito
+  <strong>molte</strong> con nomi plausibili (<code>secret_function_maybe_flag</code>, <code>betteryetthisone</code>, <code>super_hidden</code>…):
+  quasi tutte sono <strong>decoy</strong> che stampano messaggi falsi o rickroll. <strong>Una sola</strong> stampa <code>SEC{...}</code>.
+  Il nome non è affidabile — provale <strong>tutte</strong> finché non compare la flag. In 5 casi reali su 7 c'erano
+  da 2 a 6 decoy.</li>
+</ul>
+<hr />
+<h2 id="1-triage-che-tipo-di-esercizio-e-in-3-comandi">1. Triage — che tipo di esercizio è (in 3 comandi)</h2>
+<p>Appena hai il binario eseguibile (<code>chmod +x ./&lt;bin&gt;</code>), lancia questi tre comandi. Decidono tutto:</p>
+<pre><code class="language-bash">file ./&lt;bin&gt;                          # architettura: deve essere &quot;ELF 32-bit ... Intel 80386&quot;
+readelf -lW ./&lt;bin&gt; | grep GNU_STACK  # RWE = stack ESEGUIBILE (shellcode ok) ; RW = NX attivo
+nm ./&lt;bin&gt; | grep -iE ' [tT] '        # funzioni definite: c'è una funzione &quot;segreta&quot;?
+</code></pre>
+<p><strong>Canary (protezione non presente nel pool, ma da saper riconoscere).</strong> I 7 binari del pool sono
+compilati <strong>senza</strong> stack protector (<code>nm ./&lt;bin&gt; | grep stack_chk</code> → vuoto), quindi l'overflow classico
+funziona. Se invece durante la bisezione vedi <code>*** stack smashing detected ***: terminated</code> (invece di
+<code>0x42424242 in ?? ()</code>), c'è un <strong>canary</strong>: il valore-sentinella tra buffer e ret address viene
+controllato prima del <code>ret</code> e il programma aborta. In quel caso l'overflow lineare non basta — servirebbe
+leakare/riscrivere il canary (fuori dallo scopo di questo pool); segnala che l'hai riconosciuto. Firma
+rapida: <code>readelf -s ./&lt;bin&gt; | grep -i stack_chk</code> non vuoto, o <code>checksec</code> che riporta "Canary found".</p>
+<p><strong>Vettore d'ingresso (argv o stdin?).</strong> Aggiungi al triage <code>nm ./&lt;bin&gt; | grep -iE 'gets|fgets|read'</code>:
+se il binario legge il payload da <strong>stdin</strong> (<code>gets</code>/<code>fgets</code>/<code>read</code>) invece che da <code>argv[1]</code>, il trasporto
+e le regole bad-char cambiano — <strong>salta alla §4-bis</strong>. Se legge da <code>argv</code> (i 7 casi del pool: <code>./bin $(…)</code>),
+prosegui normalmente. Firma pratica: lanciato <strong>senza argomenti</strong>, un binario stdin-based <strong>si blocca in
+attesa di input</strong>; uno argv-based no.</p>
+<p>E leggi la <strong>consegna</strong>: cosa chiede l'obiettivo?</p>
+<table>
+<thead>
+<tr>
+<th>Segnale nella consegna</th>
+<th>Cosa implica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"farsi <strong>stampare la flag</strong>" / "recuperare la Flag"</td>
+<td>c'è (quasi sempre) una <strong>funzione segreta</strong> che stampa <code>SEC{...}</code> → ret2secret-function.</td>
+</tr>
+<tr>
+<td>"eseguire lo <strong>shellcode</strong> fornito" / "ottenere una <strong>shell</strong>"</td>
+<td>nessuna funzione utile → <strong>shellcode injection</strong> (se stack RWE) o ret2libc (se NX).</td>
+</tr>
+<tr>
+<td>"stampa la flag <strong>se si conosce la password</strong>" (ex6/ex7)</td>
+<td>ret2secret-function + <strong>bonus recupero password</strong> (<code>strings</code>/gdb).</td>
+</tr>
+<tr>
+<td>binario <code>.gz</code> singolo (<code>secret.gz</code>)</td>
+<td><code>gunzip</code> poi <code>chmod +x</code>.</td>
+</tr>
+<tr>
+<td><code>.zip</code> (<code>bof.zip</code>)</td>
+<td><code>unzip</code>, entra nella cartella estratta, <code>chmod +x</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Il triage indirizza; la <strong>tecnica esatta</strong> la decide l'albero della Sezione 2.</p>
+<hr />
+<h2 id="2-albero-di-decisione-per-protezioni-il-cuore-della-guida">2. Albero di decisione per protezioni (il cuore della guida)</h2>
+<pre><code>                         ┌─────────────────────────────────────────────┐
+                         │  Esiste una funzione che stampa la flag?     │
+                         │  (nm / info functions → nome tipo secret,    │
+                         │   reveal, super_*, *flag*, *hidden*, trythat)│
+                         └───────────────┬──────────────────┬──────────┘
+                                    SÌ   │                  │  NO (obiettivo = shell)
+                                         ▼                  ▼
+                          ┌──────────────────────┐   ┌─────────────────────────────┐
+                          │ RET2SECRET-FUNCTION   │   │ GNU_STACK = RWE (eseguibile)?│
+                          │ (NX irrilevante:      │   └──────┬──────────────┬───────┘
+                          │  salti a codice       │      SÌ  │              │  NO (NX on)
+                          │  già presente)        │          ▼              ▼
+                          │  → §2.A               │  ┌──────────────┐  ┌──────────────┐
+                          └──────────────────────┘   │ SHELLCODE    │  │ RET2LIBC     │
+                                                      │ INJECTION    │  │ (system+exit │
+                                                      │ → §2.B       │  │  +/bin/sh)   │
+                                                      └──────────────┘  │ → §2.C       │
+                                                                        └──────────────┘
+</code></pre>
+<p><strong>Nota trasversale — SUID.</strong> Se <code>ls -l ./&lt;bin&gt;</code> mostra la <code>s</code> (<code>-rwsr-xr-x</code>) il binario è SUID-root:
+qualunque shell ottieni (§2.B o §2.C) sarà <strong>root</strong> (<code>id</code> → <code>uid=0</code>). Attenzione: <strong>gdb e il SUID non
+vanno d'accordo</strong> — sotto debugger il SUID è disattivato (<code>id</code> dà uid normale), va verificato <strong>fuori</strong>
+da gdb, e per binari SUID il core dump richiede <code>sudo sysctl -w fs.suid_dumpable=1</code> (vedi §2.B).</p>
+<h3 id="2a-ret2secret-function-5-casi-su-7-nel-pool-il-ramo-piu-probabile">§2.A — RET2SECRET-FUNCTION (5 casi su 7 nel pool: il ramo più probabile)</h3>
+<p>Salti l'indirizzo di ritorno su una funzione già presente che stampa la flag. <strong>NX e stack non
+eseguibile NON contano</strong> (non inietti codice).</p>
+<ol>
+<li><strong>Trova le funzioni candidate.</strong>
+   - <strong>non-PIE</strong> (<code>nm</code> mostra indirizzi <code>0x0804…</code>): usa direttamente <code>nm ./&lt;bin&gt;</code> — gli indirizzi
+     sono <strong>fissi</strong>.
+   - <strong>PIE</strong> (<code>nm</code> mostra <code>0x0000…</code>): apri gdb, fai <strong>un <code>run</code> qualunque</strong> (anche <code>run ciao</code>) e solo
+     <strong>dopo</strong> <code>info functions</code> — prima del <code>run</code> vedi solo l'offset di link. A runtime (ASLR off)
+     diventano <code>0x5655…</code>, stabili.
+   <code>bash
+   nm ./&lt;bin&gt; | grep -iE ' [tT] ' | grep -viE '__|_start|_init|_fini|frame_dummy|register|gmon'
+   # oppure in gdb (binari PIE):  (gdb) run ciao   →   (gdb) info functions</code></li>
+<li><strong>Trova l'offset per bisezione</strong> (vedi §3): payload <code>A</code>*N + <code>BBBB</code> finché <code>EIP = 0x42424242</code>.</li>
+<li><strong>Prova ogni candidata</strong>, sostituendo <code>BBBB</code> con l'indirizzo in <strong>little-endian</strong>:
+   <code>bash
+   ./&lt;bin&gt; $(python -c 'print("A"*OFFSET + "\xLL\xLL\xLL\xLL")')   # indirizzo a byte invertiti</code>
+   finché compare <code>SEC{...}</code>. Le altre stampano messaggi decoy o crashano.</li>
+<li><strong>Bad character</strong> (§4): se l'indirizzo della funzione giusta contiene <code>0x00</code>/<code>0x20</code>/<code>0x0a</code>/<code>0x09</code>,
+   via <code>strcpy</code>/<code>argv</code> il payload si tronca. Nel pool non è mai capitato sulla funzione <strong>giusta</strong>,
+   ma verifica; se capitasse, vedi §4 e <code>procedura_operativa_binary.md</code>.</li>
+</ol>
+<p><strong>Casi reali di riferimento</strong>: ex2 (offset 16), ex4 (offset 16, non-PIE, <code>secret_function_a..f</code>),
+ex5 (offset 16, 6 decoy, bad char 0x00 su un decoy), ex6 (offset 212, non-PIE, +password),
+ex7 (offset 44, non-PIE, +password).</p>
+<h3 id="2b-shellcode-injection-2-casi-su-7-quando-lobiettivo-e-una-shell-e-lo-stack-e-rwe">§2.B — SHELLCODE INJECTION (2 casi su 7: quando l'obiettivo è una shell e lo stack è RWE)</h3>
+<p>Inietti NOP sled + shellcode nel buffer e fai puntare il ritorno nella slitta.</p>
+<ol>
+<li><strong>Serve lo stack eseguibile</strong> — verificato al triage (<code>GNU_STACK = RWE</code>). Il testo di solito
+   <strong>fornisce lo shellcode</strong> (46 byte tipici che aprono <code>/bin/sh</code>): copialo esatto.</li>
+<li><strong>Trova l'offset</strong> (§3): <code>A</code><em>N + <code>BBBB</code> → <code>EIP = 0x42424242</code>. Chiamalo </em><em>OFF</em>*.</li>
+<li><strong>Guarda dove sono finiti i tuoi byte</strong>: dopo il crash, <code>x/200xw $esp</code> (o <code>x/700xw $esp</code>) — cerca
+   la fascia di <code>0x41414141</code>. Scegli un indirizzo <strong>al centro</strong> di quella fascia = bersaglio del
+   NOP sled.</li>
+<li><strong>Componi il payload</strong> = <code>[NOP] + [shellcode] + [indirizzo]</code>, con <code>len(NOP) + len(shellcode) = OFF</code>
+   (così l'indirizzo cade esattamente sul ret address) e l'indirizzo che punta <strong>dentro</strong> i NOP:
+   <code>bash
+   ./&lt;bin&gt; $(python -c 'print("\x90"*(OFF-46) + "&lt;46-byte shellcode&gt;" + "\xLL\xLL\xLL\xLL")')</code>
+   Esempio reale ex1: <code>OFF=622</code>, <code>\x90</code>*576 + shellcode(46) + <code>\xb0\xd2\xff\xff</code> (0xffffd2b0).</li>
+<li><strong>⚠️ Lo stack sotto gdb ≠ lo stack standalone</strong> (anche con ASLR off): l'<code>argv[0]</code> è diverso
+   (<code>/percorso/assoluto</code> in gdb vs <code>./bin</code> da shell) → il buffer si sposta anche di <strong>centinaia di
+   byte</strong>. Un indirizzo trovato in gdb può fallire fuori. Rimedi: (a) NOP sled <strong>largo</strong> per assorbire
+   lo scarto; (b) se serve precisione, prendi il dump dal <strong>core dump della vera esecuzione standalone</strong>:
+   <code>bash
+   sudo sysctl -w fs.suid_dumpable=1        # solo se il binario è SUID (altrimenti il core non si salva)
+   ./&lt;bin&gt; &lt;payload che crasha&gt;              # genera il crash da shell
+   coredumpctl list                          # trova il PID
+   sudo coredumpctl gdb &lt;PID&gt;                # apri il core (di root se SUID → sudo)
+   (gdb) x/200xw $esp                        # QUI vedi la vera fascia di NOP standalone</code></li>
+<li><strong>Se SUID-root</strong> → la shell è root: verifica <strong>fuori</strong> da gdb con <code>id</code> → <code>uid=0</code>.</li>
+</ol>
+<p><strong>Casi reali</strong>: ex1 (offset 622), ex3 (buffer ~1518, solo appunti-guida allegati).</p>
+<h3 id="2c-ret2libc-non-nel-pool-desame-ma-nel-programma-nx-on-nessuna-funzione-utile">§2.C — RET2LIBC (NON nel pool d'esame, ma nel programma: NX on + nessuna funzione utile)</h3>
+<p>Quando lo stack <strong>non</strong> è eseguibile (NX) e non c'è una funzione segreta, non puoi iniettare shellcode:
+<strong>riusi <code>system("/bin/sh")</code> già presente nella libc</strong>.</p>
+<ol>
+<li><strong>Trova gli indirizzi</strong> (breakpoint per avere la libc caricata):
+   <code>bash
+   gdb ./&lt;bin&gt;
+   (gdb) b *main
+   (gdb) run
+   (gdb) p system            # indirizzo di system
+   (gdb) p exit               # indirizzo di exit (ritorno "pulito" di system)
+   (gdb) find $esp, +0x3000, "SHELL="   # cerca la stringa /bin/sh nell'ambiente (vedi §4)</code></li>
+<li><strong>Payload</strong> = <code>[padding OFF] + [system] + [exit] + [indirizzo di "/bin/sh"]</code>:
+   <code>bash
+   run "$(perl -e 'print "\x90"x OFF ,"&lt;system&gt;","&lt;exit&gt;","&lt;addr /bin/sh&gt;"')"</code>
+   <code>system</code> esegue la shell; <code>exit</code> fa da suo indirizzo di ritorno (chiusura pulita); l'ultimo è il
+   <strong>parametro</strong> di <code>system</code> (la stringa <code>/bin/sh</code>, tipicamente il valore di <code>SHELL=</code> in <code>envp</code>,
+   scavalcando i 6 caratteri <code>SHELL=</code> → indirizzo+6).</li>
+<li><strong>⚠️ Gotcha ret2libc</strong> (§4): (a) se l'indirizzo di <code>system</code> contiene <code>0x00</code> lo <code>strcpy</code> tronca →
+   usa il byte immediatamente successivo, ancora dentro <code>system</code>; (b) se contiene <code>0x20</code> (spazio) il
+   <code>$()</code> <strong>non quotato</strong> tronca il payload per word-splitting → <strong>quota</strong> la sostituzione:
+   <code>run "$(perl -e '…')"</code>; (c) <code>x/500s $esp</code> è inaffidabile su lunghe distanze → usa <code>find</code> (attento
+   all'overflow di <code>0xffffffff</code>).</li>
+</ol>
+<p><strong>Riferimento</strong>: S4 es4 (<code>guida_lab_moduloS4_binary_exploits.md</code>, "Esercizio 4 — ret2libc").</p>
+<hr />
+<h2 id="3-trovare-loffset-la-bisezione-con-gli-stadi-intermedi-da-riconoscere">3. Trovare l'offset — la bisezione, con gli stadi intermedi da riconoscere</h2>
+<p>L'offset (byte dall'inizio del buffer al ret address salvato) <strong>cambia ogni volta</strong>. Metodo:</p>
+<pre><code class="language-bash">gdb ./&lt;bin&gt;
+(gdb) run $(perl -e 'print &quot;A&quot;x200')   # parti alto: crash? è overflow
+(gdb) run $(perl -e 'print &quot;A&quot;x100')   # dimezza: no crash? sei sotto
+(gdb) run $(perl -e 'print &quot;A&quot;x150')   # bisezione, avvicinati...
+(gdb) run $(perl -e 'print &quot;A&quot;x OFF ,&quot;BBBB&quot;')   # conferma: EIP == 0x42424242
+</code></pre>
+<p><strong>Gli stadi intermedi (fondamentale — non tutti i crash sono uguali):</strong>
+- <strong><code>SIGSEGV … in &lt;nomefunzione&gt; ()</code></strong> (indirizzo riconosciuto, es. <code>in main</code>): hai corrotto solo
+  l'<strong>EBP salvato</strong> (che sta <em>prima</em> del ret address), non ancora il ret. Sei <strong>vicino ma corto</strong>.
+- <strong><code>SIGILL … in &lt;nomefunzione&gt; ()</code></strong>: il <code>ret</code> è <strong>avvenuto</strong> ma sei atterrato a metà di un'istruzione
+  valida (byte decodificati come opcode illegale). Offset <strong>quasi</strong> giusto.
+- <strong><code>SIGSEGV 0x42424242 in ?? ()</code></strong>: <code>EIP</code> è esattamente <code>BBBB</code>. <strong>Controllo pieno del ret address</strong> →
+  offset esatto. I <code>?? ()</code> (indirizzo non riconosciuto) sono la firma del successo.</p>
+<p>Regola mnemonica: <strong><code>in &lt;funzione&gt;</code> = EIP non dirottato</strong> (crash da dato corrotto altrove);
+<strong><code>in ?? ()</code> = EIP sotto il tuo controllo totale</strong>.</p>
+<hr />
+<h2 id="4-bad-character-e-quoting-il-gruppo-di-gotcha-che-fa-perdere-piu-tempo">4. Bad character e quoting — il gruppo di gotcha che fa perdere più tempo</h2>
+<p>Un indirizzo va <strong>iniettato intatto</strong>. Quattro byte lo troncano se passa via <code>strcpy</code>/<code>argv</code>/shell:</p>
+<table>
+<thead>
+<tr>
+<th>Byte</th>
+<th>Nome</th>
+<th>Perché tronca</th>
+<th>Rimedio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0x00</code></td>
+<td>NUL</td>
+<td>terminatore di stringa C: <code>strcpy</code> si ferma lì</td>
+<td>se è un <strong>indirizzo di funzione</strong> con scelta multipla (decoy), scartalo; se è l'unico bersaglio, usa il byte adiacente ancora dentro la funzione/zona</td>
+</tr>
+<tr>
+<td><code>0x20</code></td>
+<td>spazio</td>
+<td>la shell fa <strong>word-splitting</strong> su <code>$()</code> <strong>non quotato</strong></td>
+<td><strong>quota</strong>: <code>run "$(perl -e '…')"</code> — le doppie apici esterne bloccano lo split, le singole interne restano contesto perl separato</td>
+</tr>
+<tr>
+<td><code>0x0a</code></td>
+<td>newline</td>
+<td>separatore di riga per la shell</td>
+<td>come <code>0x20</code>: quota, o sposta il bersaglio se hai scelta</td>
+</tr>
+<tr>
+<td><code>0x09</code></td>
+<td>tab</td>
+<td>separatore IFS</td>
+<td>come sopra</td>
+</tr>
+</tbody>
+</table>
+<p><strong>La distinzione chiave (dalla pratica reale S4):</strong>
+- Se il byte proibito cade in un <strong>indirizzo dello stack scelto da te</strong> (bersaglio del NOP sled, dove
+  hai margine) → <strong>sposta il bersaglio</strong> di qualche decina di byte nella stessa fascia.
+- Se cade nell'indirizzo di una <strong>funzione fissa</strong> (<code>system</code>, o l'unica funzione segreta) dove non c'è
+  scelta → il problema è il <strong>trasporto</strong>, non l'indirizzo: se è <code>0x20</code>/<code>0x0a</code>/<code>0x09</code> <strong>quota il <code>$()</code></strong>;
+  se è <code>0x00</code> non c'è quoting che tenga (è <code>strcpy</code> a fermarsi) → serve il byte adiacente o un vettore
+  d'ingresso che non usi <code>strcpy</code> (nel pool non è mai stato necessario sulla funzione giusta).</p>
+<p>Riconoscere <strong>in anticipo</strong> quale dei due casi stai affrontando evita di cercare un "indirizzo vicino"
+quando invece il fix è quotare (e viceversa).</p>
+<hr />
+<h2 id="4-bis-variante-di-trasporto-il-binario-legge-da-stdin-getsfgetsread-non-da-argv">4-bis. Variante di trasporto — il binario legge da <strong>stdin</strong> (<code>gets</code>/<code>fgets</code>/<code>read</code>), non da <code>argv</code></h2>
+<blockquote>
+<p>⚠️ <strong>Estensione critica della §4.</strong> Tutti i 7 casi del pool ricevono il payload come <strong>argomento</strong>
+(<code>./bin $(python -c '…')</code>), quindi via <code>argv[1]</code> + <code>strcpy</code>. Ma la vulnerabilità classica del corso è
+<code>gets(buf)</code>/<code>fgets</code>/<code>read</code>, che leggono da <strong>standard input</strong>: se all'esame capita un binario così, il
+<code>$(…)</code> come argomento <strong>non arriva mai al buffer</strong> e cambiano sia il <em>trasporto</em> sia le <em>regole bad-char</em>.
+Questa sezione è la variante gemella della §4: <strong>se il binario legge da stdin, applica questa; se legge
+da argv, applica la §4</strong>. Gli esempi qui sotto sono <strong>didattici</strong> (dichiarati come tali): nel pool storico
+non compaiono, ma il vettore è esattamente quello del lab S4.</p>
+</blockquote>
+<h3 id="4-bis1-come-riconosci-che-legge-da-stdin-non-da-argv">4-bis.1 Come riconosci che legge da stdin (non da argv)</h3>
+<p>Due segnali, uno statico e uno comportamentale:</p>
+<ul>
+<li><strong>Analisi statica</strong> — nel disassemblato/nei simboli compare una lettura da stdin, <strong>non</strong> un accesso a
+  <code>argv</code>:
+  <code>bash
+  nm ./&lt;bin&gt; | grep -iE 'gets|fgets|read|scanf'      # gets/fgets/read/gets_s presenti?
+  objdump -d ./&lt;bin&gt; | grep -iE 'call.*(gets|fgets|read|__isoc99_scanf)@plt'
+  strings ./&lt;bin&gt; | grep -iE 'gets|Enter|password:|input'   # spesso c'è un prompt "Enter …"</code>
+  Se in <code>main</code>/<code>vuln</code> vedi <code>call gets@plt</code> o <code>call fgets@plt</code> (con <code>stdin</code> come 3° argomento) o
+  <code>call read@plt</code> (con <code>0</code> = fd stdin come 1° argomento) <strong>e non</strong> vedi la catena
+  <code>mov eax,[eax+0x4] ; …[eax]</code> che carica <code>argv[1]</code> (cfr. modello ex3/ex4) → <strong>legge da stdin</strong>.</li>
+<li><strong>Comportamento</strong> — lancia il binario <strong>senza argomenti</strong>: se <strong>si blocca in attesa</strong> (cursore fermo,
+  nessun crash, riprende solo quando digiti <code>Invio</code>) sta leggendo stdin. Un binario argv-based invece
+  termina subito (o stampa un <code>Usage:</code>), non aspetta niente.
+  <code>bash
+  ./&lt;bin&gt;            # si ferma qui in attesa? → stdin.  Ctrl-D o Ctrl-C per uscire</code></li>
+</ul>
+<h3 id="4-bis2-come-consegni-il-payload-a-un-binario-stdin-based">4-bis.2 Come consegni il payload a un binario stdin-based</h3>
+<p>Il payload va <strong>su stdin</strong>, non in <code>argv</code>. Tre vettori equivalenti, con pro/contro:</p>
+<table>
+<thead>
+<tr>
+<th>Vettore</th>
+<th>Comando</th>
+<th>Pro / Contro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Pipe</strong></td>
+<td><code>python3 -c 'import sys; sys.stdout.buffer.write(b"A"*OFF + b"\xLL\xLL\xHH\xHH")' \| ./&lt;bin&gt;</code></td>
+<td>Il più diretto. <code>sys.stdout.buffer.write</code> scrive <strong>byte grezzi</strong> senza newline finale né ricodifiche → pulito per byte binari. <strong>Contro:</strong> con la pipe il processo eredita stdin dalla pipe, non dal terminale: se il binario dopo l'overflow apre una <strong>shell</strong> (shellcode/ret2libc) la shell trova subito EOF e muore → per le shell usa here-string o file, non la pipe.</td>
+</tr>
+<tr>
+<td><strong>Here-string</strong></td>
+<td><code>./&lt;bin&gt; &lt;&lt;&lt; "$(python3 -c '…')"</code></td>
+<td>Comodo da riga di comando. <strong>Contro:</strong> il <code>&lt;&lt;&lt;</code> di bash/zsh <strong>aggiunge un <code>\n</code> finale</strong> — di solito innocuo (il newline sta <em>dopo</em> l'indirizzo di ritorno), ma se ti serve controllo esatto sull'ultimo byte, evitalo. Vale lo stesso avviso pipe/EOF per le shell.</td>
+</tr>
+<tr>
+<td><strong>File + redirect</strong></td>
+<td><code>python3 -c '…' &gt; payload.bin</code> poi <code>./&lt;bin&gt; &lt; payload.bin</code></td>
+<td>Il più <strong>robusto e riproducibile</strong> (stesso file in shell e in gdb: <code>(gdb) run &lt; payload.bin</code>). <strong>Consigliato in fase di bisezione</strong> e per gli screenshot. Nessuna sorpresa di newline se costruisci il file con <code>sys.stdout.buffer.write</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong><code>echo</code>/<code>printf</code> vs <code>python3</code>.</strong> <code>echo "$payload"</code> aggiunge un <code>\n</code> finale (a meno di <code>echo -n</code>) e
+può reinterpretare le sequenze; <code>printf</code> non aggiunge newline ma richiede <code>\xNN</code> esatti nel formato.
+Per byte binari <strong>preferisci sempre</strong> <code>python3 -c 'import sys; sys.stdout.buffer.write(b"…")'</code> (oppure
+<code>perl -e 'print …'</code>, che non aggiunge newline): eviti newline fantasma e ricodifiche UTF-8 dei byte alti.</p>
+<h3 id="4-bis3-come-cambiano-i-bad-character-il-ribaltamento-rispetto-alla-4">4-bis.3 Come cambiano i bad character (il ribaltamento rispetto alla §4)</h3>
+<p>Questo è il punto in cui è <strong>facilissimo confondersi sotto stress</strong>: con stdin le regole si <strong>ribaltano</strong>
+rispetto al caso argv/strcpy della §4.</p>
+<table>
+<thead>
+<tr>
+<th>Byte</th>
+<th>argv + <code>strcpy</code> (§4, il pool)</th>
+<th>stdin + <code>gets</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0x00</code> NUL</td>
+<td><strong>BAD</strong>: <code>strcpy</code> termina la copia sul NUL → il payload si tronca. Se è nell'indirizzo giusto sei bloccato.</td>
+<td><strong>USABILE</strong>: <code>gets</code> <strong>non</strong> si ferma sul NUL (non è <code>strcpy</code>); copia byte per byte fino a newline/EOF. <code>0x00</code> diventa un byte normale del payload.</td>
+</tr>
+<tr>
+<td><code>0x0a</code> newline</td>
+<td>Bad <strong>solo</strong> se passa via <code>$()</code> <strong>non quotato</strong> (word-splitting shell) → si risolve <strong>quotando</strong> <code>"$(…)"</code>.</td>
+<td><strong>BAD principale</strong>: <code>gets</code> <strong>termina l'input</strong> esattamente sulla <code>\n</code>. Un <code>0x0a</code> nell'indirizzo o nello shellcode tronca lì → tutto ciò che segue non entra. Non c'è quoting che aiuti: è la semantica di <code>gets</code>, non della shell.</td>
+</tr>
+<tr>
+<td><code>0x20</code> spazio</td>
+<td>Bad se <code>$()</code> non quotato (word-splitting) → <strong>quota</strong>.</td>
+<td><strong>USABILE</strong>: stdin è un flusso di byte grezzi, non un elenco di argomenti → nessun word-splitting. Lo spazio entra intatto.</td>
+</tr>
+<tr>
+<td><code>0x09</code> tab</td>
+<td>come <code>0x20</code> (IFS) → quota.</td>
+<td><strong>USABILE</strong>: come lo spazio, nessuno split su stdin.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>In una frase, per non sbagliare:</strong> <em>via </em><em>argv/strcpy</em><em> il nemico n.1 è <code>0x00</code>; via </em><em>stdin/gets</em><em> il
+nemico n.1 diventa <code>0x0a</code> (newline), mentre <code>0x00</code> è diventato tuo amico.</em> Spazi e tab, che via argv
+richiedevano il quoting, su stdin non danno alcun problema.</p>
+<p><strong>Dipende da QUALE funzione legge</strong> (non tutte le letture da stdin sono uguali):</p>
+<table>
+<thead>
+<tr>
+<th>Funzione</th>
+<th>Termina su</th>
+<th><code>0x00</code></th>
+<th><code>0x0a</code></th>
+<th>Limite di lunghezza</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gets(buf)</code></td>
+<td>newline o EOF</td>
+<td>usabile</td>
+<td><strong>bad</strong> (termina)</td>
+<td>nessuno (è proprio l'overflow)</td>
+</tr>
+<tr>
+<td><code>fgets(buf, N, stdin)</code></td>
+<td>newline, EOF <strong>o</strong> <code>N-1</code> byte</td>
+<td>usabile</td>
+<td><strong>bad</strong> (termina)</td>
+<td><strong>sì, N-1 byte</strong>: se l'offset+4 supera <code>N-1</code> l'overflow classico <strong>non raggiunge</strong> il ret address → riconoscilo dal disassemblato (<code>N</code> è il 2° argomento di <code>fgets</code>) e verifica che <code>OFF+4 ≤ N-1</code>.</td>
+</tr>
+<tr>
+<td><code>read(0, buf, N)</code></td>
+<td><code>N</code> byte o EOF</td>
+<td>usabile</td>
+<td><strong>usabile</strong> (non è speciale)</td>
+<td>sì, N byte — ma nessun byte è proibito: il vettore <strong>più permissivo</strong> (né <code>0x00</code> né <code>0x0a</code> bloccano).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-bis4-la-bisezione-delloffset-resta-identica-cambia-solo-come-invii-ogni-tentativo">4-bis.4 La bisezione dell'offset resta identica — cambia solo <strong>come invii</strong> ogni tentativo</h3>
+<p>Il metodo della §3 (parti alto con <code>A</code><em>N, dimezza, conferma con <code>A</code></em>OFF + <code>BBBB</code> fino a
+<code>0x42424242 in ?? ()</code>, riconosci gli stadi <code>in &lt;func&gt;</code>/<code>SIGILL</code>/<code>?? ()</code>) è <strong>concettualmente invariato</strong>:
+cambia <strong>solo il modo di consegnare</strong> ogni prova, da argomento a stdin. In gdb:</p>
+<pre><code class="language-bash"># invece di:   (gdb) run $(perl -e 'print &quot;A&quot;x OFF ,&quot;BBBB&quot;')        ← argv (§3)
+python3 -c 'import sys; sys.stdout.buffer.write(b&quot;A&quot;*OFF + b&quot;BBBB&quot;)' &gt; t.bin
+gdb ./&lt;bin&gt;
+(gdb) run &lt; t.bin        # ← stesso payload, consegnato su stdin
+# atteso identico:  Program received signal SIGSEGV, 0x42424242 in ?? ()
+</code></pre>
+<p>Tutto il resto (interpretazione degli stadi del crash, EBP corrotto vs ret controllato) è invariato.
+⚠️ Un solo accorgimento: se usi <code>gets</code>, <strong>non mettere <code>0x0a</code> nel padding di prova</strong> (le <code>A</code> = <code>0x41</code> vanno
+benissimo, ma se un giorno usi byte casuali evita la newline) — un <code>0x0a</code> accidentale nel payload di test
+troncherebbe la prova e ti farebbe leggere un offset falso.</p>
+<p><strong>Rimando incrociato:</strong> una volta trovato l'offset e scelto l'indirizzo/shellcode, il ramo è lo stesso
+della §2 (ret2secret-function / shellcode injection / ret2libc): l'unica differenza end-to-end è il
+<strong>vettore d'ingresso</strong> di questa §4-bis e le <strong>bad-char ribaltate</strong> della §4-bis.3.</p>
+<hr />
+<h2 id="5-recupero-della-password-bonus-ex6ex7">5. Recupero della password (bonus ex6/ex7)</h2>
+<p>Quando la consegna dice "stampa la flag <strong>senza conoscere la password</strong>" e chiede la password come bonus:</p>
+<ul>
+<li><strong>Metodo A — in chiaro:</strong> <code>strings ./&lt;bin&gt;</code> — se la password è una stringa letterale compare
+  direttamente (es. <code>ThisShouldBeHardToGuess…</code>). Riconoscila accanto a <code>SEC{%s}</code>, <code>Usage:</code>, ecc.</li>
+<li><strong>Metodo B — de-offuscata a runtime:</strong> se <code>strings</code> non la mostra (è calcolata), mettiti un
+  breakpoint <strong>subito prima</strong> della <code>strcmp</code>/confronto e leggi la memoria puntata dal registro
+  argomento:
+  <code>bash
+  (gdb) disas check                    # individua l'indirizzo del push/lea prima di call strcmp@plt
+  (gdb) b *0xINDIRIZZO_PRIMA_DI_STRCMP
+  (gdb) run ciao
+  (gdb) x/s $eax                        # (o l'altro operando) → la password de-offuscata</code></li>
+<li><strong>Limite (da scrivere nel pwn.txt):</strong> funziona solo se il programma <strong>de-offusca</strong> la password per
+  confrontarla in chiaro. Non funziona per sistemi reali che <strong>hashano l'input</strong> e confrontano col
+  digest (non c'è mai la password in chiaro in memoria). La <strong>flag</strong>, invece, spesso è ricostruita via
+  XOR solo dentro la funzione target → non esce da <code>strings</code>, esce solo <strong>eseguendola</strong> (cioè con
+  l'exploit stesso).</li>
+</ul>
+<hr />
+<h2 id="6-verifica-finale-e-deliverable">6. Verifica finale e deliverable</h2>
+<ul>
+<li><strong>ret2secret-function</strong>: la flag <code>SEC{...}</code> è stampata (il <code>Segmentation fault</code> che segue è atteso e
+  <strong>non</strong> è un errore — la flag esce prima del crash del ret finale).</li>
+<li><strong>shellcode injection / ret2libc</strong>: si apre una shell (<code>$</code>, o <code>executing new program: /bin/sh|dash</code>);
+  se SUID, <code>id</code> → <code>uid=0(root)</code> <strong>fuori</strong> da gdb.</li>
+<li>Deliverable tipici (vedi <code>template_report_binary.md</code>): un file di testo (<code>bof.txt</code> o <code>pwn.txt</code>) con
+  flag + payload finale + descrizione dettagliata dei passaggi (il <strong>dettaglio è criterio di voto</strong>),
+  e <strong>2+ screenshot</strong>: uno che dimostra il controllo del ret address (<code>AAAA..AA+BBBB</code> → <code>0x42424242</code>),
+  uno con l'exploit funzionante (flag stampata / shell ottenuta). Nomi ricorrenti: <code>overflow.png</code>,
+  <code>payload.png</code>, <code>exploit.png</code>, <code>overflowNN.png</code>.</li>
+</ul>
+<hr />
+<h2 id="7-checklist-mentale-desame-la-catena">7. Checklist mentale d'esame (la catena)</h2>
+<ol>
+<li><code>file</code> + <code>readelf -lW … GNU_STACK</code> + <code>nm</code> + leggi la consegna → <strong>quale ramo</strong> (§2.A/B/C).</li>
+<li>ASLR off (Gate A). Binario PIE o non-PIE? (cambia come leggi gli indirizzi).</li>
+<li><strong>Offset per bisezione</strong> (<code>A</code>*N + <code>BBBB</code> → <code>0x42424242 in ?? ()</code>) — mai copiarlo.</li>
+<li><strong>ret2secret</strong>: prova <strong>tutte</strong> le funzioni candidate (Gate B), riconosci <code>SEC{...}</code>.
+   <strong>shellcode</strong>: NOP sled + shellcode + indirizzo nella slitta (occhio a gdb≠standalone).
+   <strong>ret2libc</strong>: system + exit + /bin/sh (occhio a bad char e quoting).</li>
+<li><strong>Bad character</strong> sull'indirizzo iniettato? (§4) sposta il bersaglio <em>oppure</em> quota il <code>$()</code>.</li>
+<li>Verifica (flag stampata / shell / <code>id</code>=root se SUID), poi scrivi il report dettagliato + screenshot.</li>
+</ol>
+<hr />
+<h2 id="8-materiale-di-riserva-binari-a-64-bit-x86_64-raramente-necessario">8. Materiale di riserva — binari a <strong>64 bit</strong> (x86_64) — <em>raramente necessario</em></h2>
+<blockquote>
+<p>⚠️ <strong>Dichiarazione:</strong> tutto il pool storico e il lab S4 sono <strong>x86_32</strong> (<code>file</code> → <em>Intel 80386</em>). Un
+binario a 64 bit all'esame è <strong>improbabile</strong>. Questa sezione è una rete di sicurezza minima, non il caso
+standard: se <code>file ./&lt;bin&gt;</code> dice <code>ELF 64-bit … x86-64</code>, ecco cosa cambia rispetto a tutto quanto sopra.</p>
+</blockquote>
+<p><strong>Cosa NON cambia:</strong> il concetto di overflow, la bisezione per trovare l'offset, l'idea di dirottare il
+ret address, l'ASLR-off, i due gate. <strong>Cosa cambia</strong> (3 punti):</p>
+<ol>
+<li><strong>Indirizzi a 8 byte, non 4.</strong> Il ret address ora è un valore a 64 bit → nel payload l'indirizzo è
+   <strong>8 byte</strong> little-endian, non 4. Il marcatore di conferma diventa <code>"BBBBBBBB"</code> (8 <code>B</code>) e il crash da
+   cercare è <code>RIP = 0x4242424242424242</code>. <strong>Occhio alla bisezione/conteggio offset:</strong> l'offset in sé si
+   trova come prima (byte fino al ret salvato), ma quando componi l'indirizzo ricorda che ne servono
+   <strong>8</strong> — un errore frequente è scriverne 4 e sballare tutto l'allineamento.
+   - <strong>Nota bad-char pratica:</strong> gli indirizzi tipici del codice/stack a 64 bit hanno i <strong>byte alti a <code>0x00</code></strong>
+     (es. <code>0x0000555555555189</code>): via <code>argv</code>/<code>strcpy</code> quegli zeri <strong>troncano</strong> → un altro motivo per cui
+     l'exploit via <strong>stdin</strong> (§4-bis, dove <code>0x00</code> è usabile) è spesso l'unica strada su 64 bit.</li>
+<li><strong>Argomenti nei registri, non sullo stack.</strong> La convenzione <strong>System V AMD64</strong> passa i primi argomenti
+   in <code>rdi, rsi, rdx, rcx, r8, r9</code> (nel 32 bit erano tutti sullo stack). Conseguenza: se vuoi chiamare
+   <code>system("/bin/sh")</code> <strong>non basta</strong> mettere la stringa sullo stack come nel ret2libc a 32 bit — devi
+   caricare l'indirizzo di <code>"/bin/sh"</code> in <strong><code>rdi</code></strong> <em>prima</em> di saltare a <code>system</code>. Per la sola
+   <strong>ret2secret-function</strong> (salti a una funzione <strong>senza argomenti</strong> che stampa la flag) questa complicazione
+   <strong>non si presenta</strong>: sovrascrivi il ret con l'indirizzo della funzione e basta, come a 32 bit.</li>
+<li><strong>Servono gadget ROP</strong> per impostare i registri. Per mettere un valore in <code>rdi</code> si riusa una sequenza
+   già presente nel binario del tipo <code>pop rdi ; ret</code>: la metti nel payload seguita dal valore da caricare,
+   poi l'indirizzo di <code>system</code>. Come si cercano i gadget:
+   <code>bash
+   ROPgadget --binary ./&lt;bin&gt; | grep 'pop rdi'      # tool dedicato (se installato)
+   objdump -d ./&lt;bin&gt; | grep -B1 'ret'              # fallback grezzo: cerca "pop rdi" seguito da "ret"</code>
+   Payload ret2libc a 64 bit (schema minimo): <code>[padding OFF] + [addr di "pop rdi; ret"] + [addr "/bin/sh"]
+   + [addr system]</code>. (A 64 bit c'è anche il vincolo di <strong>allineamento dello stack a 16 byte</strong> prima di
+   <code>call system</code>: se <code>system</code> crasha subito, inserisci un gadget <code>ret</code> in più come padding di allineamento.)</li>
+</ol>
+<p><strong>In pratica all'esame:</strong> se ti capita un 64 bit ed è un <strong>ret2secret-function</strong>, procedi quasi come a 32
+bit (solo indirizzo a 8 byte). Se è <strong>shell via ret2libc</strong>, serve la catena ROP del punto 3 — segnala nel
+report che l'hai riconosciuta anche se non fai in tempo a completarla: dimostra il metodo.</p>
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[modello_binary_exploitation]]</li>
+<li>[[guida_lab_moduloS4_binary_exploits]]</li>
+<li>[[appunti_moduloS4_binary_exploits]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

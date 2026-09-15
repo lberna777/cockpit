@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>appunti_moduloS2_autenticazione.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  appunti</p>
+<h1 class="titolo-pagina">appunti_moduloS2_autenticazione.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/claudeAppunti/APPUNTI SECURITY/appunti_moduloS2_autenticazione.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="appunti-modulo-s2-autenticazione">Appunti — Modulo S2: Autenticazione</h1>
+<p><strong>Corso</strong>: Lab Sicurezza Informatica T
+<strong>Materiale di riferimento</strong>: <code>lezione_moduloS2_autenticazione.md</code>
+<strong>Appunti grezzi</strong>: <code>APPUNTI GREZZI/Lab - Security/Appunti_grezzi_lezioneS2.md</code>
+<strong>Elaborati</strong>: 2026-06-23</p>
+<hr />
+<h2 id="aaa-autenticazione-autorizzazione-auditing">AAA — Autenticazione, Autorizzazione, Auditing</h2>
+<p><strong>Autenticazione</strong> è l'attribuzione certa dell'identità di un soggetto che usa il sistema. Include un'<strong>identificazione</strong> preliminare, che però non è sufficiente a dichiararsi autenticati. L'identificazione è il <strong>nome che dichiari</strong>, mentre l'autenticazione è la <strong>prova che quel nome sia davvero tuo</strong>.</p>
+<p><strong>Autorizzazione</strong> è la verifica dei <strong>diritti</strong> di un soggetto di <strong>compiere un'azione su un determinato oggetto</strong> nel sistema: o si ha il permesso o non lo si ha. I propri permessi vengono verificati <strong>dopo l'autenticazione</strong>. Su Linux, <strong>PAM</strong> gestisce l'autenticazione, <strong>sudo</strong> e i <strong>permessi su file</strong> gestiscono l'autorizzazione.</p>
+<p><strong>Auditing</strong> è il tracciamento delle <strong>decisioni di autenticazione e autorizzazione</strong>. È la base di un compromesso: più dettagliato è il log, più ne risentono prestazioni e privacy.</p>
+<blockquote>
+<p>✅ Distinzione AAA ottimamente formulata. La precisione su "identificazione ≠ autenticazione" è esattamente il livello che il quiz teorico testa. Anche il collegamento PAM/sudo per Linux è corretto.</p>
+</blockquote>
+<hr />
+<h2 id="i-quattro-fattori-dellautenticazione">I quattro fattori dell'autenticazione</h2>
+<p>L'autenticazione si basa su ciò che l'utente <strong>conosce, possiede, è, o fa</strong>. Il <strong>Prover (P)</strong> deve dimostrare al <strong>Verifier (V)</strong> di conoscere un segreto di uno dei tipi seguenti.</p>
+<table>
+<thead>
+<tr>
+<th>Fattore</th>
+<th>Esempi</th>
+<th>Punto di forza</th>
+<th>Punto di debolezza</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Conosce</strong></td>
+<td>password, PIN, risposte segrete</td>
+<td>Nessun hardware richiesto</td>
+<td>Se fuoriesce dal canale o dal DB di V, è bruciato</td>
+</tr>
+<tr>
+<td><strong>Possiede</strong></td>
+<td>hard-token, Yubikey, chiavetta NFC</td>
+<td>Non si può clonare via rete</td>
+<td>Può essere smarrito o rubato fisicamente</td>
+</tr>
+<tr>
+<td><strong>È</strong> (biometrico)</td>
+<td>iride, impronta digitale</td>
+<td>Unico e sempre presente</td>
+<td>Irrevocabile se compromesso — non si cambia come una password</td>
+</tr>
+<tr>
+<td><strong>Fa / Dove è</strong></td>
+<td>GPS, geolocalizzazione</td>
+<td>Segnale di anomalia contestuale</td>
+<td>Non sufficiente da solo come fattore di accesso</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>✅ Corretto anche il punto sul GPS: non si fa login con la posizione, ma si usa come segnale di allerta per forzare un secondo step.</p>
+</blockquote>
+<hr />
+<h2 id="etcshadow-dove-vive-il-segreto-lato-server"><code>/etc/shadow</code>: dove vive il segreto lato server</h2>
+<p><code>/etc/shadow</code> contiene la <strong>fingerprint della password</strong>, una versione hashed ottenuta dalla <strong>concatenazione <code>password || salt</code></strong>:</p>
+<pre><code>$6$ViDM2ItuaSNPBxfO$Ip40UoaquO.OiFafaIVeMazZpIisBV.CC76...
+</code></pre>
+<ul>
+<li><code>$6$</code> = identificatore algoritmo hash (SHA-512)</li>
+<li><code>ViDM2ItuaSNPBxfO</code> = <strong>salt</strong> (variazione random generata al momento della scelta della password)</li>
+<li>il resto = <strong>fingerprint</strong> (hash della concatenazione)</li>
+</ul>
+<p>Il <strong>salt</strong> rompe la simmetria: due utenti con la stessa password hanno fingerprint diverse. Impedisce le <strong>rainbow tables</strong> (tabelle precalcolate di hash), perché bisognerebbe precalcolarle per ogni possibile salt.</p>
+<p>Il <strong>salt non basta contro attacchi offline</strong>: chi ruba <code>/etc/shadow</code> può tentare brute force sul proprio hardware senza limiti di tentativi. La contromisura principale è avere una <strong>password con alta entropia</strong>.</p>
+<p>Il <strong>pepper</strong> è una variante del salt che vive in un <strong>HSM (Hardware Security Module)</strong>, non nel database: anche rubando <code>/etc/shadow</code>, l'attaccante non ha il pepper e non può replicare il calcolo del fingerprint.</p>
+<blockquote>
+<p><strong>Domanda: cos'è un HSM nel pratico? che forma ha?</strong></p>
+<p>Un HSM è un dispositivo hardware dedicato <strong>esclusivamente</strong> a operazioni crittografiche: generare chiavi, firmare, cifrare, calcolare hash con segreti interni. Il suo elemento distintivo è che le chiavi e i segreti che contiene <strong>non ne escono mai in chiaro</strong> — anche se qualcuno ha accesso fisico al dispositivo, questo si autodistrugge (zeroing della memoria) se viene manomesso.</p>
+<p><strong>Forme fisiche:</strong> in contesti enterprise ha l'aspetto di un rack server 1U (es. Thales Luna, AWS CloudHSM). In contesti più piccoli può essere una smart card o un modulo USB. Sul banco del professore potrebbe non mostrartene uno fisicamente — ma concettualmente è un "caveau crittografico": il tuo <code>/etc/shadow</code> contiene <code>hash(password || pepper)</code>, ma il pepper non è mai scritto sul disco, vive solo nell'HSM. Un attaccante che ruba il disco non può calcolare il fingerprint perché non conosce il pepper. Anche il sysadmin che gestisce il sistema non vede il pepper in chiaro — solo l'HSM lo conosce.</p>
+</blockquote>
+<hr />
+<h2 id="scelta-della-password-lentropia-conta-piu-della-complessita-percepita">Scelta della password: l'entropia conta più della complessità percepita</h2>
+<blockquote>
+<p><strong>Domanda: cos'è l'entropia? in base a cosa si ottiene? cosa la determina?</strong></p>
+<p><strong>Entropia</strong> in crittografia misura quanto è difficile indovinare una password per tentativi. Si misura in <strong>bit</strong>: N bit di entropia significa che un attaccante deve fare in media 2^N tentativi per trovarla.</p>
+<p>Due fattori la determinano:
+1. <strong>Dimensione del pool</strong>: quanti simboli diversi uso (solo minuscole = 26; maiuscole+minuscole+numeri = 62; tutti i caratteri ASCII stampabili = 95)
+2. <strong>Lunghezza</strong>: quanti simboli ho nella password</p>
+<p>Formula: <code>entropia = lunghezza × log₂(dimensione_pool)</code></p>
+<p>Quindi: 8 caratteri da 95 possibili → 8 × 6.57 ≈ <strong>52 bit teorici</strong>.</p>
+<p><strong>Il punto chiave</strong>: quei 52 bit valgono solo se la scelta è <strong>veramente casuale</strong>. Se invece uso un pattern prevedibile (una parola base + sostituzione di lettere: <code>Tr0ub4dor&amp;3</code>), l'attaccante non cerca tra tutti i 95^8 = 10^15 simboli — cerca tra le parole comuni con varianti note. L'entropia reale scende a ~28 bit.</p>
+<p><code>correct horse battery staple</code> ha ~44 bit di entropia <strong>se</strong> le parole sono scelte a caso da un dizionario grande — anche se sembra semplice, la combinazione casuale di 4 parole da un vocabolario di 2048 parole dà 2048^4 = 2^44 possibilità, tutte equivalenti. È più difficile da bruteforare e più facile da ricordare.</p>
+<p><strong>Perché gli LLM non generano buona entropia</strong>: tendono a produrre output statisticamente prevedibili (parole comuni, strutture tipiche). Una password "casuale" generata da un LLM non è uniformemente distribuita nello spazio delle possibilità — un attaccante che sa che è stata generata da un LLM può restringere lo spazio di ricerca.</p>
+<p><strong>Soluzione pratica</strong>: un <strong>password manager</strong> genera password con vera casualità computazionale (CSPRNG) e le memorizza cifrate. Una sola passphrase forte sblocca il vault.</p>
+</blockquote>
+<hr />
+<h2 id="autenticazione-passiva-vs-attiva">Autenticazione passiva vs attiva</h2>
+<p>L'<strong>autenticazione passiva</strong> è il modello della password classica: P e V concordano un segreto, P lo invia a V che lo confronta con la propria copia. Ha problemi strutturali: se il segreto viaggia in chiaro viene intercettato; se è offuscato ma sempre uguale, basta catturarlo e riprodurlo (<em>replay attack</em>). E V possiede una copia del segreto: se V viene compromesso, tutti i segreti sono a rischio.</p>
+<blockquote>
+<p><strong>Domanda: spiega più chiaramente l'autenticazione attiva — pensavo fosse una sorta di 2FA ma non lo è.</strong></p>
+<p>Hai ragione che non è 2FA. La distinzione è un'altra: <strong>non cambia il numero di fattori, cambia cosa viene inviato sul canale</strong>.</p>
+<ul>
+<li><strong>Passiva</strong>: P invia il segreto stesso → V confronta. Se qualcuno intercetta: ha il segreto.</li>
+<li><strong>Attiva</strong>: P invia una <em>prova che conosce il segreto</em> senza inviare il segreto. E questa prova è diversa ogni volta → se qualcuno intercetta: ha solo una prova già consumata, inutilizzabile.</li>
+</ul>
+<p>Analogia: immagina di dover dimostrare di conoscere una passphrase segreta con un giudice.
+- <strong>Passiva</strong>: la sussurri all'orecchio del giudice. Se qualcuno ascolta, ha la passphrase.
+- <strong>Attiva</strong>: il giudice ti lancia un dado e ti dice "dimmi il terzo carattere della passphrase + il numero sul dado". Dimostri di conoscerla senza rivelarla tutta, e la risposta è diversa ogni volta.</p>
+<p>Il rischio che resta nell'attiva è il <strong>MITM attivo</strong>: se un attaccante si frappone tra P e V, può impersonare V verso P e usare le risposte di P per autenticarsi verso V. La cifratura del canale (TLS) risolve questo.</p>
+</blockquote>
+<hr />
+<h2 id="s-key-one-time-password-hash-come-ratchet">S-KEY One-Time Password: hash come ratchet</h2>
+<p>S-KEY è autenticazione attiva basata su catena di hash. Concetto chiave: <strong>applicare l'hash è facile; invertirlo è impossibile</strong>.</p>
+<p><strong>Setup</strong>: P conosce un segreto N. V viene inizializzato con <code>h^k(N)</code> (hash applicato k volte a N).</p>
+<p><strong>Prima autenticazione</strong>: P invia <code>h^(k-1)(N)</code>. V verifica: calcola <code>hash(h^(k-1)(N))</code> e controlla che sia uguale a <code>h^k(N)</code>. Se sì, accetta. Poi V aggiorna il suo riferimento a <code>h^(k-1)(N)</code>.</p>
+<p><strong>Seconda autenticazione</strong>: P invia <code>h^(k-2)(N)</code>. V applica hash una volta e controlla. E così via.</p>
+<blockquote>
+<p><strong>Domanda (implicita — "non ho capito l'argomento" Q5): perché chi intercetta non può riusare il token?</strong></p>
+<p>Se un attaccante intercetta <code>h^(k-1)(N)</code> sul canale, ha in mano esattamente quello che P ha appena inviato. Ma V ha già aggiornato il suo riferimento a <code>h^(k-1)(N)</code> — quel token è consumato, non vale più.</p>
+<p>Per la prossima autenticazione serve <code>h^(k-2)(N)</code>. L'attaccante dovrebbe invertire l'hash per ricavarlo da <code>h^(k-1)(N)</code> — ma l'hash è a senso unico: non è calcolabile all'indietro. Il ratchet va solo in avanti.</p>
+<p>È lo stesso motivo per cui il sale in <code>/etc/shadow</code> non si può invertire: hash è facile in un senso, impossibile nell'altro.</p>
+</blockquote>
+<hr />
+<h2 id="sfida-e-risposta-ssh-e-la-chiave-privata-come-segreto">Sfida e risposta: SSH e la chiave privata come segreto</h2>
+<blockquote>
+<p>⚠️ Questa sezione non era presente negli appunti grezzi.</p>
+</blockquote>
+<p>Il meccanismo challenge-response con crittografia asimmetrica è quello che usi ogni volta che ti connetti via SSH con chiave pubblica.</p>
+<p><strong>Setup</strong>: P genera una coppia chiave (PRIV_P, PUB_P). Mette PUB_P in <code>~/.ssh/authorized_keys</code> sul server (V).</p>
+<p><strong>Flusso di autenticazione</strong>:
+1. V genera un numero casuale (nonce) e lo cifra con PUB_P → invia la sfida cifrata
+2. P decifra con PRIV_P — può farlo solo chi possiede la chiave privata
+3. P rimanda il nonce a V
+4. V confronta: se coincide, P ha dimostrato di possedere PRIV_P senza averla mai inviata</p>
+<p><strong>Perché è più robusta della password</strong>: anche intercettando tutto il traffico, l'attaccante vede solo il nonce cifrato e la risposta — nulla di riutilizzabile. L'unico rischio è la compromissione di PRIV_P sul dispositivo di P.</p>
+<p><strong>Connessione SysAdmin</strong>: il file <code>~/.ssh/authorized_keys</code> che hai già configurato in SysAdmin è esattamente questo: V che memorizza PUB_P per il confronto.</p>
+<hr />
+<h2 id="etcpamd-il-framework-che-collega-tutto-a-linux"><code>/etc/pam.d/</code>: il framework che collega tutto a Linux</h2>
+<p>PAM (<strong>Pluggable Authentication Modules</strong>) è il livello che ogni programma Linux usa per delegare l'autenticazione — <code>login</code>, <code>ssh</code>, <code>sudo</code>, <code>su</code> non implementano la logica da soli: la passano a PAM, che carica moduli configurabili. La configurazione vive in <code>/etc/pam.d/</code>, un file per programma.</p>
+<blockquote>
+<p><strong>Domanda: cos'è PAM? tabella chiara dei parametri, specialmente control-flag.</strong></p>
+</blockquote>
+<p><strong>Formato di ogni riga in <code>/etc/pam.d/&lt;programma&gt;</code>:</strong></p>
+<pre><code>module-type   control-flag   module-path   [argomenti]
+</code></pre>
+<h3 id="tabella-module-type">Tabella: <code>module-type</code></h3>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auth</code></td>
+<td>Verifica dell'identità: confronta credenziali (es. legge <code>/etc/shadow</code>)</td>
+</tr>
+<tr>
+<td><code>account</code></td>
+<td>Controlli non legati alla password: account scaduto? restrizioni orarie? gruppo corretto?</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>Setup e teardown della sessione: mount home, variabili d'ambiente, logging</td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td>Aggiornamento delle credenziali: robustezza nuova password, scadenza</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tabella-control-flag-il-cuore-della-logica-di-stack">Tabella: <code>control-flag</code> — il cuore della logica di stack</h3>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Cosa succede al fallimento</th>
+<th>Cosa succede al successo</th>
+<th>Continua?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>required</code></td>
+<td>Segna stack come fallito, ma <strong>continua</strong> verso i moduli successivi (nasconde quale modulo ha fallito)</td>
+<td>Contribuisce al successo</td>
+<td>Sempre</td>
+</tr>
+<tr>
+<td><code>requisite</code></td>
+<td><strong>Ferma immediatamente</strong> lo stack con fallimento</td>
+<td>Contribuisce al successo</td>
+<td>No (solo se fallisce)</td>
+</tr>
+<tr>
+<td><code>sufficient</code></td>
+<td>Ignorato</td>
+<td><strong>Ferma immediatamente</strong> lo stack con successo (purché nessun <code>required</code> precedente abbia già fallito)</td>
+<td>No (solo se riesce)</td>
+</tr>
+<tr>
+<td><code>optional</code></td>
+<td>Ignorato (a meno che sia l'unico modulo presente)</td>
+<td>Ignorato</td>
+<td>Sempre</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Domanda: perché l'ordine dei moduli è importante?</strong></p>
+<p>Perché i flag si combinano in sequenza, e lo stesso flag ha effetto diverso in base a cosa è già successo prima.</p>
+<p>Esempio:
+<code>auth  required   pam_unix.so
+auth  sufficient pam_krb5.so</code>
+Qui <code>pam_unix</code> (password Unix) deve passare per forza (<code>required</code>). Se passa e <code>pam_krb5</code> (Kerberos) fallisce: lo stack riesce comunque — il <code>sufficient</code> di <code>pam_krb5</code> non interrompe negativamente, e <code>pam_unix</code> era già <code>required</code> e passato.</p>
+<p>Se inverti l'ordine:
+<code>auth  sufficient pam_krb5.so
+auth  required   pam_unix.so</code>
+Ora: se <code>pam_krb5</code> riesce, lo stack si ferma subito con successo — <code>pam_unix</code> non viene nemmeno consultato. L'utente può autenticarsi con Kerberos senza dover avere la password Unix.</p>
+<p>Stessa configurazione, ordine diverso → logica completamente diversa. L'ordine non è decorativo.</p>
+</blockquote>
+<h3 id="moduli-pam-comuni">Moduli PAM comuni</h3>
+<table>
+<thead>
+<tr>
+<th>Modulo</th>
+<th>Tipo</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pam_unix.so</code></td>
+<td>auth/password</td>
+<td>Autenticazione Unix classica via <code>/etc/shadow</code></td>
+</tr>
+<tr>
+<td><code>pam_tally.so</code></td>
+<td>auth</td>
+<td>Conta tentativi falliti, blocca account dopo N → difesa brute force online</td>
+</tr>
+<tr>
+<td><code>pam_cracklib.so</code></td>
+<td>password</td>
+<td>Verifica robustezza nuova password durante il cambio</td>
+</tr>
+<tr>
+<td><code>pam_nologin.so</code></td>
+<td>auth</td>
+<td>Se <code>/etc/nologin</code> esiste, solo root accede (manutenzione)</td>
+</tr>
+<tr>
+<td><code>pam_deny.so</code></td>
+<td>tutti</td>
+<td>Sempre fallisce — usato in <code>/etc/pam.d/other</code> per default-deny</td>
+</tr>
+<tr>
+<td><code>pam_warn.so</code></td>
+<td>tutti</td>
+<td>Logga il tentativo — usato insieme a <code>pam_deny.so</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Esempio default-deny</strong> (<code>/etc/pam.d/other</code>): qualsiasi programma senza una configurazione PAM dedicata viene bloccato da <code>pam_warn</code> (loga) + <code>pam_deny</code> (rifiuta). La sicurezza per fail-closed: se non è esplicitamente permesso, è vietato.</p>
+<hr />
+<h2 id="2fa-vs-2sa-vs-mfa">2FA vs 2SA vs MFA</h2>
+<p><strong>2FA (Two-Factor Authentication)</strong>: richiede 2 fattori che siano <strong>categorialmente distinti</strong> — conosce + possiede, oppure possiede + è. La distinzione categoriale è il requisito chiave.</p>
+<p><strong>2SA (Two-Step Authentication)</strong>: richiede 2 passi ma non necessariamente due fattori distinti. OTP via SMS o email sono 2SA: il canale SMS/email è intercettabile (MITM), quindi non costituisce un "possesso" affidabile. Chi controlla il canale può intercettare il codice.</p>
+<p>Caso limite: sbloccare un'app con PIN per ottenere il token OTP è "conoscenza aggiuntiva", non un secondo fattore distinto — sia la password che il PIN rientrano nella categoria "conosce".</p>
+<p><strong>MFA (Multi-Factor Authentication)</strong>: generalizza 2FA a più di due fattori categorialmente distinti.</p>
+<p><strong>Perché importa per l'esame</strong>: 2SA protegge contro chi ha solo la password rubata, non contro chi controlla il canale. 2FA con hardware dedicato protegge anche contro il controllo del canale.</p>
+<blockquote>
+<p>✅ Distinzione 2FA/2SA/MFA ben catturata e con la motivazione corretta (intercettabilità del canale SMS).</p>
+</blockquote>
+<hr />
+<h2 id="fido-standard-per-autenticazione-forte-su-larga-scala">FIDO: standard per autenticazione forte su larga scala</h2>
+<p>FIDO (<strong>Fast IDentity Online</strong>) è un consorzio (Google, Microsoft, Yubico e altri) che ha sviluppato standard per rendere l'<strong>autenticazione forte</strong> usabile su larga scala.</p>
+<blockquote>
+<p>⚠️ <strong>Correzione</strong>: negli appunti grezzi FIDO viene descritto come "standard per rendere l'<em>autorizzazione</em> a doppia chiave usabile". È un errore di terminologia: FIDO riguarda l'<strong>autenticazione</strong> (stabilire chi sei), non l'autorizzazione (cosa puoi fare). Confondere autenticazione/autorizzazione è l'errore più comune su S2 — li hai distinti bene nell'introduzione AAA, ma è scivolato qui.</p>
+</blockquote>
+<p><strong>FIDO UAF (Universal Authentication Framework)</strong>: autenticazione <em>senza password</em>. L'utente si autentica localmente sul dispositivo (biometria o PIN); il dispositivo usa questa verifica per sbloccare una chiave privata che firma la sfida del server FIDO UAF. Le informazioni di sicurezza <strong>non lasciano mai il dispositivo</strong>.</p>
+<p><strong>FIDO U2F / FIDO2 / WebAuthn</strong>: rafforza e semplifica la 2FA usando dispositivi hardware (USB, NFC, Bluetooth). La <strong>YubiKey</strong> è l'implementazione più nota.</p>
+<p><strong>Flusso U2F</strong>:
+1. Browser invia la sfida al dispositivo
+2. L'utente tocca il pulsante fisico (prova di presenza umana)
+3. Il dispositivo firma la sfida con la propria chiave privata
+4. Il server verifica con la chiave pubblica associata</p>
+<p><strong>Anti-phishing integrato</strong>: la YubiKey esegue un <em>origin-check</em> — verifica il dominio del sito prima di firmare. Un sito fake (<code>g00gle.com</code>) riceve una firma valida solo per quel dominio, non usabile su <code>google.com</code>.</p>
+<blockquote>
+<p>⚠️ Questa sezione (YubiKey/WebUSB 2018) non era presente negli appunti grezzi.</p>
+<p>Nel 2018, Vervier e Orrù hanno dimostrato che la feature <strong>WebUSB</strong> di Chrome (comunicazione diretta JS → USB) poteva essere usata per aggirare l'origin-check della YubiKey NEO, inviando richieste direttamente all'interfaccia CCID del dispositivo. Il punto non è che la YubiKey è insicura — è che la sicurezza dell'hardware dipende dall'<strong>isolamento del contesto software</strong> che lo circonda. La vulnerabilità stava in Chrome, non nella chiave.</p>
+</blockquote>
+<hr />
+<h2 id="domande-di-autoverifica-risposte">Domande di autoverifica — Risposte</h2>
+<p><strong>1.</strong> Username inserito → risposta: <strong>C — Identificazione</strong> ✅</p>
+<p><strong>2.</strong> Il salt protegge contro attacchi offline? → <strong>Falso</strong> ✅
+Il salt impedisce le rainbow table, non il brute force diretto su <code>/etc/shadow</code> rubato. La protezione offline è l'entropia della password.</p>
+<p><strong>3.</strong> OTP via SMS è 2FA o 2SA? → <strong>B — 2SA</strong> ✅ (SMS intercettabile via MITM, non è "possesso" affidabile)</p>
+<p><strong>4.</strong> Differenza <code>required</code> vs <code>requisite</code> in PAM → "non ho capito l'argomento"</p>
+<blockquote>
+<p><strong>Risposta</strong>: entrambi i flag implicano che il modulo <em>deve</em> passare perché lo stack riesca. La differenza è sul <em>quando</em> si rivela il fallimento:
+- <code>required</code>: il fallimento viene registrato internamente, ma lo stack <strong>continua</strong> verso i moduli successivi (così chi attacca non sa quale modulo ha rifiutato). Lo stack restituisce fallimento alla fine.
+- <code>requisite</code>: il fallimento <strong>ferma immediatamente</strong> lo stack con errore. Più veloce, ma rivela che c'è stato un blocco precoce.
+Usa <code>required</code> quando vuoi mascherare quale modulo ha fallito (sicurezza contro timing attack); usa <code>requisite</code> quando un certo fallimento rende inutile continuare (es. assenza di smart card).</p>
+</blockquote>
+<p><strong>5.</strong> S-KEY: chi intercetta <code>h^(k-1)(N)</code> può riusarlo? → <strong>Falso</strong> ✅ (ma "non ho capito l'argomento")</p>
+<blockquote>
+<p><strong>Risposta</strong>: vedi sezione S-KEY sopra. Il token intercettato è già consumato (V ha aggiornato il suo riferimento) e il successivo non è calcolabile perché richiederebbe invertire l'hash.</p>
+</blockquote>
+<p><strong>6.</strong> YubiKey + WebUSB: la YubiKey protegge contro qualsiasi attacco? → <strong>Falso</strong> ✅
+La vulnerabilità WebUSB 2018 ha dimostrato che un contesto software compromesso (Chrome) può aggirare l'origin-check.</p>
+<p><strong>Risultato autoverifica</strong>: 4/6 risposte corrette al primo tentativo. Q4 e Q5 non erano chiare — entrambe le risposte sono ora integrate in questa nota.</p>
+<hr />
+<!-- AUTO-LINKS:START -->
+<h2 id="collegati">🔗 Collegati</h2>
+<ul>
+<li>[[lezione_moduloS2_autenticazione]]</li>
+</ul>
+<p><strong>Hub:</strong> [[master_map_studio]] · [[concept_maps]] · [[metodo_studio_esami_pratici]]</p>
+<!-- AUTO-LINKS:END --></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

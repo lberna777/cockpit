@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>template_report_privesc.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">template_report_privesc.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/template_report_privesc.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="template-integritytxt-integrity-check-privilege-escalation">Template — integrity.txt (Integrity check &amp; privilege escalation)</h1>
+<blockquote>
+<p>Struttura riutilizzabile per il resoconto testuale richiesto negli esercizi di tipo
+Integrity check &amp; privilege escalation (S11, famiglia <code>changeN</code>/pacchetti <code>.deb</code>). Ogni
+sezione ha, tra <code>[ ]</code>, <strong>da dove</strong> ricavare l'informazione e <strong>con quale comando/azione</strong>.
+Vedi <code>modello_integrity_privesc.md</code> per le soluzioni ufficiali di tutte le varianti del pool,
+<code>guida_esame_privesc.md</code> per il triage per vettore (SUID/capability/ACL/sudoers/...), e
+<code>esercizi/SICINF/privesc_2026-07-14_change4/integrity.txt</code> per un esempio reale compilato
+da zero (capability <code>cap_dac_override</code> su <code>tee</code>).</p>
+</blockquote>
+<pre><code>INTEGRITY.TXT — Esercizio &lt;data esercizio&gt; (&lt;nome file/pacchetto: changeN, change_AAAA_MM_GG, o .deb&gt;)
+Integrity check &amp; privilege escalation — Fase 1
+
+===========================================================
+STRATEGIA — procedura generale per trovare le modifiche
+(riga fissa, riusabile per ogni variante della famiglia — cambia solo se hai
+usato strumenti diversi da AIDE)
+===========================================================
+
+1. Config AIDE (PRIMA di tutto — Gate A):
+   In /etc/aide/aide.conf, commentare la riga
+     @@x_include /etc/aide/aide.conf.d ^[a-zA-Z0-9_-]+$
+   (il preset di default NON copre /usr/bin), e aggiungere in fondo al file:
+     /usr/bin f Full
+     /etc f Full
+   Sintassi: &quot;f&quot; da solo, NESSUN trattino prima (&quot;/usr/bin -f Full&quot; non è valido).
+   Farlo PRIMA di creare la baseline: se la baseline si crea con le modifiche già
+   presenti, il confronto successivo non le rileva.
+
+2. Baseline sul sistema pulito:
+     sudo aideinit
+     sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+
+3. Eseguire il file/pacchetto fornito:
+     chmod +x &lt;nomefile&gt;      [solo se changeN eseguibile; per .deb: sudo dpkg -i &lt;pacchetto&gt;.deb]
+     sudo ./&lt;nomefile&gt;
+
+4. Confrontare:
+     sudo aide -C -c /etc/aide/aide.conf
+
+5. Leggere la riga di sintesi di ogni entry cambiata (formato &quot;f X.... .c....X .+ : /path&quot;):
+   [vedi guida_esame_privesc.md §... per la lettura posizionale completa: p=permessi,
+   A=ACL, X=xattr/capability, c=ctime, m=mtime — &quot;c&quot; da solo è RUMORE]
+
+6. Per OGNI file segnalato (Gate B — non fermarsi al primo), verificare con il comando
+   giusto se è un vettore reale o un vicolo cieco:
+   [X/xattr -&gt; getcap &lt;file&gt; (output vuoto &quot;path =&quot; = falso positivo, capability
+   svuotata) | A -&gt; getfacl &lt;file&gt; | p su binario senza altro -&gt; ls -l (SUID nuovo?)
+   | un privilegio TOLTO non è mai un vettore]
+
+===========================================================
+RISULTATO — diff AIDE (&lt;N&gt; entry modificate su &lt;TOT&gt; totali)
+===========================================================
+
+[incolla qui le righe di sintesi grezze di `sudo aide -C`, una per file segnalato]
+
+===========================================================
+ANALISI FILE PER FILE
+===========================================================
+
+1. &lt;path/file&gt;
+   Diff: [cosa dice AIDE - attributo cambiato, valore prima -&gt; dopo]
+   Verifica: [comando eseguito -&gt; output]
+   -&gt; [RUMORE puro / FALSO POSITIVO (con perché) / privilegio tolto, vicolo cieco /
+       VETTORE REALE (con perché dà davvero un potere nuovo)]
+
+2. &lt;path/file&gt;
+   ...
+
+N. &lt;path/file&gt;
+   ...
+
+===========================================================
+CONCLUSIONE FASE 1
+===========================================================
+
+Su &lt;N&gt; file segnalati da AIDE: &lt;M&gt; sono rumore/falsi positivi/vicoli ciechi (elenco
+sintetico del perché ciascuno è stato scartato), &lt;K&gt; è/sono il vettore reale:
+&lt;path&gt; ha ottenuto &lt;SUID / capability X / ACL / voce sudoers&gt;, che permette di
+&lt;cosa concede in pratica — scrivere un file specifico, eseguire come root, ecc.&gt;.
+
+===========================================================
+FASE 2 — EXPLOIT (come &lt;utente base&gt;, senza sudo)
+===========================================================
+
+Consegna: [trascrivi cosa chiede l'esercizio — nome utente da creare, password
+richiesta o a scelta, oppure &quot;diventare root senza usare il potere sudo di &lt;utente&gt;&quot;]
+
+[SOLO se il vettore è una capability tipo cap_dac_override/cap_fowner su un binario:]
+Perché non un redirect diretto:
+  echo &quot;...&quot; &gt;&gt; /etc/passwd    # Permission denied
+fallisce perché è la SHELL ad aprire il file per il redirect, e la shell ha solo i
+permessi normali di &lt;utente&gt;. La capability è attaccata al binario, non a chi lo
+lancia: si attiva solo quando è il binario stesso ad aprire il file di destinazione
+(pattern: pipe verso il binario privilegiato, mai redirect diretto sul file protetto).
+
+Comandi eseguiti:
+
+  [ogni comando + il suo output, con un commento breve su COSA fa e PERCHÉ è quel
+  comando in quel punto — non solo la sequenza cruda. Tipicamente:
+  1) generare l'hash della password (openssl passwd [-1] [-salt &lt;salt&gt;] &lt;password&gt;)
+  2) copiare il file protetto in una posizione scrivibile
+  3) editare la copia aggiungendo la riga utente:hash:0:0:gecos:/root:/bin/bash
+  4) usare il vettore per sovrascrivere il file protetto con la copia modificata
+  5) verifica (grep dell'utente nel file, o cat)
+  6) su &lt;utente creato&gt; -&gt; id (prova finale uid=0)]
+
+Screenshot: privesc.png (comandi di verifica richiesti dalla consegna + prova uid=0).
+
+===========================================================
+PERCHÉ FUNZIONA (meccanismo)
+===========================================================
+
+[spiega IL MECCANISMO, non solo i comandi: perché il controllo Unix normale viene
+bypassato (SUID = eredita i privilegi del proprietario del file eseguibile,
+capability = bypassa uno specifico controllo del kernel indipendentemente da chi
+esegue, ACL/sudoers = permesso esplicito extra oltre ai permessi standard), e
+perché il formato scelto per la riga in /etc/passwd è valido (hash inline nel 2°
+campo = formato storico, il sistema non consulta /etc/shadow se il campo non è &quot;x&quot;)]
+</code></pre>
+<h2 id="confezionamento-finale-della-consegna">Confezionamento finale della consegna</h2>
+<p>Nella cartella dei deliverable, verifica di avere entrambi i file richiesti:</p>
+<pre><code>ls -la
+</code></pre>
+<p><code>integrity.txt</code> (Fase 1 completa) e <code>privesc.png</code> (Fase 2, screenshot dei comandi
+richiesti + prova <code>id</code>/<code>whoami</code> con uid=0). Se la consegna chiede esplicitamente altri
+artefatti (es. output grezzo di <code>aide -C</code> allegato a parte), aggiungili.</p>
+<hr />
+<h2 id="checklist-rapida-prima-di-consegnare">Checklist rapida prima di consegnare</h2>
+<ul>
+<li>[ ] Hai verificato <strong>ogni</strong> file segnalato da AIDE con il comando giusto (<code>getcap</code>/<code>getfacl</code>/<code>ls -l</code>), non solo il primo o quello che "sembrava" il vettore — i falsi positivi e i vicoli ciechi vanno scartati con la prova, non per intuito.</li>
+<li>[ ] Un cambiamento che <strong>toglie</strong> un privilegio non è mai il vettore — se lo scarti, dillo esplicitamente col perché.</li>
+<li>[ ] "c" (ctime) da solo, senza altri attributi cambiati, è rumore — non trattarlo come vettore.</li>
+<li>[ ] Se il vettore è una <strong>capability</strong> su un binario, hai spiegato perché serve una pipe verso quel binario e non un redirect diretto della shell (<code>&gt;&gt;</code>/<code>&gt;</code> fallirebbero con Permission denied).</li>
+<li>[ ] L'hash della password è generato con <code>openssl passwd</code> <strong>con la password esatta richiesta dalla consegna</strong> (ricontrollata, non trascritta a orecchio).</li>
+<li>[ ] La riga aggiunta a <code>/etc/passwd</code> ha 7 campi (<code>utente:hash:uid:gid:gecos:home:shell</code>) e UID/GID <code>0</code>.</li>
+<li>[ ] Lo screenshot mostra la <strong>prova finale</strong> (<code>id</code> o <code>whoami</code> con <code>uid=0</code>), non solo i comandi intermedi.</li>
+<li>[ ] La sezione "Perché funziona" spiega il meccanismo di bypass, non ripete solo la sequenza di comandi già scritta sopra.</li>
+<li>[ ] Nessun terminale grezzo incollato con prompt/decorazioni ANSI illeggibili — comando + output riscritti puliti (vedi esempio reale in <code>privesc_2026-07-14_change4/integrity.txt</code>).</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

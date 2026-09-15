@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAS · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html" aria-current="page">Corsi</a>
+    <a href="../materiali.html">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">S1 · 6 CFU</p>
+<h1 class="titolo-pagina">LAS — Laboratorio di Amministrazione di Sistemi T</h1>
+
+<section class="griglia" data-entra>
+  <article class="scheda">
+    <p class="metrica__etichetta">Moduli chiusi</p>
+    <p class="metrica__valore">25%</p>
+    <p class="tenue">4 su 16</p>
+  </article>
+  <article class="scheda">
+    <p class="metrica__etichetta">Materiali</p>
+    <p class="metrica__valore" data-conta="103">0</p>
+  </article>
+  <article class="scheda">
+    <p class="metrica__etichetta">Ripassi tracciati</p>
+    <p class="metrica__valore" data-conta="0">0</p>
+  </article>
+</section>
+
+<section class="sezione" data-entra>
+  <h2>Moduli</h2>
+  <table class="tabella">
+    <thead><tr><th>ID</th><th>Nome</th><th>Stato</th><th>Nota</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>0A</code></td>
+        <td>Filesystem e Comandi Base</td>
+        <td><span class="pillola pillola--attenzione">attenzione</span></td>
+        <td class="tenue nota-modulo">Lab eseguito (s.3); guida_lab MANCANTE; no lezione</td>
+      </tr>
+      <tr>
+        <td><code>0B</code></td>
+        <td>Pipe, Redirect e Filtri</td>
+        <td><span class="pillola pillola--attenzione">attenzione</span></td>
+        <td class="tenue nota-modulo">Lab eseguito (s.4); guida_lab da rifare; no lezione</td>
+      </tr>
+      <tr>
+        <td><code>1A</code></td>
+        <td>Variabili, Condizioni, Loop</td>
+        <td><span class="pillola pillola--attenzione">attenzione</span></td>
+        <td class="tenue nota-modulo">Lab eseguito (s.5); guida_lab da rifare; no lezione</td>
+      </tr>
+      <tr>
+        <td><code>1B</code></td>
+        <td>Funzioni, Case, Test</td>
+        <td><span class="pillola pillola--attenzione">attenzione</span></td>
+        <td class="tenue nota-modulo">Lab eseguito (s.6); guida_lab da rifare; no lezione</td>
+      </tr>
+      <tr>
+        <td><code>2A</code></td>
+        <td>Gestione Utenti e Permessi</td>
+        <td><span class="pillola pillola--attenzione">attenzione</span></td>
+        <td class="tenue nota-modulo">Lab eseguito (s.7-8); guida_lab da rifare; no lezione</td>
+      </tr>
+      <tr>
+        <td><code>2B</code></td>
+        <td>LAB Utenti, Permessi e File</td>
+        <td><span class="pillola pillola--attenzione">attenzione</span></td>
+        <td class="tenue nota-modulo">Lab eseguito; guida_lab da rifare; no lezione</td>
+      </tr>
+      <tr>
+        <td><code>2C</code></td>
+        <td>Gestione File: find, tar, rsync</td>
+        <td><span class="pillola pillola--chiuso">chiuso</span></td>
+        <td class="tenue nota-modulo"></td>
+      </tr>
+      <tr>
+        <td><code>3A</code></td>
+        <td>Gestione Servizi con Systemd</td>
+        <td><span class="pillola pillola--chiuso">chiuso</span></td>
+        <td class="tenue nota-modulo">Sessione 10</td>
+      </tr>
+      <tr>
+        <td><code>3B</code></td>
+        <td>Gestione Pacchetti Software</td>
+        <td><span class="pillola pillola--chiuso">chiuso</span></td>
+        <td class="tenue nota-modulo">Sessione 13</td>
+      </tr>
+      <tr>
+        <td><code>3C</code></td>
+        <td>Gestione Processi</td>
+        <td><span class="pillola pillola--chiuso">chiuso</span></td>
+        <td class="tenue nota-modulo">Sessione 16</td>
+      </tr>
+      <tr>
+        <td><code>3D</code></td>
+        <td>Networking di Base</td>
+        <td><span class="pillola pillola--aperto">aperto</span></td>
+        <td class="tenue nota-modulo">Restart dall&#39;Es.1 — guida_lab in creazione</td>
+      </tr>
+      <tr>
+        <td><code>3E</code></td>
+        <td>Vagrant Multi-Machine</td>
+        <td><span class="pillola pillola--aperto">aperto</span></td>
+        <td class="tenue nota-modulo"></td>
+      </tr>
+      <tr>
+        <td><code>3F</code></td>
+        <td>Automazione con Ansible</td>
+        <td><span class="pillola pillola--aperto">aperto</span></td>
+        <td class="tenue nota-modulo"></td>
+      </tr>
+      <tr>
+        <td><code>4A</code></td>
+        <td>Servizi base rete (DHCP, router via Ansible)</td>
+        <td><span class="pillola pillola--aperto">aperto</span></td>
+        <td class="tenue nota-modulo">⚠️ non mappato prima</td>
+      </tr>
+      <tr>
+        <td><code>4B</code></td>
+        <td>SNMP / Monitoraggio centralizzato** + LAB</td>
+        <td><span class="pillola pillola--aperto">aperto</span></td>
+        <td class="tenue nota-modulo">⚠️ **mancante: né mappato né scaricato né studiato** — è d&#39;esame (netmon/SNMP)</td>
+      </tr>
+      <tr>
+        <td><code>4C</code></td>
+        <td>LDAP / Configurazione centralizzata** + LAB</td>
+        <td><span class="pillola pillola--aperto">aperto</span></td>
+        <td class="tenue nota-modulo">⚠️ **mancante: né mappato né scaricato né studiato** — è d&#39;esame (auth LDAP)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+<section class="sezione" data-entra>
+  <h2>Materiali</h2>
+  <ul class="elenco-materiali">
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/00_AmministrazioneDiSistemi.pdf">00_AmministrazioneDiSistemi.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/01_01__quick-intro-2025-2026.pdf">01_01__quick-intro-2025-2026.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/01_02_SetupAmbienteLaboratorio.pdf">01_02_SetupAmbienteLaboratorio.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/01_SetupAmbientePC.pdf">01_SetupAmbientePC.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/02_CreareGestireVM (Vagrant e SSH).pdf">02_CreareGestireVM (Vagrant e SSH).pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/03__GestioneStorage.pdf">03__GestioneStorage.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/04_05__amm_sistemi-2025-2026.pdf">04_05__amm_sistemi-2025-2026.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/04_PrimeRigheDiComando.pdf">04_PrimeRigheDiComando.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../nota/slide-teoria-sysadm-05-creare-e-gestire-vm-vagrant-e-ssh.html">05 - Creare e Gestire VM (Vagrant e SSH).md</a>
+      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/05_FiltriPrincipali.pdf">05_FiltriPrincipali.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../nota/slide-teoria-sysadm-06-shell-gestione-dei-processi-e-meccanismo-di-espansione.html">06 - Shell Gestione dei Processi e Meccanismo di Espansione.md</a>
+      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/06_GestioneDeiPacchettiSoftware.pdf">06_GestioneDeiPacchettiSoftware.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../nota/slide-teoria-sysadm-07-pratica-di-shell-scripting.html">07 - Pratica di Shell Scripting.md</a>
+      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/21_22__utenti_file (1).pdf">21_22__utenti_file (1).pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/21_22__utenti_file.pdf">21_22__utenti_file.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Approfondimento_facoltativo_su_LDAP.html">Approfondimento_facoltativo_su_LDAP.html</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Configurazione_centralizzata_7_maggio.pdf">Configurazione_centralizzata_7_maggio.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Esempi di scripting presentati a lezione _ Virtuale.html">Esempi di scripting presentati a lezione _ Virtuale.html</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Gestione_dei_pacchetti_software_26_febbraio.pdf">Gestione_dei_pacchetti_software_26_febbraio.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Gestione_dei_servizi_12_marzo.pdf">Gestione_dei_servizi_12_marzo.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Gestione_di_utenti_e_file_19_marzo.pdf">Gestione_di_utenti_e_file_19_marzo.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Introduzione_alla_materia_e_informazioni_pratiche_19_febbraio.pdf">Introduzione_alla_materia_e_informazioni_pratiche_19_febbraio.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/LDAP_ObjectClasses.html">LDAP_ObjectClasses.html</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/LDIF_prontuario_modifiche.html">LDIF_prontuario_modifiche.html</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Monitoraggio_centralizzato_30_aprile.pdf">Monitoraggio_centralizzato_30_aprile.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Networking_di_base_16_aprile.pdf">Networking_di_base_16_aprile.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Servizi_base_rete_23_aprile.pdf">Servizi_base_rete_23_aprile.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/Shell_processi_espansione_5_marzo.pdf">Shell_processi_espansione_5_marzo.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/gestione_servizi (1).pdf">gestione_servizi (1).pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/gestione_servizi.pdf">gestione_servizi.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/net-config.pdf">net-config.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/servizi_base_rete.pdf">servizi_base_rete.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/shell_processi_teoriaespansione.pdf">shell_processi_teoriaespansione.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/shell_scripting.pdf">shell_scripting.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/software.pdf">software.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-teoria">
+<a href="../../Vault/UniCode/SLIDE TEORIA/SYSADM/vagrant_ssh.pdf">vagrant_ssh.pdf</a>      <span class="pillola">slide-teoria</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/Esempi_di_scripting_presentati_a_lezione.html">Esempi_di_scripting_presentati_a_lezione.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/Esercizi_di_riepilogo_28_maggio.html">Esercizi_di_riepilogo_28_maggio.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/Esercizio_Conta_Occorrenze_Risolto.html">Esercizio_Conta_Occorrenze_Risolto.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Accesso_via_SSH_e_creazione_VM_con_Vagrant_24_febbraio.pdf">LAB_Accesso_via_SSH_e_creazione_VM_con_Vagrant_24_febbraio.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Automazione_con_Ansible_14_aprile.html">LAB_Automazione_con_Ansible_14_aprile.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Configurazione_della_rete_delle_VM_21-28_aprile.html">LAB_Configurazione_della_rete_delle_VM_21-28_aprile.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Configurazione_di_un_ambiente_multi-machine_tramite_Vagrant_2.html">LAB_Configurazione_di_un_ambiente_multi-machine_tramite_Vagrant_2.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Esempi_di_gestione_utenti_permessi_e_file_31_marzo.html">LAB_Esempi_di_gestione_utenti_permessi_e_file_31_marzo.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Esercizi_di_scripting_risolti_-_da_svolgere_in_autonomia.html">LAB_Esercizi_di_scripting_risolti_-_da_svolgere_in_autonomia.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Esercizi_introduttivi_SNMP_5_maggio.html">LAB_Esercizi_introduttivi_SNMP_5_maggio.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Gestione_di_processi_17_marzo.html">LAB_Gestione_di_processi_17_marzo.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Gestione_di_servizi_e_monitoraggio_31_marzo.html">LAB_Gestione_di_servizi_e_monitoraggio_31_marzo.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Integrazione_di_LDAP_per_lautenticazione_su_Linux_12_maggio.html">LAB_Integrazione_di_LDAP_per_lautenticazione_su_Linux_12_maggio.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Predisposizione_dellambiente_virtuale_per_le_esercitazioni_17_febb.pdf">LAB_Predisposizione_dellambiente_virtuale_per_le_esercitazioni_17_febb.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Primi_esercizi_di_accesso_alla_VM_e_gestione_filesystem_24_fe.html">LAB_Primi_esercizi_di_accesso_alla_VM_e_gestione_filesystem_24_fe.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Primi_esercizi_sulla_riga_di_comando_24_febbraio.html">LAB_Primi_esercizi_sulla_riga_di_comando_24_febbraio.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_Strutturare_Vagrantfile_e_playbook_21-28_aprile.html">LAB_Strutturare_Vagrantfile_e_playbook_21-28_aprile.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/LAB_shell_scripting_10_marzo.pdf">LAB_shell_scripting_10_marzo.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/Soluzione_gestire_servizi_con_senza_vagrant.html">Soluzione_gestire_servizi_con_senza_vagrant.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/Soluzione_search_and_replace.html">Soluzione_search_and_replace.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/Soluzioni_DHCP.html">Soluzioni_DHCP.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/Soluzioni_monitoraggio.html">Soluzioni_monitoraggio.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/Soluzioni_scripting.html">Soluzioni_scripting.html</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB __ Automazione con Ansible [14 aprile] _ Virtuale.pdf">__ LAB __ Automazione con Ansible [14 aprile] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB __ Configurazione della rete delle VM [21 aprile] _ Virtuale.pdf">__ LAB __ Configurazione della rete delle VM [21 aprile] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB __ Esempi di gestione utenti, permessi e file [31 marzo] _ Virtuale.pdf">__ LAB __ Esempi di gestione utenti, permessi e file [31 marzo] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB __ Gestione di processi [17 marzo] _ Virtuale.pdf">__ LAB __ Gestione di processi [17 marzo] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB __ Gestione di servizi e monitoraggio [31 marzo] _ Virtuale.pdf">__ LAB __ Gestione di servizi e monitoraggio [31 marzo] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB __ Primi esercizi di accesso alla VM e gestione filesystem [24 febbraio] _ Virtuale.pdf">__ LAB __ Primi esercizi di accesso alla VM e gestione filesystem [24 febbraio] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB __ Primi esercizi sulla riga di comando [24 febbraio] _ Virtuale.pdf">__ LAB __ Primi esercizi sulla riga di comando [24 febbraio] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB __ Strutturare Vagrantfile e playbook [21 aprile] _ Virtuale.pdf">__ LAB __ Strutturare Vagrantfile e playbook [21 aprile] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="slide-lab">
+<a href="../../Vault/UniCode/SLIDE LAB/SYSADM/__ LAB__ Configurazione di un ambiente multi-machine tramite Vagrant [21 aprile] _ Virtuale.pdf">__ LAB__ Configurazione di un ambiente multi-machine tramite Vagrant [21 aprile] _ Virtuale.pdf</a>      <span class="pillola">slide-lab</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/2021_09_06_testo_soluzione.pdf">2021_09_06_testo_soluzione.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/70291-434899_2025_ Prova del 21 giugno 2024 _ Virtuale.pdf">70291-434899_2025_ Prova del 21 giugno 2024 _ Virtuale.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/70291-434899_2025_ Prova dell&#39;11 febbraio 2025 _ Virtuale.pdf">70291-434899_2025_ Prova dell&#39;11 febbraio 2025 _ Virtuale.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/70291-434899_2025_ Prova proposta il 10 febbraio 2026 _ Virtuale.pdf">70291-434899_2025_ Prova proposta il 10 febbraio 2026 _ Virtuale.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/70291-434899_2025_ Prova proposta il 28 ottobre 2025 _ Virtuale.pdf">70291-434899_2025_ Prova proposta il 28 ottobre 2025 _ Virtuale.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_soluzione.tar.gz">9lug2025_soluzione.tar.gz</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_testo.pdf">9lug2025_testo.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_01_INTRO.mp4">LAS_20250709_01_INTRO.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_02_SCENARIO.mp4">LAS_20250709_02_SCENARIO.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_03_AVAILABILITY.mp4">LAS_20250709_03_AVAILABILITY.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_04_ONOFF.mp4">LAS_20250709_04_ONOFF.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_05_CREDENTIALS.mp4">LAS_20250709_05_CREDENTIALS.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_06_PLAYBOOK.mp4">LAS_20250709_06_PLAYBOOK.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_07_RUOLI-WKS.mp4">LAS_20250709_07_RUOLI-WKS.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_08_RUOLI-ROU.mp4">LAS_20250709_08_RUOLI-ROU.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/9lug2025_video_spiegazione/LAS_20250709_09_RUOLI-SRV.mp4">LAS_20250709_09_RUOLI-SRV.mp4</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_del_06_settembre_2021_testo_e_soluzione.pdf">Prova_del_06_settembre_2021_testo_e_soluzione.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_del_14_giugno_2021_testo_e_soluzione.pdf">Prova_del_14_giugno_2021_testo_e_soluzione.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_del_20_giugno_2022.pdf">Prova_del_20_giugno_2022.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_del_21_giugno_2024.html">Prova_del_21_giugno_2024.html</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_del_28_giugno_2021_testo_e_soluzione.pdf">Prova_del_28_giugno_2021_testo_e_soluzione.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_dell11_febbraio_2025.html">Prova_dell11_febbraio_2025.html</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_proposta_il_10_febbraio_2026.html">Prova_proposta_il_10_febbraio_2026.html</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_proposta_il_28_ottobre_2025.html">Prova_proposta_il_28_ottobre_2025.html</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_proposta_il_9_giugno_2026.pdf">Prova_proposta_il_9_giugno_2026.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/Prova_proposta_l8_settembre_2025.html">Prova_proposta_l8_settembre_2025.html</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/soluzione_2021_06_14.pdf">soluzione_2021_06_14.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/soluzione_2021_06_28.pdf">soluzione_2021_06_28.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="simulazione">
+<a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SYSADM/testo_2022_06_20.pdf">testo_2022_06_20.pdf</a>      <span class="pillola">simulazione</span>
+    </li>
+    <li data-tipo="esercizio">
+<a href="../nota/esercizio-sysadm-compiti-sysadm.html">COMPITI_sysadm.md</a>
+      <span class="pillola">esercizio</span>
+    </li>
+    <li data-tipo="esercizio">
+<a href="../nota/esercizio-sysadm-esercizi-sysadm.html">ESERCIZI sysadm.md</a>
+      <span class="pillola">esercizio</span>
+    </li>
+    <li data-tipo="esercizio">
+<a href="../../Vault/UniCode/esercizi/SYSADM/The_Adventures_Of_Sherlock_Holmes.txt">The_Adventures_Of_Sherlock_Holmes.txt</a>      <span class="pillola">esercizio</span>
+    </li>
+    <li data-tipo="esercizio">
+<a href="../../Vault/UniCode/esercizi/SYSADM/__ LAB__ Esercizi di scripting risolti - da svolgere in autonomia _ Virtuale.pdf">__ LAB__ Esercizi di scripting risolti - da svolgere in autonomia _ Virtuale.pdf</a>      <span class="pillola">esercizio</span>
+    </li>
+    <li data-tipo="esercizio">
+<a href="../nota/esercizio-sysadm-es-01-conta-estensioni.html">es_01_conta_estensioni.md</a>
+      <span class="pillola">esercizio</span>
+    </li>
+    <li data-tipo="esercizio">
+<a href="../nota/esercizio-sysadm-es-02-conta-occorrenze.html">es_02_conta_occorrenze.md</a>
+      <span class="pillola">esercizio</span>
+    </li>
+  </ul>
+</section>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

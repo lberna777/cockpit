@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>es_02_conta_occorrenze.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  esercizio · LAS</p>
+<h1 class="titolo-pagina">es_02_conta_occorrenze.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/esercizi/SYSADM/es_02_conta_occorrenze.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="esercizio-02-conta-occorrenze-testo-libero">Esercizio 02 — Conta Occorrenze (testo libero)</h1>
+<p><strong>Modulo</strong>: 0B — Pipe, Redirect e Filtri<br />
+<strong>Data</strong>: 2026-05-12<br />
+<strong>Difficoltà</strong>: intermedio<br />
+<strong>File di testo</strong>: <code>The_Adventures_Of_Sherlock_Holmes.txt</code> (Peter Norvig, licenza open)</p>
+<hr />
+<h2 id="obiettivo">Obiettivo</h2>
+<p>Dato un file di testo passato come argomento, uno script bash deve:</p>
+<ol>
+<li>Contare le occorrenze della lettera <code>a</code> (minuscola)</li>
+<li>Contare le occorrenze della parola <code>sherlock</code> (case insensitive)</li>
+<li>Per ogni parola distinta, contare le occorrenze e mostrare le 5 più frequenti</li>
+</ol>
+<hr />
+<h2 id="script-finale">Script Finale</h2>
+<pre><code class="language-bash">#!/bin/bash
+
+echo &quot;=== LETTERE A ===&quot;
+grep -o 'a' &quot;$1&quot; | wc -l
+
+echo &quot;=== SHERLOCK CASE INSENSITIVE ===&quot;
+grep -oi 'sherlock' &quot;$1&quot; | wc -l
+
+echo &quot;=== PAROLE PIU' USATE ===&quot;
+tr '[:upper:]' '[:lower:]' &lt; &quot;$1&quot; | tr -cs '[:alpha:]' '\n' | sort | uniq -c | sort -rn | head -5
+</code></pre>
+<p><strong>Output su Holmes</strong>:</p>
+<pre><code>=== LETTERE A ===
+34377
+=== SHERLOCK CASE INSENSITIVE ===
+99
+=== PAROLE PIU' USATE ===
+   5634 the
+   3038 i
+   3018 and
+   2744 to
+   2659 of
+</code></pre>
+<hr />
+<h2 id="spiegazione-passo-per-passo">Spiegazione Passo per Passo</h2>
+<h3 id="obiettivo-1-occorrenze-della-lettera-a">Obiettivo 1 — Occorrenze della lettera <code>a</code></h3>
+<pre><code class="language-bash">grep -o 'a' &quot;$1&quot; | wc -l
+</code></pre>
+<p><strong><code>-o</code></strong> è il flag chiave: invece di restituire le righe che contengono il pattern, stampa <strong>solo la parte corrispondente</strong>, una per riga. Ogni <code>a</code> trovata diventa una riga separata. <code>wc -l</code> conta quelle righe → conta le occorrenze.</p>
+<p><strong>Perché non <code>-i</code>?</strong> L'esercizio chiede la lettera <code>a</code> minuscola, non <code>A</code>. Con <code>-i</code> si conterebbero anche le <code>A</code> maiuscole, falsando il risultato. La distinzione è intenzionale.</p>
+<p><strong>Alternativa equivalente</strong>:</p>
+<pre><code class="language-bash">tr -cd 'a' &lt; &quot;$1&quot; | wc -c
+</code></pre>
+<p><code>tr -cd 'a'</code> elimina tutto ciò che non è <code>a</code>; <code>wc -c</code> conta i byte rimasti.</p>
+<hr />
+<p><strong>Riepilogo dei flag di <code>grep</code> esplorati in sessione</strong> (con lo stesso file):</p>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Risultato</th>
+<th>Perché</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grep 'a' file \| wc -l</code></td>
+<td>2322</td>
+<td>Conta le <strong>righe</strong> con almeno una <code>a</code></td>
+</tr>
+<tr>
+<td><code>grep -c 'a' file \| wc -l</code></td>
+<td>1</td>
+<td><code>-c</code> stampa già un numero; <code>wc -l</code> conta le righe di quell'output (1 riga)</td>
+</tr>
+<tr>
+<td><code>grep -n 'a' file \| wc -l</code></td>
+<td>2322</td>
+<td><code>-n</code> aggiunge il numero di riga, ma le righe restituite sono le stesse</td>
+</tr>
+<tr>
+<td><code>grep -v 'a' file \| wc -l</code></td>
+<td>2816</td>
+<td>Righe <strong>senza</strong> <code>a</code>; 2322+2816 = totale righe del file</td>
+</tr>
+<tr>
+<td><code>grep -i 'a' file \| wc -l</code></td>
+<td>2373</td>
+<td>Righe con <code>a</code> o <code>A</code>; 51 righe hanno <code>A</code> ma non <code>a</code></td>
+</tr>
+<tr>
+<td><code>grep -o 'a' file \| wc -l</code></td>
+<td>34377</td>
+<td>Occorrenze effettive della lettera <code>a</code></td>
+</tr>
+</tbody>
+</table>
+<p>La differenza fondamentale: senza <code>-o</code> conti <strong>righe con match</strong>; con <code>-o</code> conti <strong>occorrenze</strong>.</p>
+<hr />
+<h3 id="obiettivo-2-occorrenze-di-sherlock-case-insensitive">Obiettivo 2 — Occorrenze di <code>sherlock</code> (case insensitive)</h3>
+<pre><code class="language-bash">grep -oi 'sherlock' &quot;$1&quot; | wc -l
+</code></pre>
+<ul>
+<li><code>-o</code>: una occorrenza per riga (come sopra)</li>
+<li><code>-i</code>: ignora maiuscole/minuscole — cattura <code>Sherlock</code>, <code>SHERLOCK</code>, <code>sherlock</code> ecc.</li>
+</ul>
+<p>I due flag si combinano: <code>-oi</code> = una corrispondenza per riga + case insensitive.</p>
+<p><strong>Attenzione</strong>: senza <code>-o</code>, <code>grep -i 'sherlock' | wc -l</code> conterebbe le <strong>righe</strong> contenenti sherlock — se apparisse due volte sulla stessa riga, verrebbe contato una volta sola.</p>
+<hr />
+<h3 id="obiettivo-3-top-5-parole-per-frequenza">Obiettivo 3 — Top 5 parole per frequenza</h3>
+<pre><code class="language-bash">tr '[:upper:]' '[:lower:]' &lt; &quot;$1&quot; | tr -cs '[:alpha:]' '\n' | sort | uniq -c | sort -rn | head -5
+</code></pre>
+<p><strong>Approccio</strong>: invece di cercare ogni parola nel file (loop con migliaia di <code>grep</code> — lento), si trasforma il file in una parola per riga e si riusa la pipeline <code>sort | uniq -c | sort -rn | head</code> già nota da 0B.</p>
+<h4 id="passo-1-tr-upper-lower-1">Passo 1 — <code>tr '[:upper:]' '[:lower:]' &lt; "$1"</code></h4>
+<p>Converte tutto il testo in minuscolo prima della tokenizzazione. Così <code>The</code>, <code>the</code>, <code>THE</code> diventano tutti <code>the</code> e vengono contati insieme.</p>
+<p>L'ordine conta: va fatto <strong>prima</strong> di spezzare in parole. Se lo mettessi dopo, i token sarebbero già separati e non ci sarebbero più maiuscole miste da unificare.</p>
+<p>Effetto sul conteggio:
+- <code>the</code>: 5267 → 5634 (+367 occorrenze di <code>The</code>/<code>THE</code>)
+- <code>and</code>: 2818 → 3018</p>
+<h4 id="passo-2-tr-cs-alpha-n">Passo 2 — <code>tr -cs '[:alpha:]' '\n'</code></h4>
+<p>Spezza il testo continuo in una parola per riga eliminando punteggiatura, spazi, simboli.</p>
+<ul>
+<li><code>[:alpha:]</code>: classe POSIX per tutte le lettere (a-z, A-Z) — usata perché le lettere sono ciò che vogliamo <strong>tenere</strong></li>
+<li><code>-c</code>: complemento — invece di specificare cosa sostituire, specifichi cosa tenere; tutto il resto viene sostituito</li>
+<li><code>-s</code>: squeeze — sequenze consecutive di <code>\n</code> (da più simboli adiacenti) collassate in uno solo, evitando righe vuote</li>
+</ul>
+<p>Senza <code>-c</code> bisognerebbe elencare esplicitamente ogni carattere da eliminare (<code>,</code>, <code>.</code>, <code>'</code>, <code>*</code>, spazio, tab…) — impossibile da gestire.</p>
+<p>Senza <code>-s</code> ogni segno di punteggiatura tra due parole genererebbe righe vuote che <code>uniq -c</code> conterebbe come token vuoti.</p>
+<h4 id="passi-35-sort-uniq-c-sort-rn-head-5">Passi 3–5 — <code>sort | uniq -c | sort -rn | head -5</code></h4>
+<p>Identici all'esercizio 01:
+- <code>sort</code>: ordina alfabeticamente (prerequisito per <code>uniq</code>)
+- <code>uniq -c</code>: conta occorrenze consecutive uguali
+- <code>sort -rn</code>: ordina per frequenza decrescente
+- <code>head -5</code>: prime 5</p>
+<hr />
+<h2 id="setup-e-uso">Setup e Uso</h2>
+<pre><code class="language-bash"># Trasferire il file dalla VM host tramite cartella condivisa Vagrant
+cp /vagrant/The_Adventures_Of_Sherlock_Holmes.txt ~/holmes.txt
+
+# Creare lo script
+cat &gt; ~/conta_occorrenze.sh &lt;&lt; 'EOF'
+#!/bin/bash
+
+echo &quot;=== LETTERE A ===&quot;
+grep -o 'a' &quot;$1&quot; | wc -l
+
+echo &quot;=== SHERLOCK CASE INSENSITIVE ===&quot;
+grep -oi 'sherlock' &quot;$1&quot; | wc -l
+
+echo &quot;=== PAROLE PIU' USATE ===&quot;
+tr '[:upper:]' '[:lower:]' &lt; &quot;$1&quot; | tr -cs '[:alpha:]' '\n' | sort | uniq -c | sort -rn | head -5
+EOF
+
+chmod +x ~/conta_occorrenze.sh
+~/conta_occorrenze.sh ~/holmes.txt
+</code></pre>
+<hr />
+<h2 id="nota-trasferire-file-host-vm-con-vagrant">Nota: trasferire file host → VM con Vagrant</h2>
+<p>Con Vagrant + VirtualBox la cartella condivisa è automatica:
+- <strong>Host</strong>: tutto ciò che sta in <code>~/sysAdmin-lab/</code> è visibile dentro la VM come <code>/vagrant/</code>
+- <strong>Dentro la VM</strong>: <code>cp /vagrant/nomefile.txt ~/</code> per copiarlo nella home</p>
+<p>Non serve <code>scp</code> né configurazione aggiuntiva.</p></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>template_ipt-router.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  archivio</p>
+<h1 class="titolo-pagina">template_ipt-router.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/ARCHIVIO/security_17-07_condensati/03_iptables_nftables/template_ipt-router.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="template-host-router-piu-interfacce-di-rete-es-eth1eth2eth3">Template — host "router" (più interfacce di rete, es. eth1/eth2/eth3)</h1>
+<p>Fa da tramite tra segmenti (<code>FORWARD</code>) ed eventualmente offre lui stesso un servizio locale
+(<code>INPUT</code>/<code>OUTPUT</code>, come un endpoint qualunque).</p>
+<p>Riferimento: <code>procedura_operativa_iptables.md</code> §1-5, <code>guida_esame_iptables.md</code> §3-4</p>
+<h2 id="chiarimenti-prima-di-iniziare-dubbi-comuni-non-solo-di-questo-esercizio">Chiarimenti prima di iniziare (dubbi comuni, non solo di questo esercizio)</h2>
+<ul>
+<li><strong><code>-i</code>/<code>-o</code> vs <code>-s</code>/<code>-d</code></strong>: <code>-i</code>/<code>-o</code> prendono <strong>il nome dell'interfaccia locale</strong> (<code>eth1</code>,
+  <code>eth2</code>, <code>eth3</code>...), mai un indirizzo IP — dicono "da/verso quale porta fisica/virtuale <strong>di
+  questo router</strong>". <code>-s</code>/<code>-d</code> prendono un <strong>indirizzo IP</strong> (o una rete, es. <code>172.20.0.0/20</code>) e
+  guardano dentro il pacchetto chi l'ha mandato/a chi è diretto. Sono due criteri indipendenti:
+  puoi usarli insieme (<code>-i eth1 -o eth2 -s 172.20.0.0/20 -d 1.1.1.14</code>) per essere più precisi, ma
+  non sono intercambiabili. Ricorda: i nomi delle interfacce sono <strong>locali a ogni macchina</strong> — non
+  esiste relazione tra "l'eth1 del Client" e "l'eth1 del Router", sono cose diverse che condividono
+  solo il nome.</li>
+<li><strong><code>&lt;tcp|udp&gt;</code> nei template</strong>: è solo una notazione per dire "scegli uno dei due secondo il
+  servizio" — non va mai copiato alla lettera. Sostituiscilo con <code>tcp</code> o <code>udp</code> guardando cosa
+  chiede la consegna per quella porta.</li>
+<li><strong><code>--dport</code> vs <code>--sport</code>, e se il numero di porta cambia</strong>: <code>--dport</code> = porta di
+  <strong>destinazione</strong> (dove il pacchetto è diretto); <code>--sport</code> = porta di <strong>sorgente</strong> (da dove
+  parte). Nella richiesta usi <code>--dport &lt;porta_servizio&gt;</code>; nella risposta usi <code>--sport
+  &lt;stessa_porta&gt;</code>. <strong>Il numero di porta non cambia mai tra richiesta e risposta</strong> — cambia solo
+  quale dei due flag lo tiene, perché è cambiata la direzione. Eccezione NTP: porta 123 su
+  entrambi i lati, stessa riga ha sia <code>--dport 123</code> sia <code>--sport 123</code>.</li>
+<li><strong>FORWARD vs INPUT/OUTPUT — l'errore più facile su un router</strong>: il router ha <code>FORWARD</code>
+  popolato, ma <strong>non tutto</strong> ciò che lo riguarda è FORWARD. Per OGNI flusso chiediti: il traffico
+  <em>attraversa</em> il router (due estremi sono host diversi da lui, lui è solo il tramite) → <code>FORWARD</code>,
+  sempre con <strong>due</strong> interfacce (<code>-i</code> e <code>-o</code> insieme); oppure il traffico <em>nasce o muore sul router
+  stesso</em> (es. il router offre lui un servizio, tipo DNS/LDAP) → <code>INPUT</code>/<code>OUTPUT</code>, sempre con <strong>una
+  sola</strong> interfaccia per riga (<code>-i</code> da sola o <code>-o</code> da sola, mai entrambe). Scrivere in <code>FORWARD</code> un
+  flusso che in realtà termina sul router è un errore concreto già capitato: quella regola non
+  scatta mai (il traffico locale non passa per <code>FORWARD</code>), e il vero traffico finisce scartato
+  dalla policy <code>DROP</code> di <code>INPUT</code>/<code>OUTPUT</code> perché lì non hai messo nulla.
+  <strong>Esempio concreto realmente sbagliato</strong> (13 giu 2024, punto 4): "i client accedono al DNS del
+  router, porta 53". Il DNS gira <strong>sul router stesso</strong> → il router è la <strong>destinazione finale</strong>, non
+  un tramite: va in <code>INPUT</code> (richiesta, <code>-i eth1 --dport 53</code>) + <code>OUTPUT</code> (risposta, <code>-o eth1 --sport
+  53 ESTABLISHED</code>), <strong>una</strong> interfaccia per riga. Metterlo in <code>FORWARD</code> (<code>-i eth1 -o eth3 --dport
+  53</code>) è l'errore: quel traffico non attraversa il router verso un <strong>terzo host</strong>, quindi non passa
+  <strong>mai</strong> per la catena <code>FORWARD</code>, la regola non fa match, e il vero pacchetto DNS viene scartato
+  dalla policy <code>DROP</code> di <code>INPUT</code>. Confrontalo col punto 3 dello stesso esercizio (client→internet:443):
+  <em>quello</em> attraversa davvero il router verso un host terzo (Internet) → <code>FORWARD</code> è corretto. Il
+  test è sempre lo stesso: "questo flusso <strong>finisce sul router</strong>, o lo <strong>attraversa</strong> verso qualcun
+  altro?" — non "quante interfacce tocca".</li>
+</ul>
+<pre><code class="language-bash">#!/bin/bash
+
+# --- 1. Ripulisci lo stato precedente (rilanciabile senza accumulare regole) ---
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+iptables -t nat -F        # ⚠️ OBBLIGATORIO se questo esercizio usa NAT (vedi §3): i tre -F sopra
+                         # svuotano solo la tabella `filter`, NON la tabella `nat`. Se ometti
+                         # questa riga, ogni ri-lancio dello script ACCUMULA regole SNAT/DNAT
+                         # duplicate (bug silenzioso: la prima traduzione vince, ma la tabella si
+                         # riempie di doppioni). Se l'esercizio non ha NAT, la riga è innocua: lasciala.
+
+# --- 2. Loopback sempre permesso ---
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# --- 3. NAT — SOLO se la consegna lo richiede esplicitamente ---
+# Segnale nella consegna: un servizio con IP privato va raggiunto &quot;indirettamente&quot;
+# dall'esterno (serve DNAT), oppure una rete privata deve &quot;uscire&quot; con un IP
+# pubblico che non è il suo (serve SNAT/MASQUERADE). ⚠️ Questo vale ANCHE quando
+# il &quot;fuori&quot; non è Internet ma un altro segmento della topologia che non ha
+# instradamento di ritorno verso la rete privata (visto nel pool: 13 giu 2024,
+# punto 1 — client privato che contatta un server su una rete &quot;pubblica&quot; diversa
+# dalla propria, nessuna parola &quot;indiretto&quot; nel testo, ma serve SNAT lo stesso).
+# Se la consegna chiede solo &quot;consentire/negare questo traffico&quot; tra reti che SI
+# raggiungono già a vicenda, NON serve NAT: salta questa sezione. Dettaglio
+# completo dei segnali: procedura_operativa_iptables.md §2.
+#
+# iptables -t nat -A PREROUTING -i &lt;if_esterna&gt; -d &lt;ip_pubblico&gt; -p tcp --dport &lt;porta_pubblica&gt; \
+#     -j DNAT --to-destination &lt;ip_privato&gt;:&lt;porta_reale&gt;
+# iptables -t nat -A POSTROUTING -s &lt;rete_privata&gt; -o &lt;if_esterna&gt; -j SNAT --to-source &lt;ip_confine&gt;
+#
+# ⚠️ Se hai fatto DNAT, le regole FORWARD sotto devono guardare l'indirizzo
+# GIÀ TRADOTTO (quello privato), perché prerouting agisce prima di forward.
+
+# --- 4. Regole FORWARD — un blocco per ogni flusso che ATTRAVERSA il router ---
+# Per OGNI flusso della consegna che riguarda due host diversi da questo router,
+# chiediti: da quale INTERFACCIA DEL ROUTER entra, da quale esce? (mai le
+# interfacce dell'altro host: i nomi eth* sono locali a ciascuna macchina).
+# Se invece il flusso nasce/muore SUL ROUTER STESSO, non va qui — vedi punto 5.
+#
+# iptables -A FORWARD -i &lt;if_in&gt; -o &lt;if_out&gt; -p &lt;tcp|udp&gt; --dport &lt;porta&gt; -j ACCEPT
+# iptables -A FORWARD -i &lt;if_out&gt; -o &lt;if_in&gt; -p &lt;tcp|udp&gt; --sport &lt;porta&gt; -m state --state ESTABLISHED -j ACCEPT
+#
+# ⚠️ Se la consegna dice &quot;da/verso qualsiasi host&quot; per un estremo, non aggiungere
+# -s/-d per quel lato. Aggiungi -s &lt;rete&gt; / -d &lt;rete&gt; quando conosci il segmento
+# esatto, per non essere più permissivo del necessario.
+
+# &lt;&lt;&lt; scrivi qui i tuoi blocchi FORWARD, una coppia per flusso &gt;&gt;&gt;
+
+# --- 5. Regole INPUT/OUTPUT locali — quando il router stesso è sorgente o destinazione ---
+# (es. il router fa da server DNS/LDAP per qualcun altro, o inizia lui una richiesta):
+# qui NON è FORWARD, perché il router è la destinazione (o la sorgente), non un
+# tramite — una sola interfaccia coinvolta per riga, non due.
+#
+# iptables -A INPUT  -i &lt;if&gt; -p &lt;tcp|udp&gt; --dport &lt;porta&gt; -j ACCEPT
+# iptables -A OUTPUT -o &lt;if&gt; -p &lt;tcp|udp&gt; --sport &lt;porta&gt; -m state --state ESTABLISHED -j ACCEPT
+
+# &lt;&lt;&lt; scrivi qui eventuali righe locali &gt;&gt;&gt;
+
+# --- 6. Policy di default, sempre per ultime ---
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+</code></pre></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

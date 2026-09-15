@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>template_report_NIDS.md · cockpit</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+
+<header class="testata">
+  <a class="marchio" href="../index.html">cockpit</a>
+  <nav class="navigazione">
+    <a href="../index.html">Oggi</a>
+    <a href="../laurea.html">Laurea</a>
+    <a href="../corsi.html">Corsi</a>
+    <a href="../materiali.html" aria-current="page">Materiali</a>
+    <a href="../workflow.html">Workflow</a>
+    <a href="../diario.html">Diario</a>
+  </nav>
+  <div class="azioni">
+    <button type="button" class="cerca-apri" data-apri-ricerca>
+      <span>Cerca</span><kbd>Ctrl</kbd><kbd>K</kbd>
+    </button>
+    <button type="button" class="tema" data-cambia-tema aria-label="Cambia tema"></button>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+<p class="metrica__etichetta">
+  simulazione</p>
+<h1 class="titolo-pagina">template_report_NIDS.md</h1>
+<p class="tenue"><a href="../../Vault/UniCode/SIMULAZIONI ESAMI/SICINF/modelli_risolti/template_report_NIDS.md">Apri il file originale</a></p>
+<article class="prosa"><h1 id="template-reporttxt-network-intrusion-detection">Template — report.txt (Network Intrusion Detection)</h1>
+<blockquote>
+<p>Struttura riutilizzabile per il resoconto testuale richiesto negli esercizi di tipo
+Network Intrusion Detection (S10). Ogni sezione ha, tra <code>[ ]</code>, <strong>da dove</strong> ricavare
+l'informazione e <strong>con quale comando/azione</strong>. Vedi <code>modello_network_intrusion_detection.md</code>
+per un esempio completo già risolto, e <code>esercizi/SICINF/pratica_NIDS_2025-02-13/report.txt</code>
+per un esempio reale compilato da zero.</p>
+</blockquote>
+<pre><code>ANALISI DEL TRACCIATO &lt;nome_file.pcap&gt;
+[nome file: quello scaricato da Virtuale]
+(catturato su router che connette N host/subnet diverse)
+[N e le subnet: Wireshark -&gt; ordina per colonna Source (click sull'intestazione
+nella lista pacchetti) -&gt; conta quanti IP sorgente distinti compaiono e le loro subnet]
+
+METODO:
+[una riga fissa, riusabile sempre uguale — cambia solo se hai usato strumenti diversi]
+Analisi in Wireshark: ordinamento per indirizzo sorgente (colonna Source),
+poi Statistics -&gt; Protocol Hierarchy per la vista d'insieme dei protocolli
+presenti, poi Statistics -&gt; Conversations (tab TCP/UDP) per isolare i
+singoli flussi, e Follow -&gt; TCP/UDP Stream per ispezionare il contenuto
+applicativo di ciascun gruppo di conversazioni.
+
+TRAFFICO INDIVIDUATO:
+
+1. &lt;NOME TIPO DI TRAFFICO&gt;
+   [nome: Statistics -&gt; Protocol Hierarchy ti dice quali protocolli applicativi
+   sono presenti (SMTP, HTTP, DNS, Telnet, ...) e la % di ciascuno]
+   - Host coinvolti: &lt;IP o rete sorgente&gt; &lt;-&gt; &lt;IP o rete destinazione&gt;, porta &lt;N&gt;
+     [ricava IP/porte da: Statistics -&gt; Conversations, tab del protocollo
+     giusto (TCP/UDP). Se la consegna chiede reti /24 (non singoli host),
+     scrivi la rete, non il singolo IP]
+   - Descrizione: [perché è innocuo — apri Follow Stream su un esempio e
+     controlla: 1) la richiesta è sintatticamente valida? 2) contenuto/path
+     sospetti? 3) risposta anomala? 4) frequenza/volume compatibile con uso
+     normale? Scrivi la conclusione con la prova, non solo l'aggettivo]
+
+2. &lt;NOME TIPO DI TRAFFICO&gt;
+   - Host coinvolti: ...
+   - Descrizione: ...
+
+3. ICMP
+   [quasi sempre presente e quasi sempre ignorato per errore — controllalo:
+   filtro Wireshark &quot;icmp&quot;, guarda colonna Info per il tipo (Echo request/
+   reply, Destination unreachable, ...) e sorgente/destinazione]
+   - Host coinvolti: ...
+   - Descrizione: ...
+
+N. ATTACCO INDIVIDUATO: &lt;nome/tipo&gt;
+   [il tipo si deduce da CONTENUTO (stringa/pattern anomalo nel payload) o
+   da COMPORTAMENTO (volume/frequenza anomali) o entrambi]
+   - Sorgente: &lt;IP/rete&gt;  -&gt;  Vittima: &lt;IP/rete&gt;, porta &lt;N&gt;
+   - Come l'ho riconosciuto:
+     a) Contenuto: [Follow Stream sul gruppo sospetto -&gt; cerca stringhe,
+        path, parametri fuori dal comune rispetto al traffico legittimo
+        analogo (stesso protocollo, confronta i due Follow Stream fianco
+        a fianco)]
+     b) Frequenza/volume: [Wireshark -&gt; attiva &quot;Time delta from previous
+        displayed packet&quot; in View -&gt; Time Display Format -&gt; Seconds Since
+        Previously Displayed Packet, poi guarda la colonna Time sui
+        pacchetti del gruppo sospetto e del gruppo legittimo, confrontali]
+   - Perché è incompatibile con uso legittimo: [confronto esplicito col
+     punto 2 — stesso protocollo, comportamento diverso: quale differenza
+     numerica/qualitativa lo dimostra]
+
+REGOLA SURICATA SCRITTA (exam.rules):
+[scrivi qui la regola: azione + protocollo + sorgente + porta -&gt; dest + porta
+(msg:&quot;...&quot;; content:&quot;...&quot;; &lt;buffer keyword tipo http_uri se serve&gt;; sid:&lt;numero
+univoco &gt;=1000000&gt;; rev:1;) — vedi modello_network_intrusion_detection.md per
+la sintassi completa]
+
+DISCUSSIONE DEI LIMITI DI SURICATA RISPETTO A QUESTO ATTACCO:
+[SOLO se la consegna lo chiede esplicitamente, O se l'attacco vive sotto il
+livello IP (es. ARP spoofing/poisoning — Suricata non ha sintassi per
+condizionare un alert su un pacchetto ARP o un MAC address). In quel caso
+la regola è un'approssimazione dichiarata (es. pattern $GOOD_NET/$BAD_NET),
+non un rilevamento diretto — spiega qui perché. Vedi il secondo caso in
+modello_network_intrusion_detection.md per un esempio completo]
+
+VERIFICA — LA REGOLA FUNZIONA:
+Comando eseguito:
+  mkdir -p &lt;dir_output&gt;
+  suricata -r &lt;pcap&gt; -S exam.rules -l &lt;dir_output&gt;
+  [verifica che non stampi errori di parsing della regola all'avvio]
+
+Numero di alert generati: &lt;N&gt;
+  [comando: grep -c '&quot;signature_id&quot;:&lt;sid&gt;' &lt;dir_output&gt;/eve.json — NON &quot;sid&quot;,
+  nel JSON il campo si chiama signature_id (annidato in &quot;alert&quot;:{...}); se il
+  conteggio sembra 0 verifica prima con grep -c '&quot;event_type&quot;:&quot;alert&quot;' che
+  ci siano alert di qualunque tipo, per escludere che sia solo il grep sbagliato]
+
+Esempio di alert (da eve.json):
+  [comando: grep '&quot;signature_id&quot;:&lt;sid&gt;' &lt;dir_output&gt;/eve.json | head -1
+  poi trascrivi SOLO i campi rilevanti (src_ip, dest_ip, http.url o
+  content applicativo, signature_id, timestamp) — non incollare il JSON
+  grezzo né il terminale con prompt/decorazioni: riscrivi pulito]
+
+NOTA SU suricata.yaml:
+[di default NON serve modificarlo se la regola specifica reti/IP espliciti
+invece di $HOME_NET. Se invece la regola usa $HOME_NET, o se serve abilitare
+qualche opzione (es. payload-printable per leggere il payload in eve.json),
+scrivi qui cosa hai cambiato e perché]
+Consegnato invariato / modificato in &lt;punto X&gt; perché &lt;motivazione&gt;.
+</code></pre>
+<h2 id="confezionamento-finale-della-consegna">Confezionamento finale della consegna</h2>
+<p>Nella cartella dove hai già <code>report.txt</code> e <code>exam.rules</code>, copia gli altri due file richiesti:</p>
+<pre><code>cp /etc/suricata/suricata.yaml .
+cp &lt;dir_output_suricata&gt;/eve.json .
+ls -la
+</code></pre>
+<p>Verifica che ci siano tutti e 4: <code>report.txt</code>, <code>exam.rules</code>, <code>suricata.yaml</code>, <code>eve.json</code>.</p>
+<hr />
+<h2 id="checklist-rapida-prima-di-consegnare">Checklist rapida prima di consegnare</h2>
+<ul>
+<li>[ ] Ogni tipo di traffico (anche quello innocuo) ha una riga che spiega <strong>perché</strong> è innocuo o malevolo — mai solo "è normale" senza motivazione.</li>
+<li>[ ] Hai controllato <strong>anche</strong> l'ICMP, non solo TCP — è facile da dimenticare perché di solito non contiene l'attacco, ma la consegna chiede tutti i tipi di traffico.</li>
+<li>[ ] L'attacco è descritto sia nel <strong>contenuto</strong> (cosa c'è nel payload, citato testualmente) sia nel <strong>comportamento</strong> (volume/frequenza, con numeri) — i due argomenti si rinforzano a vicenda.</li>
+<li>[ ] La regola Suricata è stata <strong>testata</strong> (non solo scritta) — il numero di alert generati è riportato, non solo ipotizzato.</li>
+<li>[ ] Le reti nella regola e nel report sono coerenti: se la consegna chiede "rete /24", scrivi <code>X.X.X.0/24</code>, non il singolo IP dell'host che hai osservato.</li>
+<li>[ ] Nessun terminale grezzo incollato (prompt, decorazioni, ANSI) — solo comando + risultato rilevante, riscritti puliti.</li>
+<li>[ ] <code>suricata.yaml</code> ha una nota esplicita sul perché è invariato o cosa è stato modificato — mai consegnarlo senza commento.</li>
+</ul></article>
+</main>
+
+<footer class="pieDiPagina">
+  <p>Generato il 2026-09-02 16:48 da <code>scripts/build_ui.py</code>. Sola lettura.</p>
+</footer>
+
+<dialog class="ricerca" id="ricerca">
+  <input type="search" id="ricerca-campo" placeholder="Cerca in tutto il cockpit…" autocomplete="off">
+  <ul id="ricerca-esiti"></ul>
+</dialog>
+
+<script>window.RADICE = "../";</script>
+<script src="../assets/indice.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>
