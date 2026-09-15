@@ -128,8 +128,11 @@ La seconda compare nella schermata di JUnit, e il docente la lascia in inglese
 > valore sbagliato produce una *failure*, perché il test è arrivato all'asserzione e il
 > confronto non torna. Lo stesso metodo che invece solleva un'eccezione imprevista prima di
 > restituire qualsiasi cosa produce un *error*, perché l'asserzione non viene mai raggiunta.
-> All'esame la distinzione ti dice dove cercare: con una failure la logica è sbagliata, con
-> un error il codice si rompe prima.
+> All'esame la distinzione ti dice dove cercare: con una failure il risultato è sbagliato; con
+> un error il codice, **che ha compilato**, si interrompe *durante l'esecuzione* prima di
+> arrivare al confronto. Un errore di sintassi invece non produce nessuno dei due: il codice non
+> compila e i test non partono. `[corretto il 2026-09-15: la formulazione precedente, «si rompe
+> prima», non diceva prima di cosa]`
 
 > ⚠️ **Fermarsi al primo indizio** (trasversale n. 2). Qualche test verde non chiude il
 > compito. Il criterio è quantitativo, 2/3 dei test, e il collaudo del docente è progettato

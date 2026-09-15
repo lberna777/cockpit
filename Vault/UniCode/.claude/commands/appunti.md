@@ -62,8 +62,13 @@ Path: `corsi/<COD>/appunti/appunti_<ID>_<nome_breve>.md`
 
 **Struttura, valida per ogni corso:**
 - Segui l'ordine della lezione come ossatura.
-- Per ogni domanda aperta: **rispondi inline come blocco citazione `>`**, immediatamente dopo
-  il concetto a cui si riferisce — non raccolte in fondo.
+- Per ogni domanda aperta: **integra la risposta nel testo**, nel punto in cui si tratta il
+  concetto — la spiegazione si espande fino a contenerla. **Mai** in forma domanda-risposta, né
+  come blocco citazione staccato, né raccolte in fondo (preferenza di Lorenzo dal 2026-09-15).
+- Dove la fonte mostra un diagramma o un'immagine a cui il testo si riferisce (UML, schemi a
+  strati, schermate): estrai la pagina dal PDF in PNG
+  (`pdftoppm -f <p> -l <p> -png -r 110 '<pdf>' corsi/<COD>/appunti/img/<ID>_<nome>`) e inseriscila
+  con `![didascalia](img/<file>.png)`, citando la slide.
 - Per ogni sezione omessa dagli appunti grezzi che risulta davvero mancante: includila con
   `> ⚠️ Questa sezione non era presente negli appunti grezzi.`
 - Per ogni punto di forza: `> ✅ Ottima osservazione: ...`
@@ -116,7 +121,8 @@ Se `<COD>` è il corso attivo, aggiorna `stato/corrente.md`: stato del modulo e 
 
 **7. Verifica qualità (checklist interna)**
 
-- [ ] Ogni domanda dagli appunti grezzi ha una risposta inline
+- [ ] Ogni domanda dagli appunti grezzi ha una risposta integrata nel testo, non in forma domanda-risposta
+- [ ] I diagrammi citati sono inseriti come immagini estratte dalla fonte
 - [ ] Nessuna sezione della lezione è stata saltata senza nota
 - [ ] Gli errori hanno l'analisi del perché, non solo la correzione
 - [ ] `profilo/errori.md` aggiornato dove serviva, con promozione a trasversale se ricorre

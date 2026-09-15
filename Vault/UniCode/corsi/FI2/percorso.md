@@ -95,6 +95,13 @@ codice che compila e passa i test — `CLAUDE.md` §7.2)
 | LAB12 | Flights — UI | intro + testo + startkit + soluzione |
 | LAB13 | Oroscopi | slide + startkit + soluzione |
 
+## Supporto in `materiali/slide/`, fuori numerazione
+
+- `DiagrammiUML.pdf` — *Nozioni base di UML2* (Molesini, 2019/20): notazione del diagramma delle
+  classi (sl. 10–29), di sequenza (30–51), delle attività (52–61). Serve a leggere i diagrammi dei
+  compiti; usato per la prima volta negli appunti di 01.
+- `CACM 2018(4)-Google.pdf` — articolo citato in 01 sl. 16 (build system, analisi statica a Google).
+
 ## Esercizi autonomi (`materiali/esercizi/`)
 
 Persona · JUnit · uso di NaN · Matrici (testo, startkit, soluzione) · PhonePlan (testo,

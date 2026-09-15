@@ -219,8 +219,12 @@ mirato — ed è particolarmente adatto a `MATAP`, `CA`, `ELT`, `ELN` e `TLC`.
 - Connessioni con altri moduli: specifiche, mai generiche.
 
 ### Appunti (`/appunti`)
-- Ogni domanda trovata negli appunti grezzi riceve risposta inline come blocco citazione `>`
-  immediatamente dopo il concetto.
+- Ogni domanda trovata negli appunti grezzi riceve risposta **integrata nel testo**, nel punto in
+  cui si tratta il concetto: la spiegazione si espande fino a contenere la risposta. **Mai** in
+  forma domanda-risposta, né come blocco citazione staccato. `[2026-09-15, su richiesta di
+  Lorenzo; sostituisce la risposta inline come citazione `>`]`
+- Dove una slide mostra un diagramma o un'immagine citata nel testo (UML, schemi a strati,
+  schermate di strumenti), l'immagine si estrae dal PDF e si inserisce negli appunti.
 - Errori corretti mostrando: versione errata → analisi → versione corretta.
 - Sezioni omesse: incluse con nota `> ⚠️ Sezione non presente negli appunti grezzi`. **L'assenza non
   è lacuna**: Lorenzo omette intenzionalmente ciò che ha già consolidato.

@@ -24,9 +24,13 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
 
 ## Prossimo passo esatto
 
-Rispondere a freddo alle cinque domande di autoverifica in fondo a
-`lezione_01_linguaggi_infrastrutture.md`, poi `/lezione FI2 02` — «Linguaggio e piattaforma»,
-fonte `materiali/slide/02-x1-Linguaggi e piattaforme.pdf`. A seguire `04b`, che apre la parte a oggetti.
+Autoverifica 01 fatta il 2026-09-15 (1 parziale, 2 parziale, 3 errata, 4 non data, 5 buona) e
+appunti elaborati in `corsi/FI2/appunti/appunti_01_linguaggi_infrastrutture.md`. Per chiudere
+il modulo: rispondere **a freddo**, senza riaprire gli appunti, alle domande **2, 3, 4** della
+lezione, più le due verifiche in fondo agli appunti (un test black-box e uno white-box per lo
+stesso metodo; cosa fa `mvn package` e perché può non produrre il JAR). Se tornano: CHIUSO FI2 01,
+poi `/lezione FI2 02` — «Linguaggio e piattaforma», fonte `materiali/slide/02-x1-Linguaggi e
+piattaforme.pdf` (già letta per gli appunti di 01). A seguire `04b`, che apre la parte a oggetti.
 Il modulo `00` è la sola overview del corso: si legge, non si studia.
 
 ## Punti aperti su questo corso

@@ -29,6 +29,17 @@ a discrezione del docente. Strumenti: JDK, Eclipse, JUnit, JavaFX.
 | 3 — esercizi autonomi | 11 esercizi con testo, startkit e soluzione — 22 file | ✅ acquisita | `materiali/esercizi/` |
 | 4 — prove passate | **30 appelli completi** (testo + start kit + soluzione del docente), 2020-01 → 2025-02, più la simulazione 05/06/2024 | ✅ acquisita 2026-09-14 | `prove/` |
 | 5 — libro di testo | elenco tenuto dal docente sul portale | ⬜ non reperito | — |
+| esterna | **documentazione ufficiale Apache Maven** (`maven.apache.org`: *What is Maven*, *Introduction to the Build Lifecycle*, *Introduction to the POM*, *Introduction to the Dependency Mechanism*) | ✅ consultata 2026-09-15 | web |
+
+**Fonte esterna — Maven.** Il corso nomina i build tools in una sola slide (01, sl. 17) senza
+trattarli. Su richiesta esplicita di Lorenzo (2026-09-15) la documentazione ufficiale di Maven è
+ammessa **solo** per spiegare cosa sia un build tool, e ogni passo che ne deriva va marcato
+`[fonte: maven.apache.org]`, separato dal materiale del docente. Non è materia d'esame.
+
+**Materiale di supporto in `materiali/slide/` non numerato** (fuori dalla tabella dei moduli in
+`percorso.md`): `DiagrammiUML.pdf`, *Nozioni base di UML2* (Molesini, edizione **2019/20**), con
+diagramma delle classi, di sequenza e delle attività; `CACM 2018(4)-Google.pdf`, l'articolo
+citato in 01 sl. 16.
 
 Non scaricate di proposito: le 49 versioni `x6` delle slide (stesso contenuto, sei per pagina) e
 le risorse di tipo video/URL, non scaricabili.

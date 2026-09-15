@@ -21,6 +21,12 @@ soglia vs. tensione di saturazione (`ELN`); latenza vs. RTT (`RETI`).
 primo dal secondo, e quale caso limite li separa*. Se non emerge un caso limite, la
 distinzione non è stata capita.
 
+**Occorrenze registrate**
+- [2026-09-15] `FI2` 01: collaudo e progetto fusi. Sul caso del bus 33, che il docente usa proprio
+  per separarli, ha risposto che «un collaudo più estremo» avrebbe trovato l'errore; l'errore era
+  nel modello del dominio, e i test scritti su quel modello passano tutti. Evidenza:
+  `corsi/FI2/grezzi/grezzi_FI2_01.md`, autoverifica 3.
+
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
 **tutti** i dati del problema. Emerso su analisi di traffico in Sicurezza.
@@ -46,6 +52,17 @@ Dove la fonte usa una formulazione precisa, riformularla la degrada.
 - Shebang assente o incompleto.
 - Confusione fra contare *righe* (`grep -c`) e contare *occorrenze* (`grep -o | wc -l`).
 - **Contromisura**: testare con casi limite prima di fidarsi della logica.
+
+### `FI2` — Fondamenti di Informatica T-2
+- [2026-09-15] Compilazione ed esecuzione fuse: ha attribuito l'*error* di JUnit a un problema
+  «sintattico» → causa: non separa le due fasi, e un errore di sintassi non arriva mai ai test
+  (il codice non compila) → correzione: non compila = nessun test; compila e l'asserzione non
+  torna = failure; compila ed esplode un'eccezione a run-time = error. Evidenza:
+  `corsi/FI2/grezzi/grezzi_FI2_01.md`, autoverifica 2. **Candidato trasversale** (è il pattern 1
+  applicato a due fasi): da promuovere se si ripresenta su un altro corso.
+- [2026-09-15] Terminologia imprecisa sul collegamento: «scaricati» per le librerie caricate
+  dinamicamente a run-time, «hardcodati» per il collegamento statico → correzione: usare *collegamento
+  statico / dinamico*; «scaricare» è ciò che fa un build tool dalla rete. Evidenza: autoverifica 5.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
