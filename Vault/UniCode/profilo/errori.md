@@ -33,6 +33,12 @@ distinzione non è stata capita.
   Git il commit è locale, il push è il secondo passo. Evidenza: trascrizione del 2026-09-15
   («commit fatto, ora procediamo» → «ottimo, pusha tutto su github»);
   `corsi/FI2/appunti/appunti_01_linguaggi_infrastrutture.md` §2.
+- [2026-09-16] `FI2` 01, verifica a voce: black-box / white-box distinti per *cosa controlla* il
+  test («guardare come lavora invece del risultato») anziché per *da dove nasce il caso* (specifica
+  vs codice); un collaudo povero, con un solo caso fortunato, scambiato per un limite del black-box.
+  Nella stessa verifica l'error JUnit collocato «nella struttura» invece che nell'esecuzione.
+  Recuperato con guida (caso white-box `(4, 4)` sul confine del `>`). Evidenza: `stato/giornata.md`
+  del 2026-09-16 → `log/giornate.md`.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -79,6 +85,10 @@ Dove la fonte usa una formulazione precisa, riformularla la degrada.
   `corsi/FI2/grezzi/grezzi_FI2_01.md`, autoverifica 1 (esito «parziale»);
   `appunti_01_linguaggi_infrastrutture.md` §1. **Candidato trasversale**: da promuovere se si
   ripresenta su un altro corso.
+- [2026-09-16] Ricorrenza, stesso corso: nella verifica a voce di 01 ha risposto a metà due volte —
+  failure/error senza dire *dove cercare* l'errore, black-box/white-box senza dare un caso white-box.
+  In entrambi i casi la seconda parte, richiesta, è arrivata corretta o quasi. Resta candidato
+  (nessun altro corso ancora).
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

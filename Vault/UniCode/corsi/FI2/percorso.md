@@ -20,7 +20,7 @@ codice che compila e passa i test — `CLAUDE.md` §7.2)
 | S02 | JUnit                                                   | `Strumenti-02-JUnit.pdf`                                                 | ⬜     |
 | S04 | Installazione JavaFX                                    | `Strumenti-04-Installazione JavaFX.pdf`                                  | ⬜     |
 | S05 | Produrre il JAR eseguibile                              | `Come produrre il JAR eseguibile.pdf`                                    | ⬜     |
-| 01  | Dai linguaggi alle infrastrutture software              | `01-x1-Intro.pdf`                                                        | 🔶    |
+| 01  | Dai linguaggi alle infrastrutture software              | `01-x1-Intro.pdf`                                                        | ✅    |
 | 02  | Linguaggio e piattaforma                                | `02-x1-Linguaggi e piattaforme.pdf`                                      | ⬜     |
 | 02x | Esercitazione: tipi base                                | `02x-x1-Esercitazione Tipi base.pdf`                                     | ⬜     |
 | 02z | Addendum: `main` in Java 21                             | `02z-Addendum-Main in Java21.pdf`                                        | ⬜     |

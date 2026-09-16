@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-15
+**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-16
 
 > Un solo esame in fase attiva (`piano/piano_laurea.md`, regola 4). Gli altri tre di S1 —
 > `CALC`, `MATAP`, `ELT` — hanno cartella, fonti e percorso pronti, e restano in attesa.
@@ -15,25 +15,25 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
 ## Stato dei moduli
 
 - 57 moduli di teoria, 13 esercitazioni di laboratorio, 11 esercizi autonomi.
-- 🔶 **01** «Dai linguaggi alle infrastrutture software» — in corso dal 2026-09-15, lezione in
-  `corsi/FI2/lezioni/lezione_01_linguaggi_infrastrutture.md`. Modulo senza codice: si chiude
-  sulle cinque domande di autoverifica risposte senza appunti (criterio *teoria*, `CLAUDE.md` §7.2).
+- ✅ **01** «Dai linguaggi alle infrastrutture software» — chiuso il 2026-09-16 (criterio *teoria*,
+  verifica a voce a libro chiuso: d.2 parziale, d.3 buona, d.4 buona, black-box/white-box parziale
+  recuperata con guida; `mvn package` saltata). Primo ripasso dovuto il 2026-09-19.
 - Tutti gli altri: non aperti.
 - Materiale completo in `corsi/FI2/materiali/`; mappa in `corsi/FI2/percorso.md`.
 - Edizione del materiale: 2023/24, quella d'iscrizione.
 
 ## Prossimo passo esatto
 
-Autoverifica 01 fatta il 2026-09-15 (1 parziale, 2 parziale, 3 errata, 4 non data, 5 buona) e
-appunti elaborati in `corsi/FI2/appunti/appunti_01_linguaggi_infrastrutture.md`. Per chiudere
-il modulo, all'inizio della prossima sessione: Lorenzo legge gli appunti, poi **Claude gli pone le
-domande a voce** (decisione del 2026-09-16, sostituisce l'autoverifica scritta rifatta da solo) —
-le **2, 3, 4** della lezione, più le due verifiche in fondo agli appunti (un test black-box e uno
-white-box per lo stesso metodo; cosa fa `mvn package` e perché può non produrre il JAR). Le
-risposte si danno **a libro chiuso**. Se tornano: CHIUSO FI2 01,
-poi `/lezione FI2 02` — «Linguaggio e piattaforma», fonte `materiali/slide/02-x1-Linguaggi e
-piattaforme.pdf` (già letta per gli appunti di 01). A seguire `04b`, che apre la parte a oggetti.
-Il modulo `00` è la sola overview del corso: si legge, non si studia.
+`/lezione FI2 02` — «Linguaggio e piattaforma», fonte `materiali/slide/02-x1-Linguaggi e
+piattaforme.pdf`. A seguire `04b`, che apre la parte a oggetti. Il modulo `00` è la sola overview
+del corso: si legge, non si studia.
+
+Al primo ripasso di 01 (2026-09-19) verificare **per primi** i due punti rimasti deboli, che hanno
+la stessa radice — *da dove nasce* la cosa:
+- **error** JUnit: eccezione imprevista **durante l'esecuzione**, l'asserzione non viene raggiunta
+  (non «la struttura», che è a posto perché il codice ha compilato);
+- **black-box / white-box**: il caso si ricava dalla **specifica** o dal **codice**; entrambi
+  controllano il risultato.
 
 ## Punti aperti su questo corso
 
@@ -43,6 +43,9 @@ Il modulo `00` è la sola overview del corso: si legge, non si studia.
     costruiscono in modo operativo, quindi va ripresa lì e non in astratto.
 1c. Il versioning è il punto in cui l'esperienza pregressa (GitHub) ha agganciato la teoria:
     Lorenzo vuole approfondirlo. Il corso non ci torna sopra (solo 01 sl. 5–12).
+1d. Maven (`mvn package`, perché può non produrre il JAR): rimandato da Lorenzo il 2026-09-16 al
+    momento in cui servirà. Il corso gli dedica una sola slide (01 sl. 17) e all'esame si consegna
+    un progetto Eclipse: non è una lacuna d'esame.
 2. Libro di testo dichiarato in scheda ma non reperito.
 
 ## Archivio delle prove — acquisito
