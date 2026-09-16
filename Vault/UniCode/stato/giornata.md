@@ -18,3 +18,6 @@
 13:06 · FI2 · verifica 01 d.black/white ripresa: caso white-box (4,4) sul confine del > dato correttamente dal codice ✓; esito complessivo PARZIALE → buona dopo la guida
 13:07 · FI2 · verifica 01 d.mvn package saltata su richiesta di Lorenzo: Maven rimandato a quando servirà (il corso gli dedica una sola slide, sl. 17; all'esame si consegna un progetto Eclipse)
 13:08 · FI2 · CHIUSO FI2 01 — verifica a voce a libro chiuso; punti deboli per il primo ripasso: error = eccezione a run-time, black/white = origine del caso (specifica vs codice)
+13:14 · FI2 · lezione 02 creata da 1 fonti (02-x1-Linguaggi e piattaforme.pdf, 74 slide): lezione_02_linguaggi_piattaforme.md
+15:46 · FI2 · decisione di piano: mappa teoria → pratica compilata in percorso.md dalle fonti (11 esercitazioni x/z, 14 LAB, 9 esercizi ES-*); prossima pratica di 02 = 02x, primo LAB obbligato = LAB02 (richiede 04b)
+15:49 · FI2 · decisione di metodo: /lab ha un template dedicato «progetto a oggetti con startkit e test» (contratto + casi limite + suggerimenti a gradini, frammenti di codice solo da slide fino a LAB04, modalità compito per LAB12/13 e prove); CLAUDE.md §8 aggiornato

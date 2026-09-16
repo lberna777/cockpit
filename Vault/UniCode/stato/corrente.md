@@ -18,6 +18,9 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
 - ✅ **01** «Dai linguaggi alle infrastrutture software» — chiuso il 2026-09-16 (criterio *teoria*,
   verifica a voce a libro chiuso: d.2 parziale, d.3 buona, d.4 buona, black-box/white-box parziale
   recuperata con guida; `mvn package` saltata). Primo ripasso dovuto il 2026-09-19.
+- 🔶 **02** «Linguaggio e piattaforma» — in corso dal 2026-09-16: lezione creata
+  (`corsi/FI2/lezioni/lezione_02_linguaggi_piattaforme.md`), da leggere e rispondere alle cinque
+  domande di autoverifica prima degli appunti grezzi.
 - Tutti gli altri: non aperti.
 - Materiale completo in `corsi/FI2/materiali/`; mappa in `corsi/FI2/percorso.md`.
 - Edizione del materiale: 2023/24, quella d'iscrizione.
