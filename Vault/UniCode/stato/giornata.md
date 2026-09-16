@@ -21,3 +21,4 @@
 13:14 · FI2 · lezione 02 creata da 1 fonti (02-x1-Linguaggi e piattaforme.pdf, 74 slide): lezione_02_linguaggi_piattaforme.md
 15:46 · FI2 · decisione di piano: mappa teoria → pratica compilata in percorso.md dalle fonti (11 esercitazioni x/z, 14 LAB, 9 esercizi ES-*); prossima pratica di 02 = 02x, primo LAB obbligato = LAB02 (richiede 04b)
 15:49 · FI2 · decisione di metodo: /lab ha un template dedicato «progetto a oggetti con startkit e test» (contratto + casi limite + suggerimenti a gradini, frammenti di codice solo da slide fino a LAB04, modalità compito per LAB12/13 e prove); CLAUDE.md §8 aggiornato
+15:53 · — · pdf batch: 2 convertiti, 0 falliti.
