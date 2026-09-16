@@ -26,9 +26,11 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
 
 Autoverifica 01 fatta il 2026-09-15 (1 parziale, 2 parziale, 3 errata, 4 non data, 5 buona) e
 appunti elaborati in `corsi/FI2/appunti/appunti_01_linguaggi_infrastrutture.md`. Per chiudere
-il modulo: rispondere **a freddo**, senza riaprire gli appunti, alle domande **2, 3, 4** della
-lezione, più le due verifiche in fondo agli appunti (un test black-box e uno white-box per lo
-stesso metodo; cosa fa `mvn package` e perché può non produrre il JAR). Se tornano: CHIUSO FI2 01,
+il modulo, all'inizio della prossima sessione: Lorenzo legge gli appunti, poi **Claude gli pone le
+domande a voce** (decisione del 2026-09-16, sostituisce l'autoverifica scritta rifatta da solo) —
+le **2, 3, 4** della lezione, più le due verifiche in fondo agli appunti (un test black-box e uno
+white-box per lo stesso metodo; cosa fa `mvn package` e perché può non produrre il JAR). Le
+risposte si danno **a libro chiuso**. Se tornano: CHIUSO FI2 01,
 poi `/lezione FI2 02` — «Linguaggio e piattaforma», fonte `materiali/slide/02-x1-Linguaggi e
 piattaforme.pdf` (già letta per gli appunti di 01). A seguire `04b`, che apre la parte a oggetti.
 Il modulo `00` è la sola overview del corso: si legge, non si studia.
@@ -36,6 +38,11 @@ Il modulo `00` è la sola overview del corso: si legge, non si studia.
 ## Punti aperti su questo corso
 
 1. Numeri 18 e 19 assenti dalla numerazione delle slide: da chiarire.
+1b. La «struttura formale» di Java (da cosa è composto il linguaggio) resta poco chiara a Lorenzo,
+    che la giudica poco rilevante per l'esame: non è prioritaria, ma i moduli 02, 04b e 12 la
+    costruiscono in modo operativo, quindi va ripresa lì e non in astratto.
+1c. Il versioning è il punto in cui l'esperienza pregressa (GitHub) ha agganciato la teoria:
+    Lorenzo vuole approfondirlo. Il corso non ci torna sopra (solo 01 sl. 5–12).
 2. Libro di testo dichiarato in scheda ma non reperito.
 
 ## Archivio delle prove — acquisito

@@ -26,6 +26,13 @@ distinzione non è stata capita.
   per separarli, ha risposto che «un collaudo più estremo» avrebbe trovato l'errore; l'errore era
   nel modello del dominio, e i test scritti su quel modello passano tutti. Evidenza:
   `corsi/FI2/grezzi/grezzi_FI2_01.md`, autoverifica 3.
+- [2026-09-15] `FI2`: commit e push fusi in un gesto solo. Lanciata a mano solo la prima metà del
+  comando proposto (`git commit … && git push`), ha dichiarato «commit fatto, ora procediamo»
+  considerando il lavoro al sicuro; su GitHub non c'era ancora nulla, e il push è partito solo più
+  tardi su sua richiesta esplicita. È la stessa distinzione SVN/Git della sl. 7 del modulo 01: in
+  Git il commit è locale, il push è il secondo passo. Evidenza: trascrizione del 2026-09-15
+  («commit fatto, ora procediamo» → «ottimo, pusha tutto su github»);
+  `corsi/FI2/appunti/appunti_01_linguaggi_infrastrutture.md` §2.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -63,6 +70,15 @@ Dove la fonte usa una formulazione precisa, riformularla la degrada.
 - [2026-09-15] Terminologia imprecisa sul collegamento: «scaricati» per le librerie caricate
   dinamicamente a run-time, «hardcodati» per il collegamento statico → correzione: usare *collegamento
   statico / dinamico*; «scaricare» è ciò che fa un build tool dalla rete. Evidenza: autoverifica 5.
+- [2026-09-15] Risposta alla domanda posta solo a metà: all'autoverifica 1 ha descritto la
+  *soluzione* (organizzazione industriale, progetto, tracciamento delle versioni) senza nominare la
+  coppia **in-the-small / in-the-large**, che la domanda chiedeva esplicitamente → causa: risponde
+  con ciò che ricorda del contenuto invece che con ciò che la domanda chiede, e salta il problema
+  che genera la soluzione → correzione: rileggere la domanda punto per punto prima di consegnare, e
+  su una domanda a due parti verificare di aver coperto entrambe. Evidenza:
+  `corsi/FI2/grezzi/grezzi_FI2_01.md`, autoverifica 1 (esito «parziale»);
+  `appunti_01_linguaggi_infrastrutture.md` §1. **Candidato trasversale**: da promuovere se si
+  ripresenta su un altro corso.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
