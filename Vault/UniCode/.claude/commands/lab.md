@@ -1,6 +1,6 @@
 ---
 description: "Genera la guida-lab operativa per un modulo dalle fonti del corso (passo 3 del flusso). Uso: /lab <CODICE> <ID>"
-argument-hint: "<CODICE> <ID modulo> — es. LAS 3D, FI2 2A"
+argument-hint: "<CODICE> <ID modulo> — es. LAS 3D, FI2 02x, FI2 LAB02"
 ---
 
 Il parametro passato è: "$ARGUMENTS"
@@ -55,6 +55,23 @@ Leggi integralmente i materiali del modulo.
 **4. Genera la guida-lab**
 
 Path: `corsi/<COD>/lezioni/guida_lab_<ID>_<nome_breve>.md`
+
+**Scelta del template** — dal tipo di verifica in `fonti.md`, non dal nome del corso:
+
+| Tipo di verifica | Template |
+|---|---|
+| pratico-lab su macchina (es. `LAS`) | laboratorio su macchina |
+| esercizi di calcolo o dimostrazione (es. `CA`, `ELT`, `MATAP`) | esercizi formali |
+| codice che compila e passa i test, con startkit (es. `FI2`) | progetto a oggetti con startkit e test |
+
+Per il terzo template, prima di scrivere:
+- Da `percorso.md`, sezione *Mappa teoria → pratica*, ricava i **prerequisiti di teoria** della
+  voce. Se uno è ancora ⬜, non fermarti ma dichiaralo in testa alla guida, con il modulo mancante.
+- Leggi **per intero** le slide o il testo della voce e **lo startkit, test compresi**: i test
+  sono il contratto. Scompatta gli zip nella scratchpad, non in `materiali/`.
+- La **soluzione** del docente si legge solo per controllare che i suggerimenti portino a una
+  strada che funziona. **Non se ne riporta codice nella guida, mai**, né a parole un algoritmo
+  che Lorenzo dovrebbe trovare da sé.
 
 ---
 
@@ -137,7 +154,7 @@ l'esercizio, non a fine lavoro: quando l'ambiente torna pulito, quel che non è 
 
 ---
 
-### Template — esercizi formali (calcolo, dimostrazioni, progetto)
+### Template — esercizi formali (calcolo, dimostrazioni)
 
 ```
 # Guida Esercizi — <COD> <ID>: <Nome Completo>
@@ -185,6 +202,126 @@ I punti dove il procedimento si rompe di solito, e il segnale che rivela lo sbag
 
 ---
 
+### Template — progetto a oggetti con startkit e test
+
+> **Perché è diverso dagli altri due.** Qui il «passaggio esatto» è il codice, e il codice è la
+> soluzione. Un modulo si chiude solo su un esercizio risolto **a freddo** (`CLAUDE.md` §7.2):
+> una guida che detta le classi lo rende impossibile. La guida quindi imposta il lavoro con il
+> metodo dei LAB del docente — dominio → modello → classi nell'ordine delle dipendenze → test —
+> e si ferma prima dell'implementazione.
+>
+> **Due modalità, dalla colonna *Tipo* della mappa in `percorso.md`:**
+> - **guidata** — esercitazioni `x`/`z`, `LAB` guidati, esercizi `ES-`: template completo;
+> - **compito** — `LAB` in forma di compito (es. `LAB12`, `LAB13`) e prove d'esame: solo
+>   *Setup*, *Condizioni della prova* e *Dopo la prova*. Niente analisi, contratti né
+>   suggerimenti: è una simulazione, e la guida non deve servire da aiuto durante.
+
+```
+# Guida Lab — <COD> <ID>: <Nome Completo>
+**Corso**: <nome esteso>
+**Materiale**: <slide/testo, startkit, soluzione — nomi esatti da percorso.md>
+**Modalità**: guidata | compito
+**Prerequisiti di teoria**: <dalla mappa, con stato; ⚠️ quelli ancora ⬜>
+
+---
+
+## Setup
+
+Dalle slide del laboratorio e da `LAB02` (procedura d'esame):
+- importazione dello startkit in Eclipse e **rinomina del progetto** — all'esame è richiesta;
+- cartelle sorgenti (`src`, `test`) e package attesi: **i nomi vanno rispettati**, o i test non
+  compilano;
+- configurazione di esecuzione quando la fonte la richiede (`-ea`, VM JavaFX);
+- «le X rosse sono normali»: quali classi mancano all'inizio e perché il progetto non compila.
+
+## Il dominio
+
+In prosa, dalla fonte: di cosa parla il problema, i termini del dominio e il loro significato
+preciso, le ipotesi semplificative dichiarate. Dove la fonte pone domande di analisi («cos'è
+esattamente un appuntamento?»), riportarle **senza risposta**: sono la prima cosa da fare.
+*(⚠️ distinzioni fra termini vicini del dominio, da `profilo/errori.md` pattern 1.)*
+
+## Il modello
+
+- Le classi e le loro relazioni come le dà la fonte (UML o testo): cosa è **fornito** nello
+  startkit e cosa è **da fare**.
+- **Ordine di lavoro**: dalla classe con meno dipendenze a quella con più — dalla fonte se lo
+  indica, altrimenti ricavato dal modello, dicendo da cosa.
+
+## Classi da realizzare — una sezione per classe, nell'ordine sopra
+
+### <NomeClasse>
+
+**Responsabilità**: cosa rappresenta e cosa fa, in una o due frasi, dalla fonte.
+
+**Contratto**: costruttori e metodi richiesti **con firma esatta** (dalla specifica, dall'UML
+o dai test), e per ciascuno cosa deve garantire: valori restituiti, stato, eccezioni attese.
+Nessun corpo di metodo.
+
+**Test che la coprono**: la classe di test e i metodi di test dello startkit, e cosa verifica
+ciascuno, in una riga. Suggerire l'ordine in cui togliere i commenti ai test, metodo per metodo.
+
+**Casi limite da pensare prima di scrivere**: quelli che la fonte segnala («cosa succede intorno a
+mezzanotte?») e quelli che i test esercitano. Formulati come **domande**, non come risposte.
+*(⚠️ pattern 2 di `profilo/errori.md`: la classe è finita quando passano tutti i test, non il
+primo.)*
+
+**Frammenti di codice** — *solo nei LAB fino a `LAB04` compreso e nelle esercitazioni `x`
+collegate a moduli fino a `07`, e solo per costrutti che Lorenzo usa per la prima volta*:
+un frammento breve del **costrutto**, preso dalle slide di teoria o del laboratorio e citato con
+`[fonte: <file>, sl. N]`, mai dalla soluzione e mai il metodo richiesto. Esempio lecito: la
+forma del costruttore ausiliario con `this(n, 1)` (LAB02 sl. 6), dove il laboratorio stesso la
+mostra. Oltre questi gradini, la sezione si omette.
+
+<details><summary>Se sei bloccato — 1: una domanda</summary>
+
+Una domanda che sposta l'attenzione sul punto giusto, senza nominare la soluzione.
+</details>
+
+<details><summary>Se sei bloccato — 2: l'idea</summary>
+
+L'idea o la struttura dati da usare, a parole, **presa dai suggerimenti della fonte** quando ci
+sono (es. le due strategie per contare i piolini bianchi in LAB06). Mai codice.
+</details>
+
+---
+
+## Leggere un test rosso
+
+Da riprendere a ogni esecuzione dei test:
+- **non compila** → nessun test gira: firma, nome o package diversi da quelli attesi;
+- **failure** → il codice gira ma l'asserzione non torna: l'errore è nella logica, cercare il caso
+  del test;
+- **error** → un'eccezione imprevista **durante l'esecuzione**, l'asserzione non è raggiunta:
+  cercare lo stack trace.
+*(⚠️ `profilo/errori.md`, `FI2`: compilazione ed esecuzione fuse, error collocato «nella
+struttura».)*
+
+## Dopo i test verdi — confronto con la soluzione
+
+Solo ora si apre la soluzione del docente. La guida elenca **cosa guardare**, non cosa c'è:
+scelte di rappresentazione interna, gestione dei casi limite, divisione in metodi privati.
+Ciò che manca nel proprio codice va in `stato/giornata.md` e, se ricorre, in `profilo/errori.md`.
+
+## Condizioni della prova *(solo modalità compito)*
+
+Tempo massimo e punteggio per parte, dalla fonte. Regola: nessuna guida, nessuna soluzione,
+nessun aiuto durante; cronometro. Al termine: quanti test passano, per parte.
+
+## Dopo la prova *(solo modalità compito)*
+
+Confronto con la soluzione del docente come sopra, più: quali parti hanno richiesto più tempo
+e perché. Una prova sotto i 2/3 dei test è un dato, non un fallimento: va registrata.
+
+## Connessioni
+
+- Con la teoria: quali concetti dei moduli prerequisito compaiono e **dove** (classe, metodo).
+- Con i LAB precedenti: cosa si riusa (es. `MyMath` da LAB01 in LAB02).
+- Con le prove: la tipologia d'esame e la prova passata correlata, se la mappa la indica.
+```
+
+---
+
 ## Famiglia d'esame
 
 *(Solo se il modulo è marcato ⭐ nel percorso — altrimenti ometti la sezione.)*
@@ -209,6 +346,11 @@ Prova passata correlata: `corsi/<COD>/prove/<file>` — eseguila al termine del 
 - [ ] Errori frequenti di Lorenzo integrati come ⚠️ dove rilevanti
 - [ ] Se ⭐: tipologia d'esame e rimando alla prova passata
 - [ ] **Lorenzo digita i comandi: la guida non li esegue al suo posto**
+- [ ] *Progetto con startkit*: nessun corpo di metodo né algoritmo della soluzione nella guida;
+      frammenti solo entro i gradini ammessi e solo da slide, con `[fonte: ...]`
+- [ ] *Progetto con startkit*: firme e nomi di package coincidono con quelli dei test dello
+      startkit (verificati leggendo i test, non dedotti)
+- [ ] *Progetto con startkit, modalità compito*: niente analisi, contratti né suggerimenti
 
 Se un punto non è soddisfatto, correggi prima di procedere. Poi invoca
 `lorenzo-skills:unicode-output-gate`.

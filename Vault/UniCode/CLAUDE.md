@@ -230,12 +230,26 @@ mirato — ed è particolarmente adatto a `MATAP`, `CA`, `ELT`, `ELN` e `TLC`.
   è lacuna**: Lorenzo omette intenzionalmente ciò che ha già consolidato.
 - I pattern nuovi vanno aggiunti a `profilo/errori.md` nella stessa esecuzione.
 
-### Guida-lab (`/lab`, solo `LAS`)
+### Guida-lab (`/lab`)
+Tre template, scelti dal tipo di verifica in `fonti.md` (dettaglio in `.claude/commands/lab.md`).
+
+**Laboratorio su macchina** (`LAS`):
 - Ancorata al PDF reale del laboratorio, prerequisiti e stato della VM espliciti.
 - Ogni passo: comando esatto, output atteso, cosa verificare prima di proseguire.
 - Anatomia di ogni comando: cosa fa, perché lì, funzione di ogni parametro, varianti per riscriverlo
   a memoria invece di copiarlo.
 - **Lorenzo digita i comandi**: la guida li fornisce, non li esegue al suo posto.
+
+**Progetto a oggetti con startkit e test** (`FI2`) `[2026-09-16, su richiesta di Lorenzo]`:
+- Ancorata alle slide del laboratorio e allo startkit **con i suoi test**, che sono il contratto;
+  prerequisiti di teoria dalla *Mappa teoria → pratica* di `percorso.md`.
+- Imposta il lavoro — dominio, modello, classi nell'ordine delle dipendenze, contratto e casi
+  limite di ciascuna — ma **non scrive le classi**: il codice è la soluzione, e il modulo si chiude
+  solo a freddo (§7.2).
+- Suggerimenti a gradini nascosti (domanda → idea); frammenti di codice solo sui costrutti nuovi
+  dei primi laboratori, presi dalle slide.
+- La soluzione del docente si apre dopo i test verdi, per il confronto.
+- I laboratori in forma di compito e le prove si fanno in modalità **compito**: nessun aiuto.
 
 ### Anti-pattern
 - **Non parafrasare le fonti letterali.** Dove la fonte usa una formulazione precisa, riprodurla.

@@ -21,7 +21,7 @@ codice che compila e passa i test — `CLAUDE.md` §7.2)
 | S04 | Installazione JavaFX                                    | `Strumenti-04-Installazione JavaFX.pdf`                                  | ⬜     |
 | S05 | Produrre il JAR eseguibile                              | `Come produrre il JAR eseguibile.pdf`                                    | ⬜     |
 | 01  | Dai linguaggi alle infrastrutture software              | `01-x1-Intro.pdf`                                                        | ✅    |
-| 02  | Linguaggio e piattaforma                                | `02-x1-Linguaggi e piattaforme.pdf`                                      | ⬜     |
+| 02  | Linguaggio e piattaforma                                | `02-x1-Linguaggi e piattaforme.pdf`                                      | 🔶    |
 | 02x | Esercitazione: tipi base                                | `02x-x1-Esercitazione Tipi base.pdf`                                     | ⬜     |
 | 02z | Addendum: `main` in Java 21                             | `02z-Addendum-Main in Java21.pdf`                                        | ⬜     |
 | 03  | Deployment                                              | `03-x1-Deployment.pdf`                                                   | ⬜     |
@@ -109,7 +109,100 @@ startkit, soluzione, commento) · Battaglia Navale (slide, UML, startkit, soluzi
 ZannoTassametro (testo, startkit, soluzione) · BinaryBasicPersistence · Media-IOBinario
 (soluzione) · MyCalendar-IOBinario (soluzione) · FormeGeometricheConInterfacce.
 
-## Prove (`prove/`) — 30 sessioni complete
+## Mappa teoria → pratica
+
+> Compilata il 2026-09-16 **leggendo i materiali**: il testo delle slide di ogni LAB, di ogni
+> esercitazione `x`/`z` e di ogni esercizio autonomo, più un conteggio dei costrutti Java usati nel
+> codice delle soluzioni. Non è ricavata dai titoli.
+>
+> **Come si legge.** Una voce pratica si apre quando tutti i suoi prerequisiti di teoria sono
+> almeno 🔶. *Dichiarato* = la slide lo dice («la teoria completa l'avete vista a lezione», «per
+> ora non conosciamo le collection»); *dal codice* = il costrutto compare nella soluzione o nel
+> testo, ma la slide non rimanda al modulo. Dove i due non bastano, la riga lo segnala.
+>
+> **Comando**: tutte le voci di questa tabella sono materia di `/lab`, i moduli di teoria di
+> `/lezione`. La regola rapida sull'ID: numero semplice, `z` di addendum o `S` → `/lezione`;
+> suffisso `x`, `LAB`, `ES-` → `/lab`. Eccezione: `12z` *Elezioni* è un'esercitazione, non un
+> addendum (vedi sotto).
+
+### Quattro tipi di pratica, non uno
+
+| Tipo | Voci | Com'è fatta (dalle fonti) | Soluzione |
+|---|---|---|---|
+| **Esercitazione autonoma** del docente | `02x` `03x` `07x` `12x` `12z` `23x` `24x` `25x` `31x` `33x` `34x` | slide di Denti: riassunto della teoria + casi da svolgere da soli | nelle slide stesse, quando c'è |
+| **Laboratorio guidato** | `LAB00`–`LAB11` | analisi del dominio → modello UML → startkit Eclipse con test JUnit già scritti → classi «DA FARE» in un ordine dato | zip separato |
+| **Laboratorio in forma di compito** | `LAB12`, `LAB13` | testo con punteggi per parte (modello, persistenza, UI), tempo massimo (LAB13: «3,5 ore MAX») | zip separato |
+| **Esercizio individuale** | `ES-*` | testo o slide, spesso con startkit e soluzione; alcuni con commento alla soluzione | zip, non sempre |
+
+Tre regole dei LAB che valgono anche all'esame, dichiarate in `LAB02` (sl. 14–25): lo startkit
+si importa in Eclipse e **il progetto va rinominato** («All'esame è espressamente richiesto! […]
+si perdono punti»); le «X rosse» iniziali sono normali perché mancano le classi da scrivere; si
+collauda **metodo per metodo**, commentando i test non ancora pertinenti. `LAB07-Recap` aggiunge:
+«NON INVENTARE SPECIFICHE! Seguire il progetto stabilito!» e «si parte sempre da quella con meno
+legami».
+
+### Esercitazioni del docente
+
+| ID | Segue | Prerequisiti di teoria | Evidenza | Note |
+|---|---|---|---|---|
+| `02x` Tipi base | 02 | 02 | dichiarato: riassunto del `main` e dei tipi di 02 | spiega perché il `main` è `static` («deve esistere dall'inizio alla fine del programma»), punto lasciato aperto dalla lezione 02 |
+| `03x` JAR | 03 | 02, 03 | dichiarato: riassunto di deployment e formato JAR | |
+| `07x` Array venendo dal C | 07 | 07 | dichiarato: revisione critica degli array C | |
+| `12x` Display 7 segmenti + orologio | 12 | 03, 12 | dal testo: usa `SevenSegments.jar`, classpath, factory `of` | serve `materiali/lab/SevenSegments.jar` |
+| `12z` Elezioni | 12 | 06, 07, S02 | dal testo e dal codice: array di `String`/`long`, `StringBuilder`, JUnit | è un'esercitazione vera, nonostante la `z` |
+| `23x` Enumerativi + interfacce | 23 | 09, 13, 21, 23 | dichiarato: «già sappiamo che gli enumerativi…» | |
+| `24x` Classi generiche | 22, 25 | 22, 25 | dal testo: `MyStack<T>` su `List<T>` / `ArrayList<T>` | per numero segue 24, per contenuto 22 + 25 |
+| `25x` Collection nei compiti | 25 | 25, 28 | dal testo: casi da compiti (es. 15/6/2016) con reader | le parti con reader richiedono 28 |
+| `31x` CounterFX · JAR e JavaFX | 31 | 30, 31, 03 | dichiarato: «nelle scorse lezioni abbiamo visto le basi di JavaFX» | |
+| `33x` Principio di Liskov | 33 | 14, 25, 33 | dal testo: `List<…>`, `Comparator`, sottotipi | |
+| `34x` ValExp | 34 | 09, 20, 21, 34 | dal testo: `interface Token`, `enum Operator implements Token`, `TreeItem<Token>` | «abbiamo già visto… tramite uno stack»: l'esempio precedente non è stato localizzato |
+
+### Laboratori
+
+| ID | Prerequisiti di teoria | Evidenza | Cosa si costruisce |
+|---|---|---|---|
+| `LAB00` Introduzione | — | | come funziona il laboratorio e l'esame; si legge, non si svolge |
+| `LAB01` Linea di comando | 02, 03 | dichiarato: `javac`, `java`, `javadoc`, `jar cmf` | mini-esempi, libreria `MyMath` (mcd/mcm), test con `assert` e `-ea`, JAR eseguibile |
+| `LAB02` Frazione I | 04b, S01 | dal testo: ADT, costruttori, `equals`, `toString` | `Frazione` immutabile; **import e rinomina dello startkit** |
+| `LAB03` Frazione II | 04b | dal testo | `sum`, `mul`, `compareTo`, `getDouble`; nota: le eccezioni «per ora non sappiamo» usarle |
+| `LAB04` Insiemi di frazioni (a/b/c) | 07, 08 | dichiarato: «la teoria completa relativa ai package l'avete vista a lezione» | `FrazLib` statica → Frazione «double face» → ADT `FractionCollection` |
+| `LAB05` TicketSosta | 10, 11, S02 | dichiarato: «Lavoriamo con package java.time»; dal codice: formattatore valuta | caso d'esame (luglio 2018) + refactoring su nuovi requisiti |
+| `LAB06` MasterMind | 09, 12 | dal testo: tre enumerativi, `StringJoiner`, package per funzionalità | 7 classi di modello; UI JavaFX già pronta, non richiede 31 |
+| `LAB07` MyCalendar | 10, 12, S02 | dal testo: `LocalDateTime`, `Duration`, MVC, associazioni UML | `Appointment`, `AppointmentCollection` (a mano su array), controller |
+| `LAB08` EDLift | 13, 14, 20 | dichiarato: «non sarebbe male poter usare l'ereditarietà»; «per ora non conosciamo strutture dati collection»; eccezioni «le studieremo più avanti» | gerarchia astratta `Lift` con politiche diverse |
+| `LAB09` MyMedia | 09, 13, 15, 20 | dal testo: classe astratta `Media`, `enum Type`, `equals` con `instanceof`; collection «in futuro» | gerarchia di media su array |
+| `LAB10` Bussy | 15, 20, 23, 24, 25, 25e | dal testo: `Map<Integer, Fermata>`, `Optional`, `Comparable`, `equals`/`hashCode`, `NullPointerException`/`IllegalArgumentException` | analisi del dominio (la linea 33 di Bologna), percorsi fra fermate |
+| `LAB11` Agenda | 20, 21, 24, 25, 25e, 28 | dal testo: classi astratte, `SortedSet`, `Optional`, `Reader`/`Writer`, `split`, `Map<String, DetailPersister>` | modello + persistenza su testo; controller e view pronti |
+| `LAB12` Flights | 10, 25, 25e, 28, 30, 31 | dal testo: `OffsetDateTime`, reader con `BadFileFormatException`, JavaFX, lambda, liste osservabili, mock | **forma di compito**: modello, persistenza (10 punti), UI |
+| `LAB13` Oroscopi | 09, 21, 23, 25, 25e, 28, 31 | dal testo: `enum`, interfacce, `Comparable<Oroscopo>`, `Set`, eccezioni, `Reader`, JavaFX, mock | **forma di compito** completa, «3,5 ore MAX»: è una simulazione d'esame |
+
+### Esercizi individuali
+
+Gli esercizi di `materiali/esercizi/` non avevano un identificatore: ricevono qui il prefisso `ES-`.
+
+| ID | Materiale | Prerequisiti di teoria | Evidenza |
+|---|---|---|---|
+| `ES-PERSONA` | `Esercizio-Persona.pdf` | 04b | dal testo: due costruttori, uno con l'anno come stringa; `LocalDate` annunciato «in futuro» |
+| `ES-MATRICI` | `Esercizio-Matrici.pdf` + startkit + soluzione | 07, 08 | dal testo: `double[][]`, libreria statica → ADT `Matrix`, due package, `-ea` |
+| `ES-NAN` | `Esercizio-ante-NaN.pdf` | 07 (e 36 per il perché) | dal testo: `Double.NaN` come risultato assente, esempio del determinante — prosegue `ES-MATRICI` |
+| `ES-JUNIT` | `EsercitazioneIndividuale-JUnit.pdf` | 08, S02 | dichiarato: rifare con JUnit il collaudo di Counter, Angle e Frazione (`LAB02`–`03`) |
+| `ES-PHONEPLAN` | `Esercizio-PhonePlan.pdf` + commento + startkit + soluzione | 07, 10, S02 | dal testo: `LocalTime`, `LocalDateTime`; il commento lo dice «strutturalmente complesso» → dopo `LAB05` |
+| `ES-NAVALE` | `Esercitazione Battaglia Navale.pdf` + `UML.zip` + startkit + soluzione | 09, 17, S02 | dal codice: `enum`, `record`, test JUnit; collezioni di posizioni ancora su array |
+| `ES-TAXI` | `Esercizio-ZannoTassametro.pdf` + startkit + soluzione | 10, 20, 21, 24 | dal testo: interfacce prima delle classi, `Optional<Scatto>`, `LocalTime`; «l'algoritmo più complesso che vedrete in questo corso» |
+| `ES-IOBIN` | `Esercizio-BinaryBasicPersistence.pdf` + soluzioni Media/MyCalendar | 27 | dichiarato: aggiungere persistenza binaria a `LAB07` e `LAB09` → richiede anche quei due |
+| `ES-FORME` | `FormeGeometricheConInterfacce-Docs.zip` | 21 (da verificare) | ⚠️ lo zip contiene **solo** la javadoc generata (2014), né testo né codice: materiale incompleto |
+
+### Letture della mappa
+
+- **Il primo gradino pratico non è un LAB.** Prima di `LAB02` vengono `02x`, `LAB01`, `03x`: sono
+  gli unici esercizi aperti con la sola teoria di 02–03.
+- **`LAB02` è il primo punto obbligato**: introduce la procedura di startkit e rinomina che l'esame
+  richiede. Richiede 04b.
+- **I LAB fino a `LAB09` lavorano deliberatamente su array** («per ora non conosciamo le
+  collection»): sono l'allenamento algoritmico. Da `LAB10` in poi la forma è quella dei compiti.
+- **`LAB13` è la prima simulazione d'esame completa** del materiale di laboratorio: presuppone
+  quasi tutta la teoria fino a 31.
+
 
 Ogni riga: testo, start kit e **soluzione ufficiale del docente**. Fonte: archivio pubblico di
 Denti, `VecchiEsami`, scaricato il 2026-09-14 (dal 2020 in poi).
