@@ -18,18 +18,27 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
 - ✅ **01** «Dai linguaggi alle infrastrutture software» — chiuso il 2026-09-16 (criterio *teoria*,
   verifica a voce a libro chiuso: d.2 parziale, d.3 buona, d.4 buona, black-box/white-box parziale
   recuperata con guida; `mvn package` saltata). Primo ripasso dovuto il 2026-09-19.
-- 🔶 **02** «Linguaggio e piattaforma» — in corso dal 2026-09-16: lezione creata
-  (`corsi/FI2/lezioni/lezione_02_linguaggi_piattaforme.md`), da leggere e rispondere alle cinque
-  domande di autoverifica prima degli appunti grezzi.
+- 🔶 **02** «Linguaggio e piattaforma» — in corso dal 2026-09-16. Lezione
+  (`corsi/FI2/lezioni/lezione_02_linguaggi_piattaforme.md`, PDF in `pdf/lezioni/`) studiata e
+  verificata a voce a libro chiuso: d.1 (`comp.operation`, chi fa cosa) buona dopo guida; d.2
+  (`javac`/`java`) buona dopo guida; d.3 (EXE contro `.class`, EXE .NET) buona dopo guida; d.4
+  (conversioni fra reali) **da riprendere** — verso invertito; d.5 (Unicode/UTF) parziale — `char`
+  e byte fusi. Pratica `02x` non svolta: non è chiudibile finché non lo è.
 - Tutti gli altri: non aperti.
 - Materiale completo in `corsi/FI2/materiali/`; mappa in `corsi/FI2/percorso.md`.
 - Edizione del materiale: 2023/24, quella d'iscrizione.
 
 ## Prossimo passo esatto
 
-`/lezione FI2 02` — «Linguaggio e piattaforma», fonte `materiali/slide/02-x1-Linguaggi e
-piattaforme.pdf`. A seguire `04b`, che apre la parte a oggetti. Il modulo `00` è la sola overview
-del corso: si legge, non si studia.
+`/lab FI2 02x` — *Esercitazione: tipi base*, fonte `materiali/slide/02x-x1-Esercitazione Tipi
+base.pdf`, con il nuovo template «progetto a oggetti con startkit e test» in modalità guidata
+(prerequisito: solo 02). Dentro `02x`, allenare per primo il punto 1e: **riconoscere a occhio**,
+riga per riga, se un assegnamento fra tipi numerici perde informazione (tipo del letterale dal
+suffisso, poi il verso). Poi ridomandare a voce, a libro chiuso, i tre punti deboli di 02:
+- `float f = 3.54;` contro `double x = 3.54F;` — quale compila e perché, cast e Design Intent;
+- a `java` si passa **il nome della classe** col `main`, non il file `.class`;
+- U+1F608 occupa **2 `char`** (coppia surrogata), cioè 4 byte.
+Se tornano e `02x` è svolta: CHIUSO FI2 02. A seguire `03` (Deployment), poi `03x` e `LAB01`.
 
 Al primo ripasso di 01 (2026-09-19) verificare **per primi** i due punti rimasti deboli, che hanno
 la stessa radice — *da dove nasce* la cosa:
@@ -49,6 +58,11 @@ la stessa radice — *da dove nasce* la cosa:
 1d. Maven (`mvn package`, perché può non produrre il JAR): rimandato da Lorenzo il 2026-09-16 al
     momento in cui servirà. Il corso gli dedica una sola slide (01 sl. 17) e all'esame si consegna
     un progetto Eclipse: non è una lacuna d'esame.
+1e. **Da riprendere (2026-09-16, verifica 02 d.4)**: Lorenzo dice che il meccanismo della perdita
+    di informazione è chiaro, ma non sa **riconoscerla a occhio dalla sintassi**: leggere il tipo
+    del letterale dal suffisso (`3.54` → `double`, `3.54F` → `float`; interi `L` → `long`) e il verso
+    dell'assegnamento. Nella verifica aveva invertito `float f = 3.54` e `double x = 3.54F`. Da
+    allenare su righe concrete prima di chiudere 02 — `02x` è il posto naturale.
 2. Libro di testo dichiarato in scheda ma non reperito.
 
 ## Archivio delle prove — acquisito

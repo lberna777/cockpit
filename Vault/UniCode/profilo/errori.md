@@ -39,6 +39,13 @@ distinzione non è stata capita.
   Nella stessa verifica l'error JUnit collocato «nella struttura» invece che nell'esecuzione.
   Recuperato con guida (caso white-box `(4, 4)` sul confine del `>`). Evidenza: `stato/giornata.md`
   del 2026-09-16 → `log/giornate.md`.
+- [2026-09-16] FI2 02, verifica a voce: tre coppie vicine fuse. `char` e byte: U+1F608 = «4 char
+  credo» (sono 2 `char`, coppia surrogata; 4 sono i byte in UTF-8). Eseguibile ed eseguibile dal
+  SO: l'EXE di `cc` detto «vero e proprio eseguibile», come se il `.class` lo fosse meno, e legato a
+  «un ambiente identico» invece che allo specifico sistema operativo. Verso della conversione:
+  `float → double` e `double → float` scambiati (d.4). Evidenza: trascrizione del 2026-09-16
+  pomeriggio («4 char credo»; «un vero e proprio eseguibile .exe, che fa affiamento sul trovare un
+  ambiente identico»); `stato/giornata.md`, verifica 02 d.3–d.5.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -47,6 +54,14 @@ Considera risolto un esercizio al primo risultato plausibile, senza verificare c
 **Contromisura**: far quadrare i numeri prima di concludere. Un esercizio è chiuso quando
 ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazione.
 
+**Occorrenze registrate**
+- [2026-09-16] FI2 02, verifica d.4: su `float f = 3.54;` / `double x = 3.54F;` ha applicato l'idea
+  giusta (conta la perdita di informazione) senza verificarla sulle due righe, e ha concluso a verso
+  invertito («la prima riga non prevede perdita di precisione del dato, mentre la seconda riga si»);
+  il dato decisivo, il suffisso `F` presente in una riga sola, non è stato usato benché la domanda
+  chiedesse esplicitamente il tipo del letterale. Evidenza: trascrizione del 2026-09-16 pomeriggio;
+  `stato/giornata.md`, verifica 02 d.4.
+
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
 **Contromisura**: per ogni meccanismo chiedersi — *stabilisce chi sei, o cosa puoi fare?*
@@ -54,6 +69,14 @@ Distinzione teoricamente posseduta che scivola in pratica.
 ### 4. Parafrasi al posto della formulazione esatta
 Dove la fonte usa una formulazione precisa, riformularla la degrada.
 **Contromisura**: `[fonte: <fonte>]` sulle affermazioni riprese alla lettera.
+
+**Occorrenze registrate**
+- [2026-09-16] FI2 02, verifica d.5: Unicode detto «codifica come scrivere tutti i caratteri» e UTF
+  «codifica come interpretarli per il calcolatore», al posto di *Unicode numera i caratteri (code
+  point)* / *UTF mappa i code point in sequenze di byte*; la distinzione c'è nella sostanza ma la
+  parafrasi la sfuma. In d.4 il cast descritto come dichiarazione di volontà senza il termine del
+  docente, **Design Intent**. Evidenza: trascrizione del 2026-09-16 pomeriggio; `stato/giornata.md`,
+  verifica 02 d.4–d.5.
 
 ---
 
@@ -89,6 +112,45 @@ Dove la fonte usa una formulazione precisa, riformularla la degrada.
   failure/error senza dire *dove cercare* l'errore, black-box/white-box senza dare un caso white-box.
   In entrambi i casi la seconda parte, richiesta, è arrivata corretta o quasi. Resta candidato
   (nessun altro corso ancora).
+- [2026-09-16] Ricorrenza, stesso corso (terza sessione): nella verifica a voce di 02, con le parti
+  numerate da Claude nella domanda, ha risposto a metà su quasi ogni domanda — d.1 solo parte 1 di 3;
+  il «perché» della domanda di controllo non dato; d.2 una risposta sola per l'installazione di due
+  comandi e «cosa produce» risposto con cosa *fa* `javac`; d.4 tipo del letterale non nominato,
+  sintassi del cast assente; d.5 «4 char credo» senza perché. Le parti mancanti, richieste, sono
+  arrivate corrette dopo la guida. Evidenza: trascrizione del 2026-09-16 pomeriggio («Però hai
+  risposto solo alla prima delle tre parti»); `stato/giornata.md`, verifica 02 d.1–d.5. Resta
+  candidato (nessun altro corso ancora).
+- [2026-09-16] Ricorrenza di «compilazione ed esecuzione fuse», sul piano dell'installazione: alla
+  verifica 02 d.2 «servono installati JDK e gli strumenti per sviluppatori di java» — JDK dato per
+  entrambi i comandi, e JDK e strumenti di sviluppo detti come due cose (sono la stessa) → causa: non
+  lega ogni strumento alla sua fase (`javac` è sviluppo → JDK; `java` esegue un `.class` già
+  compilato → JRE) → correzione recuperata con guida («per javac serve JDK e per java serve JRE»),
+  ma senza i perché. Già in verifica 01 d.4 aveva parlato di «strumenti da sviluppatore» senza
+  nominare JDK/`javac`. Evidenza: trascrizione del 2026-09-16; `stato/giornata.md`, verifica 01 d.4
+  e 02 d.2.
+- [2026-09-16] A `java` passato un file invece di una classe: «il secondo riceve quale programma
+  eseguire, in questo caso il file Esempio1 precedentemente compilato»; alla richiesta esplicita
+  («cosa riceve il secondo») ha dichiarato di non saper rispondere → causa: non separa il nome del
+  file (`Esempio1.class`, prodotto da `javac`) dal nome della classe che contiene il `main`
+  (`Esempio1`, che si passa a `java`, senza estensione) → correzione: `java <NomeClasseColMain>
+  args…`; la JVM cerca da sé il bytecode (prova: `Esempio1.kt` → `kotlin Esempio1Kt`). Recuperato
+  sul controllo `java Esempio1.class alfa`. Evidenza: trascrizione del 2026-09-16 pomeriggio;
+  `stato/giornata.md`, verifica 02 d.2.
+- [2026-09-16] Servizio chiesto all'array: età media di più persone scritta `persone[].getMediaEta`
+  → causa: dà l'operazione su più entità alla pari al contenitore, che non è un'entità a cui si
+  possono aggiungere metodi («non possiamo aggiungere un metodo alla classe `[]`», LAB04) →
+  correzione: operazione di un solo soggetto → metodo di quel soggetto (`persona.getNomeCompleto()`);
+  operazione fra più soggetti alla pari → ente terzo, funzione statica di libreria
+  (`PersonaLib.mediaEta(persone)`, come `FrazLib.sum`, `Math.sin`). Nella stessa risposta chiamate
+  scritte senza parentesi. Evidenza: trascrizione del 2026-09-16 pomeriggio, controllo di d.1.
+- [2026-09-16] Tipo del letterale non riconosciuto dalla sintassi: in d.4 verso della conversione
+  invertito (`float f = 3.54` detto senza perdita, `double x = 3.54F` con perdita) → causa: non legge
+  il suffisso — `3.54` senza suffisso è `double`, `3.54F` è `float` — e quindi non può stabilire il
+  verso; Lorenzo stesso dichiara «mi è chiaro come funziona il meccanismo, ma non come riconoscere a
+  livello di sintassi quando si perdono informazioni» → correzione: prima il tipo del letterale dal
+  suffisso, poi il confronto con il tipo della variabile (più piccolo ← più grande = perdita, serve
+  `(float)`, Design Intent). Da allenare su righe concrete in `02x`. Evidenza: trascrizione del
+  2026-09-16 pomeriggio; `stato/giornata.md`, verifica 02 d.4 e controllo non svolto.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
