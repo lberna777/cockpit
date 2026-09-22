@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-16
+**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-22
 
 > Un solo esame in fase attiva (`piano/piano_laurea.md`, regola 4). Gli altri tre di S1 —
 > `CALC`, `MATAP`, `ELT` — hanno cartella, fonti e percorso pronti, e restano in attesa.
@@ -23,12 +23,24 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   verificata a voce a libro chiuso: d.1 (`comp.operation`, chi fa cosa) buona dopo guida; d.2
   (`javac`/`java`) buona dopo guida; d.3 (EXE contro `.class`, EXE .NET) buona dopo guida; d.4
   (conversioni fra reali) **da riprendere** — verso invertito; d.5 (Unicode/UTF) parziale — `char`
-  e byte fusi. Pratica `02x` non svolta: non è chiudibile finché non lo è.
+  e byte fusi. Pratica `02x` **avviata** (dichiarato da Lorenzo il 2026-09-22: «ho fatto l'inizio»),
+  data e punto d'arresto non registrati nel repo: nessun file di `02x` presente in `corsi/FI2/`.
+  Non è chiudibile finché `02x` non è completata.
 - Tutti gli altri: non aperti.
 - Materiale completo in `corsi/FI2/materiali/`; mappa in `corsi/FI2/percorso.md`.
 - Edizione del materiale: 2023/24, quella d'iscrizione.
 
+## Vincoli della settimana 22–26 settembre 2026
+
+Lorenzo lavora **dalle 7:00 alle 13:30, da lunedì 22 a venerdì 26** (dichiarato il 2026-09-22).
+Lo studio della settimana cade nel pomeriggio, dopo sei ore e mezza di lavoro: sessioni brevi,
+con obiettivo unico e dichiarato in apertura (`profilo/studente.md`: pianificare per blocchi di
+programma coperto, non per monte ore). Obiettivo minimo della settimana: **chiudere FI2 02**.
+
 ## Prossimo passo esatto
+
+**Ripresa di `02x`**: prima di proseguire, ricostruire con Lorenzo fin dove è arrivato (quali punti
+dell'esercitazione, se esiste codice nello startkit); poi continuare da lì.
 
 `/lab FI2 02x` — *Esercitazione: tipi base*, fonte `materiali/slide/02x-x1-Esercitazione Tipi
 base.pdf`, con il nuovo template «progetto a oggetti con startkit e test» in modalità guidata
@@ -40,7 +52,7 @@ suffisso, poi il verso). Poi ridomandare a voce, a libro chiuso, i tre punti deb
 - U+1F608 occupa **2 `char`** (coppia surrogata), cioè 4 byte.
 Se tornano e `02x` è svolta: CHIUSO FI2 02. A seguire `03` (Deployment), poi `03x` e `LAB01`.
 
-Al primo ripasso di 01 (2026-09-19) verificare **per primi** i due punti rimasti deboli, che hanno
+Al primo ripasso di 01 (dovuto il 2026-09-19, **scaduto**: nessun `RIPASSO FI2 01` registrato) verificare **per primi** i due punti rimasti deboli, che hanno
 la stessa radice — *da dove nasce* la cosa:
 - **error** JUnit: eccezione imprevista **durante l'esecuzione**, l'asserzione non viene raggiunta
   (non «la struttura», che è a posto perché il codice ha compilato);
