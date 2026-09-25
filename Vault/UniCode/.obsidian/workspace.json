@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "claudeLezioni/LEZIONI SECURITY/lezione_moduloS1_offensive_security_enumerazione.md",
-                "mode": "preview",
+                "file": "piano/piano_laurea.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "lezione_moduloS1_offensive_security_enumerazione"
+              "title": "piano_laurea"
             }
           }
         ]
@@ -41,10 +41,12 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
-              "title": "Esplora risorse"
+              "title": "Esplora file"
             }
           },
           {
@@ -92,8 +94,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "7e33827c4cdbc22f",
@@ -200,11 +201,11 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "switcher:Apri selettore rapido": false,
+      "daily-notes:Apri nota giornaliera": false,
       "obsidian-git:Open Git source control": false,
-      "switcher:Apri selezione rapida": false,
       "graph:Apri vista grafo": false,
       "canvas:Crea nuova lavagna": false,
-      "daily-notes:Apri nota del giorno": false,
       "templates:Inserisci modello": false,
       "command-palette:Apri riquadro comandi": false,
       "bases:Crea nuova Base": false
@@ -212,6 +213,7 @@
   },
   "active": "9ffeab3f526d0057",
   "lastOpenFiles": [
+    "corsi/CALC/fonti.md",
     "claudeAppunti/APPUNTI SECURITY/appunti_moduloS1_concetti.md",
     "claudeAppunti/APPUNTI SECURITY/appunti_moduloS1_concetti.md.tmp.319554.10e807b408d0",
     "claudeLezioni/LEZIONI SECURITY/guida_lab_moduloS1_enumerazione.md",
@@ -247,7 +249,6 @@
     "APPUNTI GREZZI/Diritto/Appunti_moduloD6.md",
     "claudeLezioni/LEZIONI DIRITTO/lezione_moduloD6_contratto_sviluppo_software.md",
     "claudeLezioni/LEZIONI DIRITTO/lezione_moduloD3_diritto_autore.md",
-    "CLAUDE.md",
-    "master_map_studio.md"
+    "CLAUDE.md"
   ]
 }

@@ -219,12 +219,33 @@ mirato — ed è particolarmente adatto a `MATAP`, `CA`, `ELT`, `ELN` e `TLC`.
 - Connessioni con altri moduli: specifiche, mai generiche.
 
 ### Appunti (`/appunti`)
+- **Un modulo con parte pratica produce un solo file**, che copre teoria e pratica insieme — es.
+  `02` e `02x` in `appunti_02+02x_*.md`. La coppia si risolve dalla *Mappa teoria → pratica* di
+  `percorso.md` (colonna *Segue*), e gli appunti si scrivono **dopo** la pratica: prima, la parte
+  che conta non esiste ancora. `[2026-09-21, su richiesta di Lorenzo]`
+- **Tre fonti, non una**: gli appunti grezzi di Lorenzo, la guida-lab annotata in linea, e la
+  traccia di ciò che **Claude** ha osservato durante l'esecuzione (`stato/giornata.md`,
+  `log/giornate_dettaglio/`, occorrenze in `profilo/errori.md`). La terza è indispensabile: gli
+  errori commessi durante i drill non stanno nei grezzi, perché mentre sbagliava Lorenzo non
+  sapeva di sbagliare. `[2026-09-21, su richiesta di Lorenzo]`
 - Ogni domanda trovata negli appunti grezzi riceve risposta **integrata nel testo**, nel punto in
   cui si tratta il concetto: la spiegazione si espande fino a contenere la risposta. **Mai** in
   forma domanda-risposta, né come blocco citazione staccato. `[2026-09-15, su richiesta di
   Lorenzo; sostituisce la risposta inline come citazione `>`]`
+- **La pratica si intreccia, non si appende**: ciò che è emerso eseguendo va nel paragrafo di
+  teoria che quel fatto illumina, non in una sezione «Parte pratica» finale. È lo stesso principio
+  delle risposte integrate. In fondo sta solo l'esercizio completo, dove il modulo ne ha uno.
+  `[2026-09-21]`
 - Dove una slide mostra un diagramma o un'immagine citata nel testo (UML, schemi a strati,
   schermate di strumenti), l'immagine si estrae dal PDF e si inserisce negli appunti.
+- **Dove un concetto è relazionale — una gerarchia, un verso, un flusso, un reticolo di
+  conversioni — si disegna.** Il criterio: *l'informazione sta in come le cose sono collegate?* Se
+  sì, la prosa la nasconde. Formato **PNG generato con graphviz**, con il `.dot` conservato accanto
+  perché il disegno resti rigenerabile; **mai Mermaid**, che `/pdf-batch` (pandoc + xelatex) non
+  renderizza. I grafi si disegnano **orizzontali** (`rankdir=LR`): verificato il 2026-09-21 che un
+  grafo verticale di sei nodi sfora la pagina in xelatex, mentre lo stesso in orizzontale entra
+  senza attributi di larghezza. Ogni diagramma ha una didascalia che dice dove guardare e quale
+  errore intercetta. `[2026-09-21, su richiesta di Lorenzo]`
 - Errori corretti mostrando: versione errata → analisi → versione corretta.
 - Sezioni omesse: incluse con nota `> ⚠️ Sezione non presente negli appunti grezzi`. **L'assenza non
   è lacuna**: Lorenzo omette intenzionalmente ciò che ha già consolidato.
@@ -337,6 +358,12 @@ Priorità nel briefing: `SCADUTO` (in ritardo), `DOVUTO` (entro tre giorni), `OK
 Regola di ingaggio: `/ripassa <CODICE> <modulo>` genera domande adattive; **si risponde senza
 consultare gli appunti**. Una risposta esitante non è un ripasso superato: reimposta l'intervallo al
 gradino precedente, non lo azzera.
+
+> **`[2026-09-25]` Ingaggio sospeso per decisione di Lorenzo.** I ripassi non si propongono più
+> a scadenza durante il percorso: si accumulano e si fanno in blocco prima dell'appello
+> (`piano/piano_laurea.md`, regola 4b). Gli intervalli qui sopra restano il modo in cui il tracker
+> calcola le scadenze — cambia solo che `SCADUTO` nel briefing è un inventario per la preparazione
+> finale, non lavoro dovuto oggi. `/ripassa` resta disponibile su richiesta esplicita.
 
 Il tracker è mantenuto dagli script, non a mano. Se lo stato del tracker e la realtà divergono, la
 realtà vince: correggere il file e annotare la correzione in `stato/giornata.md`.

@@ -5,3 +5,4 @@
 
 | Codice | Modulo | Chiuso | Ultimo ripasso | Gradino | Prossimo |
 |---|---|---|---|---|---|
+| FI2 | 01 | 2026-09-16 | 2026-09-21 | 3 | 2026-09-24 |

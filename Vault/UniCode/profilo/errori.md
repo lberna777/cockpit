@@ -77,6 +77,36 @@ Dove la fonte usa una formulazione precisa, riformularla la degrada.
   parafrasi la sfuma. In d.4 il cast descritto come dichiarazione di volontà senza il termine del
   docente, **Design Intent**. Evidenza: trascrizione del 2026-09-16 pomeriggio; `stato/giornata.md`,
   verifica 02 d.4–d.5.
+- [2026-09-21] `FI2` 01, ripasso: due formule del docente non recuperate benché la domanda le
+  chiedesse. Sl. 73 «standardizzare il linguaggio non basta» / «comunità incomunicabili»: al loro
+  posto l'argomento della portabilità dell'eseguibile. Sl. 94 (definizione di «eseguibile»):
+  «non mi ricordo la frase». Sl. 81: sostanza corretta ma con «versatilità» e «ottica scalabilità»
+  al posto di «(piccolo) prezzo per questo passo extra» / «i vantaggi sono molto superiori al costo»
+  / «massimamente riusabile». Evidenza: `stato/giornata.md` del 2026-09-21, ripasso 01 d.2 e d.5.
+
+### 5. Inversione del verso in una relazione asimmetrica
+`[promosso a trasversale il 2026-09-21, seconda occorrenza]` Davanti a una coppia A/B in cui una
+proprietà vale per uno solo dei due, Lorenzo coglie *che* la proprietà è in gioco ma ne assegna il
+verso a caso — e poi costruisce il resto del ragionamento sul verso sbagliato, senza che nulla lo
+contraddica. È diverso dal pattern 1: la distinzione **è** stata capita, è l'orientamento che salta.
+
+**Contromisura**: quando la risposta ha un verso, non dichiararlo a memoria — derivarlo da un caso
+concreto verificabile. *Chi contiene cosa? Chi ha più bit? Chi ha bisogno dell'altro per esistere?*
+Un verso che non si appoggia a un caso è un lancio di moneta.
+
+**Dove si ripresenterà**: ogni conversione fra tipi numerici (`FI2`, `CALC`); ampiezza di banda e
+bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento fra livelli di stack
+— chi imbusta chi (`RETI`); prerequisiti fra moduli e dipendenze fra classi (`IDS`).
+
+**Occorrenze registrate**
+- [2026-09-16] `FI2` 02 d.4: `float f = 3.54;` / `double x = 3.54F;` con la perdita di precisione
+  attribuita alla riga sbagliata. Già registrato sotto il pattern 2.
+- [2026-09-21] `FI2` 01, ripasso d.4: alla domanda «dentro il JAR e dentro l'EXE ci sono le
+  librerie?» ha risposto «dentro il jar sì e nell'exe no». È l'opposto: l'EXE è autocontenuto per
+  collegamento statico, il JAR non contiene l'infrastruttura e la collega dinamicamente a run-time
+  (sl. 78, 82–83). Sulla base del verso invertito tutta d.4 è caduta, incluso il punto che il verso
+  giusto rende ovvio: **un solo file basta *proprio perché* non è autocontenuto**. Evidenza:
+  `stato/giornata.md` del 2026-09-21, ripasso 01 d.4.
 
 ---
 
@@ -151,6 +181,32 @@ Dove la fonte usa una formulazione precisa, riformularla la degrada.
   suffisso, poi il confronto con il tipo della variabile (più piccolo ← più grande = perdita, serve
   `(float)`, Design Intent). Da allenare su righe concrete in `02x`. Evidenza: trascrizione del
   2026-09-16 pomeriggio; `stato/giornata.md`, verifica 02 d.4 e controllo non svolto.
+- [2026-09-21] Ripasso 01 d.2: due argomenti distinti del modulo fusi in uno. Alla domanda sul C++
+  come controesempio (sl. 73, *standardizzazione dell'ecosistema*) ha risposto con l'argomento della
+  *portabilità dell'eseguibile* (§6, collegamento statico/dinamico) → causa: risponde con ciò che
+  ricorda del contenuto invece che con ciò che la domanda chiede — quarta ricorrenza dello stesso
+  meccanismo, stesso corso → correzione data col caso limite che separa le due cause: due programmi
+  C++ per lo stesso SO, con librerie dinamiche presenti su entrambe le macchine, sono portabili e
+  restano incomunicabili se usano librerie di stringhe diverse.
+- [2026-09-21] Ripasso 01 d.4: **JRE** non nominato («il Jqualcosa, non me lo ricordo bene»), pur
+  avendo descritto correttamente la funzione dello strato locale che adatta il bytecode. Terza
+  sessione in cui i nomi dell'infrastruttura non arrivano (cfr. verifica 01 d.4 e 02 d.2 del
+  2026-09-16): il meccanismo c'è, l'etichetta no. Manca anche la formula «unico strato dipendente
+  dalla piattaforma» (sl. 84). Nella stessa risposta, «compilandolo» per ciò che la JVM fa al
+  bytecode, che è già compilato.
+- [2026-09-25] Sesta ricorrenza della risposta a metà, stesso corso. Ripasso 01, domanda in due
+  parti esplicite (a: nomi delle due relazioni UML; b: cosa cambia nel codice Java): data solo la a)
+  — «generalizzazione la continua, implementazione di interfaccia la tratteggiata», corretta. Alla
+  richiesta della b) è arrivata solo la metà sull'interfaccia («devo scrivere tutti i metodi da
+  zero», corretta), non quella su `extends`/ereditarietà. Il pattern è ormai stabile su FI2: risponde
+  alla prima parte e considera chiusa la domanda. Resta candidato trasversale (nessun altro corso
+  ancora aperto per verificarlo). Evidenza: `stato/giornata.md` del 2026-09-25.
+- **[2026-09-21] Superato — black-box / white-box.** Nel ripasso 01 d.3 il criterio è stato applicato
+  correttamente: caso `eta = 18` su `return eta > 18;` classificato white-box **perché nato dalla
+  lettura dell'operatore**, cioè per origine del caso e non per cosa il test controlla. Failure/error
+  pure solido, con la motivazione giusta. Supera l'occorrenza del 2026-09-16 (trasversale n. 1).
+- **[2026-09-21] Superato — commit e push.** Ripasso 01 d.1: distinzione tenuta separata e formulata
+  correttamente senza guida. Supera l'occorrenza del 2026-09-15 (trasversale n. 1).
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

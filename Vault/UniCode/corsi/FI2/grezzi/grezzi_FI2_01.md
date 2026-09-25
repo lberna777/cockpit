@@ -1,7 +1,7 @@
 ---
 tags: [FI2, grezzi]
 ---
-
+\
 # Grezzi — FI2 01: Dai linguaggi alle infrastrutture software
 
 **Data**: 2026-09-15

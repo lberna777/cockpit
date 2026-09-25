@@ -172,6 +172,13 @@ perso, e lo si scopre mesi dopo.
 (`profilo/studente.md`). `stato/corrente.md` descrive solo l'esame attivo; gli altri corsi
 vivono in `corsi/<COD>/percorso.md`.
 
+**4b. I ripassi si fanno in blocco a ridosso dell'esame.** `[2026-09-25, deciso da Lorenzo]`
+Sostituisce l'ingaggio a intervalli durante il percorso: il tracker continua a calcolare le
+scadenze, ma non vengono proposte in sessione. Il recupero dei moduli chiusi si concentra nelle
+settimane che precedono l'appello e va messo a bilancio lì, non distribuito. Il rischio è noto e
+accettato: su `FI2`, testa di catena, un modulo chiuso a settembre 2026 deve reggere fino
+all'appello senza passaggi intermedi.
+
 **5. Il piano si verifica su blocchi settimanali di programma coperto.** Mai su ore giornaliere:
 la disponibilità di Lorenzo è troppo variabile perché un monte ore significhi qualcosa. La
 metrica è *moduli chiusi a settimana*, confrontata con quella necessaria per arrivare
