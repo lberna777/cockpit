@@ -8,3 +8,4 @@
 11:25 · FI2 · creato corsi/FI2/appunti/prontuario_FI2.md, cumulativo per l'esame (consultabile in prova): sezione 02x, valori verificati in jshell, messaggi Eclipse (ecj) + javac, pattern dalle 30 soluzioni d'esame
 11:25 · FI2 · tensione BOM della 02x risolta: "A".getBytes("UTF-16") = FE FF 00 41 → big-endian; la didascalia di sl. 24 («little endian») è imprecisa
 11:25 · FI2 · la guida-lab 02x cita numeri di slide che non corrispondono al PDF da 42 pagine (es. compatibilità reali: guida «sl. 21», PDF p. 15); il prontuario usa le pagine del PDF
+11:32 · FI2 · prontuario ridotto a ciò che la 02x ha fatto incontrare (tolti gli schemi dalle prove); aggiornamento del prontuario aggiunto a /chiudi (passo 8a) e a CLAUDE.md §8

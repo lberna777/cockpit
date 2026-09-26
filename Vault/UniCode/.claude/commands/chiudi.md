@@ -159,7 +159,27 @@ dalle previsioni.
 
 ---
 
-**8. Aggiorna glossario e troubleshooting** *(solo se serve)*
+**8. Aggiorna prontuario, glossario e troubleshooting**
+
+**8a. Prontuario d'esame** — per ogni corso con prontuario (`corsi/<COD>/appunti/prontuario_<COD>.md`)
+toccato oggi da una sessione **pratica** (lab, esercizi, prova). Il prontuario è materiale da
+consultare in sede d'esame: si aggiorna con ciò che la sessione ha fatto **incontrare davvero**,
+non con ciò che il materiale contiene.
+
+- **Cosa entra**: codice nuovo imparato; ingegni e scorciatoie emersi eseguendo; frammenti da
+  copiare e incollare così come sono; errori di compilazione o eccezioni incontrati, con il
+  **testo esatto** del messaggio (Eclipse e `javac`), causa e rimedio; righe ⚠️ dove Lorenzo ha
+  sbagliato. Schemi delle prove d'esame solo **dopo** aver fatto quella prova.
+- **Dove**: nella sezione del modulo (`# <ID> — …`), creandola se è la prima volta; aggiungere le
+  voci nuove all'*Indice per bisogno* in cima.
+- **Forma**: tabelle e codice, non prosa. **Ogni frammento di codice è commentato riga per
+  riga** — cosa fa e perché lì — perché si usi e si interpreti senza rileggere la teoria. Valori
+  e messaggi verificati eseguendoli (jshell/terminale), non scritti a memoria.
+- Se la sessione non ha prodotto niente di consultabile, non si scrive nulla.
+
+Una riga in `stato/giornata.md`: `HH:MM · <COD> · prontuario: <cosa aggiunto>`.
+
+**8b. Glossario e troubleshooting** *(solo se serve)*
 
 - Termini nuovi → il glossario del corso, in `corsi/<COD>/`
 - Problemi tecnici risolti sull'ambiente → `troubleshooting_vm.md`, con sintomo, causa,

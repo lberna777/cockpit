@@ -251,6 +251,16 @@ mirato — ed è particolarmente adatto a `MATAP`, `CA`, `ELT`, `ELN` e `TLC`.
   è lacuna**: Lorenzo omette intenzionalmente ciò che ha già consolidato.
 - I pattern nuovi vanno aggiunti a `profilo/errori.md` nella stessa esecuzione.
 
+### Prontuario d'esame (`corsi/<COD>/appunti/prontuario_<COD>.md`)
+Per gli esami in cui si può consultare materiale (`FI2`: tutti i file ammessi). Serve a
+*rispondere* in prova, non a spiegare: tabelle *errore → causa → rimedio* con il testo esatto dei
+messaggi, *Indice per bisogno*, frammenti copia-incolla. `[2026-09-26, su richiesta di Lorenzo]`
+- **Cresce per sessione, non si scrive in blocco**: una sezione per modulo, **dopo** averlo fatto,
+  aggiornata a fine sessione (`/chiudi`, passo 8a). Entra solo ciò che è stato incontrato davvero;
+  gli schemi delle prove d'esame entrano quando si fanno le prove.
+- **Ogni frammento di codice è commentato riga per riga**, per l'uso e l'interpretazione immediati.
+- Valori e messaggi si verificano eseguendoli prima di scriverli.
+
 ### Guida-lab (`/lab`)
 Tre template, scelti dal tipo di verifica in `fonti.md` (dettaglio in `.claude/commands/lab.md`).
 
