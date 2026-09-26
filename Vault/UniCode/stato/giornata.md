@@ -1,9 +1,10 @@
-# Giornata 2026-09-25
+# Giornata 2026-09-26
 
 <!-- Claude appende qui, una riga per fatto: HH:MM · CODICE · fatto.
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
-20:05 · FI2 · ripasso 01 interrotto su richiesta dopo 2 domande (nessun marcatore: il ripasso resta dovuto). D.1 UML generalizzazione/implementazione: nomi e linee corretti, metà b) mancante (`implements` sì, `extends` no) — quinta ricorrenza della risposta a metà.
-20:08 · FI2 · decisione di metodo: ripassi non più a intervalli durante il percorso, ma **in blocco a ridosso dell'esame**. Priorità all'avanzamento: 02x, chiusura di 02, poi 03.
-20:10 · FI2 · giudizio di rilevanza di Lorenzo sui comandi `javac`/`jar`/`java -cp` del modulo 03: fuori esame (il compito è un progetto Eclipse). Confermato — resta in gioco solo il confine compilazione/esecuzione.
-20:12 · FI2 · revisione errori: 0 nuovi, 1 ricorrenza (risposta a metà).
+11:17 · sessione aperta, nessun evento di merito registrato
+11:18 · FI2 · 02x eseguita da Lorenzo (dichiarato «tutto bene»); proposta una scheda riassuntiva dei fatti del lab
+11:25 · FI2 · creato corsi/FI2/appunti/prontuario_FI2.md, cumulativo per l'esame (consultabile in prova): sezione 02x, valori verificati in jshell, messaggi Eclipse (ecj) + javac, pattern dalle 30 soluzioni d'esame
+11:25 · FI2 · tensione BOM della 02x risolta: "A".getBytes("UTF-16") = FE FF 00 41 → big-endian; la didascalia di sl. 24 («little endian») è imprecisa
+11:25 · FI2 · la guida-lab 02x cita numeri di slide che non corrispondono al PDF da 42 pagine (es. compatibilità reali: guida «sl. 21», PDF p. 15); il prontuario usa le pagine del PDF

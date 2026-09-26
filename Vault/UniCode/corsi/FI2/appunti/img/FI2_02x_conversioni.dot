@@ -1,0 +1,23 @@
+// FI2 02x — conversioni allarganti fra primitivi numerici (accettate senza cast)
+// Rigenera: dot -Tpng -Gdpi=150 FI2_02x_conversioni.dot -o FI2_02x_conversioni.png
+digraph conversioni {
+  rankdir=LR;
+  node [shape=box, style="rounded,filled", fillcolor="#eef3fb", fontname="DejaVu Sans", fontsize=13];
+  edge [fontname="DejaVu Sans", fontsize=10];
+
+  byte   [label="byte\n1 B"];
+  short  [label="short\n2 B"];
+  char   [label="char\n2 B\n(senza segno)"];
+  int    [label="int\n4 B"];
+  long   [label="long\n8 B"];
+  float  [label="float\n4 B"];
+  double [label="double\n8 B"];
+
+  byte -> short -> int;
+  char -> int;
+  int -> long;
+  long -> float [style=dashed, color="#c0392b", fontcolor="#c0392b", label="accettata, ma\nperde cifre"];
+  float -> double;
+
+  {rank=same; short; char;}
+}
