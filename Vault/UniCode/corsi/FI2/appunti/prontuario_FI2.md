@@ -32,15 +32,15 @@ tags: [FI2, appunti]
 
 | Devo… | Vai a |
 |---|---|
-| capire un errore «Type mismatch» / «lossy conversion» | [02x · A](#a--errore--causa--rimedio) |
-| sapere se un assegnamento fra numeri compila | [02x · C](#c--conversioni-fra-numerici-compila-o-no) |
-| capire perché un conto dà un valore assurdo (overflow, `Infinity`, `NaN`) | [02x · D](#d--aritmetica-le-trappole-che-compilano) |
-| confrontare due `double` | [02x · D](#d--aritmetica-le-trappole-che-compilano) |
-| arrotondare a intero | [02x · E](#e--arrotondare) |
-| trasformare una stringa in numero, o un numero in stringa | [02x · F](#f--stringa--numero) |
-| fare conti su caratteri (`'7'` → 7, lettera successiva) | [02x · G](#g--caratteri) |
-| scrivere un `main` e leggere gli argomenti | [02x · H](#h--main-e-argomenti) |
-| sapere quanto è grande / fin dove arriva un tipo | [02x · B](#b--i-tipi-primitivi) |
+| capire un errore «Type mismatch» / «lossy conversion» | 02x · A |
+| sapere se un assegnamento fra numeri compila | 02x · C |
+| capire perché un conto dà un valore assurdo (overflow, `Infinity`, `NaN`) | 02x · D |
+| confrontare due `double` | 02x · D |
+| arrotondare a intero | 02x · E |
+| trasformare una stringa in numero, o un numero in stringa | 02x · F |
+| fare conti su caratteri (`'7'` → 7, lettera successiva) | 02x · G |
+| scrivere un `main` e leggere gli argomenti | 02x · H |
+| sapere quanto è grande / fin dove arriva un tipo | 02x · B |
 
 ---
 
@@ -132,7 +132,7 @@ float f = (float) 3.54;        // double → float: perdita dichiarata, compila
 int t = (int) 3.9;             // t = 3: il cast TRONCA, non arrotonda
 int u = (int) -3.9;            // u = -3: tronca verso lo zero, non verso il basso
 short d = (short)(c + 1);      // parentesi esterne obbligatorie: c + 1 è un int
-// short d = (short) c + 1;    // ✗ il cast lega solo a c, la somma torna int
+// short d = (short) c + 1;    // SBAGLIATO: il cast lega solo a c, la somma torna int
 ```
 
 ## D — Aritmetica: le trappole che compilano

@@ -9,3 +9,5 @@
 11:25 · FI2 · tensione BOM della 02x risolta: "A".getBytes("UTF-16") = FE FF 00 41 → big-endian; la didascalia di sl. 24 («little endian») è imprecisa
 11:25 · FI2 · la guida-lab 02x cita numeri di slide che non corrispondono al PDF da 42 pagine (es. compatibilità reali: guida «sl. 21», PDF p. 15); il prontuario usa le pagine del PDF
 11:32 · FI2 · prontuario ridotto a ciò che la 02x ha fatto incontrare (tolti gli schemi dalle prove); aggiornamento del prontuario aggiunto a /chiudi (passo 8a) e a CLAUDE.md §8
+11:34 · — · pdf batch: 2 convertiti, 0 falliti.
+11:34 · FI2 · 02x svolta: stato aggiornato in corrente.md e percorso.md; prossimo passo verifica a voce dei tre punti deboli di 02, poi CHIUSO 02 e 02x

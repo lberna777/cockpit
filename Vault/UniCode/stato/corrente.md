@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-25
+**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-26
 
 > Un solo esame in fase attiva (`piano/piano_laurea.md`, regola 4). Gli altri tre di S1 —
 > `CALC`, `MATAP`, `ELT` — hanno cartella, fonti e percorso pronti, e restano in attesa.
@@ -23,38 +23,29 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   verificata a voce a libro chiuso: d.1 (`comp.operation`, chi fa cosa) buona dopo guida; d.2
   (`javac`/`java`) buona dopo guida; d.3 (EXE contro `.class`, EXE .NET) buona dopo guida; d.4
   (conversioni fra reali) **da riprendere** — verso invertito; d.5 (Unicode/UTF) parziale — `char`
-  e byte fusi. Pratica `02x` non svolta: non è chiudibile finché non lo è.
-- 🔶 **02x** «Esercitazione: tipi base» — aperto il 2026-09-21. Guida-lab generata in modalità
-  guidata da `02x` (42 sl.) + `02z` (7 sl.): `corsi/FI2/lezioni/guida_lab_02x_tipi_base.md`.
-  Nessuno startkit — il contratto è la lista di collaudo del docente (sl. 48, otto casi). Sei
-  paragrafi: `main`/argomenti, assegnamenti fra numerici, overflow e IEEE-754, caratteri e UTF,
-  primitivi contro classi-libreria, equazioni di 2° grado. Da svolgere; chiude 02 se l'esercizio
-  finale regge a freddo.
+  e byte fusi. Pratica `02x` svolta il 2026-09-26: manca solo la verifica a voce dei tre punti deboli
+  (vedi *Prossimo passo*).
+- 🔶 **02x** «Esercitazione: tipi base» — aperto il 2026-09-21, **svolto il 2026-09-26** (guida
+  `corsi/FI2/lezioni/guida_lab_02x_tipi_base.md`, drill §2–§5 ed equazioni di 2° grado; esito
+  dichiarato da Lorenzo: «tutto bene»). Dalla sessione è nato il **prontuario d'esame**
+  `corsi/FI2/appunti/prontuario_FI2.md`, sezione 02x (PDF in `pdf/appunti/`): da qui in avanti si
+  aggiorna a ogni fine sessione pratica (`/chiudi`, passo 8a). Si chiude insieme a 02.
 - Tutti gli altri: non aperti.
 - Materiale completo in `corsi/FI2/materiali/`; mappa in `corsi/FI2/percorso.md`.
 - Edizione del materiale: 2023/24, quella d'iscrizione.
 
 ## Prossimo passo esatto
 
-**Svolgere `corsi/FI2/lezioni/guida_lab_02x_tipi_base.md`**, nell'ordine che la guida indica:
-comincia dal **§2** (assegnamenti fra tipi numerici) e non dal §1, perché è il punto che ha fatto
-cadere la verifica del 16/09 e il ripasso del 21/09. Il drill del §2 sono 14 righe: per ciascuna,
-**A o R e la ragione scritta**, nella forma «il letterale è X, la variabile è Y, X→Y ⇒ …»; poi
-verifica in jshell. La regola: prima il **tipo del letterale dal suffisso**, poi il verso.
-
-Poi §3 (overflow: `short d = c+1;` rifiutato contro `b++` accettato), §4 (`char` contro byte
-sull'emoji: 2 `char`, 4 byte UTF-8), §5 (a chi si chiede il servizio), e infine **§6, le equazioni
-di 2° grado**: scritto a freddo, con gli otto casi di collaudo previsti in tabella *prima* di
-eseguirli, e le slide 49–51 (soluzione) chiuse fino al §7.
-
-Quando i drill sono fatti, ridomandare a voce, a libro chiuso, i tre punti deboli di 02:
+**Verifica a voce di 02, a libro chiuso** — i tre punti deboli rimasti dal 16/09, ora che la `02x`
+è svolta:
 - `float f = 3.54;` contro `double x = 3.54F;` — quale compila e perché, cast e Design Intent;
 - a `java` si passa **il nome della classe** col `main`, non il file `.class`;
-- U+1F608 occupa **2 `char`** (coppia surrogata), cioè 4 byte.
-Se tornano e `02x` è svolta: CHIUSO FI2 02 e CHIUSO FI2 02x. A seguire `03` (Deployment), poi `03x`
-e `LAB01`.
+- U+1F608 occupa **2 `char`** (coppia surrogata), cioè 4 byte in UTF-8.
 
-Da segnalare nella guida (§4b): la slide 34 annota `FE FF` come marcatore *little endian*, ma
+Se tornano: CHIUSO FI2 02 e CHIUSO FI2 02x. Poi `/appunti FI2 02` (un solo file per 02+02x,
+§8 di `CLAUDE.md`) e a seguire `03` (Deployment), poi `03x` e `LAB01`.
+
+Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
 `"A".getBytes("UTF-16")` dà `[-2, -1, 0, 65]`, cioè il BOM **big endian**, coerente con la slide 35
 («Everything in Java is stored in big-endian order»). Verificato il 2026-09-21: la slide 34 è
 imprecisa. Da sapere prima dell'orale.
