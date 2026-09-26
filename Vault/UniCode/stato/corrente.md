@@ -18,32 +18,23 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
 - ✅ **01** «Dai linguaggi alle infrastrutture software» — chiuso il 2026-09-16 (criterio *teoria*,
   verifica a voce a libro chiuso: d.2 parziale, d.3 buona, d.4 buona, black-box/white-box parziale
   recuperata con guida; `mvn package` saltata). Primo ripasso dovuto il 2026-09-19.
-- 🔶 **02** «Linguaggio e piattaforma» — in corso dal 2026-09-16. Lezione
-  (`corsi/FI2/lezioni/lezione_02_linguaggi_piattaforme.md`, PDF in `pdf/lezioni/`) studiata e
-  verificata a voce a libro chiuso: d.1 (`comp.operation`, chi fa cosa) buona dopo guida; d.2
-  (`javac`/`java`) buona dopo guida; d.3 (EXE contro `.class`, EXE .NET) buona dopo guida; d.4
-  (conversioni fra reali) **da riprendere** — verso invertito; d.5 (Unicode/UTF) parziale — `char`
-  e byte fusi. Pratica `02x` svolta il 2026-09-26: manca solo la verifica a voce dei tre punti deboli
-  (vedi *Prossimo passo*).
-- 🔶 **02x** «Esercitazione: tipi base» — aperto il 2026-09-21, **svolto il 2026-09-26** (guida
-  `corsi/FI2/lezioni/guida_lab_02x_tipi_base.md`, drill §2–§5 ed equazioni di 2° grado; esito
-  dichiarato da Lorenzo: «tutto bene»). Dalla sessione è nato il **prontuario d'esame**
-  `corsi/FI2/appunti/prontuario_FI2.md`, sezione 02x (PDF in `pdf/appunti/`): da qui in avanti si
-  aggiorna a ogni fine sessione pratica (`/chiudi`, passo 8a). Si chiude insieme a 02.
+- ✅ **02** «Linguaggio e piattaforma» e **02x** «Esercitazione: tipi base» — chiusi il 2026-09-26
+  **per decisione di Lorenzo**, dopo aver svolto la 02x: la verifica a voce finale è stata saltata
+  («stiamo ripassando troppo»). Inventario per il ripasso pre-esame, i tre punti deboli del 16/09:
+  `float f = 3.54` contro `double x = 3.54F` (verso e Design Intent); a `java` si passa il nome della
+  classe; U+1F608 = 2 `char`, 4 byte UTF-8. Dalla 02x è nato il **prontuario d'esame**
+  `corsi/FI2/appunti/prontuario_FI2.md`, da aggiornare a ogni fine sessione pratica (`/chiudi` 8a).
+  `/appunti FI2 02` (02+02x) resta da fare.
 - Tutti gli altri: non aperti.
 - Materiale completo in `corsi/FI2/materiali/`; mappa in `corsi/FI2/percorso.md`.
 - Edizione del materiale: 2023/24, quella d'iscrizione.
 
 ## Prossimo passo esatto
 
-**Verifica a voce di 02, a libro chiuso** — i tre punti deboli rimasti dal 16/09, ora che la `02x`
-è svolta:
-- `float f = 3.54;` contro `double x = 3.54F;` — quale compila e perché, cast e Design Intent;
-- a `java` si passa **il nome della classe** col `main`, non il file `.class`;
-- U+1F608 occupa **2 `char`** (coppia surrogata), cioè 4 byte in UTF-8.
-
-Se tornano: CHIUSO FI2 02 e CHIUSO FI2 02x. Poi `/appunti FI2 02` (un solo file per 02+02x,
-§8 di `CLAUDE.md`) e a seguire `03` (Deployment), poi `03x` e `LAB01`.
+**Installare Eclipse** (S01, `Strumenti-01-Eclipse intro.pdf`): *Eclipse IDE for Java Developers*,
+agganciato al JDK 21 già presente; primo workspace, un progetto con la classe `main` della 02x che
+gira da Eclipse passando gli argomenti con *Run Configurations*. Poi `03` (Deployment), `03x`,
+`LAB01`.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
 `"A".getBytes("UTF-16")` dà `[-2, -1, 0, 65]`, cioè il BOM **big endian**, coerente con la slide 35

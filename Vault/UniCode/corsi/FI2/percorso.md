@@ -21,8 +21,8 @@ codice che compila e passa i test — `CLAUDE.md` §7.2)
 | S04 | Installazione JavaFX                                    | `Strumenti-04-Installazione JavaFX.pdf`                                  | ⬜     |
 | S05 | Produrre il JAR eseguibile                              | `Come produrre il JAR eseguibile.pdf`                                    | ⬜     |
 | 01  | Dai linguaggi alle infrastrutture software              | `01-x1-Intro.pdf`                                                        | ✅    |
-| 02  | Linguaggio e piattaforma                                | `02-x1-Linguaggi e piattaforme.pdf`                                      | 🔶    |
-| 02x | Esercitazione: tipi base                                | `02x-x1-Esercitazione Tipi base.pdf`                                     | 🔶 svolta 2026-09-26, chiude con 02 |
+| 02  | Linguaggio e piattaforma                                | `02-x1-Linguaggi e piattaforme.pdf`                                      | ✅    |
+| 02x | Esercitazione: tipi base                                | `02x-x1-Esercitazione Tipi base.pdf`                                     | ✅    |
 | 02z | Addendum: `main` in Java 21                             | `02z-Addendum-Main in Java21.pdf`                                        | ⬜     |
 | 03  | Deployment                                              | `03-x1-Deployment.pdf`                                                   | ⬜     |
 | 03x | Esercitazione: JAR                                      | `03x-x1-Esercitazione Jar.pdf`                                           | ⬜     |

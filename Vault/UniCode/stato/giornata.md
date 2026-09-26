@@ -11,3 +11,6 @@
 11:32 · FI2 · prontuario ridotto a ciò che la 02x ha fatto incontrare (tolti gli schemi dalle prove); aggiornamento del prontuario aggiunto a /chiudi (passo 8a) e a CLAUDE.md §8
 11:34 · — · pdf batch: 2 convertiti, 0 falliti.
 11:34 · FI2 · 02x svolta: stato aggiornato in corrente.md e percorso.md; prossimo passo verifica a voce dei tre punti deboli di 02, poi CHIUSO 02 e 02x
+11:39 · FI2 · 02 e 02x chiusi per decisione di Lorenzo («stiamo ripassando troppo»): verifica a voce dei tre punti deboli saltata, messa nell'inventario del ripasso pre-esame. CHIUSO FI2 02
+11:39 · FI2 · CHIUSO FI2 02x
+11:39 · FI2 · piano: prossimo passo installare Eclipse (S01), poi 03 → 03x → LAB01
