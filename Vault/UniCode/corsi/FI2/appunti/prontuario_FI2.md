@@ -45,6 +45,11 @@ tags: [FI2, appunti]
 | lanciare test fatti di `assert` (`-ea`); capire le X rosse iniziali | 2 · 1.1 | LAB02 |
 | scrivere una classe-valore immutabile: costruttori, getter, `equals`, `toString` | 3.8 | LAB02 |
 | usare `mcd` / scrivere `mcm` | 3.8 | LAB02 |
+| operazioni che restituiscono un oggetto nuovo (`sum`, `sub`, `mul`, `div`, `reciprocal`) | 3.9 | LAB03 |
+| capire l'mcm e portare due frazioni allo stesso denominatore | 3.9 | LAB03 |
+| scrivere un `compareTo` che restituisce 0 / 1 / −1 | 3.9 | LAB03 |
+| dividere due `int` e ottenere un `double` | 3.9 · 1.3 | LAB03 |
+| capire `UnsupportedClassVersionError` al lancio | 2 · 1.2 | LAB03 |
 
 ---
 
@@ -79,6 +84,7 @@ Compila tutto, esplode eseguendo — in console, in rosso.
 | `AssertionError` … `at FrazioneTest.main(FrazioneTest.java:28)` | con `-ea`, un `assert` del test è falso: è il **failure** di un test fatto di `assert` | apri la riga indicata, leggi cosa si aspetta, prova quel caso a mano |
 | ⚠️ `ArithmeticException: / by zero` … `at MyMath.mcd` | `mcd(0, n)`: Euclide scambia e fa `n % 0` [LAB02 sl. 9] | nel chiamante, gestire il numeratore 0 **prima** di chiamare `mcd`; non modificare `mcd` |
 | `NumberFormatException: For input string: "…"` | `parseInt`/`parseDouble` su stringa non valida — **le virgolette nel messaggio mostrano la stringa esatta**: guardale per vedere spazi e virgole | controllare la stringa prima di convertirla [02x sl. 35] — vedi 3.5 |
+| ⚠️ `LinkageError durante il caricamento della classe principale X` · `java.lang.UnsupportedClassVersionError: X has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0` | al lancio, prima di eseguire qualsiasi riga: Eclipse ha compilato per una Java **più nuova** del JRE che esegue. Versione class file = Java + 44: 65 = Java 21, 69 = Java 25 | compliance del compilatore = versione del JRE → §2 |
 
 ## 1.3 Errori silenziosi
 
@@ -93,6 +99,9 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | test fatti di `assert`: console vuota anche col codice sbagliato | manca `-ea`: senza, gli `assert` **non vengono eseguiti** | 2 |
 | ⚠️ oggetto con campi a `0` (`new Frazione(0, -5)` → `0/0`) | catena `if` / `else if` senza `else`: per un input nessun ramo assegna, e i campi restano al default (`0`). Java non lo segnala, perché i campi sono già inizializzati | 3.8 |
 | ⚠️ test verdi ma metodo sbagliato (`mcm(4,6)` = 22) | **nessun test lo copre**: verde vuol dire solo che i casi del test passano | provare a mano 2–3 casi, compreso lo 0 |
+| ⚠️ `getDouble()` dà `0.0` per ogni frazione fra −1 e 1 | `double v = num / den;`: `int / int` è divisione **intera**, e la conversione a `double` arriva dopo, sul risultato già troncato | `(double) num / den` — 3.9 |
+| ⚠️ somma via `mcm` che «perde» un addendo (`1/4 + 1/8` = `1/8`) | fattore scritto al contrario: `den / mcm` invece di `mcm / den`; fra `int` fa 0 | 3.9 |
+| ⚠️ test verde **per caso** (`sub`, `compareTo`) | due errori che si compensano sul caso del test, o un caso che non distingue (`3/12` e `1/4` → entrambe `0.0`) | aggiungere un caso scelto da te: per `compareTo` sia `1` sia `−1` |
 
 ---
 
@@ -101,6 +110,7 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | Problema | Rimedio | Incontrato |
 |---|---|---|
 | Al primo avvio: il JRE selezionato non supporta il *compliance level* 25 | *Window → Preferences → Java → Compiler* → *Compiler compliance level* = **21** [S01 p. 27] | Eclipse 2026-09 + JDK 21, 26/09 |
+| ⚠️ Startkit importato: al Run `UnsupportedClassVersionError` (class file 69 vs 65) | lo startkit non fissa la compliance e prende quella di default (25), ma il JRE è 21. **Workspace**: *Window → Preferences → Java → Compiler* → **21** → *Apply and Close* → rebuild **Yes** (o *Project → Clean…*). Solo il progetto: tasto destro → *Properties → Java Compiler* → *Enable project specific settings* → 21 | LAB03, 30/09 |
 
 | Import dello startkit: **Next** non si attiva | è la seconda pagina del wizard: il pulsante è **Finish**. «Select root directory» → Browse → se il riquadro *Projects* è vuoto, **Refresh** → **spunta** il progetto → Finish [LAB02 sl. 16–18] | LAB02, 30/09 |
 | Procedura completa (si perdono punti se manca il rename) | scompatta lo zip → **rinomina la cartella** → *File → Import → General → Existing Projects into Workspace* → *Refactor → Rename* del **progetto**, con l'aggiornamento dei riferimenti spuntato [LAB02 sl. 15–22] | LAB02, 30/09 |
@@ -385,6 +395,83 @@ public static int mcm(int a, int b) {
 
 `mcd(a, b)` (Euclide, già nello startkit) vuole **naturali, non 0** [LAB02 sl. 9]: passare
 `Math.abs(…)` e gestire lo 0 prima (§1.2). `a * b` può andare in overflow prima della divisione (§3.3).
+
+
+## 3.9 Operazioni che restituiscono un oggetto nuovo (LAB03)
+
+**L'mcm, dalla base.** Due frazioni si sommano solo se i pezzi hanno la **stessa grandezza**, cioè
+lo stesso denominatore. `mcm(a, b)` è il più piccolo numero in cui stanno esattamente sia `a` sia `b`.
+
+| Passo | `4` e `6` | Perché |
+|---|---|---|
+| scomponi | `4 = 2·2`, `6 = 2·3` | |
+| moltiplica | `4·6 = 24 = 2·2·2·3` | il `2` **comune** compare due volte, una per numero |
+| dividi per l'mcd | `24 / mcd(4,6) = 24 / 2 = 12 = 2·2·3` | l'mcd *è* la parte comune: la tieni una volta sola |
+
+Da qui `mcm(a, b) = a·b / mcd(a, b)` (§3.8). **Portare `1/4` in dodicesimi**: quante volte il 4 sta
+nel 12? `12 / 4 = 3` → `1/4 = (1·3)/(4·3) = 3/12`; il valore non cambia perché moltiplichi sopra e
+sotto per lo stesso numero. Il fattore è **`mcm / den`**: il multiplo diviso il denominatore, mai il
+contrario (`4 / 12` fra `int` fa `0`). Prova: `1/4 + 1/6` → mcm 12 → `3/12 + 2/12 = 5/12`.
+
+Nella forma del docente, verificata coi test di LAB03 [LAB03 sl. 4–7]. Il perché:
+`esame_FI2/svolti/LAB03_Frazione/confronto_LAB03.md`.
+
+```java
+public Frazione sum(Frazione f) {                         // this + f, SENZA modificare né this né f
+    int mcm = MyMath.mcm(f.getDen(), this.getDen());      // denominatore comune (i den sono > 0)
+    int n = ((mcm / this.getDen()) * this.getNum())       // numeratore di this portato a mcm: fattore mcm/den
+          + ((mcm / f.getDen()) * f.getNum());            // idem per f
+    return (new Frazione(n, mcm)).minTerm();              // oggetto NUOVO, ridotto (sl. 4: «ridotto ai minimi termini»)
+}
+
+public Frazione sub(Frazione f) {                         // this − f: nell'ordine in cui si legge
+    int mcm = MyMath.mcm(f.getDen(), den);                // dentro la classe si può usare anche il campo: den
+    int n = ((mcm / den) * num) - ((mcm / f.getDen()) * f.getNum()); // parte di THIS a sinistra, di f a destra
+    return new Frazione(n, mcm).minTerm();
+}
+
+public Frazione mul(Frazione f) {                         // prodotto: numeratori × numeratori, den × den
+    int n = this.getNum() * f.getNum();
+    int d = this.getDen() * f.getDen();
+    return new Frazione(n, d).minTerm();                  // il costruttore sistema il segno
+}
+
+public Frazione reciprocal() {                            // scambia num e den
+    return new Frazione(getDen(), getNum()).minTerm();    // -2/3 → Frazione(3, -2): il costruttore rimette il segno sopra → -3/2
+}                                                         // ⚠️ reciproco di 0/n → den 0: «per ora» non gestito [sl. 9]
+
+public Frazione div(Frazione f) {                         // dividere = moltiplicare per il reciproco
+    return mul(new Frazione(f.getDen(), f.getNum())).minTerm(); // RIUSA mul: nessun conto riscritto (il minTerm finale è ridondante)
+}
+
+public int compareTo(Frazione f) {                        // 0 se uguali, 1 se this > f, −1 se this < f [sl. 5]
+    int thisValue = this.getNum() * f.getDen();           // a/b ? c/d  ⇔  a·d ? c·b ...
+    int otherValue = f.getNum() * this.getDen();          // ... valido SOLO perché b, d > 0 (lo garantisce il costruttore)
+    if (thisValue == otherValue) return 0;                // stessa formula di equals: compareTo==0 ⇔ equals, per costruzione
+    else return thisValue > otherValue ? 1 : -1;          // interi: esatto, niente virgola mobile
+}
+
+public double getDouble() {
+    return (double) getNum() / (double) getDen();         // cast PRIMA della /: basta un operando double
+}                                                         // ⚠️ (double)(num / den) o double v = num / den → 0.0 per 3/12
+```
+
+| Espressione (`int` 3 e 12) | Valore | |
+|---|---|---|
+| `3 / 12` | `0` | divisione intera |
+| `(double) 3 / 12` | `0.25` | il cast lega a `3`, poi divisione reale |
+| `(double) (3 / 12)` | `0.0` | il cast arriva dopo la divisione intera |
+| `3.0 / 12` | `0.25` | un letterale `double` basta |
+
+- ⚠️ **Il fattore è `mcm / den`** (verso: `profilo/errori.md` pattern 5). Controllo: `1/4 + 1/8`
+  deve dare `3/8`.
+- ⚠️ **Il test non basta**: `FrazioneTest` controlla `compareTo` solo sul caso `0` e `sub` su un
+  caso dove due errori si compensano. Aggiungi `1/2` contro `1/3` (→ `1`), il contrario (→ `−1`),
+  `1/2 − 1/3` (→ `1/6`).
+- `sum` alternativa, senza mcm (sl. 6): `n = num·f.den + den·f.num`, `d = den·f.den`, poi `minTerm()`.
+  All'esame si usa il metodo che chiede il testo.
+- Dentro la classe `f.den` compila anche se `den` è `private`: `private` protegge **dalle altre
+  classi**, non dagli altri oggetti della stessa classe [sl. 6].
 
 ---
 

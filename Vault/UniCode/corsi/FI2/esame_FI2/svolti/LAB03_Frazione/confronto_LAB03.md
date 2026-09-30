@@ -118,6 +118,6 @@ della divisione: era il mio errore (`double val = num / den` → `0.0`).
   tronca a 0 senza protestare.
 - **Un test verde può essere verde per caso**: il mio primo `sub` passava perché due errori si
   compensavano, `compareTo` passava con `getDouble` rotto perché `3/12` e `1/4` davano entrambe
-  `0.0` (pattern 2). Un caso in più, scelto da me, li avrebbe trovati.
+  `0.0`. Un caso in più, scelto da me, li avrebbe trovati.
 - **Riusare i metodi della classe** (`div` → `mul`) e **nomi che dicono la provenienza**
   (`nThis`, `nF`) invece di `n1`, `n2`.

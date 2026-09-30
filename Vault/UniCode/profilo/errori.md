@@ -117,6 +117,14 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   (sl. 78, 82–83). Sulla base del verso invertito tutta d.4 è caduta, incluso il punto che il verso
   giusto rende ovvio: **un solo file basta *proprio perché* non è autocontenuto**. Evidenza:
   `stato/giornata.md` del 2026-09-21, ripasso 01 d.4.
+- [2026-09-30] FI2 LAB03: due versi invertiti nello stesso codice. In `sumWithMcm` e `sub` il
+  fattore di conversione scritto `den/mcm` invece di `mcm/den` (su `1/4 + 1/8`: `4/8` fra `int` fa 0,
+  risultato `1/8`); in `sub` in più `n1` (da `f`) − `n2` (da `this`), cioè `f − this` invece di
+  `this − f`, con nomi `n1`/`n2` che nascondono la provenienza. Nessuno dei due versi era derivato
+  da un caso: il conto a mano su `1/4 + 1/8` li avrebbe mostrati entrambi. A `/chiudi` Lorenzo
+  dichiara di non avere chiara la matematica dell'mcm, che è la base da cui il verso si deriva.
+  Evidenza: codice letto alle 17:26 (`int n2 = ((this.den/mcm)*this.num);`, `new Frazione(n1-n2,
+  mcm)`); `stato/giornata.md` 17:26 e 18:02; `svolti/LAB03_Frazione/confronto_LAB03.md` §2.
 
 ---
 
@@ -242,6 +250,27 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   riga, *«questo lo so già?»* (Lorenzo: «scrivo ancora come su C») → correzione: togliere ciò che è
   già noto, chiarezza prima della brevità. Da cercare nei prossimi confronti. Evidenza:
   `confronto_LAB02.md` §1, §3, §5; `stato/giornata.md` 16:09.
+- [2026-09-30] `getDouble` scritto `double val = this.num / this.den;` → `0.0` per ogni frazione
+  fra −1 e 1 → causa: crede che il tipo della variabile a sinistra decida la divisione; invece il
+  tipo di `/` lo decidono gli operandi, e `int / int` tronca prima dell'assegnamento (stessa
+  famiglia della riga del 2026-09-16 sul tipo del letterale: il tipo di un'espressione si legge
+  dagli operandi, non dalla destinazione). La stessa troncatura silenziosa ha nascosto `den/mcm`
+  in `sumWithMcm` → correzione: cast su un operando **prima** della divisione, `(double) num / den`.
+  Correzione data in chat su richiesta. Evidenza: codice letto alle 17:47; output di `MainFrazione`
+  «valore reale associato a : 3/12 è 0.0»; `confronto_LAB03.md` §5.
+- [2026-09-30] mcm, seconda sessione su due nello stesso giorno: in LAB02 formula `a*b - mcd`, in
+  LAB03 fattore di conversione `den/mcm` → causa dichiarata da Lorenzo a `/chiudi`: «non mi è stata
+  troppo chiara la matematica alla base del mcm […] da essermela scordata» — l'aritmetica di base
+  manca, e senza di lei né la formula né il verso si possono derivare → correzione: `mcm = a·b/mcd`
+  perché il prodotto conta due volte i fattori comuni; il fattore per portare `n/den` al
+  denominatore `mcm` è `mcm/den`, «quante volte `den` sta in `mcm`»; verificare sempre su 4 e 6
+  (mcm 12, fattori 3 e 2). Da riprendere prima di rifare LAB02–03 a freddo. Evidenza:
+  `stato/giornata.md` 15:59 e 18:02; trascrizione LAB03, risposta a `/chiudi`.
+- [2026-09-30] Ricorrenza delle ridondanze, nel LAB successivo allo stesso richiamo: `div` rifà a
+  mano il prodotto invece di riusare `mul`, e costruisce `f.reciprocal()` due volte; `compareTo`
+  calcola `getDouble()` quattro volte e sottrae prima di confrontare. Criterio da aggiungere a
+  «questo lo so già?»: *«un metodo della classe lo fa già?»*. Evidenza: `confronto_LAB03.md` §3–§4;
+  `svolti/LAB03_Frazione/src/Frazione.java`.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
