@@ -61,6 +61,16 @@ ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazion
   il dato decisivo, il suffisso `F` presente in una riga sola, non è stato usato benché la domanda
   chiedesse esplicitamente il tipo del letterale. Evidenza: trascrizione del 2026-09-16 pomeriggio;
   `stato/giornata.md`, verifica 02 d.4.
+- [2026-09-30] FI2 LAB02: costruttore di `Frazione` dato per finito sulla console vuota di
+  `FrazioneTest` («fatto, console vuota, controlla tu»), ma `new Frazione(0, -5)` dava `0/0`. Il caso
+  numeratore 0 lo aveva sollevato lui stesso pochi minuti prima («e le frazioni con 0 al
+  numeratore?») e non l'ha provato sul proprio codice: test verde preso come prova di correttezza.
+  Evidenza: `stato/giornata.md` 15:46; trascrizione del 2026-09-30.
+- [2026-09-30] FI2 LAB02: `mcm` scritto `a*b - mcd(a,b)` e consegnato senza provarlo sull'esempio
+  appena svolto in chat (4 e 6 → 12; la sua formula dà 22) né sulla coppia di verifica proposta (6 e
+  9 → 18); `FrazioneTest` verde perché nessun test usa `mcm`. Nella spiegazione di Claude «togli la
+  parte comune» era ambiguo, ma i numeri per accorgersene erano sotto mano. Evidenza:
+  `stato/giornata.md` 15:59; `svolti/LAB02_Frazione/confronto_LAB02.md` §7.
 
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
@@ -207,6 +217,31 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   pure solido, con la motivazione giusta. Supera l'occorrenza del 2026-09-16 (trasversale n. 1).
 - **[2026-09-21] Superato — commit e push.** Ripasso 01 d.1: distinzione tenuta separata e formulata
   correttamente senza guida. Supera l'occorrenza del 2026-09-15 (trasversale n. 1).
+- [2026-09-30] Catena `if (i > 0) … else if (i < 0)` nel costruttore, senza ramo per `i == 0` →
+  causa: i rami non coprono tutti i valori dell'input, e Java non lo segnala perché i **campi**
+  hanno già il default `0` (una variabile locale non compilerebbe) → correzione: il costruttore
+  deve lasciare l'oggetto valido per ogni input; ciò che è uguale in tutti i rami si assegna fuori
+  dai rami (`this.den = Math.abs(den)`), nei rami solo ciò che cambia (forma del docente con
+  `negativo ? … : …`). Evidenza: trascrizione del 2026-09-30, versione con `i > 0`;
+  `confronto_LAB02.md` §1.
+- [2026-09-30] Stampa dentro `equals` (`System.out.print(… + " sono equivalenti")`) → causa: il
+  metodo che *risponde* vero/falso usato anche per *comunicare*, per cui nel `Main` la frase
+  compariva due volte → correzione: un predicato restituisce il `boolean` e basta; la stampa la fa
+  il chiamante. Riconosciuto da Lorenzo sul suggerimento di Claude. Evidenza: trascrizione del
+  2026-09-30, prima versione di `Frazione.java`.
+- [2026-09-30] Proposto di far restituire 1 a `mcd` quando il numeratore è 0, dicendo che `0/5`
+  ridotta «fa sempre 1» → causa: valore della frazione (0), denominatore normalizzato (1) e mcd
+  (`mcd(0,5) = 5`) fusi in un solo «1»; e il crash si toglie falsando la funzione di libreria
+  condivisa invece di proteggere la chiamata → correzione: caso speciale gestito nel chiamante
+  (`minTerm`, prima di chiamare `mcd`); una funzione di libreria non si fa mentire per evitare
+  un'eccezione. Evidenza: trascrizione del 2026-09-30 («fa sempre 1 no? quindi un controllo in mcd
+  che dia 1 se num = 0?»).
+- [2026-09-30] Ridondanze nel codice: `if (cond) return true; else return false;` al posto di
+  `return cond;`; `this.den = Math.abs(den)` ripetuto in entrambi i rami; `Math.abs` sul
+  denominatore in `minTerm`, già garantito positivo dal costruttore → causa: non si chiede, riga per
+  riga, *«questo lo so già?»* (Lorenzo: «scrivo ancora come su C») → correzione: togliere ciò che è
+  già noto, chiarezza prima della brevità. Da cercare nei prossimi confronti. Evidenza:
+  `confronto_LAB02.md` §1, §3, §5; `stato/giornata.md` 16:09.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

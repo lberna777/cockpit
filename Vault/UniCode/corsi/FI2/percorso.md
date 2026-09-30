@@ -27,9 +27,9 @@ codice che compila e passa i test — `CLAUDE.md` §7.2)
 | 03  | Deployment                                              | `03-x1-Deployment.pdf`                                                   | ⬜     |
 | 03x | Esercitazione: JAR                                      | `03x-x1-Esercitazione Jar.pdf`                                           | ⬜     |
 | 04a | Componenti software in C                                | `04a-x1-Componenti sw in C.pdf`                                          | ⬜     |
-| 04b | Classi e oggetti                                        | `04b-x1-Classi e oggetti.pdf`                                            | ⬜     |
+| 04b | Classi e oggetti                                        | `04b-x1-Classi e oggetti.pdf`                                            | 🔶     |
 | 05  | Riferimenti                                             | `05-x1-Riferimenti.pdf`                                                  | ⬜     |
-| 06  | Stringhe e codice fiscale                               | `06-x1-Stringhe e codice fiscale.pdf`                                    | ⬜     |
+| 06  | Stringhe e codice fiscale                               | `06-x1-Stringhe e codice fiscale.pdf`                                    | 🔶     |
 | 07  | Array                                                   | `07-x1-Array.pdf`                                                        | ⬜     |
 | 07x | Array in Java venendo dal C                             | `07x-x1-Esercitazione Array Java venendo dal C.pdf`                      | ⬜     |
 | 08  | Package e namespace                                     | `08-x1-Package e namespace.pdf`                                          | ⬜     |

@@ -202,6 +202,10 @@ Un modulo è chiuso — e solo allora entra nel tracker — quando:
 - **teoria**: Lorenzo ha risposto alle domande di autoverifica senza consultare gli appunti.
   Per `FI2` non si usa più `[2026-09-30]`: i moduli di teoria si chiudono insieme alla voce
   pratica (LAB, esercitazione, prova) che li richiede, quando i suoi test passano.
+- **`FI2`, voci pratiche** `[2026-09-30, decisione di Lorenzo]`: un LAB o un esercizio è chiuso
+  quando i suoi test passano, **anche se svolto con guida**. La distinzione svolto/chiuso non si
+  usa; si annota invece «guidato» in `stato/corrente.md`, e quelle voci sono l'inventario da
+  rifare a freddo nella preparazione all'esame.
 - **progetto**: il pezzo di progetto compila, gira e fa ciò che deve.
 
 ### 7.3 Orientamento alle prove
@@ -296,7 +300,10 @@ scheda di una pagina + accompagnamento in chat, teoria solo quando la voce la ri
   solo a freddo (§7.2).
 - Suggerimenti a gradini nascosti (domanda → idea); frammenti di codice solo sui costrutti nuovi
   dei primi laboratori, presi dalle slide.
-- La soluzione del docente si apre dopo i test verdi, per il confronto.
+- La soluzione del docente si apre dopo i test verdi, per il confronto. Claude lo scrive in
+  `esame_FI2/svolti/<ID>_<Nome>/confronto_<ID>.md`: per ogni differenza i due frammenti, quale è
+  *migliore* e perché, e *da seguire* — **sempre la versione del docente**; all'esame vince
+  comunque il testo del compito. `[2026-09-30, su richiesta di Lorenzo]`
 - I laboratori in forma di compito e le prove si fanno in modalità **compito**: nessun aiuto.
 
 ### Anti-pattern

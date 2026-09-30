@@ -41,6 +41,10 @@ tags: [FI2, appunti]
 | trasformare una stringa in numero, o un numero in stringa | 3.5 | 02x |
 | fare conti su caratteri (`'7'` → 7, lettera successiva) | 3.6 | 02x |
 | scrivere un `main` e leggere gli argomenti | 3.7 | 02x |
+| importare lo startkit, rinominare il progetto | 2 | LAB02 |
+| lanciare test fatti di `assert` (`-ea`); capire le X rosse iniziali | 2 · 1.1 | LAB02 |
+| scrivere una classe-valore immutabile: costruttori, getter, `equals`, `toString` | 3.8 | LAB02 |
+| usare `mcd` / scrivere `mcm` | 3.8 | LAB02 |
 
 ---
 
@@ -62,6 +66,8 @@ terminale. **Stessa causa, parole diverse.**
 | `Type mismatch: cannot convert from int to char` | `… lossy conversion from int to char` | `ch + 1` è un `int` | `(char)(ch + 1)`, oppure `ch++` (compila: ha il cast incorporato) |
 | `Type mismatch: cannot convert from String to int` | `String cannot be converted to int` | gli argomenti del `main` sono stringhe, non numeri | `Integer.parseInt(s)` / `Double.parseDouble(s)` — vedi 3.5 |
 | `The literal 3000000000 of type int is out of range` | `integer number too large` | un letterale senza `L` è `int`, e non arriva a 3·10⁹ | `3000000000L` |
+| `Frazione cannot be resolved to a type` | `cannot find symbol` … `symbol: class Frazione` | la classe non esiste ancora: sono le **X rosse** normali dello startkit | scriverla col nome **esatto** usato nei test, nel package dei test |
+| `This method must return a result of type int` | `missing return statement` | metodo dello startkit con solo `// da fare`, o un ramo senza `return` | un `return` su **ogni** strada del metodo |
 
 ## 1.2 Eccezioni a run-time
 
@@ -70,6 +76,8 @@ Compila tutto, esplode eseguendo — in console, in rosso.
 | Eccezione | Quando | Rimedio |
 |---|---|---|
 | `ArithmeticException: / by zero` | divisione o `%` fra **interi** per zero. Fra reali **non** succede: dà `Infinity`/`NaN` [02x sl. 21–22] | controllare il divisore prima |
+| `AssertionError` … `at FrazioneTest.main(FrazioneTest.java:28)` | con `-ea`, un `assert` del test è falso: è il **failure** di un test fatto di `assert` | apri la riga indicata, leggi cosa si aspetta, prova quel caso a mano |
+| ⚠️ `ArithmeticException: / by zero` … `at MyMath.mcd` | `mcd(0, n)`: Euclide scambia e fa `n % 0` [LAB02 sl. 9] | nel chiamante, gestire il numeratore 0 **prima** di chiamare `mcd`; non modificare `mcd` |
 | `NumberFormatException: For input string: "…"` | `parseInt`/`parseDouble` su stringa non valida — **le virgolette nel messaggio mostrano la stringa esatta**: guardale per vedere spazi e virgole | controllare la stringa prima di convertirla [02x sl. 35] — vedi 3.5 |
 
 ## 1.3 Errori silenziosi
@@ -82,6 +90,9 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | `x == y` falso fra due `double` che «dovrebbero» essere uguali | errore numerico | 3.3 |
 | `(int) 3.9` dà `3` | il cast **tronca**, non arrotonda | 3.4 |
 | `Math.rint(2.5)` dà `2.0` | `rint` arrotonda al pari | 3.4 |
+| test fatti di `assert`: console vuota anche col codice sbagliato | manca `-ea`: senza, gli `assert` **non vengono eseguiti** | 2 |
+| ⚠️ oggetto con campi a `0` (`new Frazione(0, -5)` → `0/0`) | catena `if` / `else if` senza `else`: per un input nessun ramo assegna, e i campi restano al default (`0`). Java non lo segnala, perché i campi sono già inizializzati | 3.8 |
+| ⚠️ test verdi ma metodo sbagliato (`mcm(4,6)` = 22) | **nessun test lo copre**: verde vuol dire solo che i casi del test passano | provare a mano 2–3 casi, compreso lo 0 |
 
 ---
 
@@ -91,8 +102,13 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 |---|---|---|
 | Al primo avvio: il JRE selezionato non supporta il *compliance level* 25 | *Window → Preferences → Java → Compiler* → *Compiler compliance level* = **21** [S01 p. 27] | Eclipse 2026-09 + JDK 21, 26/09 |
 
-*Si riempie con LAB01–LAB02: importare lo startkit, rinominare il progetto, lanciare i test,
-commentare i test non ancora pertinenti.*
+| Import dello startkit: **Next** non si attiva | è la seconda pagina del wizard: il pulsante è **Finish**. «Select root directory» → Browse → se il riquadro *Projects* è vuoto, **Refresh** → **spunta** il progetto → Finish [LAB02 sl. 16–18] | LAB02, 30/09 |
+| Procedura completa (si perdono punti se manca il rename) | scompatta lo zip → **rinomina la cartella** → *File → Import → General → Existing Projects into Workspace* → *Refactor → Rename* del **progetto**, con l'aggiornamento dei riferimenti spuntato [LAB02 sl. 15–22] | LAB02, 30/09 |
+| *Refactor → Rename* rifiuta il nome | il progetto sta dentro il workspace ed esiste già una **cartella con quel nome** (quella rinominata a mano), dove Eclipse vorrebbe spostarlo → dare al progetto un nome **diverso** da quello della cartella; Eclipse rinomina anche la cartella | LAB02, 30/09 |
+| Il nome che conta | quello scritto in `.project` (`<name>…</name>`), che Eclipse aggiorna col Refactor; rinominare la cartella a mano non lo cambia | LAB02, 30/09 |
+| Test fatti di `assert` in un `main` (non JUnit) | tasto destro sulla classe di test → *Run As → Run Configurations… → Arguments → VM arguments* = `-ea` → Run; poi basta ▶. Console vuota = tutti passati, **solo con `-ea`** [LAB02 sl. 12, 24–25] | LAB02, 30/09 |
+| X rosse appena importato | normali: mancano le classi e i metodi da scrivere [LAB02 sl. 23] | LAB02, 30/09 |
+| Collaudo | **metodo per metodo**: commenta i blocchi di test non ancora pertinenti e scommentali man mano, per evitare «errori in cascata» [LAB02 sl. 23]. Un `assert` fallito ferma il `main`: quelli dopo non sono ancora stati controllati | LAB02, 30/09 |
 
 ---
 
@@ -307,6 +323,68 @@ public class Prog {                                  // in Java il main sta semp
 - Java 21 (preview) accetta anche `void main()` senza classe né argomenti, compilando con
   `javac --enable-preview --source 21`. Ordine di ricerca: statico con argomenti → statico senza
   → d'istanza con argomenti → d'istanza senza [02z, sl. 7]. All'esame usa la forma classica.
+
+## 3.8 Classe-valore immutabile (ADT)
+
+Lo schema della `Frazione` di LAB02, **nella forma del docente**, verificato coi test del LAB.
+Il perché di ogni scelta: `esame_FI2/svolti/LAB02_Frazione/confronto_LAB02.md`.
+
+```java
+public class Frazione {                                   // ADT "valore": una volta creata non cambia più
+    private int num, den;                                 // private: da fuori si legge solo coi getter
+
+    public Frazione(int num, int den) {                   // costruttore PRIMARIO: gestisce il caso generale
+        boolean negativo = num * den < 0;                 // segni opposti ⇔ prodotto negativo (0 → non negativo)
+        this.num = negativo ? -Math.abs(num) : Math.abs(num); // il segno sta SOLO nel numeratore
+        this.den = Math.abs(den);                         // fuori da ogni ramo: sempre assegnato, sempre > 0
+    }
+
+    public Frazione(int num) {                            // costruttore AUSILIARIO: gli interi
+        this(num, 1);                                     // delega al primario; dev'essere la prima istruzione
+    }
+
+    public int getNum() { return num; }                   // accessor: niente set*, l'oggetto è immutabile
+    public int getDen() { return den; }
+
+    public boolean equals(Frazione f) {                   // "uguale" = equivalente: n/m = p/q ⇔ n·q = m·p
+        return f.getNum() * getDen() == f.getDen() * getNum(); // il confronto È già un boolean: niente if
+    }
+
+    public Frazione minTerm() {                           // restituisce una frazione NUOVA, this non cambia
+        if (getNum() == 0) return new Frazione(getNum(), getDen()); // mcd(0, n) → / by zero: esci prima
+        int mcd = MyMath.mcd(Math.abs(getNum()), getDen());  // mcd vuole naturali; den è già > 0
+        return new Frazione(getNum() / mcd, getDen() / mcd);
+    }
+
+    @Override                                             // ridefinisce il toString che ogni classe ha già
+    public String toString() {
+        return getDen() == 1 ? "" + getNum() : getNum() + "/" + getDen(); // "4" se intero, altrimenti "n/d"
+    }
+}
+```
+
+- Costruttori: primario + ausiliario che delega con `this(…)` [LAB02 sl. 5–6; 04b sl. 79–82].
+  Operatore `cond ? a : b` [06 sl. 96]. `toString` e `@Override` [06 sl. 24–26].
+- `toString`: la slide chiede `Num/Den` [LAB02 sl. 10]; il docente stampa `4` per `4/1` (qui in una
+  riga, stessa logica). **All'esame decide il testo del compito.**
+- ⚠️ **Ogni campo assegnato fuori dai rami**, dove il valore non cambia: con `if (i > 0) … else if
+  (i < 0)` il caso 0 non assegnava niente → `0/0` a test verdi (§1.3).
+- ⚠️ **Niente di ridondante**: un `boolean` si restituisce (`return cond;`, non `if (cond) return
+  true; else return false;`); ciò che il costruttore garantisce (den > 0) non si ricontrolla.
+- ⚠️ Un metodo che risponde (`equals`, getter) **non stampa**.
+- `equals(Frazione f)` è un metodo nuovo, non ridefinisce l'`equals(Object)` di ogni classe: la
+  forma completa arriva con `LAB09`–`LAB10`.
+
+**`mcm` da `mcd`** — `MyMath` dello startkit:
+
+```java
+public static int mcm(int a, int b) {
+    return (a * b) / mcd(a, b);    // il prodotto contiene la parte comune due volte: si DIVIDE per l'mcd
+}                                  // ⚠️ non "- mcd": mcm(4,6) darebbe 22. Prova: 4,6 → 12 · 6,9 → 18 · 7,7 → 7
+```
+
+`mcd(a, b)` (Euclide, già nello startkit) vuole **naturali, non 0** [LAB02 sl. 9]: passare
+`Math.abs(…)` e gestire lo 0 prima (§1.2). `a * b` può andare in overflow prima della divisione (§3.3).
 
 ---
 

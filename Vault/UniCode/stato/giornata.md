@@ -4,3 +4,15 @@
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
 12:52 · FI2 · metodo cambiato: niente più /lezione per FI2, si lavora sui LAB con i test (teoria solo quando serve); prontuario riorganizzato per parte del compito; creato corsi/FI2/esame_FI2/ (kit d'esame)
+13:05 · FI2 · guida-lab LAB02 generata (scheda di una pagina, template startkit).
+15:46 · FI2 · LAB02: FrazioneTest verde (-ea), ma new Frazione(0, d) dà 0/0 — il costruttore copre solo prodotto >0 e <0, il caso =0 lascia i campi a 0; i test non lo coprono (pattern 2: test verde ≠ classe corretta).
+15:53 · FI2 · LAB02: costruttore corretto (i >= 0), Frazione completa — FrazioneTest verde e casi con lo zero verificati (0/-5 → 0/5, minTerm 0/5 → 0/1). Restano mcm e rename del progetto.
+15:59 · FI2 · LAB02: mcm scritto come a*b - mcd (sottrazione invece di divisione: «togliere un fattore» letto come togliere un addendo); FrazioneTest resta verde perché nessun test usa mcm.
+16:00 · FI2 · LAB02 svolto in modalità guidata: tutti i test verdi, mcm corretto, progetto rinominato (LAB02_Frazione-300926); copiato in esame_FI2/svolti/LAB02_Frazione/. Resta il confronto con la soluzione del docente.
+16:03 · FI2 · LAB02: confronto con la soluzione del docente scritto (svolti/LAB02_Frazione/confronto_LAB02.md); da ora il confronto è un passo fisso dopo i test verdi (lab.md, CLAUDE.md §8, README kit).
+16:09 · FI2 · Lorenzo, dal confronto LAB02: «scrivo ancora come in C», il docente è più efficiente. Precisato: le differenze sono ridondanze (boolean restituito con if, campo ripetuto nei rami, abs su un invariante), non idiomi Java; criterio «questo lo so già?», chiarezza prima della brevità. Da cercare nei prossimi confronti.
+16:11 · FI2 · /chiudi: Lorenzo giudica tutto abbastanza chiaro, nessun intoppo nuovo con Eclipse. Decisione di Lorenzo: un LAB con i test verdi è chiuso anche se svolto con guida — si annota «guidato» come inventario per la preparazione all'esame. CHIUSO FI2 LAB02
+16:11 · FI2 · 04b e 06 → 🔶: entrati in LAB02 per le parti usate (costruttori primario/ausiliario, this(...), toString con @Override); si completano con i LAB che li riusano.
+16:11 · FI2 · tracker: rimossa la riga spuria «02 | e» (marcatore «CHIUSO FI2 02 e 02x» del 26/09 letto come modulo «e»); restano FI2 02 e FI2 02x.
+16:15 · FI2 · revisione errori: 4 nuovi (FI2: rami senza caso 0, stampa in equals, mcd→1 per lo zero, ridondanze), 2 ricorrenze del pattern trasversale 2 (console vuota presa per corretta; mcm non verificato sugli esempi).
+16:15 · FI2 · prontuario: §1 (X rosse «cannot be resolved to a type», «must return a result», AssertionError, / by zero in mcd, silenziosi: -ea mancante, campi a 0, test verdi ma mcm sbagliato), §2 procedura startkit completa (import/Finish, rename e conflitto con la cartella, -ea, collaudo metodo per metodo), §3.8 classe-valore immutabile nella forma del docente + mcm; indice aggiornato. Messaggi verificati con javac ed ecj 3.46.

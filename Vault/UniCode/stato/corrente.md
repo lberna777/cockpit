@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-26
+**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-30
 
 > Un solo esame in fase attiva (`piano/piano_laurea.md`, regola 4). Gli altri tre di S1 —
 > `CALC`, `MATAP`, `ELT` — hanno cartella, fonti e percorso pronti, e restano in attesa.
@@ -25,6 +25,12 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   classe; U+1F608 = 2 `char`, 4 byte UTF-8. Dalla 02x è nato il **prontuario d'esame**
   `corsi/FI2/appunti/prontuario_FI2.md`, da aggiornare a ogni fine sessione pratica (`/chiudi` 8a).
   `/appunti FI2 02` (02+02x) resta da fare.
+- ✅ **LAB02** «Frazione — prima parte» — chiuso il 2026-09-30 con i test verdi, **svolto con
+  guida** (suggerimenti a gradini in chat): da rifare a freddo nella preparazione all'esame. Codice
+  e confronto con il docente in `corsi/FI2/esame_FI2/svolti/LAB02_Frazione/`. Inciampi: caso 0 non
+  coperto nel costruttore (`0/0` a test verdi), `mcm` con sottrazione invece di divisione.
+- 🔶 **04b** «Classi e oggetti» e **06** «Stringhe»: entrati in LAB02 per costruttori, `this(...)`,
+  `toString`/`@Override`; si completano con i LAB che li riusano.
 - Tutti gli altri: non aperti.
 - Materiale completo in `corsi/FI2/materiali/`; mappa in `corsi/FI2/percorso.md`.
 - Edizione del materiale: 2023/24, quella d'iscrizione.
@@ -36,10 +42,12 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-1. **Controllo di Eclipse** (già installato il 26/09, compliance portato a 21): far girare il
-   `main` della 02x passando gli argomenti con *Run Configurations*.
-2. **`/lab FI2 LAB02`** (Frazione, prima parte) — oppure `LAB01` prima, se Lorenzo lo vuole:
-   scelta aperta il 2026-09-30. `03`/`03x` (Deployment, JAR) entrano quando serviranno.
+1. **`/lab FI2 LAB03`** — Frazione, seconda parte: `sum`, `mul`, `compareTo`, `getDouble`
+   [percorso: prerequisito 04b, 🔶]. Si parte dal progetto svolto di LAB02 o dal nuovo startkit,
+   secondo quanto dice la slide del LAB03; import con *Existing Projects* → **Finish**, rename con
+   un nome diverso da quello della cartella, `-ea` se i test sono ancora `assert`.
+2. Dopo i test verdi: `confronto_LAB03.md` con la soluzione del docente, cercando apposta le
+   **ridondanze** (criterio «questo lo so già?», `confronto_LAB02.md` punto 5).
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
 `"A".getBytes("UTF-16")` dà `[-2, -1, 0, 65]`, cioè il BOM **big endian**, coerente con la slide 35

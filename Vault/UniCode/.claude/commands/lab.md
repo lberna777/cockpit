@@ -213,8 +213,9 @@ I punti dove il procedimento si rompe di solito, e il segnale che rivela lo sbag
 > I moduli di teoria che la voce richiede **non si aprono con `/lezione`**: entrano qui, quando
 > servono, e si chiudono con la voce.
 >
-> Un modulo si chiude solo su un esercizio risolto **a freddo** (`CLAUDE.md` §7.2): la scheda
-> imposta il lavoro e si ferma prima dell'implementazione.
+> Una voce pratica si chiude quando i suoi test passano, **anche se svolta con guida**
+> (`CLAUDE.md` §7.2, decisione di Lorenzo del 2026-09-30): la guida si annota come «guidato» in
+> `stato/corrente.md`. La scheda imposta il lavoro e si ferma prima dell'implementazione.
 >
 > **Due modalità, dalla colonna *Tipo* della mappa in `percorso.md`:**
 > - **guidata** — esercitazioni `x`/`z`, `LAB` guidati, esercizi `ES-`: scheda completa;
@@ -245,6 +246,10 @@ Non compila (firma/nome/package) · failure (logica: guarda il caso del test) ·
 ## Dopo i test verdi
 - copia il progetto in `corsi/FI2/esame_FI2/svolti/<ID>_<Nome>/`;
 - apri la soluzione del docente e confronta: rappresentazione interna, casi limite, metodi privati;
+- Claude scrive `svolti/<ID>_<Nome>/confronto_<ID>.md`: per ogni differenza fra il codice di Lorenzo
+  e la soluzione del docente, i due frammenti, *migliore* (motivato, onesto) e *da seguire* (sempre
+  il docente); in fondo *Cosa porto via*. Modello: `svolti/LAB02_Frazione/confronto_LAB02.md`
+  `[2026-09-30, su richiesta di Lorenzo]`;
 - `/chiudi` aggiorna il prontuario con ciò che hai incontrato.
 
 ## Condizioni della prova *(solo modalità compito)*
