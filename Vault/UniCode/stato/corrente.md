@@ -29,6 +29,12 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   guida** (suggerimenti a gradini in chat): da rifare a freddo nella preparazione all'esame. Codice
   e confronto con il docente in `corsi/FI2/esame_FI2/svolti/LAB02_Frazione/`. Inciampi: caso 0 non
   coperto nel costruttore (`0/0` a test verdi), `mcm` con sottrazione invece di divisione.
+- ✅ **LAB03** «Frazione — seconda parte» — chiuso il 2026-09-30 con i test verdi, **svolto con
+  guida** (correzioni di `sumWithMcm`, `sub`, `getDouble` date in chat): da rifare a freddo. Codice e
+  confronto in `corsi/FI2/esame_FI2/svolti/LAB03_Frazione/`. Inciampi: `den/mcm` invece di
+  `mcm/den` (verso, pattern 5), `sub` come `f − this`, divisione intera in `getDouble`; test verdi
+  per caso su `sub` e `compareTo` (pattern 2). Eclipse: `UnsupportedClassVersionError` 69/65 →
+  compliance 21 nelle preferenze del workspace.
 - 🔶 **04b** «Classi e oggetti» e **06** «Stringhe»: entrati in LAB02 per costruttori, `this(...)`,
   `toString`/`@Override`; si completano con i LAB che li riusano.
 - Tutti gli altri: non aperti.
@@ -42,12 +48,12 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-1. **`/lab FI2 LAB03`** — Frazione, seconda parte: `sum`, `mul`, `compareTo`, `getDouble`
-   [percorso: prerequisito 04b, 🔶]. Si parte dal progetto svolto di LAB02 o dal nuovo startkit,
-   secondo quanto dice la slide del LAB03; import con *Existing Projects* → **Finish**, rename con
-   un nome diverso da quello della cartella, `-ea` se i test sono ancora `assert`.
-2. Dopo i test verdi: `confronto_LAB03.md` con la soluzione del docente, cercando apposta le
-   **ridondanze** (criterio «questo lo so già?», `confronto_LAB02.md` punto 5).
+1. **`/lab FI2 LAB04`** — Insiemi di frazioni (a/b/c): `FrazLib` statica → Frazione «double face» →
+   ADT `FractionCollection` [percorso: prerequisiti 07, 08, entrambi ⬜ — dichiararlo in testa alla scheda].
+2. Dopo i test verdi: `confronto_LAB04.md`, cercando ridondanze e **riuso di metodi già scritti**
+   (`confronto_LAB03.md` punto 3).
+3. Prontuario, da `/chiudi`: §1 `UnsupportedClassVersionError` (class file 69 vs 65), §3 operazioni
+   su Frazione (`mcm/den`, cast prima della divisione, `compareTo` in croce).
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
 `"A".getBytes("UTF-16")` dà `[-2, -1, 0, 65]`, cioè il BOM **big endian**, coerente con la slide 35
