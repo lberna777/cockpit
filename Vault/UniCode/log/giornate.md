@@ -14,3 +14,8 @@
 - **2026-09-22** · nessuna attività registrata
 - **2026-09-23** · nessuna attività registrata
 - **2026-09-24** · nessuna attività registrata · ripassi arretrati: 1
+- **2026-09-25** · 4 eventi · ripassi arretrati: 1
+- **2026-09-26** · 12 eventi · chiuso 02 e; chiuso FI2 02; chiuso FI2 02x · ripassi arretrati: 1
+- **2026-09-27** · nessuna attività registrata · ripassi arretrati: 4
+- **2026-09-28** · nessuna attività registrata
+- **2026-09-29** · nessuna attività registrata

@@ -204,120 +204,51 @@ I punti dove il procedimento si rompe di solito, e il segnale che rivela lo sbag
 
 ### Template — progetto a oggetti con startkit e test
 
-> **Perché è diverso dagli altri due.** Qui il «passaggio esatto» è il codice, e il codice è la
-> soluzione. Un modulo si chiude solo su un esercizio risolto **a freddo** (`CLAUDE.md` §7.2):
-> una guida che detta le classi lo rende impossibile. La guida quindi imposta il lavoro con il
-> metodo dei LAB del docente — dominio → modello → classi nell'ordine delle dipendenze → test —
-> e si ferma prima dell'implementazione.
+> **`[2026-09-30, su richiesta di Lorenzo]` Scheda + chat, non guida.** Per `FI2` il lavoro si fa
+> sui test dello startkit, **accompagnati in chat**: Claude legge i file di Lorenzo e lancia i test
+> dal disco, dà suggerimenti a gradini (① concetto e pagina di slide → ② pseudocodice → ③ frammento
+> del costrutto, mai il metodo richiesto) e, quando compare un costrutto nuovo, 5–10 righe su quello
+> solo. Il file prodotto da `/lab` è una **scheda di una pagina (≤ 40 righe)** da tenere accanto
+> a Eclipse, non una guida: la guida da 900 righe della 02x è il caso da non ripetere.
+> I moduli di teoria che la voce richiede **non si aprono con `/lezione`**: entrano qui, quando
+> servono, e si chiudono con la voce.
+>
+> Un modulo si chiude solo su un esercizio risolto **a freddo** (`CLAUDE.md` §7.2): la scheda
+> imposta il lavoro e si ferma prima dell'implementazione.
 >
 > **Due modalità, dalla colonna *Tipo* della mappa in `percorso.md`:**
-> - **guidata** — esercitazioni `x`/`z`, `LAB` guidati, esercizi `ES-`: template completo;
-> - **compito** — `LAB` in forma di compito (es. `LAB12`, `LAB13`) e prove d'esame: solo
->   *Setup*, *Condizioni della prova* e *Dopo la prova*. Niente analisi, contratti né
->   suggerimenti: è una simulazione, e la guida non deve servire da aiuto durante.
+> - **guidata** — esercitazioni `x`/`z`, `LAB` guidati, esercizi `ES-`: scheda completa;
+> - **compito** — `LAB` in forma di compito (es. `LAB12`, `LAB13`) e prove d'esame: solo *Setup*
+>   e *Condizioni della prova*; in chat nessun aiuto durante, confronto con la soluzione dopo.
 
 ```
-# Guida Lab — <COD> <ID>: <Nome Completo>
-**Corso**: <nome esteso>
-**Materiale**: <slide/testo, startkit, soluzione — nomi esatti da percorso.md>
-**Modalità**: guidata | compito
-**Prerequisiti di teoria**: <dalla mappa, con stato; ⚠️ quelli ancora ⬜>
-
----
+# Scheda — <COD> <ID>: <Nome Completo>
+**Materiale**: <slide/testo, startkit — nomi esatti> · **Modalità**: guidata | compito
+**Teoria che entra qui**: <moduli dalla mappa, con la pagina di slide da tenere aperta>
 
 ## Setup
+- importa lo startkit, **rinomina il progetto** (all'esame è richiesto), package da rispettare;
+- configurazione di esecuzione se la fonte la richiede; le X rosse iniziali e perché.
 
-Dalle slide del laboratorio e da `LAB02` (procedura d'esame):
-- importazione dello startkit in Eclipse e **rinomina del progetto** — all'esame è richiesta;
-- cartelle sorgenti (`src`, `test`) e package attesi: **i nomi vanno rispettati**, o i test non
-  compilano;
-- configurazione di esecuzione quando la fonte la richiede (`-ea`, VM JavaFX);
-- «le X rosse sono normali»: quali classi mancano all'inizio e perché il progetto non compila.
+## Ordine di lavoro
+| # | Classe | Cosa rappresenta (1 riga) | Test che la coprono | Costrutto nuovo → slide |
+|---|---|---|---|---|
 
-## Il dominio
+## Casi limite da pensare
+- Solo come **domande**, dalla fonte e dai test. (⚠️ la classe è finita quando passano tutti i
+  test, non il primo — `profilo/errori.md` pattern 2.)
 
-In prosa, dalla fonte: di cosa parla il problema, i termini del dominio e il loro significato
-preciso, le ipotesi semplificative dichiarate. Dove la fonte pone domande di analisi («cos'è
-esattamente un appuntamento?»), riportarle **senza risposta**: sono la prima cosa da fare.
-*(⚠️ distinzioni fra termini vicini del dominio, da `profilo/errori.md` pattern 1.)*
+## Test rosso?
+Non compila (firma/nome/package) · failure (logica: guarda il caso del test) · error
+(eccezione durante l'esecuzione: guarda lo stack trace) → prontuario §1, oppure scrivilo in chat.
 
-## Il modello
-
-- Le classi e le loro relazioni come le dà la fonte (UML o testo): cosa è **fornito** nello
-  startkit e cosa è **da fare**.
-- **Ordine di lavoro**: dalla classe con meno dipendenze a quella con più — dalla fonte se lo
-  indica, altrimenti ricavato dal modello, dicendo da cosa.
-
-## Classi da realizzare — una sezione per classe, nell'ordine sopra
-
-### <NomeClasse>
-
-**Responsabilità**: cosa rappresenta e cosa fa, in una o due frasi, dalla fonte.
-
-**Contratto**: costruttori e metodi richiesti **con firma esatta** (dalla specifica, dall'UML
-o dai test), e per ciascuno cosa deve garantire: valori restituiti, stato, eccezioni attese.
-Nessun corpo di metodo.
-
-**Test che la coprono**: la classe di test e i metodi di test dello startkit, e cosa verifica
-ciascuno, in una riga. Suggerire l'ordine in cui togliere i commenti ai test, metodo per metodo.
-
-**Casi limite da pensare prima di scrivere**: quelli che la fonte segnala («cosa succede intorno a
-mezzanotte?») e quelli che i test esercitano. Formulati come **domande**, non come risposte.
-*(⚠️ pattern 2 di `profilo/errori.md`: la classe è finita quando passano tutti i test, non il
-primo.)*
-
-**Frammenti di codice** — *solo nei LAB fino a `LAB04` compreso e nelle esercitazioni `x`
-collegate a moduli fino a `07`, e solo per costrutti che Lorenzo usa per la prima volta*:
-un frammento breve del **costrutto**, preso dalle slide di teoria o del laboratorio e citato con
-`[fonte: <file>, sl. N]`, mai dalla soluzione e mai il metodo richiesto. Esempio lecito: la
-forma del costruttore ausiliario con `this(n, 1)` (LAB02 sl. 6), dove il laboratorio stesso la
-mostra. Oltre questi gradini, la sezione si omette.
-
-<details><summary>Se sei bloccato — 1: una domanda</summary>
-
-Una domanda che sposta l'attenzione sul punto giusto, senza nominare la soluzione.
-</details>
-
-<details><summary>Se sei bloccato — 2: l'idea</summary>
-
-L'idea o la struttura dati da usare, a parole, **presa dai suggerimenti della fonte** quando ci
-sono (es. le due strategie per contare i piolini bianchi in LAB06). Mai codice.
-</details>
-
----
-
-## Leggere un test rosso
-
-Da riprendere a ogni esecuzione dei test:
-- **non compila** → nessun test gira: firma, nome o package diversi da quelli attesi;
-- **failure** → il codice gira ma l'asserzione non torna: l'errore è nella logica, cercare il caso
-  del test;
-- **error** → un'eccezione imprevista **durante l'esecuzione**, l'asserzione non è raggiunta:
-  cercare lo stack trace.
-*(⚠️ `profilo/errori.md`, `FI2`: compilazione ed esecuzione fuse, error collocato «nella
-struttura».)*
-
-## Dopo i test verdi — confronto con la soluzione
-
-Solo ora si apre la soluzione del docente. La guida elenca **cosa guardare**, non cosa c'è:
-scelte di rappresentazione interna, gestione dei casi limite, divisione in metodi privati.
-Ciò che manca nel proprio codice va in `stato/giornata.md` e, se ricorre, in `profilo/errori.md`.
+## Dopo i test verdi
+- copia il progetto in `corsi/FI2/esame_FI2/svolti/<ID>_<Nome>/`;
+- apri la soluzione del docente e confronta: rappresentazione interna, casi limite, metodi privati;
+- `/chiudi` aggiorna il prontuario con ciò che hai incontrato.
 
 ## Condizioni della prova *(solo modalità compito)*
-
-Tempo massimo e punteggio per parte, dalla fonte. Regola: nessuna guida, nessuna soluzione,
-nessun aiuto durante; cronometro. Al termine: quanti test passano, per parte.
-
-## Dopo la prova *(solo modalità compito)*
-
-Confronto con la soluzione del docente come sopra, più: quali parti hanno richiesto più tempo
-e perché. Una prova sotto i 2/3 dei test è un dato, non un fallimento: va registrata.
-
-## Connessioni
-
-- Con la teoria: quali concetti dei moduli prerequisito compaiono e **dove** (classe, metodo).
-- Con i LAB precedenti: cosa si riusa (es. `MyMath` da LAB01 in LAB02).
-- Con le prove: la tipologia d'esame e la prova passata correlata, se la mappa la indica.
+Tempo massimo e punteggio per parte, dalla fonte; cronometro; al termine, test passati per parte.
 ```
 
 ---

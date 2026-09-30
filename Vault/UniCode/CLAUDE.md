@@ -39,6 +39,12 @@ Claude è **tutor + organizzatore**, non un chatbot: produce file, non risposte 
 in chat servono per coordinamento, domande e conferme. Se un contenuto può stare in un file, sta in
 un file.
 
+> **`[2026-09-30]` Eccezione per gli esami di programmazione (`FI2`).** Il lavoro sul codice si
+> accompagna **in chat**: Claude legge i file di Lorenzo e lancia i test dal disco, e risponde
+> breve, sul punto in cui è bloccato. Di file restano la scheda di `/lab` (una pagina) e il
+> prontuario. Motivo: le lezioni da 400–900 righe non insegnavano a programmare e costavano più
+> della chat che comunque seguiva.
+
 Lingua: italiano accademico universitario. Conciso e diretto: non ripetere ciò che Lorenzo ha già
 detto. Dove esiste un docente di riferimento per il corso, adottarne terminologia e convenzioni.
 
@@ -194,6 +200,8 @@ Un modulo è chiuso — e solo allora entra nel tracker — quando:
 - **pratico-lab**: Lorenzo ha eseguito il laboratorio **in prima persona sulla VM**. La lettura
   passiva vale zero ai fini dell'esame.
 - **teoria**: Lorenzo ha risposto alle domande di autoverifica senza consultare gli appunti.
+  Per `FI2` non si usa più `[2026-09-30]`: i moduli di teoria si chiudono insieme alla voce
+  pratica (LAB, esercitazione, prova) che li richiede, quando i suoi test passano.
 - **progetto**: il pezzo di progetto compila, gira e fa ciò che deve.
 
 ### 7.3 Orientamento alle prove
@@ -255,9 +263,17 @@ mirato — ed è particolarmente adatto a `MATAP`, `CA`, `ELT`, `ELN` e `TLC`.
 Per gli esami in cui si può consultare materiale (`FI2`: tutti i file ammessi). Serve a
 *rispondere* in prova, non a spiegare: tabelle *errore → causa → rimedio* con il testo esatto dei
 messaggi, *Indice per bisogno*, frammenti copia-incolla. `[2026-09-26, su richiesta di Lorenzo]`
-- **Cresce per sessione, non si scrive in blocco**: una sezione per modulo, **dopo** averlo fatto,
-  aggiornata a fine sessione (`/chiudi`, passo 8a). Entra solo ciò che è stato incontrato davvero;
-  gli schemi delle prove d'esame entrano quando si fanno le prove.
+- **Cresce per sessione, non si scrive in blocco**: aggiornato a fine sessione (`/chiudi`, passo
+  8a). Entra solo ciò che è stato incontrato davvero; gli schemi delle prove d'esame entrano quando
+  si fanno le prove.
+- **Ordinato per parte del compito, non per modulo** `[2026-09-30, su richiesta di Lorenzo;
+  sostituisce «una sezione per modulo»]`: §1 errori → causa → rimedio (tabella unica del corso),
+  §2 Eclipse e procedura, poi una sezione per package dello startkit d'esame (`model`,
+  `persistence`, `controller`/`ui`). L'*Indice per bisogno* ha la colonna *Fatto in*: ogni
+  schema rimanda al **file del LAB o della prova svolta da Lorenzo** dove quel codice funziona.
+- È il punto d'ingresso del **kit d'esame** `corsi/FI2/esame_FI2/`, che contiene anche i LAB e le
+  prove svolti da Lorenzo e le soluzioni ufficiali: il prontuario indica, il codice svolto è la
+  risposta.
 - **Ogni frammento di codice è commentato riga per riga**, per l'uso e l'interpretazione immediati.
 - Valori e messaggi si verificano eseguendoli prima di scriverli.
 
@@ -271,7 +287,8 @@ Tre template, scelti dal tipo di verifica in `fonti.md` (dettaglio in `.claude/c
   a memoria invece di copiarlo.
 - **Lorenzo digita i comandi**: la guida li fornisce, non li esegue al suo posto.
 
-**Progetto a oggetti con startkit e test** (`FI2`) `[2026-09-16, su richiesta di Lorenzo]`:
+**Progetto a oggetti con startkit e test** (`FI2`) `[2026-09-16; forma rivista il 2026-09-30:
+scheda di una pagina + accompagnamento in chat, teoria solo quando la voce la richiede]`:
 - Ancorata alle slide del laboratorio e allo startkit **con i suoi test**, che sono il contratto;
   prerequisiti di teoria dalla *Mappa teoria → pratica* di `percorso.md`.
 - Imposta il lavoro — dominio, modello, classi nell'ordine delle dipendenze, contratto e casi

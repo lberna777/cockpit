@@ -170,8 +170,10 @@ non con ciò che il materiale contiene.
   copiare e incollare così come sono; errori di compilazione o eccezioni incontrati, con il
   **testo esatto** del messaggio (Eclipse e `javac`), causa e rimedio; righe ⚠️ dove Lorenzo ha
   sbagliato. Schemi delle prove d'esame solo **dopo** aver fatto quella prova.
-- **Dove**: nella sezione del modulo (`# <ID> — …`), creandola se è la prima volta; aggiungere le
-  voci nuove all'*Indice per bisogno* in cima.
+- **Dove**: nella sezione della **parte del compito** (§1 errori, §2 Eclipse, §3 model,
+  §4 persistence, §5 controller/UI), non del modulo; aggiungere le voci nuove all'*Indice per
+  bisogno* in cima, con la colonna *Fatto in* che punta al file svolto da Lorenzo. Se un LAB o una
+  prova è stato completato, copiarne il progetto in `corsi/FI2/esame_FI2/svolti/`.
 - **Forma**: tabelle e codice, non prosa. **Ogni frammento di codice è commentato riga per
   riga** — cosa fa e perché lì — perché si usi e si interpreti senza rileggere la teoria. Valori
   e messaggi verificati eseguendoli (jshell/terminale), non scritti a memoria.

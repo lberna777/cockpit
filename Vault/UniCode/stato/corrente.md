@@ -31,10 +31,15 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
 
 ## Prossimo passo esatto
 
-**Installare Eclipse** (S01, `Strumenti-01-Eclipse intro.pdf`): *Eclipse IDE for Java Developers*,
-agganciato al JDK 21 già presente; primo workspace, un progetto con la classe `main` della 02x che
-gira da Eclipse passando gli argomenti con *Run Configurations*. Poi `03` (Deployment), `03x`,
-`LAB01`.
+**`[2026-09-30]` Metodo cambiato**: si lavora sui LAB con i test, accompagnati in chat; la teoria
+entra solo quando la voce la richiede, e i moduli di teoria non si aprono più con `/lezione`
+(`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
+d'esame in `corsi/FI2/esame_FI2/`.
+
+1. **Controllo di Eclipse** (già installato il 26/09, compliance portato a 21): far girare il
+   `main` della 02x passando gli argomenti con *Run Configurations*.
+2. **`/lab FI2 LAB02`** (Frazione, prima parte) — oppure `LAB01` prima, se Lorenzo lo vuole:
+   scelta aperta il 2026-09-30. `03`/`03x` (Deployment, JAR) entrano quando serviranno.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
 `"A".getBytes("UTF-16")` dà `[-2, -1, 0, 65]`, cioè il BOM **big endian**, coerente con la slide 35

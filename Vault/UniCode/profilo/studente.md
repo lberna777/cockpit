@@ -45,6 +45,9 @@
 ## Come vuole gli output
 
 - File, non risposte in chat.
+  `[2026-09-30]` Eccezione per la programmazione: vuole imparare scrivendo codice sui test, non
+  leggendo teoria («devo imparare a programmare, non leggere 13 pagine di teoria per un esame
+  senza prova teorica»). Accompagnamento in chat + scheda di una pagina.
 - Italiano accademico universitario; dove esiste un docente di riferimento, la sua
   terminologia e le sue convenzioni.
 - Per esercizi e prove: bozze complete e pronte da consegnare, con l'elenco preciso degli

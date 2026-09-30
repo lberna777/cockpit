@@ -47,7 +47,7 @@ Riordinata il 2026-09-01, rivista il 2026-09-14.
   la laurea nella sessione estiva 2028. Ha il suo CLAUDE.md e l'architettura di continuità
   installata il 2026-09-02 (memoria a strati, briefing iniettato dal SessionStart hook,
   consolidamento serale via timer systemd). I comandi prendono `<CODICE> <ID modulo>`, es.
-  `/lezione FI2 01`; i codici stanno in `piano/codici.txt`, il piano per sessioni in
+  `/lab FI2 LAB02` (per FI2 si lavora sui LAB, non su `/lezione`: vedi `UniCode/CLAUDE.md` §2); i codici stanno in `piano/codici.txt`, il piano per sessioni in
   `piano/piano_laurea.md`. `ARCHIVIO/` contiene il materiale degli esami chiusi.
 - `~/Sviluppo` — tutto il codice, diviso per tipo di lavoro:
   - `app/` — accountability-app, agenticdash (dashboard + memoria, Tauri), diritto-quiz-app, bibiciclo

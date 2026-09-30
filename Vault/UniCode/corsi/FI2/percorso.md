@@ -111,6 +111,11 @@ ZannoTassametro (testo, startkit, soluzione) · BinaryBasicPersistence · Media-
 
 ## Mappa teoria → pratica
 
+> **`[2026-09-30]` Da qui in avanti è questa tabella a guidare il percorso**, non la lista dei
+> moduli di teoria: si procede per voci pratiche (LAB, esercitazioni, prove) e i moduli di teoria
+> che ciascuna richiede si studiano **dentro** la voce, quando servono, e si chiudono con i suoi
+> test verdi. `/lezione` non si usa più per `FI2`.
+
 > Compilata il 2026-09-16 **leggendo i materiali**: il testo delle slide di ogni LAB, di ogni
 > esercitazione `x`/`z` e di ogni esercizio autonomo, più un conteggio dei costrutti Java usati nel
 > codice delle soluzioni. Non è ricavata dai titoli.
