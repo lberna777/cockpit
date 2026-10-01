@@ -45,7 +45,7 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   guida**: da rifare a freddo. Codice e confronto in `corsi/FI2/esame_FI2/svolti/LAB04b_FrazioniDoubleFace/`.
   `size` scritta da solo; `convertToString` e i cicli dei metodi statici dopo tre giri sulla
   condizione (`length-1` → `length` → `length && != null`, data dalla sl. 28): **fine fisica e
-  fine logica confuse**. `0/6` risolto chiamando `sumWithMcm`. Il suo `sum(Frazione[])` regge le
+  fine logica confuse**; giudizio di Lorenzo: «chiaro ma non chiarissimo», fatica sul ragionamento con gli array e sulla forma «giusta». `0/6` risolto chiamando `sumWithMcm`. Il suo `sum(Frazione[])` regge le
   celle `null`, quello del docente no (verificato).
 - 🔶 **07** «Array» e **08** «Package e namespace»: entrati in LAB04a (array di oggetti, *for
   each*, `length`; package e `import`); si completano con LAB04b/c ed `ES-MATRICI`.
@@ -62,7 +62,10 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-1. **`/lab FI2 LAB04c`** — ADT `FractionCollection` (LAB04 sl. 41 sgg.): l'incapsulamento che la sl. 41
+1. **`/lab FI2 LAB04c`** — ADT `FractionCollection` (LAB04 sl. 41 sgg.). Partire duplicando il
+   progetto `Lab04b-FrazioniDoubleFace-Startkit` del workspace (quello verde), e allenare proprio
+   il punto debole dichiarato oggi: ragionare sull'array logico (dove finisce, `null`), stavolta
+   *dentro* una classe: l'incapsulamento che la sl. 41
    chiede contro il software «fragile» degli array nudi. Prima, rendere la `sum` d'istanza via `mcm` (confronto LAB04b punto 5).
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 

@@ -46,6 +46,10 @@ distinzione non è stata capita.
   `float → double` e `double → float` scambiati (d.4). Evidenza: trascrizione del 2026-09-16
   pomeriggio («4 char credo»; «un vero e proprio eseguibile .exe, che fa affiamento sul trovare un
   ambiente identico»); `stato/giornata.md`, verifica 02 d.3–d.5.
+- [2026-10-01] FI2 LAB04b: `length` (fine fisica) e dimensione logica (primo `null`) fuse: il
+  ciclo `i < fs.length-1` scritto «per non andare nei valori nulli», e l'ultimo elemento logico
+  cercato in `fs[fs.length]` / `fs[fs.length-1]`. Dettaglio nella sezione FI2. Evidenza:
+  trascrizione del 2026-10-01, 17:18; `stato/giornata.md` 17:17.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -71,6 +75,12 @@ ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazion
   9 → 18); `FrazioneTest` verde perché nessun test usa `mcm`. Nella spiegazione di Claude «togli la
   parte comune» era ambiguo, ma i numeri per accorgersene erano sotto mano. Evidenza:
   `stato/giornata.md` 15:59; `svolti/LAB02_Frazione/confronto_LAB02.md` §7.
+- [2026-10-01] FI2 LAB04b: per due volte ha dichiarato risolto il test `0/6` senza lanciare
+  `FrazioneTest`, ogni volta dopo aver modificato un metodo che il test non chiama: prima `.minTerm()`
+  aggiunto alla `FrazLib` del 04a («risolto riducendo le somme a minimi termini»; `minTerm` lascia
+  comunque `0/36`), poi `sumWithMcm` dentro `sum(Frazione[])` («sum usa sumconmcm quindi dovrebbe
+  funzionare ora»), benché Claude avesse già detto che quel passaggio «non tocca il caso `0/6`».
+  Evidenza: trascrizione del 2026-10-01, 16:45 e 17:31; `stato/giornata.md` 17:16.
 
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
@@ -293,6 +303,38 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   d'istanza, no → `static`. Lorenzo lo dichiara chiaro (13:43 e a `/chiudi`), ma le tre domande di
   verifica sono state saltate: **comprensione dichiarata, non verificata**; il banco di prova è
   LAB04b, dove i due mondi stanno nella stessa classe. Evidenza: `stato/giornata.md` 15:23 e 15:47.
+- [2026-10-01] LAB04b: cicli su un array riempito a metà con `i < fs.length-1` «per non andare nei
+  valori nulli» (salta l'ultima cella fisica e alla cella 4 va comunque in `NullPointerException`),
+  poi `i < fs.length` senza controllo sul `null`; in `convertToString` l'ultimo elemento cercato in
+  `fs[fs.length]` (sempre `ArrayIndexOutOfBoundsException`) e poi in `fs[fs.length-1]` (`null` o
+  indice `-1`) → causa: fine fisica (`length`, celle allocate) e fine logica (primo `null`, celle
+  usate) trattate come una sola, e `-1` usato come se escludesse le celle vuote → correzione: ogni
+  ciclo su un array a metà controlla entrambe, in quest'ordine: `i < a.length && a[i] != null`
+  (sl. 28); l'ultimo elemento logico non si conosce finché non si incontra il `null`, quindi il
+  separatore va *prima* di ogni elemento tranne il primo (`i != 0`). Lorenzo a `/chiudi`: «i
+  problemi li ho avuti coi ragionamenti logici per operare con gli array, i valori nulli, dove
+  finisce». Condizione data da Claude (gradino ③). Evidenza: trascrizione del 2026-10-01, 17:18 e
+  17:20 (tabelle di Claude con NPE/AIOOBE); `confronto_LAB04b.md` §2 e «Cosa porto via».
+- [2026-10-01] LAB04b: le tre `sum` di `Frazione` (d'istanza; statica su un array; statica a
+  coppie) non distinte nel ragionare su un test: per il caso `0/6` ha modificato due volte un
+  metodo che il test non chiama (prima la `FrazLib` del 04a, poi `sum(Frazione[])`), mentre il test
+  passa da `setA[k].sum(setB[k])`, cioè dalla `sum` d'istanza → causa: non risale dal test al
+  metodo davvero chiamato, e l'overloading rende uguali i nomi → correzione: partire dalla riga del
+  test e seguire la chiamata; distinguere le `sum` per firma (argomenti e tipo restituito). Stessa
+  famiglia della riga del 2026-10-01 su istanza/`static`. Evidenza: trascrizione del 2026-10-01,
+  16:45 e 17:31 («sum usa sumconmcm quindi dovrebbe funzionare ora»); `confronto_LAB04b.md` §5.
+- [2026-10-01] Settima ricorrenza della risposta a metà, ora **nel codice**: davanti a una
+  correzione in due parti ne applica una sola. Detto che la condizione deve contenere «entrambi i
+  controlli» (fine fisica e `null`), ha corretto solo `length-1` → `length`; detto per
+  `convertToString` «la stessa condizione di `sum`, e la virgola prima», ha corretto il corpo e
+  lasciato il ciclo `i < fs.length-1`. Resta candidato trasversale (nessun altro corso ancora).
+  Evidenza: trascrizione del 2026-10-01, 17:19–17:28; `stato/giornata.md` 17:21 e 17:28.
+- [2026-10-01] Terza ricorrenza delle ridondanze: in `size` `int size = 0;` ripetuto
+  dall'inizializzazione del `for`; nelle somme a coppie `size(fA)` calcolata due volte (ogni volta
+  scorre l'array, il costo che la sl. 29 segnala); `return risultato;` sulla riga della `}` del
+  ciclo. Coerente con quanto dichiarato a `/chiudi`: fatica a trovare la forma «giusta» oltre che
+  funzionante. Evidenza: `svolti/LAB04b_FrazioniDoubleFace/src/frazione/Frazione.java` (`size`,
+  `sum`/`mul` a coppie); trascrizione del 2026-10-01, 17:38 e 17:41.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

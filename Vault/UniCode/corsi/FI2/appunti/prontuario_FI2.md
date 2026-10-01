@@ -54,6 +54,11 @@ tags: [FI2, appunti]
 | scrivere una libreria di funzioni `static`; capire quando un metodo è `static` | 3.10 | LAB04a |
 | scorrere un array di oggetti e accumulare un risultato (somma, prodotto) | 3.10 | LAB04a |
 | capire «non-static method … static context» | 1.1 · 3.10 | LAB04a |
+| scorrere un array **riempito a metà** (celle `null` in fondo): condizione del ciclo | 3.11 | LAB04b |
+| contare gli elementi di un array a metà (`size`) | 3.11 | LAB04b |
+| creare e restituire un array nuovo (somma cella per cella di due array) | 3.11 | LAB04b |
+| stampare un array come `[a, b, c]` senza virgola finale | 3.11 | LAB04b |
+| metodi `static` e d'istanza nella stessa classe; tre `sum` con lo stesso nome (overloading) | 3.11 | LAB04b |
 
 ---
 
@@ -79,6 +84,8 @@ terminale. **Stessa causa, parole diverse.**
 | `MyMath cannot be resolved` (classe di un **altro package**) | `cannot find symbol` … `symbol: variable MyMath` | la classe esiste, ma sta in un altro package e manca l'`import` | `import util.MyMath;` sotto la riga `package` [08 sl. 18; LAB04 sl. 18] |
 | `Cannot make a static reference to the non-static method sum(Frazione) from the type Frazione` | `non-static method sum(Frazione) cannot be referenced from a static context` | metodo d'istanza chiamato sulla **classe** (`Frazione.sum(f)`): manca l'oggetto che fa da `this` | chiamarlo su un oggetto (`a.sum(f)`), oppure è una funzione da libreria → 3.10 |
 | `This method must return a result of type int` | `missing return statement` | metodo dello startkit con solo `// da fare`, o un ramo senza `return` | un `return` su **ogni** strada del metodo |
+| `The method sum(Frazione) in the type Frazione is not applicable for the arguments (Frazione[], Frazione[])` | `method sum in class Frazione cannot be applied to given types` | esiste un `sum` con quel nome ma con **altri** argomenti: il test chiama un overload non ancora scritto | scrivere il metodo con la firma del test (qui `static Frazione[] sum(Frazione[], Frazione[])`) → 3.11 |
+| `The method convertToString(Frazione[]) is undefined for the type Frazione` | `cannot find symbol` … `symbol: method convertToString(Frazione[])` | nessun metodo con quel nome nella classe | scriverlo, nella classe che il test usa come prefisso |
 
 ## 1.2 Eccezioni a run-time
 
@@ -90,6 +97,8 @@ Compila tutto, esplode eseguendo — in console, in rosso.
 | `AssertionError` … `at FrazioneTest.main(FrazioneTest.java:28)` | con `-ea`, un `assert` del test è falso: è il **failure** di un test fatto di `assert` | apri la riga indicata, leggi cosa si aspetta, prova quel caso a mano |
 | ⚠️ `ArithmeticException: / by zero` … `at MyMath.mcd` | `mcd(0, n)`: Euclide scambia e fa `n % 0` [LAB02 sl. 9] | nel chiamante, gestire il numeratore 0 **prima** di chiamare `mcd`; non modificare `mcd` |
 | `NullPointerException: Cannot read field "den" because "f" is null` … `at frazione.Frazione.sum` … `at frazlib.FrazLib.sum` | una cella dell'array è `null`: `new Frazione[4]` crea 4 caselle **vuote**, non 4 frazioni [07 sl. 17]. È un **error**, non un failure | riempire ogni cella (`fs[i] = new Frazione(…)`) prima di passare l'array. Leggi la traccia dal basso: chi ha passato il `null` |
+| ⚠️ `NullPointerException: Cannot invoke "frazione.Frazione.toString()" because "fs[i]" is null` | un ciclo su un array **riempito a metà** è arrivato alla prima cella vuota: la condizione controlla solo `length` | `i < fs.length && fs[i] != null` → 3.11 |
+| ⚠️ `ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 2` / `Index -1 out of bounds for length 0` | `fs[fs.length]` (l'ultimo indice valido è `length-1`), oppure `fs[fs.length-1]` su un array vuoto | non stampare «l'ultimo» a parte: separatore *prima* di ogni elemento tranne il primo → 3.11 |
 | `NumberFormatException: For input string: "…"` | `parseInt`/`parseDouble` su stringa non valida — **le virgolette nel messaggio mostrano la stringa esatta**: guardale per vedere spazi e virgole | controllare la stringa prima di convertirla [02x sl. 35] — vedi 3.5 |
 | ⚠️ `LinkageError durante il caricamento della classe principale X` · `java.lang.UnsupportedClassVersionError: X has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0` | al lancio, prima di eseguire qualsiasi riga: Eclipse ha compilato per una Java **più nuova** del JRE che esegue. Versione class file = Java + 44: 65 = Java 21, 69 = Java 25 | compliance del compilatore = versione del JRE → §2 |
 
@@ -109,6 +118,8 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | ⚠️ `getDouble()` dà `0.0` per ogni frazione fra −1 e 1 | `double v = num / den;`: `int / int` è divisione **intera**, e la conversione a `double` arriva dopo, sul risultato già troncato | `(double) num / den` — 3.9 |
 | ⚠️ somma via `mcm` che «perde» un addendo (`1/4 + 1/8` = `1/8`) | fattore scritto al contrario: `den / mcm` invece di `mcm / den`; fra `int` fa 0 | 3.9 |
 | ⚠️ test verde **per caso** (`sub`, `compareTo`) | due errori che si compensano sul caso del test, o un caso che non distingue (`3/12` e `1/4` → entrambe `0.0`) | aggiungere un caso scelto da te: per `compareTo` sia `1` sia `−1` |
+| ⚠️ somma di un array pieno che «perde» l'ultimo elemento (`{1/2, 1/3}` → `1/2`) | ciclo `i < fs.length - 1`: il `-1` salta l'ultima cella, **non** evita i `null` | `i < fs.length` (+ `&& fs[i] != null` se l'array è a metà) → 3.11 |
+| ⚠️ `0/36` invece del `0/6` atteso dal test | somma col prodotto in croce (`den·den`) invece che con l'`mcm`; e `minTerm` lascia lo zero com'è | sommare via `mcm` (`sumWithMcm` / la `sum` del docente) → 3.9 |
 
 ---
 
@@ -531,6 +542,64 @@ public class FrazLib {                    // libreria: solo metodi static, nessu
 | `Frazione[]` | esiste da sé per ogni classe: non si dichiara da nessuna parte |
 
 Verificato (`javac`): `sum` e `mul` di un array vuoto → `0` e `1`; `sum({3/6})` → `1/2`.
+
+## 3.11 Array riempito a metà, metodi statici dentro la classe-tipo (LAB04b)
+
+Svolto: `esame_FI2/svolti/LAB04b_FrazioniDoubleFace/src/frazione/Frazione.java`. Fonti: LAB04 sl. 22–40, 07 sl. 14, 05 sl. 57.
+
+**Fine fisica e fine logica.** `new Frazione[10]` con 4 frazioni: `length` = 10 (celle esistenti),
+dimensione **logica** = 4 (celle usate). Convenzione del corso: riempimento in sequenza, il **primo
+`null` segna la fine** [LAB04 sl. 32]. ⚠️ Tre tentativi sbagliati prima di quello giusto:
+
+| Condizione | Array pieno `{1/2, 1/3}` | Array a metà |
+|---|---|---|
+| `i < fs.length - 1` | salta l'ultima → `1/2` | `NullPointerException` |
+| `i < fs.length` | ✅ | `NullPointerException` |
+| `i < fs.length && fs[i] != null` | ✅ | ✅ — **questa, sempre** [LAB04 sl. 28] |
+
+L'**ordine** conta: con `&&`, se `i < fs.length` è falso la seconda non viene valutata, quindi
+`fs[length]` non viene mai letto. Invertite → `ArrayIndexOutOfBoundsException` su un array pieno.
+
+**Tre `sum` nella stessa classe** (overloading: stesso nome, argomenti diversi [05 sl. 57]):
+
+| Chiamata | Prende | Restituisce |
+|---|---|---|
+| `f.sum(g)` — d'istanza | due frazioni | una `Frazione` |
+| `Frazione.sum(tutte)` — `static` | **un** array | **una** `Frazione`, il totale |
+| `Frazione.sum(setA, setB)` — `static` | **due** array | **un array**, cella per cella |
+
+```java
+public static int size(Frazione[] fs) {                 // dimensione LOGICA: celle prima del primo null
+    int size = 0;
+    for (size = 0; size < fs.length && fs[size] != null; size++) {
+    }                                                   // corpo vuoto: il contatore è la variabile del ciclo
+    return size;                                        // pieno → length; tutto null o length 0 → 0
+}
+
+public static Frazione[] sum(Frazione[] fA, Frazione[] fB) {
+    if (size(fA) != size(fB)) return null;              // dimensioni logiche diverse: «allarme» = null [sl. 30]; uscita subito, niente else
+    Frazione[] risultato = new Frazione[size(fA)];      // creato DOPO aver saputo la lunghezza, PRIMA del ciclo; celle tutte null
+    for (int i = 0; i < risultato.length; i++)          // qui length = dimensione logica: nessun null da evitare
+        risultato[i] = fA[i].sumWithMcm(fB[i]);         // ⚠️ via mcm: il test vuole 1/6 + (-1/6) = 0/6, non 0/36
+    return risultato;                                   // array NUOVO: fA e fB restano intatti
+}                                                       // mul a coppie: identica, con .mul al posto di .sumWithMcm
+
+public static String convertToString(Frazione[] fs) {
+    String res = "[";
+    for (int i = 0; i < fs.length && fs[i] != null; i++) {  // stessa condizione di ogni ciclo su array a metà
+        if (i != 0) res += ", ";                            // separatore PRIMA, tranne il primo: il primo si riconosce (i == 0), l'ultimo no
+        res += fs[i].toString();                            // fs[i] qui non è mai null
+    }
+    res += "]";                                             // vuoto o tutto null → "[]"
+    return res;
+}
+```
+
+Verificato (`javac`): `size` → 4 / 2 / 0 su array del test / pieno / vuoto; `sum` a coppie del test
+→ `[8/15, 11/12, -5/14, 0/6]`; dimensioni 4 e 2 → `null`; `convertToString` → `[1/3, 2/3, -1/2, 1/6]`.
+⚠️ Il `sum(Frazione[])` della soluzione del docente usa il *for each* e va in
+`NullPointerException` sugli array a metà: per gli array a metà usa la condizione sopra.
+
 
 ---
 

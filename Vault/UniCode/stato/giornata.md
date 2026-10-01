@@ -23,3 +23,6 @@
 17:30 · FI2 · LAB04b: convertToString corretta (pieno, a metà, tutto null, length 0). Passi 1–2 della scheda chiusi; prossimo size.
 17:43 · FI2 · LAB04b test verdi (FrazioneTest -ea, exit 0; MyMain stampa i due array), guidato. size scritta da solo (for a corpo vuoto); sum/mul a coppie guidate su creazione array e return null; 0/6 risolto con sumWithMcm nella somma a coppie. 11 prove extra superate. Da fare: copia in svolti + confronto.
 17:45 · FI2 · LAB04b CHIUSO (guidato): progetto in svolti/LAB04b_FrazioniDoubleFace/ con confronto_LAB04b.md (sum(Frazione[]) del docente va in NPE su array a metà, il suo no). CHIUSO FI2 LAB04b
+17:54 · FI2 · giudizio LAB04b: static/istanza afferrato; tutto «chiaro ma non chiarissimo». Fatica nel ragionamento sugli array (null, dove finisce l'array logico) e nel trovare la forma «giusta» oltre che funzionante. Nessun problema Eclipse.
+17:56 · FI2 · prontuario: §3.11 array a metà (fine fisica/logica, size, somma a coppie, convertToString, tre sum), §1.1 «not applicable for the arguments» e «is undefined», §1.2 NPE "fs[i]" e AIOOBE, §1.3 length-1 e 0/36; messaggi verificati con ecj
+17:56 · FI2 · revisione errori: 4 nuovi, 2 ricorrenze
