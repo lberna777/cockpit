@@ -41,3 +41,6 @@ Thumbs.db
 
 # briefing rigenerato a ogni avvio da scripts/briefing.py: non versionarlo
 stato/briefing.md
+
+# avvisi del bootstrap cloud, rigenerati a ogni avvio (scripts/cloud_bootstrap.sh in cockpit)
+stato/cloud_avvisi.md

@@ -6,3 +6,4 @@
 - Security S3: letta interamente la teoria Web Security (45 pp. OWASP A1-A10) + lab PDF (42 pp. DVWA, SQLi Union Based, XSS, Command Injection) → scritta lezione completa `lezione_moduloS3_web_security.md`
 - Security S3 (cont.): generata `guida_lab_moduloS3_web_security.md` (9 esercizi: nmap→gobuster→Hydra→LFI→command injection→SQLi semplice→SQLi union based→XSS reflected→XSS stored); AUTO-LINKS applicati
 
+- 2026-10-01 · cockpit: automatismi di UniCode portati anche sui lanci da cockpit e nel cloud (briefing, traccia di fine sessione, comandi di studio, bootstrap e salvataggio automatico cloud, TZ Europe/Rome); giornata.py: marcatori solo maiuscoli, fuori da «…», con codice corso valido

@@ -33,15 +33,24 @@ in contesto. L'hook inietta un artefatto compatto: l'indice del vault + gli ulti
 
 Riordinata il 2026-09-01, rivista il 2026-09-14.
 
-> **Lo studio universitario ha una sola cartella di lavoro: `~/UniCode`.**
-> È da lì che si lancia Claude Code per studiare, ed è l'unico percorso da usare nei comandi,
-> nei riferimenti e negli appunti. I file vivono dentro `Vault/UniCode` perché è lì che il repo
-> li versiona: quel percorso è una questione di git, non una seconda cartella in cui entrare.
-> Da qui — la base di lancio — lo studio **non si apre**: i comandi `/lezione`, `/lab`,
-> `/appunti` e gli altri non sono più esposti in `cockpit/.claude/commands`, perché lanciati da
-> qui perdono i due hook di UniCode (briefing d'avvio e registrazione di fine sessione), che
-> sono registrati in `UniCode/.claude/settings.json` e partono solo quando la cartella di lavoro
-> è quella.
+> **Lo studio si apre da `~/UniCode` oppure da qui** (deciso da Lorenzo il 2026-10-01: cockpit
+> è la cartella sempre aggiornata e la sola che il cloud clona). Da cockpit valgono gli stessi
+> automatismi di UniCode, registrati in `.claude/settings.json`:
+> - **avvio**: `scripts/unicode_session_start.sh` inietta il briefing di UniCode (nel cloud,
+>   prima, `scripts/cloud_bootstrap.sh`: symlink `~/cockpit` e `~/UniCode`, merge dei rami
+>   `claude/*` di studio più recenti non ancora in master, consolidamento arretrato);
+> - **fine sessione**: `scripts/unicode_session_end.sh` scrive la traccia in `log/AAAA-MM.md`
+>   solo se la sessione ha toccato lo studio — le sessioni di codice non contano come giornate;
+> - **cloud**: `scripts/cloud_autosave.sh` su `Stop` committa e invia il Vault sul ramo di
+>   sessione dopo ogni risposta; sul laptop arriva solo dopo il merge della PR in master;
+> - **comandi**: `/lab`, `/chiudi`, `/lezione`… stanno in `.claude/commands` come rimandi agli
+>   originali di `Vault/UniCode/.claude/commands`; dopo aver aggiunto o rinominato un comando
+>   di UniCode, `python3 scripts/unicode_commands.py`;
+> - **fuso**: `TZ=Europe/Rome` in `settings.json`, perché il container cloud è in UTC.
+>
+> Nei comandi e negli appunti il percorso resta `~/UniCode` (nel cloud è un symlink creato
+> all'avvio). Il timer serale di consolidamento esiste solo sul laptop; nel cloud lo sostituisce
+> il recupero all'avvio.
 
 - `~/UniCode` — **studio universitario**, cartella di lavoro unica: dodici esami arretrati verso
   la laurea nella sessione estiva 2028. Ha il suo CLAUDE.md e l'architettura di continuità

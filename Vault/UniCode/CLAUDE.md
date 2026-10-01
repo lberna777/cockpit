@@ -324,13 +324,14 @@ scheda di una pagina + accompagnamento in chat, teoria solo quando la voce la ri
 
 ## 9. Struttura del progetto
 
-> **Cartella di lavoro unica: `~/UniCode`.** Le sessioni di studio si aprono da lì e solo da lì
-> (`cd ~/UniCode && claude`). È la condizione perché partano i due hook di questo progetto: il
-> briefing iniettato all'avvio e la traccia di fine sessione in `log/AAAA-MM.md`. Claude Code
-> legge `.claude/settings.json` della cartella da cui viene lanciato, non delle sottocartelle:
-> lanciarlo da `~/cockpit` lascia il progetto senza entrambi, ed è la ragione per cui
-> `log/2026-09.md` è rimasto vuoto fino al 2026-09-14. Il percorso `Vault/UniCode` dentro il
-> repo esiste per il versionamento e non va usato come cartella di lavoro.
+> **Due punti di lancio: `~/UniCode` oppure `~/cockpit`** (dal 2026-10-01, decisione di Lorenzo).
+> Claude Code legge `.claude/settings.json` della cartella da cui viene lanciato, non delle
+> sottocartelle: fino al 2026-09-14 lanciarlo da `~/cockpit` lasciava il progetto senza hook, ed
+> è la ragione per cui `log/2026-09.md` era rimasto vuoto. Ora cockpit registra gli stessi due
+> hook (briefing all'avvio, traccia di fine sessione) ed espone i comandi come rimandi a questi;
+> il dettaglio, e ciò che si aggiunge nel cloud (bootstrap, salvataggio automatico), è nel
+> `CLAUDE.md` di cockpit. Lanciata da cockpit, la radice è `Vault/UniCode`: i percorsi relativi
+> di questo file si risolvono da lì.
 
 
 La radice **non è cablata da nessuna parte**: la risolve `scripts/paths.py` a runtime

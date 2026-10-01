@@ -4,14 +4,19 @@
 # NON inietta il grafo intero (sarebbe pesantissimo in token).
 set -euo pipefail
 
-VAULT="$HOME/cockpit/Vault"
+# Percorso ricavato dallo script, non da $HOME: nel cloud il clone non sta in ~/cockpit.
+COCKPIT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VAULT="$COCKPIT/Vault"
 INDEX="$VAULT/index.md"
 RECAP_DIR="$VAULT/recap"
 N_RECAPS=3
 INDEX_MAX_LINES=200
 
-# Genera i recap mancanti degli ultimi 7 giorni prima di iniettare
-python3 "$HOME/cockpit/scripts/recap_generator.py" --backfill 7 >/dev/null 2>&1 || true
+# Genera i recap mancanti degli ultimi 7 giorni prima di iniettare.
+# Non nel cloud: i recap nascono dai dati del laptop, e lì produrrebbero recap vuoti.
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  python3 "$COCKPIT/scripts/recap_generator.py" --backfill 7 >/dev/null 2>&1 || true
+fi
 
 echo "=== MEMORIA PERSISTENTE (cockpit) ==="
 echo "Vault: $VAULT — ricerca con 'rg' nel vault. Note curate in claude/."

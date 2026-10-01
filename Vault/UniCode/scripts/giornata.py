@@ -18,7 +18,7 @@ essere spento, e il recupero arriva giorni dopo. Se il consolidamento è in rita
 i giorni interposti vengono riempiti come vuoti — che è esattamente il dato che
 servirebbe perdere di meno.
 
-Marcatori riconosciuti dentro stato/giornata.md (case-insensitive):
+Marcatori riconosciuti dentro stato/giornata.md (in maiuscolo, fuori da «…»):
     CHIUSO <CODICE> <modulo>            → entra nel tracker al primo gradino
     RIPASSO <CODICE> <modulo> ok        → avanza di un gradino
     RIPASSO <CODICE> <modulo> debole    → arretra di un gradino (non azzera)
@@ -64,8 +64,13 @@ HEADER = (
     "|---|---|---|---|---|---|\n"
 )
 
-RE_CHIUSO = re.compile(r"\bCHIUSO\s+([A-Z0-9]{2,6})\s+(\S+)", re.IGNORECASE)
-RE_RIPASSO = re.compile(r"\bRIPASSO\s+([A-Z0-9]{2,6})\s+(\S+)\s+(ok|debole)\b", re.IGNORECASE)
+# Marcatori solo in MAIUSCOLO e mai dentro «…» (2026-10-01): con IGNORECASE la frase «è chiuso
+# anche se svolto con guida» entrava nel tracker come modulo «ANCHE se», e una citazione
+# «CHIUSO FI2 02 e 02x» richiudeva 02 con la data del giorno in cui veniva citata.
+RE_CHIUSO = re.compile(r"(?<!«)\bCHIUSO\s+([A-Z0-9]{2,6})\s+([^\s»]+)")
+RE_RIPASSO = re.compile(r"(?<!«)\bRIPASSO\s+([A-Z0-9]{2,6})\s+([^\s»]+)\s+(ok|debole)\b")
+# Il codice deve essere un corso vero: «CHIUSO 02 e 02x» non è un marcatore del corso «02».
+CODICI = set(paths.codici())
 RE_INTESTAZIONE = re.compile(r"^#\s*Giornata\s+(\d{4}-\d{2}-\d{2})\s*$", re.MULTILINE)
 
 
@@ -155,6 +160,8 @@ def apply_markers(buffer_text: str, rows: dict[tuple[str, str], dict], giorno: d
     note: list[str] = []
 
     for codice, modulo in RE_CHIUSO.findall(buffer_text):
+        if codice.upper() not in CODICI:
+            continue
         key = (codice.upper(), modulo)
         prossimo = giorno + dt.timedelta(days=GRADINI[0])
         rows[key] = {
@@ -168,6 +175,8 @@ def apply_markers(buffer_text: str, rows: dict[tuple[str, str], dict], giorno: d
         note.append(f"chiuso {codice.upper()} {modulo}")
 
     for codice, modulo, esito in RE_RIPASSO.findall(buffer_text):
+        if codice.upper() not in CODICI:
+            continue
         key = (codice.upper(), modulo)
         row = rows.get(key)
         if row is None:
