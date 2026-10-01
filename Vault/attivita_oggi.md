@@ -7,3 +7,4 @@
 - Security S3 (cont.): generata `guida_lab_moduloS3_web_security.md` (9 esercizi: nmap→gobuster→Hydra→LFI→command injection→SQLi semplice→SQLi union based→XSS reflected→XSS stored); AUTO-LINKS applicati
 
 - 2026-10-01 · cockpit: automatismi di UniCode portati anche sui lanci da cockpit e nel cloud (briefing, traccia di fine sessione, comandi di studio, bootstrap e salvataggio automatico cloud, TZ Europe/Rome); giornata.py: marcatori solo maiuscoli, fuori da «…», con codice corso valido
+- 2026-10-01 · cockpit: autosave cloud anche su PostToolUse (solo commit), per non far scattare il controllo git del container
