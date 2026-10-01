@@ -12,10 +12,10 @@
 # origin/master nel ramo; in conflitto il merge si annulla e l'avviso compare all'utente.
 # Nel locale non fa nulla: lì si committa come sempre, a mano o da /chiudi.
 #
-# Con --solo-commit (hook PostToolUse su Bash/Write/Edit) si ferma dopo il commit locale: il
-# controllo git del container gira su Stop in parallelo a questo script e, se trova modifiche non
-# ancora committate, rimanda indietro la risposta. Committare subito dopo ogni modifica lo evita;
-# il push resta su Stop, uno per risposta.
+# Gira anche su PostToolUse (Bash/Write/Edit), commit e push completi: il controllo git del
+# container gira su Stop in parallelo a questo script e rimanda indietro la risposta se trova
+# modifiche non committate o commit non inviati. Salvare subito dopo ogni modifica lo evita.
+# --solo-commit resta disponibile per fermarsi al commit locale.
 
 SOLO_COMMIT=""
 [ "${1:-}" = "--solo-commit" ] && SOLO_COMMIT=1
