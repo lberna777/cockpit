@@ -4,3 +4,4 @@
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
 13:06 · FI2 · LAB04a avviato da sessione cloud: startkit (solo FrazLibTest, package frazlib) reso progetto Eclipse importabile (compliance 21, launch con -ea); FrazLib da scrivere, Frazione da spostare nel package frazione (modulo 08).
+14:28 · FI2 · guida-lab LAB04a generata (scheda di una pagina; ristrutturazione in package util/frazione/frazlib dal LAB03, poi FrazLib.sum/mul). Percorso verificato: codice LAB03 nei package + FrazLib del docente → FrazLibTest verde con -ea.

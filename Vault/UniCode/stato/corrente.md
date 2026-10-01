@@ -35,6 +35,8 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   `mcm/den` (verso, pattern 5), `sub` come `f − this`, divisione intera in `getDouble`; test verdi
   per caso su `sub` e `compareTo` (pattern 2). Eclipse: `UnsupportedClassVersionError` 69/65 →
   compliance 21 nelle preferenze del workspace.
+- 🔶 **LAB04a** «Frazioni base — FrazLib» — in corso dal 2026-10-01 (sessione cloud): scheda
+  `corsi/FI2/lezioni/guida_lab_LAB04a_frazlib.md`; prerequisiti 07 e 08 ⬜, entrano qui.
 - 🔶 **04b** «Classi e oggetti» e **06** «Stringhe»: entrati in LAB02 per costruttori, `this(...)`,
   `toString`/`@Override`; si completano con i LAB che li riusano.
 - Tutti gli altri: non aperti.
