@@ -271,6 +271,28 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   calcola `getDouble()` quattro volte e sottrae prima di confrontare. Criterio da aggiungere a
   «questo lo so già?»: *«un metodo della classe lo fa già?»*. Evidenza: `confronto_LAB03.md` §3–§4;
   `svolti/LAB03_Frazione/src/Frazione.java`.
+- [2026-10-01] LAB04a: `FrazLib.mul` copiata da `sum` senza adattarla, con due righe sbagliate
+  (accumulatore da `new Frazione(0)` e chiamata `.sum(f)`), e consegnata («ho scritto […] sia sum
+  che mul, come procedo») senza lanciare `FrazLibTest` → causa: dopo il copia-incolla del metodo
+  gemello non rilegge riga per riga per la nuova operazione; la domanda di Claude sul valore di
+  partenza, posta esplicitamente «per `sum` […] e per `mul`», era stata saltata, e la risposta è
+  arrivata solo per `sum` → correzione: dopo ogni copia chiedersi per ogni riga «ha senso per
+  *questa* operazione?»; l'elemento neutro dipende dall'operazione (`0` per `+`, `1` per `×`).
+  Corretta dopo due domande guida. Evidenza: `stato/giornata.md` 16:16; trascrizione del
+  2026-10-01 14:16–14:20; `confronto_LAB04a.md` §1–2.
+- [2026-10-01] LAB04a: credeva di dover dichiarare il tipo array da qualche parte («non ho
+  introdotto il concetto di array di frazione da nessuna parte») → causa: non sa che per ogni
+  classe il tipo `T[]` esiste già, e confonde il tipo con l'array concreto, che crea e passa il
+  chiamante (qui il test) → correzione: `Frazione[]` esiste da sé; dentro `sum(Frazione[] fs)`
+  servono solo `fs.length`, `fs[i]` e il *for each* (07 sl. 17–19). Evidenza: trascrizione del
+  2026-10-01, 13:43.
+- [2026-10-01] LAB04a (parte nel cloud): metodo d'istanza e `static` non distinti — non coglieva
+  la differenza fra `f[1].sumArray(...)` e `FrazLib.sum(...)` né quali «due mondi» convivano in
+  `Frazione` → causa: stessa famiglia della riga del 2026-09-16 su `persone[].getMediaEta`: non
+  lega il metodo al soggetto su cui opera → correzione: criterio «il metodo usa `this`?» — sì →
+  d'istanza, no → `static`. Lorenzo lo dichiara chiaro (13:43 e a `/chiudi`), ma le tre domande di
+  verifica sono state saltate: **comprensione dichiarata, non verificata**; il banco di prova è
+  LAB04b, dove i due mondi stanno nella stessa classe. Evidenza: `stato/giornata.md` 15:23 e 15:47.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

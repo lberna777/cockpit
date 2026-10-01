@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-09-30
+**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-10-01
 
 > Un solo esame in fase attiva (`piano/piano_laurea.md`, regola 4). Gli altri tre di S1 —
 > `CALC`, `MATAP`, `ELT` — hanno cartella, fonti e percorso pronti, e restano in attesa.
@@ -35,8 +35,14 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   `mcm/den` (verso, pattern 5), `sub` come `f − this`, divisione intera in `getDouble`; test verdi
   per caso su `sub` e `compareTo` (pattern 2). Eclipse: `UnsupportedClassVersionError` 69/65 →
   compliance 21 nelle preferenze del workspace.
-- 🔶 **LAB04a** «Frazioni base — FrazLib» — in corso dal 2026-10-01 (sessione cloud): scheda
-  `corsi/FI2/lezioni/guida_lab_LAB04a_frazlib.md`; prerequisiti 07 e 08 ⬜, entrano qui.
+- ✅ **LAB04a** «Frazioni base — FrazLib» — chiuso il 2026-10-01 con i test verdi, **svolto con
+  guida** (iniziato nel cloud, finito in locale): da rifare a freddo. Codice e confronto in
+  `corsi/FI2/esame_FI2/svolti/LAB04a_FrazioniBase/`: logica identica al docente. `sum` scritta da
+  solo; `mul` copiata da `sum` e corretta dopo due domande (neutro `1`, `.mul`). Lorenzo dichiara
+  chiara la distinzione `static` / d'istanza (criterio «usa `this`?»), dopo la confusione delle
+  15:23, e gestiti da solo gli array; verifica a voce saltata.
+- 🔶 **07** «Array» e **08** «Package e namespace»: entrati in LAB04a (array di oggetti, *for
+  each*, `length`; package e `import`); si completano con LAB04b/c ed `ES-MATRICI`.
 - 🔶 **04b** «Classi e oggetti» e **06** «Stringhe»: entrati in LAB02 per costruttori, `this(...)`,
   `toString`/`@Override`; si completano con i LAB che li riusano.
 - Tutti gli altri: non aperti.
@@ -50,12 +56,13 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-1. **`/lab FI2 LAB04`** — Insiemi di frazioni (a/b/c): `FrazLib` statica → Frazione «double face» →
-   ADT `FractionCollection` [percorso: prerequisiti 07, 08, entrambi ⬜ — dichiararlo in testa alla scheda].
-2. Dopo i test verdi: `confronto_LAB04.md`, cercando ridondanze e **riuso di metodi già scritti**
-   (`confronto_LAB03.md` punto 3).
-3. Prontuario, da `/chiudi`: §1 `UnsupportedClassVersionError` (class file 69 vs 65), §3 operazioni
-   su Frazione (`mcm/den`, cast prima della divisione, `compareTo` in croce).
+1. **`/lab FI2 LAB04b`** — Frazione «double face» (LAB04 sl. 22–24): la libreria di `FrazLib` entra
+   dentro `Frazione` come metodi `static` accanto a quelli d'istanza. Si parte duplicando il
+   progetto `Lab04a-Frazione-300927` del workspace (prontuario §2) e dallo startkit
+   `materiali/lab/Lab04b-FrazioniDoubleFace-Startkit.zip`. È il punto dei «due mondi» in una
+   classe, che alle 15:23 era opaco: verificarlo lì, sul codice.
+2. Poi **LAB04c** — ADT `FractionCollection`.
+3. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
 `"A".getBytes("UTF-16")` dà `[-2, -1, 0, 65]`, cioè il BOM **big endian**, coerente con la slide 35

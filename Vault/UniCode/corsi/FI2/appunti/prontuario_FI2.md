@@ -50,6 +50,10 @@ tags: [FI2, appunti]
 | scrivere un `compareTo` che restituisce 0 / 1 / −1 | 3.9 | LAB03 |
 | dividere due `int` e ottenere un `double` | 3.9 · 1.3 | LAB03 |
 | capire `UnsupportedClassVersionError` al lancio | 2 · 1.2 | LAB03 |
+| spostare classi in package, sistemare gli `import` | 2 · 3.10 · 1.1 | LAB04a |
+| scrivere una libreria di funzioni `static`; capire quando un metodo è `static` | 3.10 | LAB04a |
+| scorrere un array di oggetti e accumulare un risultato (somma, prodotto) | 3.10 | LAB04a |
+| capire «non-static method … static context» | 1.1 · 3.10 | LAB04a |
 
 ---
 
@@ -72,6 +76,8 @@ terminale. **Stessa causa, parole diverse.**
 | `Type mismatch: cannot convert from String to int` | `String cannot be converted to int` | gli argomenti del `main` sono stringhe, non numeri | `Integer.parseInt(s)` / `Double.parseDouble(s)` — vedi 3.5 |
 | `The literal 3000000000 of type int is out of range` | `integer number too large` | un letterale senza `L` è `int`, e non arriva a 3·10⁹ | `3000000000L` |
 | `Frazione cannot be resolved to a type` | `cannot find symbol` … `symbol: class Frazione` | la classe non esiste ancora: sono le **X rosse** normali dello startkit | scriverla col nome **esatto** usato nei test, nel package dei test |
+| `MyMath cannot be resolved` (classe di un **altro package**) | `cannot find symbol` … `symbol: variable MyMath` | la classe esiste, ma sta in un altro package e manca l'`import` | `import util.MyMath;` sotto la riga `package` [08 sl. 18; LAB04 sl. 18] |
+| `Cannot make a static reference to the non-static method sum(Frazione) from the type Frazione` | `non-static method sum(Frazione) cannot be referenced from a static context` | metodo d'istanza chiamato sulla **classe** (`Frazione.sum(f)`): manca l'oggetto che fa da `this` | chiamarlo su un oggetto (`a.sum(f)`), oppure è una funzione da libreria → 3.10 |
 | `This method must return a result of type int` | `missing return statement` | metodo dello startkit con solo `// da fare`, o un ramo senza `return` | un `return` su **ogni** strada del metodo |
 
 ## 1.2 Eccezioni a run-time
@@ -83,6 +89,7 @@ Compila tutto, esplode eseguendo — in console, in rosso.
 | `ArithmeticException: / by zero` | divisione o `%` fra **interi** per zero. Fra reali **non** succede: dà `Infinity`/`NaN` [02x sl. 21–22] | controllare il divisore prima |
 | `AssertionError` … `at FrazioneTest.main(FrazioneTest.java:28)` | con `-ea`, un `assert` del test è falso: è il **failure** di un test fatto di `assert` | apri la riga indicata, leggi cosa si aspetta, prova quel caso a mano |
 | ⚠️ `ArithmeticException: / by zero` … `at MyMath.mcd` | `mcd(0, n)`: Euclide scambia e fa `n % 0` [LAB02 sl. 9] | nel chiamante, gestire il numeratore 0 **prima** di chiamare `mcd`; non modificare `mcd` |
+| `NullPointerException: Cannot read field "den" because "f" is null` … `at frazione.Frazione.sum` … `at frazlib.FrazLib.sum` | una cella dell'array è `null`: `new Frazione[4]` crea 4 caselle **vuote**, non 4 frazioni [07 sl. 17]. È un **error**, non un failure | riempire ogni cella (`fs[i] = new Frazione(…)`) prima di passare l'array. Leggi la traccia dal basso: chi ha passato il `null` |
 | `NumberFormatException: For input string: "…"` | `parseInt`/`parseDouble` su stringa non valida — **le virgolette nel messaggio mostrano la stringa esatta**: guardale per vedere spazi e virgole | controllare la stringa prima di convertirla [02x sl. 35] — vedi 3.5 |
 | ⚠️ `LinkageError durante il caricamento della classe principale X` · `java.lang.UnsupportedClassVersionError: X has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0` | al lancio, prima di eseguire qualsiasi riga: Eclipse ha compilato per una Java **più nuova** del JRE che esegue. Versione class file = Java + 44: 65 = Java 21, 69 = Java 25 | compliance del compilatore = versione del JRE → §2 |
 
@@ -118,6 +125,9 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | Il nome che conta | quello scritto in `.project` (`<name>…</name>`), che Eclipse aggiorna col Refactor; rinominare la cartella a mano non lo cambia | LAB02, 30/09 |
 | Test fatti di `assert` in un `main` (non JUnit) | tasto destro sulla classe di test → *Run As → Run Configurations… → Arguments → VM arguments* = `-ea` → Run; poi basta ▶. Console vuota = tutti passati, **solo con `-ea`** [LAB02 sl. 12, 24–25] | LAB02, 30/09 |
 | X rosse appena importato | normali: mancano le classi e i metodi da scrivere [LAB02 sl. 23] | LAB02, 30/09 |
+| Ripartire dal LAB precedente | tasto destro sul progetto → *Copy* → *Paste* → nuovo nome. La configurazione di Run con `-ea` va **ricreata** sul progetto nuovo: controlla con un `assert false;` provvisorio che la console dia `AssertionError` | LAB04a, 01/10 |
+| Classi in package (sl. 19) | tasto destro su `src` → *New → Package* (`util`, `frazione`, `frazlib`); poi trascina la classe sul package, o *Refactor → Move*: Eclipse riscrive la riga `package` e gli `import` di chi la usa. Alla domanda sui *potential matches* → accetta | LAB04a, 01/10 |
+| Import di uno zip che fallisce | scompatta e usa *Existing Projects → Select **root directory*** + *Copy projects into workspace* | LAB04a, 01/10 |
 | Collaudo | **metodo per metodo**: commenta i blocchi di test non ancora pertinenti e scommentali man mano, per evitare «errori in cascata» [LAB02 sl. 23]. Un `assert` fallito ferma il `main`: quelli dopo non sono ancora stati controllati | LAB02, 30/09 |
 
 ---
@@ -472,6 +482,55 @@ public double getDouble() {
   All'esame si usa il metodo che chiede il testo.
 - Dentro la classe `f.den` compila anche se `den` è `private`: `private` protegge **dalle altre
   classi**, non dagli altri oggetti della stessa classe [sl. 6].
+
+## 3.10 Package, libreria `static`, array di oggetti (LAB04a)
+
+Svolto: `esame_FI2/svolti/LAB04a_FrazioniBase/src/`. Fonti: LAB04 sl. 4–21, 08 sl. 18–20, 07 sl. 17–19.
+
+**`static` o d'istanza?** Chiediti: *il metodo usa `this`?*
+
+| | Metodo d'istanza | Funzione `static` |
+|---|---|---|
+| si chiama su | un **oggetto**: `a.sum(b)` | la **classe**: `FrazLib.sum(fs)`, `MyMath.mcd(x, y)` |
+| `this` | c'è: è l'oggetto prima del punto | non esiste |
+| esempio | `Frazione.sum(Frazione f)`: `this + f` | `FrazLib.sum(Frazione[] fs)`: lavora solo sui parametri |
+
+`sum` di un array non sta in `Frazione` (non parte da *una* frazione) né nell'array (gli array non
+hanno metodi tuoi): sta in un «ente terzo», la libreria statica [LAB04 sl. 5–9].
+
+```java
+package frazlib;                          // prima riga: il package della classe (= cartella src/frazlib)
+
+import frazione.Frazione;                 // Frazione sta in un altro package: senza import → «cannot be resolved»
+
+public class FrazLib {                    // libreria: solo metodi static, nessun campo, nessun oggetto FrazLib
+
+    public static Frazione sum(Frazione[] fs) {   // static: si chiama FrazLib.sum(...), non serve un oggetto
+        Frazione tmp = new Frazione(0, 1);        // accumulatore = ELEMENTO NEUTRO della somma (0)
+        for (Frazione f : fs)                     // for each: f vale fs[0], fs[1], ... fino a fs[fs.length-1]
+            tmp = tmp.sum(f);                     // riusa la somma a due di Frazione; riassegna: Frazione è immutabile
+        return tmp;                               // array vuoto → 0/1; risultato già ridotto da Frazione.sum
+    }
+
+    public static Frazione mul(Frazione[] fs) {
+        Frazione tmp = new Frazione(1, 1);        // ⚠️ neutro del PRODOTTO è 1: partendo da 0 il risultato è sempre 0
+        for (Frazione f : fs)
+            tmp = tmp.mul(f);                     // ⚠️ mul, non sum: rileggi ogni riga dopo un copia-incolla
+        return tmp;                               // array vuoto → 1
+    }
+}
+```
+
+| Array di oggetti | Cosa fa |
+|---|---|
+| `Frazione[] fs = new Frazione[4];` | 4 caselle **`null`**: nessuna frazione è ancora stata creata [07 sl. 17] |
+| `fs[0] = new Frazione(1, 3);` | riempie la casella 0 |
+| `fs.length` | numero di caselle — **campo**, senza `()` (le `String` invece hanno `length()`) |
+| `for (int i = 0; i < fs.length; i++) … fs[i] …` | serve l'indice (posizione, celle vicine) |
+| `for (Frazione f : fs) … f …` | basta il valore: più corto, niente errori di indice |
+| `Frazione[]` | esiste da sé per ogni classe: non si dichiara da nessuna parte |
+
+Verificato (`javac`): `sum` e `mul` di un array vuoto → `0` e `1`; `sum({3/6})` → `1/2`.
 
 ---
 
