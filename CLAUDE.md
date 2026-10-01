@@ -41,11 +41,14 @@ Riordinata il 2026-09-01, rivista il 2026-09-14.
 >   `claude/*` di studio più recenti non ancora in master, consolidamento arretrato);
 > - **fine sessione**: `scripts/unicode_session_end.sh` scrive la traccia in `log/AAAA-MM.md`
 >   solo se la sessione ha toccato lo studio — le sessioni di codice non contano come giornate;
-> - **cloud**: `scripts/cloud_autosave.sh` su `Stop` committa e invia il Vault sul ramo di
->   sessione dopo ogni risposta; sul laptop arriva solo dopo il merge della PR in master. A ogni
->   `/chiudi` nel cloud Claude apre la PR verso master e la unisce (autorizzato da Lorenzo il
->   2026-10-01), dopo aver verificato il rischio di conflitto con un consolidamento serale del
->   laptop non ancora inviato (`log/giornate.md`, `stato/tracker.md`, `log/giornate_dettaglio/`);
+> - **cloud**: `scripts/cloud_autosave.sh` su `Stop` committa il Vault dopo ogni risposta e lo
+>   invia sul ramo di sessione **e su master** (solo fast-forward; se master è andato avanti lo
+>   unisce prima, in conflitto si ferma e avvisa): ciò che Claude crea nel cloud arriva sul laptop
+>   e in Obsidian con un `git pull` (richiesta di Lorenzo del 2026-10-01). Rischio da ricordare:
+>   un consolidamento serale del laptop non ancora inviato diverge su `log/giornate.md`,
+>   `stato/tracker.md`, `log/giornate_dettaglio/` — sul laptop, `git pull` prima di studiare;
+> - **progetti Eclipse dal cloud**: in `Vault/UniCode/corsi/FI2/esame_FI2/da_importare/`, da
+>   importare con *Existing Projects → Select root directory* + *Copy projects into workspace*;
 > - **comandi**: `/lab`, `/chiudi`, `/lezione`… stanno in `.claude/commands` come rimandi agli
 >   originali di `Vault/UniCode/.claude/commands`; dopo aver aggiunto o rinominato un comando
 >   di UniCode, `python3 scripts/unicode_commands.py`;

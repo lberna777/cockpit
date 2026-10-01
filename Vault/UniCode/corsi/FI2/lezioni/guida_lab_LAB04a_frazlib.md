@@ -7,7 +7,7 @@ tags: [FI2, guida-lab]
 **Teoria che entra qui**: `08` ⬜ — package e `import` sl. 11–16, 18–20, default package «innominabile» sl. 35 · `07` ⬜ — array di oggetti sl. 17–19, `length` sl. 19, *for each* sl. 41–43.
 
 ## Setup
-- importa `LAB04a_FrazioniBase-011026.zip` (*Select archive file* → **Finish**): è già rinominato, ha la compliance 21 e la configurazione `FrazLibTest` con `-ea`;
+- dopo `git pull` in `~/cockpit`: *Existing Projects* → *Select root directory* → `esame_FI2/da_importare/LAB04a_FrazioniBase-011026` → spunta **Copy projects into workspace** → **Finish**. È già rinominato, ha la compliance 21 e la configurazione `FrazLibTest` con `-ea`;
 - **ristruttura** come da sl. 19: package `util` (`MyMath`), `frazione` (`Frazione`, `FrazioneTest`, `MainFrazione` del **tuo LAB03**), `frazlib` (`FrazLib` da creare, `FrazLibTest` già lì). Copia i file da LAB03 incollandoli sul package: Eclipse riscrive la riga `package`;
 - X rosse attese: `MyMath cannot be resolved` in `Frazione` e `FrazioneTest` (manca un `import`, sl. 18) e `FrazLib cannot be resolved` in `FrazLibTest` (la classe non esiste ancora);
 - prima di `FrazLib`, lancia `FrazioneTest` (con `-ea`): deve restare verde dopo lo spostamento.
