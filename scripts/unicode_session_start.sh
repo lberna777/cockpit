@@ -46,7 +46,14 @@ testa = (
     "Radice di UniCode: `Vault/UniCode` (anche `~/UniCode`). Il lavoro sul Vault viene "
     "committato e inviato da solo dopo ogni risposta, sul ramo claude/* di questa sessione: "
     "arriva su master — e quindi sul laptop — solo dopo il merge della PR. Eclipse non c'è: "
-    "i progetti si compilano qui con javac (JDK 21), Lorenzo li importa in locale.\n"
+    "i progetti si compilano qui con javac (JDK 21), Lorenzo li importa in locale.\n\n"
+    "**A ogni `/chiudi` nel cloud** (autorizzazione di Lorenzo del 2026-10-01): dopo il commit, "
+    "apri la PR dal ramo di sessione verso master e uniscila tu (squash). **Rischio di conflitto**: "
+    "se il laptop ha consolidato la stessa giornata col timer serale senza inviarla, master e il "
+    "ramo divergono su `log/giornate.md`, `stato/tracker.md` e `log/giornate_dettaglio/`. Prima del "
+    "merge controlla che la PR sia mergeable; in conflitto su quei file tieni la versione del ramo "
+    "cloud se il contenuto coincide, altrimenti fermati e chiedi a Lorenzo. Ricordaglielo anche "
+    "a voce in chiusura.\n"
 )
 if avvisi:
     testa += "\n**Avvisi dall'avvio**:\n" + avvisi + "\n"
