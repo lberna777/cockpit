@@ -41,6 +41,9 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   solo; `mul` copiata da `sum` e corretta dopo due domande (neutro `1`, `.mul`). Lorenzo dichiara
   chiara la distinzione `static` / d'istanza (criterio «usa `this`?»), dopo la confusione delle
   15:23, e gestiti da solo gli array; verifica a voce saltata.
+- 🔶 **LAB04b** «Frazione double face» — in corso dal 2026-10-01: scheda
+  `corsi/FI2/lezioni/guida_lab_LAB04b_doubleface.md`, progetto da importare in
+  `esame_FI2/da_importare/LAB04b_FrazioniDoubleFace-011026` (contiene la `Frazione` del LAB04a).
 - 🔶 **07** «Array» e **08** «Package e namespace»: entrati in LAB04a (array di oggetti, *for
   each*, `length`; package e `import`); si completano con LAB04b/c ed `ES-MATRICI`.
 - 🔶 **04b** «Classi e oggetti» e **06** «Stringhe»: entrati in LAB02 per costruttori, `this(...)`,
@@ -56,10 +59,9 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-1. **`/lab FI2 LAB04b`** — Frazione «double face» (LAB04 sl. 22–24): la libreria di `FrazLib` entra
-   dentro `Frazione` come metodi `static` accanto a quelli d'istanza. Si parte duplicando il
-   progetto `Lab04a-Frazione-300927` del workspace (prontuario §2) e dallo startkit
-   `materiali/lab/Lab04b-FrazioniDoubleFace-Startkit.zip`. È il punto dei «due mondi» in una
+1. **LAB04b in corso** — Frazione «double face» (LAB04 sl. 22–24): la libreria di `FrazLib` entra
+   dentro `Frazione` come metodi `static` accanto a quelli d'istanza. **Scheda generata**: si
+   importa `esame_FI2/da_importare/LAB04b_FrazioniDoubleFace-011026` e si lavora su `FrazioneTest`. È il punto dei «due mondi» in una
    classe, che alle 15:23 era opaco: verificarlo lì, sul codice.
 2. Poi **LAB04c** — ADT `FractionCollection`.
 3. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.

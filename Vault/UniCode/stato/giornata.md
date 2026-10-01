@@ -15,3 +15,4 @@
 16:25 · FI2 · LAB04a test verdi (FrazLibTest + FrazioneTest con -ea), guidato: mul corretta dopo due domande (neutro 1, .mul). Lorenzo: static/istanza e array chiari. Progetto in svolti/LAB04a_FrazioniBase/ con confronto_LAB04a.md (logica identica al docente). CHIUSO FI2 LAB04a
 16:25 · FI2 · prontuario: §3.10 package/libreria static/array di oggetti, §1.1 «cannot be resolved» da import mancante e «static context», §1.2 NullPointerException su cella null, §2 duplicare un LAB, Move in package, import da cartella
 16:31 · FI2 · revisione errori: 3 nuovi, 0 ricorrenze
+16:36 · FI2 · guida-lab LAB04b generata (scheda + progetto importabile da_importare/LAB04b_FrazioniDoubleFace-011026 con la Frazione del LAB04a). LAB04b in corso.
