@@ -41,8 +41,8 @@ Riordinata il 2026-09-01, rivista il 2026-09-14.
 >   `claude/*` di studio più recenti non ancora in master, consolidamento arretrato);
 > - **fine sessione**: `scripts/unicode_session_end.sh` scrive la traccia in `log/AAAA-MM.md`
 >   solo se la sessione ha toccato lo studio — le sessioni di codice non contano come giornate;
-> - **cloud**: `scripts/cloud_autosave.sh` committa e invia il Vault dopo ogni modifica (`PostToolUse`) e su `Stop`:
->   lo invia sul ramo di sessione **e su master** (solo fast-forward; se master è andato avanti lo
+> - **cloud**: `scripts/cloud_autosave.sh` committa e invia il Vault dopo ogni modifica (`PostToolUse`) e a fine risposta (`Stop`),
+>   sul ramo di sessione **e su master** (solo fast-forward; se master è andato avanti lo
 >   unisce prima, in conflitto si ferma e avvisa): ciò che Claude crea nel cloud arriva sul laptop
 >   e in Obsidian con un `git pull` (richiesta di Lorenzo del 2026-10-01). Rischio da ricordare:
 >   un consolidamento serale del laptop non ancora inviato diverge su `log/giornate.md`,
