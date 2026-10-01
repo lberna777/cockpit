@@ -59,6 +59,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/scripts/cloud_autosave.sh\" --solo-commit",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   },
   "env": {
