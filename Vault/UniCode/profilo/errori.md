@@ -50,6 +50,13 @@ distinzione non è stata capita.
   ciclo `i < fs.length-1` scritto «per non andare nei valori nulli», e l'ultimo elemento logico
   cercato in `fs[fs.length]` / `fs[fs.length-1]`. Dettaglio nella sezione FI2. Evidenza:
   trascrizione del 2026-10-01, 17:18; `stato/giornata.md` 17:17.
+- [2026-10-02] FI2 LAB04c: capacità fisica e contenuto logico ancora non separati nel costruttore
+  `(int)`. Lo pensa come «vuota con una dimensione fisica data come campo» da «riempire con `put`»,
+  e tiene il numero in un campo `physicalSize` invece di leggere la capacità da `innerContainer.length`;
+  il «logicamente vuota» (`size = 0`) non c'è. Recuperato col modello a scaffale. Da notare in
+  positivo: davanti a `Frazione.size` da solo ha detto «ho length ma non credo vada bene», cioè la
+  distinzione fisica/logica sul conteggio oggi l'ha vista da sé. Evidenza: trascrizione del
+  2026-10-02 («riempirla con put? o cosa?», «sono veramente confuso»); `stato/giornata.md` 12:40.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -335,6 +342,16 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   ciclo. Coerente con quanto dichiarato a `/chiudi`: fatica a trovare la forma «giusta» oltre che
   funzionante. Evidenza: `svolti/LAB04b_FrazioniDoubleFace/src/frazione/Frazione.java` (`size`,
   `sum`/`mul` a coppie); trascrizione del 2026-10-01, 17:38 e 17:41.
+- [2026-10-02] LAB04c: costruttori che non portano l'oggetto in stato valido. Il `(int)` memorizzava
+  il parametro in un campo `physicalSize` senza creare l'array, `size` assente; il `()` vuoto,
+  quindi `innerContainer` sarebbe rimasto `null` e ogni `put` in errore → causa: il costruttore è
+  visto come il posto dove «salvare il parametro», non dove costruire la rappresentazione interna;
+  parametro del costruttore e campo della classe fusi (`physicalSize` non è un campo, la capacità
+  è `innerContainer.length`) → correzione: ogni costruttore lascia `innerContainer` su un array
+  vero e `size` coerente; `(int)` crea `new Frazione[n]` e pone `size = 0`; `()` delega con
+  `this(DEFAULT_PHYSICAL_SIZE)`. Stessa famiglia della riga del 2026-09-30 sul costruttore che
+  non copre tutti i casi. Evidenza: trascrizione del 2026-10-02 («gli ho scritti, ma sono
+  veramente confuso», lettura del codice da parte di Claude); `stato/giornata.md` 12:40.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

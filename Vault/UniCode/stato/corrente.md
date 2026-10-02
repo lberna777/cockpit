@@ -47,6 +47,7 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   condizione (`length-1` → `length` → `length && != null`, data dalla sl. 28): **fine fisica e
   fine logica confuse**; giudizio di Lorenzo: «chiaro ma non chiarissimo», fatica sul ragionamento con gli array e sulla forma «giusta». `0/6` risolto chiamando `sumWithMcm`. Il suo `sum(Frazione[])` regge le
   celle `null`, quello del docente no (verificato).
+- 🔄 **LAB04c** «ADT FractionCollection» — in corso dal 2026-10-02, **non chiuso**. Scheda `corsi/FI2/lezioni/guida_lab_LAB04c_fractioncollection.md`; si lavora direttamente in `esame_FI2/da_importare/LAB04c_FractionCollection-021026`. Fatti: campi, due costanti, tre costruttori (verificati). Mancano `size()`, `get`, `put`, `remove`, `toString`, `sum`/`mul`. Dichiarato «veramente confuso» sul rapporto fra array e classe: si è sciolto col modello scaffale/contatore.
 - 🔶 **07** «Array» e **08** «Package e namespace»: entrati in LAB04a (array di oggetti, *for
   each*, `length`; package e `import`); si completano con LAB04b/c ed `ES-MATRICI`.
 - 🔶 **04b** «Classi e oggetti» e **06** «Stringhe»: entrati in LAB02 per costruttori, `this(...)`,
@@ -62,11 +63,8 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-1. **`/lab FI2 LAB04c`** — ADT `FractionCollection` (LAB04 sl. 41 sgg.). Partire duplicando il
-   progetto `Lab04b-FrazioniDoubleFace-Startkit` del workspace (quello verde), e allenare proprio
-   il punto debole dichiarato oggi: ragionare sull'array logico (dove finisce, `null`), stavolta
-   *dentro* una classe: l'incapsulamento che la sl. 41
-   chiede contro il software «fragile» degli array nudi. Prima, rendere la `sum` d'istanza via `mcm` (confronto LAB04b punto 5).
+1. **Riprendere LAB04c** da `esame_FI2/da_importare/LAB04c_FractionCollection-021026/src/fractioncollection/FractionCollection.java`: tre costruttori fatti e verificati. Prossimo: `size()` e `get(int)` (passo 3 della scheda), poi `put` con raddoppio via `DEFAULT_GROWTH_FACTOR` (attenzione: con la scelta B l'array nato da `(Frazione[])` è pieno, e con lunghezza 0 «il doppio» fa 0), `remove`, `toString` con `StringBuilder`, `sum`/`mul` (`sub`/`div` non sono nel diagramma sl. 59). Lanciare `FractionCollectionTests` con `-ea`.
+   Pulizia da fare: nel workspace Eclipse restano `Lab04c-…-Soluzione.zip_expanded` e `…-Startkit.zip_expanded`; da eliminare (la prima contiene la soluzione del docente).
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma

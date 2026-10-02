@@ -59,6 +59,9 @@ tags: [FI2, appunti]
 | creare e restituire un array nuovo (somma cella per cella di due array) | 3.11 | LAB04b |
 | stampare un array come `[a, b, c]` senza virgola finale | 3.11 | LAB04b |
 | metodi `static` e d'istanza nella stessa classe; tre `sum` con lo stesso nome (overloading) | 3.11 | LAB04b |
+| nascondere un array dentro una classe (ADT con campi `private`, costanti `static final`) | 3.12 | LAB04c (in corso) |
+| scrivere più costruttori senza duplicare codice (`this(...)`) | 3.12 | LAB04c (in corso) |
+| costruire un oggetto da un array che mi passano, **copiandolo** (non tenendo il riferimento) | 3.12 | LAB04c (in corso) |
 
 ---
 
@@ -86,6 +89,7 @@ terminale. **Stessa causa, parole diverse.**
 | `This method must return a result of type int` | `missing return statement` | metodo dello startkit con solo `// da fare`, o un ramo senza `return` | un `return` su **ogni** strada del metodo |
 | `The method sum(Frazione) in the type Frazione is not applicable for the arguments (Frazione[], Frazione[])` | `method sum in class Frazione cannot be applied to given types` | esiste un `sum` con quel nome ma con **altri** argomenti: il test chiama un overload non ancora scritto | scrivere il metodo con la firma del test (qui `static Frazione[] sum(Frazione[], Frazione[])`) → 3.11 |
 | `The method convertToString(Frazione[]) is undefined for the type Frazione` | `cannot find symbol` … `symbol: method convertToString(Frazione[])` | nessun metodo con quel nome nella classe | scriverlo, nella classe che il test usa come prefisso |
+| ⚠️ `The method Size(Frazione[]) is undefined for the type Frazione` (testo Eclipse per analogia con la riga sopra, non rilanciato) | `cannot find symbol` … `symbol: method Size(Frazione[])` · `location: class Frazione` (verificato con `javac`) | **maiuscole**: Java distingue `Size` da `size`; il metodo esiste, scritto minuscolo | `Frazione.size(...)` |
 
 ## 1.2 Eccezioni a run-time
 
@@ -599,6 +603,41 @@ Verificato (`javac`): `size` → 4 / 2 / 0 su array del test / pieno / vuoto; `s
 → `[8/15, 11/12, -5/14, 0/6]`; dimensioni 4 e 2 → `null`; `convertToString` → `[1/3, 2/3, -1/2, 1/6]`.
 ⚠️ Il `sum(Frazione[])` della soluzione del docente usa il *for each* e va in
 `NullPointerException` sugli array a metà: per gli array a metà usa la condizione sopra.
+
+## 3.12 ADT con array nascosto: campi, costanti, costruttori (LAB04c — parziale, in corso)
+
+*Per ora solo la parte svolta: campi e tre costruttori. Il resto (`put`, `remove`, `toString`, `sum`) entra a LAB chiuso.*
+
+| Riga UML (sl. 59) | Java | Perché |
+|---|---|---|
+| `- DEFAULT_PHYSICAL_SIZE: int = 10 {readOnly}` (sottolineata) | `private static final int DEFAULT_PHYSICAL_SIZE = 10;` | `{readOnly}` = `final`; sottolineato = `static` (una per classe). Si inizializza **sulla riga** |
+| `- innerContainer: Frazione[]` | `private Frazione[] innerContainer;` | l'array di supporto; i campi normali non hanno `= …` (partono a `null` / `0`) e si inizializzano nel costruttore |
+| `- size: int` | `private int size;` | **dimensione logica** = quante frazioni ci sono = indice della prima cella libera |
+
+La dimensione fisica **non è un campo**: è `innerContainer.length`. `physicalSize` esiste solo come parametro.
+
+```java
+public FractionCollection(int physicalSize) {
+	innerContainer = new Frazione[physicalSize];   // crea lo "scaffale": physicalSize celle, tutte null
+	size = 0;                                      // logicamente vuota: nessuna frazione dentro
+}
+
+public FractionCollection() {
+	innerContainer = new Frazione[DEFAULT_PHYSICAL_SIZE];   // capacità di default; size parte da 0 da solo
+}                                                           // (alternativa: this(DEFAULT_PHYSICAL_SIZE); evita il duplicato)
+
+public FractionCollection(Frazione[] collection) {
+	size = Frazione.size(collection);              // dimensione LOGICA del parametro: length darebbe quella fisica
+	innerContainer = new Frazione[size];           // array nuovo, lungo quanto serve (scelta B: nasce pieno)
+	for (int i = 0; i < size; i++) {               // copia solo le celle occupate
+		innerContainer[i] = collection[i];         // `collection` = parametro, `innerContainer` = campo
+	}
+}
+```
+
+Verificato (`javac`, riflessione sui campi): array da 10 con 2, 4, 0 frazioni → `size` 2 / 4 / 0,
+`innerContainer.length` 2 / 4 / 0, array diverso dal parametro (modificare `arr[0]` dopo non cambia la
+collezione). ⚠️ Con lunghezza 0 «il doppio» fa ancora 0: ricordarlo scrivendo `put`.
 
 
 ---
