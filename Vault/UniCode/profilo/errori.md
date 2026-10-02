@@ -57,6 +57,12 @@ distinzione non è stata capita.
   positivo: davanti a `Frazione.size` da solo ha detto «ho length ma non credo vada bene», cioè la
   distinzione fisica/logica sul conteggio oggi l'ha vista da sé. Evidenza: trascrizione del
   2026-10-02 («riempirla con put? o cosa?», «sono veramente confuso»); `stato/giornata.md` 12:40.
+- [2026-10-02] `FI2` LAB04c: stessa fusione fisico/logico in tre punti dopo il costruttore. `size()` scritto
+  contando i `null` dall'inizio invece di leggere il campo `size` («il for mi sembra giusto»); poi
+  «il vettore è già sistemato in modo che dimensione fisica e virtuale siano uguali», vero solo col
+  costruttore `(Frazione[])`; infine `toString` con l'ultimo elemento scritto fuori dal ciclo
+  (`innerContainer[size-1]`), che rompe con `size` 0. Evidenza: trascrizione del 2026-10-02 pomeriggio;
+  `stato/giornata.md` 15:40, 17:37.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -88,6 +94,10 @@ ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazion
   comunque `0/36`), poi `sumWithMcm` dentro `sum(Frazione[])` («sum usa sumconmcm quindi dovrebbe
   funzionare ora»), benché Claude avesse già detto che quel passaggio «non tocca il caso `0/6`».
   Evidenza: trascrizione del 2026-10-01, 16:45 e 17:31; `stato/giornata.md` 17:16.
+- [2026-10-02] `FI2` LAB04c: `remove` consegnato come finito con `testRemove` verde, ma con tre scarti di
+  uno (`index <= size`, ciclo `i < size`, azzerata `[size]` invece di `[size-1]`); il test passa perché
+  oltre `size` c'è un `null` che si compensa. Il caso con array pieno non è stato provato da lui prima
+  di consegnare. Evidenza: codice letto alle 16:50; `stato/giornata.md` 17:00.
 
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
@@ -144,6 +154,11 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   mcm)`); `stato/giornata.md` 17:26 e 18:02; `svolti/LAB03_Frazione/confronto_LAB03.md` §2.
 
 ---
+- [2026-10-02] `FI2` LAB04c: due versi invertiti in `put` e `get`. Fattore di crescita scritto come somma
+  (`length + DEFAULT_GROWTH_FACTOR`, con capacità 3 dà 5) invece del prodotto; condizione di indice non
+  valido con `&&` (`index < 0 && index >= size`, mai vera) invece di `||`. Entrambi derivabili da un caso
+  a mano (capacità 3 → 6; indice 1 su `size` 1). Evidenza: codice letto alle 15:35 e 16:20;
+  `stato/giornata.md` 15:40, 16:30.
 
 ## Per corso
 
@@ -352,6 +367,21 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   `this(DEFAULT_PHYSICAL_SIZE)`. Stessa famiglia della riga del 2026-09-30 sul costruttore che
   non copre tutti i casi. Evidenza: trascrizione del 2026-10-02 («gli ho scritti, ma sono
   veramente confuso», lettura del codice da parte di Claude); `stato/giornata.md` 12:40.
+- [2026-10-02] LAB04c `put`: il nuovo array creato nel ramo del raddoppio resta in una variabile locale,
+  mai assegnato a `innerContainer` → causa: non distingue la variabile locale `fs` dal campo che deve
+  cambiare (il costruttore faceva già `innerContainer = …`, qui lo ha dimenticato) → correzione: dopo la
+  copia, `innerContainer = fs;`; senza, la frazione aggiunta si perde e `get` lancia. Inserimento duplicato nei
+  due rami → si fattorizza dopo l'`if`. Evidenza: codice letto alle 16:20; `stato/giornata.md` 16:30.
+- [2026-10-02] LAB04c `remove`: tre scarti di uno insieme (`<= size`, ciclo `i < size`, azzeramento di
+  `[size]`) → causa: gli estremi non sono derivati da un esempio con 4 celle (`[A,B,C,D]`, `remove(1)`)
+  → correzione: valido `0 ≤ index < size`; ciclo fino a `size - 1` (legge `[i+1]`); azzerare `[size - 1]`.
+  Evidenza: codice letto alle 16:50; `stato/giornata.md` 17:00.
+- [2026-10-02] LAB04c `toString`: prima volta con `StringBuilder`; l'idea del separatore (virgola prima, tranne il
+  primo) l'aveva già in `convertToString` ma qui ha scritto il ciclo fino a `size - 1` con l'ultimo fuori,
+  e ha aggiunto un prefisso «Container: » non richiesto → causa: forma del metodo ripresa dalla slide/stampa a
+  video senza rileggere il formato della scheda (`[a, b, c]`) → correzione: tutto nel ciclo, `[`/`]`
+  senza spazi. Evidenza: `stato/giornata.md` 17:37. Lorenzo ha anche chiesto di rinominare `size()` in
+  `getSize()` per chiarezza: i test lo chiamano `size()`, il nome dei metodi lo fissa il diagramma.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

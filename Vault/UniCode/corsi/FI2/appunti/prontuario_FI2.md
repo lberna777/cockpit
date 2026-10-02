@@ -59,9 +59,14 @@ tags: [FI2, appunti]
 | creare e restituire un array nuovo (somma cella per cella di due array) | 3.11 | LAB04b |
 | stampare un array come `[a, b, c]` senza virgola finale | 3.11 | LAB04b |
 | metodi `static` e d'istanza nella stessa classe; tre `sum` con lo stesso nome (overloading) | 3.11 | LAB04b |
-| nascondere un array dentro una classe (ADT con campi `private`, costanti `static final`) | 3.12 | LAB04c (in corso) |
-| scrivere più costruttori senza duplicare codice (`this(...)`) | 3.12 | LAB04c (in corso) |
-| costruire un oggetto da un array che mi passano, **copiandolo** (non tenendo il riferimento) | 3.12 | LAB04c (in corso) |
+| nascondere un array dentro una classe (ADT con campi `private`, costanti `static final`) | 3.12 | LAB04c |
+| scrivere più costruttori senza duplicare codice (`this(...)`) | 3.12 | LAB04c |
+| costruire un oggetto da un array che mi passano, **copiandolo** (non tenendo il riferimento) | 3.12 | LAB04c |
+| `put` che aggiunge in coda e **raddoppia** l'array quando è pieno | 3.12 | LAB04c |
+| `remove(i)`: spostare le celle indietro di uno, azzerare l'ultima, `size--` | 3.12 | LAB04c |
+| lanciare un'eccezione (`throw new …`) per un indice o un argomento non valido | 3.12 | LAB04c |
+| `toString` di una collezione con `StringBuilder` (`[a, b, c]`, `[]`) | 3.12 | LAB04c |
+| operazione fra due collezioni che restituisce una collezione nuova (`sum`, `mul`) | 3.12 | LAB04c |
 
 ---
 
@@ -102,6 +107,10 @@ Compila tutto, esplode eseguendo — in console, in rosso.
 | ⚠️ `ArithmeticException: / by zero` … `at MyMath.mcd` | `mcd(0, n)`: Euclide scambia e fa `n % 0` [LAB02 sl. 9] | nel chiamante, gestire il numeratore 0 **prima** di chiamare `mcd`; non modificare `mcd` |
 | `NullPointerException: Cannot read field "den" because "f" is null` … `at frazione.Frazione.sum` … `at frazlib.FrazLib.sum` | una cella dell'array è `null`: `new Frazione[4]` crea 4 caselle **vuote**, non 4 frazioni [07 sl. 17]. È un **error**, non un failure | riempire ogni cella (`fs[i] = new Frazione(…)`) prima di passare l'array. Leggi la traccia dal basso: chi ha passato il `null` |
 | ⚠️ `NullPointerException: Cannot invoke "frazione.Frazione.toString()" because "fs[i]" is null` | un ciclo su un array **riempito a metà** è arrivato alla prima cella vuota: la condizione controlla solo `length` | `i < fs.length && fs[i] != null` → 3.11 |
+| ⚠️ `ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3` … `at FractionCollection.remove` | ciclo di spostamento `i < size` su array **pieno**: all'ultimo giro legge `innerContainer[i+1]` = `[size]`, oltre la fine | `i < size - 1` → 3.12 |
+| ⚠️ `ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0` … `at FractionCollection.put` | capacità 0: «il doppio» di 0 è 0, e si scrive in `[size]` | `if (innerContainer.length == 0)` crea un array da `DEFAULT_PHYSICAL_SIZE` prima del raddoppio → 3.12 |
+| ⚠️ `ArrayIndexOutOfBoundsException: Index -1 out of bounds for length 10` … `at FractionCollection.toString` | l'ultimo elemento scritto fuori dal ciclo con `innerContainer[size-1]`: con `size` 0 è l'indice −1 | tutti gli elementi dentro il ciclo, virgola prima di ogni elemento tranne il primo → 3.12 |
+| ⚠️ la collezione «perde» l'elemento aggiunto dopo che l'array era pieno, senza errori | nel ramo del raddoppio il nuovo array resta in una variabile locale: manca `innerContainer = fs;` | assegnarlo al campo → 3.12 |
 | ⚠️ `ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 2` / `Index -1 out of bounds for length 0` | `fs[fs.length]` (l'ultimo indice valido è `length-1`), oppure `fs[fs.length-1]` su un array vuoto | non stampare «l'ultimo» a parte: separatore *prima* di ogni elemento tranne il primo → 3.11 |
 | `NumberFormatException: For input string: "…"` | `parseInt`/`parseDouble` su stringa non valida — **le virgolette nel messaggio mostrano la stringa esatta**: guardale per vedere spazi e virgole | controllare la stringa prima di convertirla [02x sl. 35] — vedi 3.5 |
 | ⚠️ `LinkageError durante il caricamento della classe principale X` · `java.lang.UnsupportedClassVersionError: X has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0` | al lancio, prima di eseguire qualsiasi riga: Eclipse ha compilato per una Java **più nuova** del JRE che esegue. Versione class file = Java + 44: 65 = Java 21, 69 = Java 25 | compliance del compilatore = versione del JRE → §2 |
@@ -604,9 +613,10 @@ Verificato (`javac`): `size` → 4 / 2 / 0 su array del test / pieno / vuoto; `s
 ⚠️ Il `sum(Frazione[])` della soluzione del docente usa il *for each* e va in
 `NullPointerException` sugli array a metà: per gli array a metà usa la condizione sopra.
 
-## 3.12 ADT con array nascosto: campi, costanti, costruttori (LAB04c — parziale, in corso)
+## 3.12 ADT con array nascosto: campi, costruttori, put, remove, toString (LAB04c)
 
-*Per ora solo la parte svolta: campi e tre costruttori. Il resto (`put`, `remove`, `toString`, `sum`) entra a LAB chiuso.*
+Una classe che nasconde un array (`FractionCollection`, sl. 59). Svolta il 2026-10-02, **guidato**; test
+verdi con `-ea`. Il confronto con il docente: `esame_FI2/svolti/LAB04c_FractionCollection/confronto_LAB04c.md`.
 
 | Riga UML (sl. 59) | Java | Perché |
 |---|---|---|
@@ -615,6 +625,10 @@ Verificato (`javac`): `size` → 4 / 2 / 0 su array del test / pieno / vuoto; `s
 | `- size: int` | `private int size;` | **dimensione logica** = quante frazioni ci sono = indice della prima cella libera |
 
 La dimensione fisica **non è un campo**: è `innerContainer.length`. `physicalSize` esiste solo come parametro.
+Regola che tiene in piedi la classe: ogni punto che cambia il contenuto (tre costruttori, `put`, `remove`)
+tiene `size` coerente; `size()` restituisce solo il campo.
+
+### Costruttori
 
 ```java
 public FractionCollection(int physicalSize) {
@@ -624,20 +638,116 @@ public FractionCollection(int physicalSize) {
 
 public FractionCollection() {
 	innerContainer = new Frazione[DEFAULT_PHYSICAL_SIZE];   // capacità di default; size parte da 0 da solo
-}                                                           // (alternativa: this(DEFAULT_PHYSICAL_SIZE); evita il duplicato)
+}                                                           // (alternativa del docente: this(DEFAULT_PHYSICAL_SIZE);)
 
 public FractionCollection(Frazione[] collection) {
 	size = Frazione.size(collection);              // dimensione LOGICA del parametro: length darebbe quella fisica
-	innerContainer = new Frazione[size];           // array nuovo, lungo quanto serve (scelta B: nasce pieno)
+	innerContainer = new Frazione[size];           // array nuovo, lungo quanto serve (nasce pieno)
 	for (int i = 0; i < size; i++) {               // copia solo le celle occupate
 		innerContainer[i] = collection[i];         // `collection` = parametro, `innerContainer` = campo
 	}
 }
 ```
 
-Verificato (`javac`, riflessione sui campi): array da 10 con 2, 4, 0 frazioni → `size` 2 / 4 / 0,
-`innerContainer.length` 2 / 4 / 0, array diverso dal parametro (modificare `arr[0]` dopo non cambia la
-collezione). ⚠️ Con lunghezza 0 «il doppio» fa ancora 0: ricordarlo scrivendo `put`.
+### Accesso: `size`, `get`
+
+```java
+public int size() { return size; }                 // getter: il campo è private, da fuori si legge così
+
+public Frazione get(int index) {
+	if (index < 0 || index >= size)                // ||: sbagliato se negativo OPPURE oltre la parte logica
+		throw new IndexOutOfBoundsException("indice " + index + " fuori da 0.." + (size - 1));
+	return innerContainer[index];                  // dopo il throw il metodo non prosegue: niente else
+}
+```
+
+⚠️ `index < 0 && index >= size` è sempre falso: il `throw` non scatta mai. ⚠️ Non ricalcolare `size()` contando
+i `null`: con `get` corretto il ciclo chiamerebbe `get` oltre la fine logica.
+
+### `put`: aggiunge in coda, raddoppia se pieno
+
+```java
+public void put(Frazione f) {
+	if (innerContainer.length == 0)                                  // capacità 0: «il doppio» farebbe ancora 0
+		innerContainer = new Frazione[DEFAULT_PHYSICAL_SIZE];
+	if (size == innerContainer.length) {                             // array pieno: serve spazio
+		Frazione[] fs = new Frazione[innerContainer.length * DEFAULT_GROWTH_FACTOR]; // × (non +) il fattore
+		for (int i = 0; i < size; i++)                               // copia le frazioni vere, fino a size
+			fs[i] = innerContainer[i];
+		innerContainer = fs;                                         // ⚠️ il nuovo array va ASSEGNATO al campo
+	}
+	innerContainer[size] = f;                                        // inserimento: uguale nei due casi, una volta sola
+	size++;                                                          // e `size` aggiornato
+}
+```
+
+Dopo un raddoppio restano celle `null` libere per le `put` successive: è la capacità di riserva, e per
+questo esiste `size`. Raddoppiare (e non crescere di 1) evita di ricopiare l'array a ogni `put`.
+
+### `remove(index)`: sposta indietro, azzera l'ultima, `size--`
+
+```java
+public void remove(int index) {
+	if (index < 0 || index >= size)                                  // < size, non <= size
+		throw new IndexOutOfBoundsException("indice " + index + " fuori da 0.." + (size - 1));
+	for (int i = index; i < size - 1; i++)                           // si ferma un giro prima: leggerebbe innerContainer[size]
+		innerContainer[i] = innerContainer[i + 1];                   // la cella i prende la successiva
+	innerContainer[size - 1] = null;                                 // la vecchia ultima è ora un doppione: azzerala
+	size--;
+}
+```
+
+Con `[A, B, C]` e `remove(1)` → `[A, C, null]`, `size` 2. Se `index` è l'ultimo il ciclo non gira e
+si azzera solo l'ultima cella. ⚠️ Con `i < size` e array pieno: `ArrayIndexOutOfBoundsException: Index 3 out of
+bounds for length 3`; con `size - 1` azzerato a `[size]`, l'ultima frazione resta in doppio.
+
+### Operazioni fra due collezioni: `sum`, `mul`
+
+```java
+public FractionCollection sum(FractionCollection other) {
+	if (this.size != other.size)                                     // «di pari dimensione» (sl. 49)
+		throw new IllegalArgumentException("dimensioni diverse: " + this.size + " e " + other.size);
+	FractionCollection res = new FractionCollection(this.size);      // risultato NUOVO: le due di partenza non cambiano
+	for (int i = 0; i < this.size; i++)                              // fino a size: dopo ci sono solo null
+		res.put(this.get(i).sumWithMcm(other.get(i)));               // put aggiorna la size del risultato
+	return res;
+}
+// mul: identico, con .mul(...) al posto di .sumWithMcm(...)
+```
+
+Non sostituire `innerContainer` di `this`: il metodo **restituisce** una collezione nuova.
+
+### `toString` con `StringBuilder`
+
+```java
+@Override
+public String toString() {
+	StringBuilder sb = new StringBuilder("[");       // una String non si modifica: ogni += ne crea un'altra (sl. 52)
+	for (int i = 0; i < size; i++) {                 // solo le celle piene
+		if (i != 0) sb.append(", ");                 // la virgola va PRIMA di ogni elemento tranne il primo
+		sb.append(innerContainer[i]);                // append converte con toString() della Frazione
+	}
+	sb.append("]");
+	return sb.toString();                            // alla fine: la String
+}
+```
+
+`size` 0 → il ciclo non gira → `[]`; un elemento → `[1/2]`; `2/1` si stampa `2`. ⚠️ Con il ciclo fino a
+`size - 1` e l'ultimo elemento fuori: `ArrayIndexOutOfBoundsException: Index -1 out of bounds for length 10`
+sulla collezione vuota.
+
+### Eccezioni lanciate qui
+
+| Si lancia | Quando | Sintassi |
+|---|---|---|
+| `IndexOutOfBoundsException` | indice fuori da `0 … size-1` (`get`, `remove`) | `throw new IndexOutOfBoundsException("messaggio");` |
+| `IllegalArgumentException` | argomento che non rispetta il contratto (`sum`/`mul` con `size` diverse) | `throw new IllegalArgumentException("messaggio");` |
+
+Sono non controllate (`RuntimeException`): niente `throws` nella firma né `try/catch`. Il docente, invece, restituisce
+`null` / esce in silenzio: scelta del testo non specificata, quella con l'eccezione non nasconde l'errore.
+
+Verificato eseguendo (`javac`/`java`, JDK 21): `FractionCollectionTests` con `-ea` verde; `[1/2, 1/3] + [1/2, 1/6]`
+= `[1, 1/2]`; `×` = `[1/4, 1/18]`; originali invariati; vuota + vuota → `size` 0; `put` su capacità 0 → `size` 1.
 
 
 ---

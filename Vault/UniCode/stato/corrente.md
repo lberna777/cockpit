@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-10-01
+**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-10-02
 
 > Un solo esame in fase attiva (`piano/piano_laurea.md`, regola 4). Gli altri tre di S1 —
 > `CALC`, `MATAP`, `ELT` — hanno cartella, fonti e percorso pronti, e restano in attesa.
@@ -47,7 +47,7 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   condizione (`length-1` → `length` → `length && != null`, data dalla sl. 28): **fine fisica e
   fine logica confuse**; giudizio di Lorenzo: «chiaro ma non chiarissimo», fatica sul ragionamento con gli array e sulla forma «giusta». `0/6` risolto chiamando `sumWithMcm`. Il suo `sum(Frazione[])` regge le
   celle `null`, quello del docente no (verificato).
-- 🔄 **LAB04c** «ADT FractionCollection» — in corso dal 2026-10-02, **non chiuso**. Scheda `corsi/FI2/lezioni/guida_lab_LAB04c_fractioncollection.md`; si lavora direttamente in `esame_FI2/da_importare/LAB04c_FractionCollection-021026`. Fatti: campi, due costanti, tre costruttori (verificati). Mancano `size()`, `get`, `put`, `remove`, `toString`, `sum`/`mul`. Dichiarato «veramente confuso» sul rapporto fra array e classe: si è sciolto col modello scaffale/contatore.
+- ✅ **LAB04c** «ADT FractionCollection» — chiuso il 2026-10-02 con i test verdi (eseguiti con `javac`/`java -ea`), **svolto con guida**: da rifare a freddo. Codice e confronto in `corsi/FI2/esame_FI2/svolti/LAB04c_FractionCollection/`. Scritti da solo campi, costanti, tre costruttori, `sum`/`mul` (con la scelta `IllegalArgumentException` se le `size` differiscono); corretti dopo controllo `size()` (non ricalcolarlo dai `null`), `get` (`||`), `put` (assegnare il nuovo array, `*` e non `+`, inserimento fattorizzato, caso capacità 0 risolto da lui), `remove` (tre scarti di uno), `toString` (mai usato `StringBuilder`; ultimo elemento fuori dal ciclo → eccezione sulla vuota). Fisico/logico: riconosciuto da solo all'inizio, ricaduto in `size()` e `toString`. Verifica a voce saltata. Resta nel codice svolto il formato `[ 1/3 ]` con spazi (docente: `[1/3]`), vedi il confronto.
 - 🔶 **07** «Array» e **08** «Package e namespace»: entrati in LAB04a (array di oggetti, *for
   each*, `length`; package e `import`); si completano con LAB04b/c ed `ES-MATRICI`.
 - 🔶 **04b** «Classi e oggetti» e **06** «Stringhe»: entrati in LAB02 per costruttori, `this(...)`,
@@ -63,7 +63,7 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-1. **Riprendere LAB04c** da `esame_FI2/da_importare/LAB04c_FractionCollection-021026/src/fractioncollection/FractionCollection.java`: tre costruttori fatti e verificati. Prossimo: `size()` e `get(int)` (passo 3 della scheda), poi `put` con raddoppio via `DEFAULT_GROWTH_FACTOR` (attenzione: con la scelta B l'array nato da `(Frazione[])` è pieno, e con lunghezza 0 «il doppio» fa 0), `remove`, `toString` con `StringBuilder`, `sum`/`mul` (`sub`/`div` non sono nel diagramma sl. 59). Lanciare `FractionCollectionTests` con `-ea`.
+1. **Aprire LAB05** («TicketSosta», il caso d'esame): `/lab FI2 LAB05` per la scheda. Prima, in `corsi/FI2/esame_FI2/svolti/LAB04c_FractionCollection/` il formato di `toString` da sistemare a mano (`"[" … "]"` senza spazi) se lo vuoi uguale al docente.
    Pulizia da fare: nel workspace Eclipse restano `Lab04c-…-Soluzione.zip_expanded` e `…-Startkit.zip_expanded`; da eliminare (la prima contiene la soluzione del docente).
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
