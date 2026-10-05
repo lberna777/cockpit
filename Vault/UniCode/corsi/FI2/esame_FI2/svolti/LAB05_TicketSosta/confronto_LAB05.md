@@ -101,3 +101,60 @@ la slide 5 esclude dalla parte 1 e la parte 2 risolve con `LocalDateTime`. Il ca
 5. **Frammenti riusabili** (per il prontuario): `NumberFormat.getCurrencyInstance(Locale.ITALY)`,
    `DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.ITALY)`,
    `Duration.between(a, b).toMinutes()` contro `toMinutesPart()`.
+
+---
+
+# Parte 2 — `TicketEvoluto`, `ParcometroEvoluto`
+
+**Mio**: `src/ticketsostaevoluto/` (8 test verdi in Eclipse il 2026-10-05) · **Docente**: `Lab05-TicketSosta-Soluzione.zip`, stesso package.
+Svolta con guida: il blocco del **minimo** nel ramo «stesso giorno» di `calcolaCostoSuPiuGiorni` è stato
+scritto da Claude (verificato eseguendo gli 8 casi); il resto (ciclo sui giorni, franchigia, `toString`) da Lorenzo
+dopo correzioni.
+
+## In sintesi
+
+| # | Punto | Differenza | Migliore | Da seguire |
+|---|---|---|---|---|
+| 9 | Da giorno della settimana a indice | io `getDayOfWeek().getValue() - 1`, lui `getDayOfWeek().ordinal()` | docente (una chiamata, nessun `- 1` da ricordare) | docente |
+| 10 | **Dove sta il minimo** | io solo nel ramo «stesso giorno»; lui in `emettiTicket`, sull'intera sosta, con la tariffa del primo giorno | **docente** | docente |
+| 11 | Struttura del calcolo | io `if` per un giorno + 3 pezzi (primo, `while` sui giorni in mezzo, ultimo); lui un solo `while` su tutti i giorni con `if` per primo/ultimo | docente (nessun caso a parte, la tariffa si legge una volta) | docente |
+| 12 | Franchigia | io `da.plusMinutes(...)` ripetuto in due righe lunghe; lui nel `while`, solo sul primo giorno | pari sul risultato, docente sulla leggibilità | docente |
+| 13 | Costruttore | io tengo il riferimento all'array; lui `Arrays.copyOf(tariffa, 7)` | docente (copia difensiva, come per `FractionCollection`) | docente |
+| 14 | `toString` | io `String` + ciclo con indice; lui `StringBuilder` + `for` ciascuno | docente | docente |
+| 15 | Mezzanotte con le date | stesso trucco (`MIDNIGHT` / `00:00` come fine giorno) | pari | — |
+| 16 | Getter di `TicketEvoluto` | io `getInizio`/`getFine`, lui `getInizioSosta`/`getFineSosta` | docente | docente |
+
+## 10. Dove sta il minimo
+
+```java
+// docente — in emettiTicket, sull'intera sosta
+long durataSosta = Duration.between(inizioEffettivo, fine).toMinutes();
+if (durataSosta < tariffaPrimoGiorno.getDurataMinima())
+    costo = tariffaPrimoGiorno.getDurataMinima() * tariffaPrimoGiorno.getTariffaOraria() / 60.0;
+else
+    costo = calcolaCostoSuPiuGiorni(inizio, fine);
+```
+
+Il mio controllo del minimo sta nel solo ramo «stesso giorno». Caso che li separa (provato eseguendo):
+martedì 23:50 → mercoledì 00:30 (40 minuti di sosta, franchigia 60, minimo 60): **docente 0,50 €, io 12,33 €**.
+Nella parte 1 la regola era *«sottrarre franchigia dalla durata, poi controllare il minimo»* (slide 8): il
+minimo riguarda l'**intera sosta**, non il singolo giorno. I test dello startkit non hanno un caso a cavallo
+di mezzanotte che lo faccia emergere.
+
+## 12. Franchigia a cavallo di mezzanotte — debolezza comune
+
+Martedì 23:30 → mercoledì 10:00 (franchigia 60 sul martedì): **docente e io 26,75 €**, ma il costo corretto è
+14,25 € (i 60 minuti gratuiti arrivano fino alle 00:30 del mercoledì). In entrambi, `plusMinutes` su un `LocalTime`
+(o `.toLocalTime()` dopo un `plusMinutes`) fa **ripartire** da 00:30 dello stesso giorno. Non è nei test, e il
+docente ha la stessa debolezza: la menziono, non la correggo.
+
+## Cosa porto via (parte 2)
+
+1. **Il minimo riguarda la sosta intera**: va deciso prima di spezzare in giorni (punto 10).
+2. **Gli oggetti di `java.time` sono immutabili**: `da.plusDays(1);` da solo non fa niente, il risultato va assegnato
+   (il ciclo che non terminava, 2026-10-05).
+3. **La variabile del ciclo dice qual è il giorno che stai pagando, non quello da cui sei partito**: tariffa dal
+   `giorno` che avanza, non da `da`; e `giorno` deve partire dal giorno **dopo** la partenza, senza `+ 1` anche nella condizione.
+4. **Eclipse può modificare una classe che non stai scrivendo**: un *quick fix* ha cambiato `Ticket` della parte 1 da
+   `LocalTime` a `LocalDateTime` e il progetto ha smesso di compilare. Dopo ogni quick fix, leggi quale file ha cambiato.
+5. **Per trovare il bug, stampare**: la `println` del giorno nel ciclo avrebbe mostrato subito la tariffa sbagliata.

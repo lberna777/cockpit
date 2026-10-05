@@ -15,7 +15,7 @@ public class Parcometro {
 	private double calcolaCosto(double costoOrario, LocalTime da, LocalTime a) {
 
 		// 1) durata della sosta, in MINUTI (tipo long: Duration.toMinutes() restituisce long)
-		long minutiSosta = Duration.between(da, a).toMinutes(); //
+		long minutiSosta = Duration.between(da, a).toMinutes(); 
 
 		// 2) franchigia: togli i minuti gratuiti
 		//    (il valore sta nella Tariffa del campo, non nei parametri)

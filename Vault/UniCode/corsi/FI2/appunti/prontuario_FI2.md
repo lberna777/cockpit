@@ -72,6 +72,10 @@ tags: [FI2, appunti]
 | durata fra due orari, in minuti totali | 3.13 | LAB05 |
 | applicare una regola «sottrai, poi controlla il minimo» (franchigia + durata minima) | 3.13 | LAB05 |
 | capire cosa va nel costruttore e cosa nei parametri di un metodo | 3.13 | LAB05 |
+| scegliere un elemento di un array in base al giorno della settimana | 3.13 | LAB05 (parte 2) |
+| scorrere i giorni fra due date (un giorno alla volta, con un `LocalDate` che avanza) | 3.13 | LAB05 (parte 2) |
+| calcolare una sosta su più giorni con tariffe diverse per giorno | 3.13 | LAB05 (parte 2) |
+| aggiungere giorni/minuti a una data (`plusDays`, `plusMinutes`) senza che il risultato si perda | 3.13 | LAB05 (parte 2) |
 
 ---
 
@@ -825,6 +829,62 @@ confronto in `svolti/LAB05_TicketSosta/confronto_LAB05.md`. ⚠️ `LocalTime.pl
 **riparte da 00:00** senza avvisare.
 
 ---
+
+### Parte 2 — `LocalDateTime`, giorni della settimana, più giorni (LAB05, `ticketsostaevoluto`)
+
+Svolto: `esame_FI2/svolti/LAB05_TicketSosta/src/ticketsostaevoluto/`. Fonti: LAB05 sl. 15–27.
+Le classi nuove stanno in un **package nuovo**: `Ticket` e `Parcometro` della parte 1 **non si modificano**
+(i loro test passano `LocalTime`).
+
+| Devo | Codice | Nota |
+|---|---|---|
+| il giorno della settimana di una data | `data.getDayOfWeek()` (su `LocalDate` e su `LocalDateTime`) | restituisce un `DayOfWeek` (`MONDAY`…), **non** un numero |
+| …come indice di array (lunedì = 0 … domenica = 6) | `data.getDayOfWeek().getValue() - 1` oppure `data.getDayOfWeek().ordinal()` | `getValue()` va da **1** (lunedì) a 7: derivato eseguendo, non a memoria. `ordinal()` dà già 0–6 (soluzione del docente) |
+| la tariffa del giorno | `tariffa[giorno.getDayOfWeek().getValue() - 1]` | ⚠️ si legge dal giorno **che stai pagando**, non da quello di partenza |
+| solo la data / solo l'ora di un `LocalDateTime` | `dt.toLocalDate()` / `dt.toLocalTime()` | |
+| due date nello stesso giorno? | `a.toLocalDate().equals(b.toLocalDate())` | |
+| aggiungere minuti / giorni | `dt.plusMinutes(n)` / `data.plusDays(1)` | ⚠️ **restituisce un nuovo oggetto**: `da.plusDays(1);` da solo non fa niente, va assegnato (`giorno = giorno.plusDays(1);`) |
+| una `Tariffa` come testo, per ogni elemento | `tariffa[i].toString()` | ⚠️ `tariffa.toString()` su un **array** stampa `[Lticketsosta.Tariffa;@6d06d69c` |
+| un `ParcometroEvoluto` come testo | `String s = "…\n"; for (int i = 0; i < tariffa.length; i++) { s = s + tariffa[i].toString() + "\n"; } return s;` | `length`, non `7` scritto a mano; **restituire**, non stampare |
+
+**Giorni intermedi interi**: `calcolaCosto(costoOrario, LocalTime.MIDNIGHT, LocalTime.MIDNIGHT)` dà 24 ore, grazie
+al ramo `LocalTime.of(0, 0).equals(a)` del metodo del docente (1440 minuti). Verificato.
+
+```java
+// sosta su più giorni: primo pezzo (con franchigia), giorni interi, ultimo pezzo
+LocalDate giorno = da.plusDays(1).toLocalDate();                        // il giorno DOPO la partenza
+LocalDateTime daEffettivo = da.plusMinutes(tariffa[da.getDayOfWeek().getValue() - 1].getMinutiFranchigia());   // dopo la franchigia
+double res;
+res = calcolaCosto(tariffa[da.getDayOfWeek().getValue() - 1].getTariffaOraria(),
+                   daEffettivo.toLocalTime(), LocalTime.MIDNIGHT);       // primo giorno: dopo la franchigia, fino a mezzanotte
+while (giorno.isBefore(a.toLocalDate())) {                               // giorni interi: `giorno` (senza + 1)
+	res = res + calcolaCosto(tariffa[giorno.getDayOfWeek().getValue() - 1].getTariffaOraria(),
+	                         LocalTime.MIDNIGHT, LocalTime.MIDNIGHT);    // 24 ore alla tariffa di quel giorno
+	giorno = giorno.plusDays(1);                                         // avanza: l'ultima riga del corpo
+}
+return res + calcolaCosto(tariffa[a.getDayOfWeek().getValue() - 1].getTariffaOraria(),
+                          LocalTime.MIDNIGHT, a.toLocalTime());          // ultimo giorno: da mezzanotte all'ora di fine
+```
+
+**Franchigia e minimo su un solo giorno** (stessa regola della parte 1, con la tariffa del giorno):
+
+```java
+Tariffa t = tariffa[da.getDayOfWeek().getValue() - 1];                  // tariffa del giorno
+LocalDateTime daEffettivo = da.plusMinutes(t.getMinutiFranchigia());    // il conto parte dopo i minuti gratis
+long minutiDaPagare = Duration.between(daEffettivo, a).toMinutes();     // negativo se la franchigia supera la sosta
+if (minutiDaPagare < t.getDurataMinima()) {                             // sotto il minimo: si paga il minimo
+	return t.getTariffaOraria() * t.getDurataMinima() / 60.0;           // `60.0`, non `60`
+}
+return calcolaCosto(t.getTariffaOraria(), daEffettivo.toLocalTime(), a.toLocalTime());
+```
+
+Verificato su tutti gli 8 casi di `ParcometroEvolutoTest` (incl. `mer 11:30→11:50` = `1,50 €`, `ven→sab` = `60,25 €`,
+`ven→gio 1/4` = `243,25 €`). ⚠️ Il **docente** decide il minimo **una volta, sull'intera sosta**, in `emettiTicket`
+(confronto, punto 10): mio, solo nel ramo «stesso giorno».
+
+⚠️ Ticket, non compila dopo un quick fix: se scrivendo `ParcometroEvoluto` Eclipse propone «Change type of…» e accetti,
+può cambiare **la classe della parte 1** (`Ticket`: `LocalTime` → `LocalDateTime`) e `Parcometro` smette di compilare
+(`LocalTime cannot be converted to LocalDateTime`). Dopo ogni quick fix guarda quale file si è modificato.
 
 ---
 

@@ -69,6 +69,13 @@ distinzione non è stata capita.
   orari arrivano come parametri del metodo). Recuperato con la spiegazione di Claude. Evidenza:
   trascrizione del 2026-10-05 («come inizializzo un ticked da una classe che non riceve l'orario
   di inizio e fine sosta?», «non so che valori di inizio e fine sosta dargli»).
+- [2026-10-05] FI2 LAB05 p2: giorno di partenza e giorno che avanza fusi in `calcolaCostoSuPiuGiorni`. La
+  tariffa dei giorni interi letta da `da.getDayOfWeek()` (sempre il venerdì: ven→gio dà 99,75 invece di
+  243,75); poi `giorno` inizializzato a `da` con il `plusDays(1)` rimasto nella condizione del `while`
+  (mercoledì saltato, 207,75); poi, dopo il cambio, la tariffa del ramo «stesso giorno» presa da `giorno`
+  (che ormai è il giorno dopo), mar 7:30→15:00 dà 9,75 invece di 3,25. Evidenza: trascrizione del
+  2026-10-05 (risposte di Claude dopo «fatto tutto controlla» e «fatto, controlla»: «`da` non cambia mai», «hai tenuto il `plusDays(1)` di
+  prima», «la riga dello stesso giorno ha usato `giorno`»); `confronto_LAB05.md` «Cosa porto via (parte 2)» 3.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -110,6 +117,12 @@ ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazion
   due segnalazioni di Claude, corretto solo più tardi. Il caso da 90 minuti non è nello startkit e non
   l'ha provato a mano; la regola (slide 8, «sottrarre franchigia, poi minimo») era sotto mano.
   Evidenza: `svolti/LAB05_TicketSosta/confronto_LAB05.md` §1; trascrizione del 2026-10-05.
+- [2026-10-05] FI2 LAB05 p2: franchigia nel caso a più giorni dichiarata risolta senza verifica. Claude aveva
+  mostrato che il primo pezzo partiva ancora da `da.toLocalTime()` (franchigia assente, `ven→sab` 60,75 invece
+  di 60,25); Lorenzo: «ma la franchigia dovrebbe starla contando», poi, dopo la spiegazione, «ok direi
+  risolto» senza modificare né rilanciare il test; il file non era cambiato e il test restava rosso («Non è
+  risolto», dopo la lettura del file). Il calcolo a mano 8,25 vs 7,75 era già in chat. Evidenza:
+  trascrizione del 2026-10-05 («ok direi risolto», poi «ho sistemato i tre punti»).
 
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
@@ -417,6 +430,26 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   array») → correzione da provare: disegnare i passi su un esempio numerico prima del codice
   (`/flusso`, nato oggi). Evidenza: risposta a `/chiudi` del 2026-10-05; piano a parole di Lorenzo
   («misuro la durata, converto in ore […] poi la durata minima […] non ho capito cosa fa la franchigia»).
+- [2026-10-05] LAB05 p2: `da.plusDays(1);` scritto senza assegnare il risultato → causa: crede che il metodo
+  modifichi l'oggetto, ma `LocalDate`/`LocalDateTime` sono immutabili e `plusDays` restituisce un oggetto nuovo
+  che qui viene buttato; `da` resta uguale e la condizione del `while` resta vera per sempre (il test
+  ven→gio 1/4 non termina) → correzione: `giorno = giorno.plusDays(1);`, il risultato va sempre assegnato (ordine
+  nel ciclo: usa il giorno, poi avanza). Stessa famiglia della riga del 2026-10-05 sulle API di `java.time`.
+  Evidenza: codice letto da Claude dopo «fatto tutto controlla»; `confronto_LAB05.md` «Cosa porto via (parte 2)» 2.
+- [2026-10-05] LAB05 p2: `toString` di `ParcometroEvoluto` con `tariffa.toString()` dentro il ciclo → causa: chiama il
+  metodo sull'array intero invece che sull'elemento; un array non ha un `toString` utile e stampa tipo e
+  indirizzo (`[Lticketsosta.Tariffa;@6d06d69c`, sette volte); nello stesso metodo il ciclo con `i < 7` scritto a
+  mano invece di `i < tariffa.length`, rimasto anche dopo il suggerimento → correzione: `tariffa[i].toString()`,
+  e il limite del ciclo è `length`. Stessa famiglia di `persone[].getMediaEta`
+  (2026-09-16): confonde il contenitore con i suoi elementi. Evidenza: trascrizione del 2026-10-05 (output
+  mostrato da Claude dopo «ho scritto il toString, controlla»; «hai ancora `i < 7`»).
+- [2026-10-05] LAB05 p2: il «minimo» non più riconosciuto tre ore dopo averlo sbagliato nella parte 1 («ma che è
+  sto minimo, restiamo sulla nostra strada») → causa: nessun modello della regola in testa; la sequenza durata →
+  franchigia → minimo → ore era stata seguita in parte 1 col codice sotto mano, senza essere interiorizzata (e il
+  minimo scritto sulla durata sbagliata, riga del 2026-10-05); il blocco del minimo nel ramo «stesso giorno»
+  l'ha scritto Claude → correzione da provare: disegnare i passi con un caso numerico prima di scrivere (`/flusso`,
+  prontuario §3.13). Ricorrenza della riga «processi interni alle funzioni» del 2026-10-05. Evidenza:
+  trascrizione del 2026-10-05 (risposta a «Scrivilo tu, con il metodo del debug»; «ma che è sto minimo»).
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
