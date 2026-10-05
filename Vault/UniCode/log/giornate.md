@@ -21,3 +21,6 @@
 - **2026-09-29** · nessuna attività registrata
 - **2026-09-30** · 21 eventi · chiuso FI2 LAB02; chiuso FI2 LAB03 · ripassi arretrati: 2
 - **2026-10-01** · 23 eventi · chiuso FI2 LAB04a; chiuso FI2 LAB04b · ripassi arretrati: 3
+- **2026-10-02** · 14 eventi · chiuso FI2 LAB04c · ripassi arretrati: 7
+- **2026-10-03** · nessuna attività registrata
+- **2026-10-04** · nessuna attività registrata
