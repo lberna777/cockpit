@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-10-02
+**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-10-05
 
 > Un solo esame in fase attiva (`piano/piano_laurea.md`, regola 4). Gli altri tre di S1 —
 > `CALC`, `MATAP`, `ELT` — hanno cartella, fonti e percorso pronti, e restano in attesa.
@@ -24,7 +24,7 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   `float f = 3.54` contro `double x = 3.54F` (verso e Design Intent); a `java` si passa il nome della
   classe; U+1F608 = 2 `char`, 4 byte UTF-8. Dalla 02x è nato il **prontuario d'esame**
   `corsi/FI2/appunti/prontuario_FI2.md`, da aggiornare a ogni fine sessione pratica (`/chiudi` 8a).
-  `/appunti FI2 02` (02+02x) resta da fare.
+  `/appunti FI2 02` non si fa (sospeso il 2026-10-05).
 - ✅ **LAB02** «Frazione — prima parte» — chiuso il 2026-09-30 con i test verdi, **svolto con
   guida** (suggerimenti a gradini in chat): da rifare a freddo nella preparazione all'esame. Codice
   e confronto con il docente in `corsi/FI2/esame_FI2/svolti/LAB02_Frazione/`. Inciampi: caso 0 non
@@ -48,6 +48,8 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   fine logica confuse**; giudizio di Lorenzo: «chiaro ma non chiarissimo», fatica sul ragionamento con gli array e sulla forma «giusta». `0/6` risolto chiamando `sumWithMcm`. Il suo `sum(Frazione[])` regge le
   celle `null`, quello del docente no (verificato).
 - ✅ **LAB04c** «ADT FractionCollection» — chiuso il 2026-10-02 con i test verdi (eseguiti con `javac`/`java -ea`), **svolto con guida**: da rifare a freddo. Codice e confronto in `corsi/FI2/esame_FI2/svolti/LAB04c_FractionCollection/`. Scritti da solo campi, costanti, tre costruttori, `sum`/`mul` (con la scelta `IllegalArgumentException` se le `size` differiscono); corretti dopo controllo `size()` (non ricalcolarlo dai `null`), `get` (`||`), `put` (assegnare il nuovo array, `*` e non `+`, inserimento fattorizzato, caso capacità 0 risolto da lui), `remove` (tre scarti di uno), `toString` (mai usato `StringBuilder`; ultimo elemento fuori dal ciclo → eccezione sulla vuota). Fisico/logico: riconosciuto da solo all'inizio, ricaduto in `size()` e `toString`. Verifica a voce saltata. Resta nel codice svolto il formato `[ 1/3 ]` con spazi (docente: `[1/3]`), vedi il confronto.
+- 🔶 **LAB05** «TicketSosta» — **parte 1 chiusa nei test il 2026-10-05, resta 🔶 per decisione di Lorenzo finché non è fatta la parte 2** (`TicketEvoluto`, `ParcometroEvoluto`, 60 min [sl. 26]). **Svolta con guida**: da rifare a freddo. Codice e confronto in `corsi/FI2/esame_FI2/svolti/LAB05_TicketSosta/`. Scritti da lui: struttura di `calcolaCosto` in 4 passi, `toStringDuration`, `getCostoAsString`, `emettiTicket`, `toString` di `Parcometro`; `toString` di `Ticket` ripreso dalla slide 11. Inciampi: ordine dei parametri del costruttore, confronto del minimo sulla durata totale invece che dopo la franchigia (corretto dopo tre segnalazioni; i test dati non lo vedono), cosa va nel costruttore e cosa nei parametri. Rimandati: mezzanotte, nomi dei getter, `toString` di `Ticket`. Moduli `10`, `11`, `S02` entrati in voce 🔶. Verifica a voce saltata.
+  **Osservazione di Lorenzo (2026-10-05)**: assimilati classi, chiamate, tipi; fatica sui *processi logici dentro le funzioni* (la regola del docente) e sulle spiegazioni che «danno indicazioni in un posto che non conosce». Rimedio da provare: prima del codice, tracciare la regola **a mano su un caso dei test** (come i numeri del `/flusso`), poi tradurre.
 - 🔶 **07** «Array» e **08** «Package e namespace»: entrati in LAB04a (array di oggetti, *for
   each*, `length`; package e `import`); si completano con LAB04b/c ed `ES-MATRICI`.
 - 🔶 **04b** «Classi e oggetti» e **06** «Stringhe»: entrati in LAB02 per costruttori, `this(...)`,
@@ -63,8 +65,8 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-1. **Aprire LAB05** («TicketSosta», il caso d'esame): `/lab FI2 LAB05` per la scheda. Prima, in `corsi/FI2/esame_FI2/svolti/LAB04c_FractionCollection/` il formato di `toString` da sistemare a mano (`"[" … "]"` senza spazi) se lo vuoi uguale al docente.
-   Pulizia da fare: nel workspace Eclipse restano `Lab04c-…-Soluzione.zip_expanded` e `…-Startkit.zip_expanded`; da eliminare (la prima contiene la soluzione del docente).
+1. **LAB05 parte 2**: `ticketsostaevoluto` (`TicketEvoluto`, `ParcometroEvoluto`) con i test già nel progetto `da_importare/LAB05_TicketSosta-051026/tests/ticketsostaevoluto/`; prima di scrivere codice, `/flusso` sul `calcolaCostoSuPiuGiorni` (slide 21–23: franchigia solo sul primo giorno, tariffa per giorno dell'array `0=lunedì`). Pendenze minori della parte 1: rinominare i getter in `getInizioSosta`/`getFineSosta`, `toString` di `Ticket` come il docente, mezzanotte (`00:00`) con la soluzione del docente.
+   Pulizia ancora da fare: nel workspace Eclipse restano `Lab04c-…-Soluzione.zip_expanded` e `…-Startkit.zip_expanded` (la prima contiene la soluzione del docente).
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma

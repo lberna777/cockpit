@@ -231,6 +231,9 @@ mirato — ed è particolarmente adatto a `MATAP`, `CA`, `ELT`, `ELN` e `TLC`.
 - Connessioni con altri moduli: specifiche, mai generiche.
 
 ### Appunti (`/appunti`)
+> **`[2026-10-05]` Per `FI2` non si fa `/appunti`**, per decisione di Lorenzo: il materiale d'esame
+> sono il prontuario (sotto) e i LAB svolti. Per gli altri corsi le regole sotto restano valide.
+
 - **Un modulo con parte pratica produce un solo file**, che copre teoria e pratica insieme — es.
   `02` e `02x` in `appunti_02+02x_*.md`. La coppia si risolve dalla *Mappa teoria → pratica* di
   `percorso.md` (colonna *Segue*), e gli appunti si scrivono **dopo** la pratica: prima, la parte

@@ -63,6 +63,12 @@ distinzione non è stata capita.
   costruttore `(Frazione[])`; infine `toString` con l'ultimo elemento scritto fuori dal ciclo
   (`innerContainer[size-1]`), che rompe con `size` 0. Evidenza: trascrizione del 2026-10-02 pomeriggio;
   `stato/giornata.md` 15:40, 17:37.
+- [2026-10-05] FI2 LAB05: stato dell'oggetto e dati della singola chiamata fusi. Davanti a
+  `emettiTicket(inizio, fine)` non sapeva come dare l'orario al `Ticket` «da una classe che non
+  riceve l'orario di inizio e fine sosta» (il `Parcometro` ha la `Tariffa` per tutta la vita, gli
+  orari arrivano come parametri del metodo). Recuperato con la spiegazione di Claude. Evidenza:
+  trascrizione del 2026-10-05 («come inizializzo un ticked da una classe che non riceve l'orario
+  di inizio e fine sosta?», «non so che valori di inizio e fine sosta dargli»).
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -98,6 +104,12 @@ ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazion
   uno (`index <= size`, ciclo `i < size`, azzerata `[size]` invece di `[size-1]`); il test passa perché
   oltre `size` c'è un `null` che si compensa. Il caso con array pieno non è stato provato da lui prima
   di consegnare. Evidenza: codice letto alle 16:50; `stato/giornata.md` 17:00.
+- [2026-10-05] FI2 LAB05: in `calcolaCosto` il minimo confrontato con `minutiSosta` (durata totale)
+  invece che con `minutiDaPagare` (dopo la franchigia): `H1f` 10:00→11:30 dà 0,25 € invece di 0,50 €.
+  Dichiarato finito con test verdi («ma già tutti i test sono verdi nel mio eclipse»), mantenuto dopo
+  due segnalazioni di Claude, corretto solo più tardi. Il caso da 90 minuti non è nello startkit e non
+  l'ha provato a mano; la regola (slide 8, «sottrarre franchigia, poi minimo») era sotto mano.
+  Evidenza: `svolti/LAB05_TicketSosta/confronto_LAB05.md` §1; trascrizione del 2026-10-05.
 
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
@@ -382,6 +394,29 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   video senza rileggere il formato della scheda (`[a, b, c]`) → correzione: tutto nel ciclo, `[`/`]`
   senza spazi. Evidenza: `stato/giornata.md` 17:37. Lorenzo ha anche chiesto di rinominare `size()` in
   `getSize()` per chiarezza: i test lo chiamano `size()`, il nome dei metodi lo fissa il diagramma.
+- [2026-10-05] LAB05: `Ticket` scritto senza leggere i test come contratto: costruttore con parametri
+  `(double costo, LocalTime fine, LocalTime inizio)` invece di `(inizio, fine, costo)` (non compila con
+  `TicketTest` e `Parcometro`), e `getCostoAsString()` che restituiva `"Costo = " + costo` invece di
+  `"3,50 €"` col formattatore valuta → causa: forma di firma e di output ricavata a memoria, non dal
+  test che li fissa (stessa famiglia del `toString` del 2026-10-02) → correzione: prima di scrivere una
+  firma o una stringa, leggere nel test ordine degli argomenti e valore atteso. Evidenza: tabella di
+  Claude sul `Ticket.java` del 2026-10-05 (punti 1 e 3); `stato/giornata.md` 12:21.
+- [2026-10-05] LAB05: API di `java.time`/`java.text` non recuperate: `NumberFormat.getCurrencyInstance(
+  Locale.ITALY)` («mi sono bloccato»), `toHours` proposto per la durata, poi «non riesco a ottenere una
+  durata in minuti partendo da DA e A» benché `Duration.between` l'avesse già scritto in `Ticket`;
+  `toMinutes` (totali) vs `toMinutesPart` (parte) da distinguere; formattatori di data e orario
+  copiati dalla slide 11 («mentirei se dicessi di non copiare diretto dalle slide»). Lorenzo ne trae
+  la regola giusta: sono frammenti da prontuario, da trovare e incollare. Evidenza: trascrizione del
+  2026-10-05.
+- [2026-10-05] LAB05, dichiarato da Lorenzo a `/chiudi`: «sto iniziando a fare confusione con i processi
+  interni alle funzioni»; capisce come si costruisce una classe, come si chiama un metodo, i tipi, ma
+  non l'algoritmo che il docente richiede, e quando Claude lo spiega «mi sembra che tu mi stia dando
+  indicazioni in un posto che non conosco» → causa: manca un modello di ciò che il metodo deve fare
+  *prima* di scrivere (nei passi di `calcolaCosto`: durata → franchigia → minimo → ore, con l'ordine
+  che conta); stessa difficoltà dichiarata il 2026-10-01 («ragionamenti logici per operare con gli
+  array») → correzione da provare: disegnare i passi su un esempio numerico prima del codice
+  (`/flusso`, nato oggi). Evidenza: risposta a `/chiudi` del 2026-10-05; piano a parole di Lorenzo
+  («misuro la durata, converto in ore […] poi la durata minima […] non ho capito cosa fa la franchigia»).
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

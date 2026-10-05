@@ -67,6 +67,11 @@ tags: [FI2, appunti]
 | lanciare un'eccezione (`throw new …`) per un indice o un argomento non valido | 3.12 | LAB04c |
 | `toString` di una collezione con `StringBuilder` (`[a, b, c]`, `[]`) | 3.12 | LAB04c |
 | operazione fra due collezioni che restituisce una collezione nuova (`sum`, `mul`) | 3.12 | LAB04c |
+| formattare un importo in euro (`3,50 €`) | 3.13 | LAB05 |
+| formattare un orario (`08:30`) o una durata (`6:30`) | 3.13 | LAB05 |
+| durata fra due orari, in minuti totali | 3.13 | LAB05 |
+| applicare una regola «sottrai, poi controlla il minimo» (franchigia + durata minima) | 3.13 | LAB05 |
+| capire cosa va nel costruttore e cosa nei parametri di un metodo | 3.13 | LAB05 |
 
 ---
 
@@ -95,6 +100,8 @@ terminale. **Stessa causa, parole diverse.**
 | `The method sum(Frazione) in the type Frazione is not applicable for the arguments (Frazione[], Frazione[])` | `method sum in class Frazione cannot be applied to given types` | esiste un `sum` con quel nome ma con **altri** argomenti: il test chiama un overload non ancora scritto | scrivere il metodo con la firma del test (qui `static Frazione[] sum(Frazione[], Frazione[])`) → 3.11 |
 | `The method convertToString(Frazione[]) is undefined for the type Frazione` | `cannot find symbol` … `symbol: method convertToString(Frazione[])` | nessun metodo con quel nome nella classe | scriverlo, nella classe che il test usa come prefisso |
 | ⚠️ `The method Size(Frazione[]) is undefined for the type Frazione` (testo Eclipse per analogia con la riga sopra, non rilanciato) | `cannot find symbol` … `symbol: method Size(Frazione[])` · `location: class Frazione` (verificato con `javac`) | **maiuscole**: Java distingue `Size` da `size`; il metodo esiste, scritto minuscolo | `Frazione.size(...)` |
+| ⚠️ `The constructor Ticket(double, LocalTime, LocalTime) is undefined` | `incompatible types: double cannot be converted to LocalTime` | i parametri del costruttore sono in **ordine diverso** da quello che il test (o il chiamante) passa. Eclipse nomina i tipi **del tuo** costruttore | l'ordine lo detta il test: leggi `new Ticket(...)` in `TicketTest` e allinea la firma → 3.13 |
+| `The constructor Parcometro() is undefined` | `constructor Parcometro in class Parcometro cannot be applied to given types` | si chiama `new Parcometro()` ma la classe ha solo il costruttore con la `Tariffa` | passare l'argomento richiesto: `new Parcometro(tariffa)` |
 
 ## 1.2 Eccezioni a run-time
 
@@ -133,6 +140,7 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | ⚠️ test verde **per caso** (`sub`, `compareTo`) | due errori che si compensano sul caso del test, o un caso che non distingue (`3/12` e `1/4` → entrambe `0.0`) | aggiungere un caso scelto da te: per `compareTo` sia `1` sia `−1` |
 | ⚠️ somma di un array pieno che «perde» l'ultimo elemento (`{1/2, 1/3}` → `1/2`) | ciclo `i < fs.length - 1`: il `-1` salta l'ultima cella, **non** evita i `null` | `i < fs.length` (+ `&& fs[i] != null` se l'array è a metà) → 3.11 |
 | ⚠️ `0/36` invece del `0/6` atteso dal test | somma col prodotto in croce (`den·den`) invece che con l'`mcm`; e `minTerm` lascia lo zero com'è | sommare via `mcm` (`sumWithMcm` / la `sum` del docente) → 3.9 |
+| ⚠️ test verdi ma costo sbagliato dopo una franchigia (`H1f`, 90 minuti → `0,25 €` invece di `0,50 €`) | durata minima confrontata con la durata **totale** invece che con quella **dopo la franchigia**: i test dello startkit non hanno un caso che li distingua | confrontare la variabile calcolata dopo la sottrazione; provare a mano un caso in cui la franchigia porta **sotto** il minimo → 3.13 |
 
 ---
 
@@ -749,6 +757,74 @@ Sono non controllate (`RuntimeException`): niente `throws` nella firma né `try/
 Verificato eseguendo (`javac`/`java`, JDK 21): `FractionCollectionTests` con `-ea` verde; `[1/2, 1/3] + [1/2, 1/6]`
 = `[1, 1/2]`; `×` = `[1/4, 1/18]`; originali invariati; vuota + vuota → `size` 0; `put` su capacità 0 → `size` 1.
 
+
+## 3.13 `java.time`, formattatori, regola a passi (LAB05)
+
+Svolto: `esame_FI2/svolti/LAB05_TicketSosta/src/ticketsosta/` (`Ticket.java`, `Parcometro.java`). Fonti: LAB05 sl. 11–13, 8.
+
+**Cosa va nel costruttore e cosa nei parametri.** Il costruttore riceve ciò che **resta vero per tutta
+la vita dell'oggetto** (il `Parcometro` ha la sua `Tariffa`); il metodo riceve i dati **di una singola
+chiamata** (`emettiTicket(inizio, fine)`). Un `Ticket` nasce *dentro* `emettiTicket`, con i valori dei
+parametri; non servono nel costruttore del `Parcometro`.
+
+```java
+public class Parcometro {
+	private Tariffa tariffa;                          // stato: la tariffa della zona
+
+	public Parcometro(Tariffa tariffa) {              // arriva una volta, alla creazione
+		this.tariffa = tariffa;
+	}
+
+	public Ticket emettiTicket(LocalTime inizio, LocalTime fine) {   // arrivano a ogni sosta
+		double costo = calcolaCosto(tariffa.getTariffaOraria(), inizio, fine);   // 1) il costo
+		return new Ticket(inizio, fine, costo);       // 2) il ticket, ordine = quello del costruttore
+	}
+}
+```
+
+**Formattatori** — frammenti da copiare [LAB05 sl. 11]; verificati eseguendo (JDK 21).
+
+| Devo | Codice | Esce |
+|---|---|---|
+| un importo in euro | `NumberFormat.getCurrencyInstance(Locale.ITALY).format(3.5)` | `3,50 €` — lo spazio è `\u00A0` (non breakable), **non** `" "`: nel test `"3,50\u00A0€"` |
+| un orario corto | `orario.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.ITALY))` | `08:30` (con `MEDIUM` anche i secondi) |
+| la durata fra due orari | `Duration.between(inizio, fine)` | oggetto `Duration`, non un numero |
+| …in **minuti totali** | `Duration.between(da, a).toMinutes()` | `450` per 7:30→15:00 (tipo `long`) |
+| …solo la **parte** dei minuti | `duration.toMinutesPart()` | `30` per 6h30: **non** è il totale |
+| …ore intere | `duration.toHours()` | `6` |
+
+Import: `java.text.NumberFormat`, `java.util.Locale`, `java.time.format.DateTimeFormatter`,
+`java.time.format.FormatStyle`, `java.time.Duration`, `java.time.LocalTime`.
+
+```java
+private String toStringDuration(Duration duration) {
+	long ore = duration.toHours();              // ore intere: 3 per 3h05
+	long minuti = duration.toMinutesPart();     // solo i minuti restanti: 5
+	if (minuti < 10) {
+		return ore + ":0" + minuti;             // 3:05 — lo zero davanti
+	} else return ore + ":" + minuti;           // 3:45
+}
+```
+
+**Regola «franchigia, poi minimo»** [LAB05 sl. 8]. ⚠️ L'ordine conta, e va confrontata la variabile
+**dopo** la sottrazione:
+
+```java
+long minutiSosta = Duration.between(da, a).toMinutes();      // 1) durata totale, in minuti (long)
+long minutiDaPagare = minutiSosta - tariffa.getMinutiFranchigia();   // 2) togli i minuti gratuiti
+if (minutiDaPagare < tariffa.getDurataMinima()) {            // 3) sotto il minimo? confronta quella DOPO la franchigia
+	minutiDaPagare = tariffa.getDurataMinima();              //    paghi il minimo
+}
+return costoOrario * (minutiDaPagare / 60.0);                // 4) ore con `60.0` (non `60`: `390 / 60` fa 6), poi × tariffa
+```
+
+Verificato: `H1` (0,50 €/h, franchigia 0, minimo 60) 7:30→15:00 = `3,75 €`; `H1f` (franchigia 60) 7:30→15:00 =
+`3,25 €`; `H1f` 10:00→11:30 = `0,50 €`. **Fuori da questa versione**: sosta che finisce alle `00:00` o a cavallo
+di mezzanotte (la soluzione del docente la tratta con `a.isBefore(da) || LocalTime.of(0, 0).equals(a)`) →
+confronto in `svolti/LAB05_TicketSosta/confronto_LAB05.md`. ⚠️ `LocalTime.plusMinutes` oltre le 24:00
+**riparte da 00:00** senza avvisare.
+
+---
 
 ---
 
