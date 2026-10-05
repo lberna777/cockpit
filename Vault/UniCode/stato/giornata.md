@@ -15,3 +15,4 @@
 17:10 · FI2 · LAB05 8/8 + 6/6 + 1 + 1 test verdi in Eclipse; progetto copiato in svolti/LAB05_TicketSosta/; confronto_LAB05.md parte 2 (punti 9–16, minimo sull'intera sosta, franchigia a cavallo di mezzanotte debolezza comune). CHIUSO FI2 LAB05
 17:15 · FI2 · prontuario: §3.13 «Parte 2» (giorno della settimana → indice, immutabilità di `plusDays`, ciclo sui giorni, franchigia+minimo su un giorno, `toString` su array, quick fix Eclipse), 4 righe nell'indice.
 17:16 · FI2 · revisione errori (parte 2): 5 righe aggiunte (pattern 1, 2; sezione FI2), nessun candidato trasversale nuovo.
+17:26 · FI2 · Lorenzo fissa gli obiettivi della prossima sessione: testare il proprio codice, debuggare con stampe ad hoc, costruire insieme una procedura/workflow d'esame.

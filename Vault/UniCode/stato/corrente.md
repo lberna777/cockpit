@@ -65,6 +65,10 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
+0. **Obiettivi della prossima sessione (decisi da Lorenzo il 2026-10-05, a fine LAB05)**:
+   - **imparare a testare il codice che scrive**: scegliere lui i casi (dal testo e dai casi limite), calcolarli a mano, scrivere/lanciare i test, non fidarsi del solo test verde (pattern 2);
+   - **imparare a debuggare con stampe ad hoc** (e col debugger di Eclipse): confrontare tabella a mano e stampe, la prima riga che diverge è il bug;
+   - **studiare una procedura per affrontare questi esercizi**, un workflow pronto per l'esame: leggere il testo e i test → caso numerico a mano → passi/`/flusso` → codice a pezzi → test dei casi propri → stampe se rosso → confronto. Da costruire insieme all'inizio della prossima sessione e poi scrivere nel prontuario (§2) come procedura d'esame.
 1. **Prossima voce**: `LAB06` «MasterMind» (`/lab FI2 LAB06`), oppure `ES-PHONEPLAN` che il percorso dà «dopo LAB05» (`LocalTime`/`LocalDateTime`, stesso terreno). Prima, a scelta: pendenze minori di LAB05 — getter `getInizioSosta`/`getFineSosta`, `i < tariffa.length` nel `toString`, `import ticketsosta.Ticket` inutilizzato; cartelle `*.zip_expanded` nel workspace Eclipse (la `Soluzione` contiene la soluzione del docente).
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
