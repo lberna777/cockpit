@@ -168,9 +168,21 @@ perso, e lo si scopre mesi dopo.
 >
 > Da risolvere prima del primo checkpoint, cioè entro **novembre 2026**.
 
-**4. Un solo esame per volta in fase attiva.** Gli altri restano in ripasso, non in parallelo
-(`profilo/studente.md`). `stato/corrente.md` descrive solo l'esame attivo; gli altri corsi
-vivono in `corsi/<COD>/percorso.md`.
+**4. ~~Un solo esame per volta in fase attiva.~~** `[superato 2026-10]` Gli altri restano in
+ripasso, non in parallelo (`profilo/studente.md`). `stato/corrente.md` descrive solo l'esame
+attivo; gli altri corsi vivono in `corsi/<COD>/percorso.md`.
+
+**4 (vigente). Più esami possono essere attivi in parallelo.** `[2026-10-06, deciso da Lorenzo]`
+Tolta la regola dell'esame unico all'apertura di `CALC` per l'appello anticipato del **2 dicembre
+2026**, segnalato da Lorenzo, mentre `FI2` resta attivo. Ragione: un appello fuori dalla
+finestra di S1 è un tentativo in più su un esame di S1, e coglierlo richiede di aprire il corso
+ora senza fermare la testa di catena. Conseguenze operative:
+- `stato/corrente.md` descrive **gli esami attivi**, con in testa una riga di sintesi per
+  ciascuno, così che il briefing troncato li mostri tutti;
+- `/piano` può proporre l'azione su qualunque esame attivo, scegliendo quello con la scadenza
+  più vicina o il checkpoint più stringente;
+- il rischio che la regola copriva resta, e lo copre ora il checkpoint (regola 1): con due esami
+  in parallelo la metrica della regola 5 si misura **per esame**, non in totale.
 
 **4b. I ripassi si fanno in blocco a ridosso dell'esame.** `[2026-09-25, deciso da Lorenzo]`
 Sostituisce l'ingaggio a intervalli durante il percorso: il tracker continua a calcolare le
