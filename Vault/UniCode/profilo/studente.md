@@ -21,7 +21,9 @@
 - Disponibilità giornaliera **molto variabile**. Pianificare per blocchi settimanali di
   programma coperto, mai per monte ore giornaliero.
 - Da agosto 2026: nessuna frequenza, dodici esami arretrati, preparazione autonoma.
-- Un solo esame per volta in fase attiva. Gli altri restano in ripasso, non in parallelo.
+- `[superato 2026-10]` Un solo esame per volta in fase attiva. Gli altri restano in ripasso, non in parallelo.
+- `[2026-10-06]` Più esami attivi in parallelo, per scelta di Lorenzo (`FI2` e `CALC`): il
+  controllo del carico passa ai checkpoint per esame (`piano/piano_laurea.md`, regole 1 e 4).
 
 ## Cosa ha funzionato
 
