@@ -70,8 +70,10 @@ volatile scritto in un file durevole lo inquina.
    stessa informazione utile.
 2. `profilo/` accoglie solo ciò che è **transdisciplinare**: come studia, come sbaglia, cosa
    funziona. Un fatto valido per un solo esame va nel dossier di quell'esame, non nel profilo.
-3. `stato/corrente.md` descrive **l'esame attivo e nient'altro**. Quando si cambia esame, il
-   contenuto precedente si archivia in `corsi/<CODICE>/stato.md`, non si cancella.
+3. `stato/corrente.md` descrive **gli esami attivi e nient'altro** (più d'uno dal 2026-10-06,
+   `piano/piano_laurea.md` regola 4): in testa una riga di sintesi per esame, poi una sezione
+   ciascuno. Quando un esame esce dalla fase attiva, la sua sezione si archivia in
+   `corsi/<CODICE>/stato.md`, non si cancella.
 4. `log/` è append-only. Non si riscrive la storia.
 
 ## 4. Briefing d'avvio
