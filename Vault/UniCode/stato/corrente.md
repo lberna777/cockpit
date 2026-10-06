@@ -1,10 +1,16 @@
 # Stato Corrente — Studio Attivo
 
-**Esame attivo**: `FI2` — Fondamenti di Informatica T-2 (12 CFU) | **Aggiornato**: 2026-10-05
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-06
 
-> Un solo esame in fase attiva (`piano/piano_laurea.md`, regola 4). Gli altri tre di S1 —
-> `CALC`, `MATAP`, `ELT` — hanno cartella, fonti e percorso pronti, e restano in attesa.
-> Lo stato di `LAS` è archiviato in `corsi/LAS/stato.md`.
+- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
+  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · prossimo: `/lezione CALC 02`.
+  Sezione in fondo.
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · prossimo: `/lab FI2 LAB06`.
+
+> Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
+> `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
+
+# FI2
 
 ## Perché FI2
 
