@@ -46,9 +46,9 @@ taglia, e resta allineato. Al contrario, con 64 MB a `0` il blocco da 512 MB par
 
 ## Decisione 2 — Quanti banchi: il DLX vede la memoria a 32 bit
 
-Il parallelismo di ciascuna memoria «è sempre 8 bit» [fonte: p. 56]. Per trasferire più byte
+Il parallelismo di ciascuna memoria «è sempre 8 bit» [fonte: p. 55]. Per trasferire più byte
 nello stesso ciclo di bus si affiancano più memorie, e gli **elementi contigui vanno su memorie
-diverse** [fonte: pp. 55–56]. Con un bus dati a 32 bit le memorie vanno a gruppi di quattro: la
+diverse** [fonte: pp. 54–55]. Con un bus dati a 32 bit le memorie vanno a gruppi di quattro: la
 cella di indirizzo logico `x` si trova nel banco `x mod 4`, all'indirizzo fisico `x/4` [fonte:
 pp. 65, 69]. Il processore **non emette `BA1` e `BA0`**: al loro posto emette `BE3`–`BE0`, che
 selezionano i banchi [fonte: pp. 66, 68].
@@ -59,7 +59,7 @@ Due conseguenze, che la soluzione d'esame applica ogni volta.
 - Ai piedini di indirizzo dei banchi arriva il bus **a partire da `BA2`**: `BA2` va su `A0`,
   `BA3` su `A1`, e così via [fonte: p. 66]. Un banco da 512 MB = 2^29 byte ha `A[28..0]`,
   collegati a `BA[30..2]`; uno da 16 MB ha `A[23..0]` su `BA[25..2]` [fonte: soluzione
-  2025-01-08, pp. 10–12].
+  2025-01-08, pp. 9–12].
 
 ⚠️ **Distinzione da tenere separata** (pattern trasversale 1): *indirizzo logico*, quello che vede
 il programmatore, e *indirizzo fisico*, quello sui piedini del singolo banco. Il caso che li
@@ -135,7 +135,7 @@ tra 64 MB e 2 GB. Le due porte da 8 bit lette insieme sono una *half-word*, e la
 due banchi bassi, `BE0·BE1`. Il comando di reset è un byte all'indirizzo `70000002h`, cioè il
 banco 2: per questo compare `BE2`.
 
-**Collegamenti** [fonte: soluzione, pp. 10–12]: le RAM ricevono `RD`, `WR` e `CS`, le EPROM solo
+**Collegamenti** [fonte: soluzione, pp. 9–12]: le RAM ricevono `RD`, `WR` e `CS`, le EPROM solo
 `RD` e `CS`. Tutti i banchi condividono `BA[..2]`. Il banco *i* sta su `BD[8i+7..8i]`.
 
 ## Passo di procedura
