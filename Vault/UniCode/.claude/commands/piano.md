@@ -35,6 +35,6 @@ Regole:
   troppo variabile perché una stima oraria significhi qualcosa.
 - Se manca la fonte per il modulo: azione = "Procurare [titolo esatto] per [modulo]", e dillo
   come prima cosa.
-- Un solo esame per volta in fase attiva: non proporre un modulo di un corso diverso da quello
-  attivo, salvo che sia un ripasso scaduto.
+- Più esami possono essere attivi (regola 4 del piano): proponi l'azione sull'esame attivo con
+  l'appello o il checkpoint più vicino; un corso non attivo solo per un ripasso scaduto.
 - **Non aggiungere testo libero.**
