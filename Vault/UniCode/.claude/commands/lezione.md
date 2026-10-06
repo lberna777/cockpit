@@ -88,6 +88,16 @@ La lezione è **prosa discorsiva ancorata ai comandi/file concreti**, NON un wal
 lo fa funzionare, e il posto che occupa nella teoria. Gli esercizi svolti passo-passo sono
 materia di `/lab`.
 
+**Per i corsi a progetto su prova unica** (`CALC`, e ogni corso il cui `fonti.md` dichiara
+`Template lezione: progetto su prova`) `[2026-10-06, deciso da Lorenzo]`: la prova è un solo
+esercizio di progetto a tipologia fissa, e la lezione si ancora alle **consegne della prova**,
+non ai capitoli delle dispense. Si prende la prosa dal registro formale (il *perché*) e la
+fedeltà dal registro discorsivo, applicata alla **notazione** del docente: espressioni di
+decodifica, nomi dei segnali, *range*, struttura del codice si riproducono come nelle slide e
+nelle soluzioni ufficiali. A differenza del registro formale, **un estratto di prova reale
+ragionato è parte della lezione**: in questi corsi lo svolgimento è l'esame stesso. Il *drill*
+a freddo resta a `/lab`. Tetto: **~200 righe**.
+
 **Per i corsi discorsivi con un docente di riferimento** (giuridici, e ogni corso dove conta la
 formulazione): la terminologia della fonte va **riprodotta, non parafrasata**. Nessuna
 integrazione da fonti esterne. `[fonte: <fonte>]` su ogni affermazione ripresa alla lettera.
