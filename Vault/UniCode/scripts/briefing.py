@@ -4,7 +4,7 @@ Costruisce stato/briefing.md — l'unico contesto caricato d'ufficio a ogni avvi
 
 Composizione:
   1. nucleo stabile  — profilo di studio + errori ricorrenti in testa
-  2. esame attivo    — stato/corrente.md, troncato
+  2. esami attivi   — stato/corrente.md, troncato
   3. ripassi dovuti  — da stato/tracker.md, calcolati su oggi
   4. ultime giornate — da log/giornate.md, giorni vuoti inclusi
 
@@ -196,7 +196,7 @@ def build() -> str:
         "",
         sezione("Come studia Lorenzo", profilo or "_Profilo non ancora compilato._"),
         sezione("Errori ricorrenti da intercettare", errori or "_Nessun pattern registrato._"),
-        sezione("Esame attivo", corrente or "_Nessun esame attivo dichiarato._"),
+        sezione("Esami attivi", corrente or "_Nessun esame attivo dichiarato._"),
         sezione("Ripassi dovuti", sezione_ripassi()),
         sezione("Ultime giornate", sezione_giornate()),
     ]
