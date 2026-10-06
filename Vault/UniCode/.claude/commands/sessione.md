@@ -13,9 +13,9 @@ Il parametro passato è: "$ARGUMENTS"
 - Un codice valido in `piano/codici.txt` → quel corso.
 - Un codice non riconosciuto → mostra i codici dal file e fermati.
 
-Se il codice richiesto è diverso dal corso attivo, avvisa Lorenzo: **un solo esame per volta in
-fase attiva** (`profilo/studente.md`). Cambiare focus è legittimo per un ripasso o per aprire
-un corso nuovo, ma non per studiarne due in parallelo. Chiedi quale delle due cose sta facendo.
+Più esami possono essere attivi in parallelo (`piano/piano_laurea.md`, regola 4, dal 2026-10-06).
+Se il codice richiesto non è fra gli esami attivi, chiedi a Lorenzo se è un ripasso o se il corso
+entra in fase attiva; nel secondo caso va aggiunto in testa a `stato/corrente.md`.
 
 ---
 
