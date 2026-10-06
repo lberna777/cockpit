@@ -150,6 +150,12 @@ l'esame perso, è stato il tempo speso su un esame poi abbandonato.
 > finestra: sei settimane prima del 19 dicembre cade intorno al **7 novembre 2026**. Va
 > ricalcolato sul primo appello reale appena la prenotazione si apre.
 
+> `[2026-10-06]` **Checkpoint proprio di `CALC`: ~3 novembre 2026**, quattro settimane prima
+> dell'appello anticipato del 2 dicembre (non sei: l'appello è stato scoperto a otto settimane).
+> Prova a freddo cronometrata `2024-01-19` (`corsi/CALC/prove/INDICE.md`). Sotto la sufficienza
+> si rinuncia al 2 dicembre e `CALC` torna sugli appelli ordinari di S1: il lavoro fatto non va
+> perso, perché l'esame è comunque in quella sessione.
+
 **2. Si taglia dal fondo, mai la testa di una catena.** L'esame che si toglie è l'ultimo in
 ordine di priorità nella sessione, e non deve avere code che dipendono da lui. La tabella qui
 sopra dice chi può essere tolto.
