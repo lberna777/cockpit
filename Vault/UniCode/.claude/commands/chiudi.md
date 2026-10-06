@@ -89,8 +89,8 @@ Per ogni marcatore `RIPASSO`, aggiorna **solo** la colonna *Ultimo ripasso* alla
 
 - Stato dei moduli toccati, con lo stesso criterio rigoroso del passo 3
 - **Punto di ripresa**: il punto esatto da cui ripartire, non una generica "continuare con X"
-- Se l'esame attivo è cambiato, riscrivi l'intestazione: `corrente.md` descrive **solo l'esame
-  attivo**
+- Se gli esami attivi sono cambiati, riscrivi l'intestazione: `corrente.md` descrive **solo gli
+  esami attivi**, con una riga di sintesi ciascuno in testa
 
 ---
 
