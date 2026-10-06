@@ -32,13 +32,22 @@ verificata — l'esame è scritto con domande, esercizi *e* progetto di un siste
 
 ## Prove (`prove/`)
 
-`Prove_esame-20260914.zip` — cartella completa delle prove d'esame pubblicate dal docente,
-scaricata come archivio (12,7 MB). **Da scompattare e indicizzare**: è la risorsa più preziosa
-del corso, perché contiene le tipologie reali su cui va costruito il curricolo (`CLAUDE.md` §7.3).
+`[2026-10-06]` Archivio scompattato e indicizzato: **62 testi, 46 con soluzione** (2015–2025),
+tutti con un unico esercizio di progetto di un sistema DLX. Indice e piano d'uso in
+`prove/INDICE.md`.
+
+## Calendario verso l'appello anticipato del 2 dicembre 2026 `[2026-10-06]`
+
+| Settimane | Contenuto |
+|---|---|
+| 1–3 (6–26 ott) | `02`, `03`, `04`, `05`; `00` su necessità |
+| 4 (27 ott – 2 nov) | `07`, `08`, `01` |
+| **~3 nov** | **checkpoint**: `2024-01-19` a freddo, cronometrata — sotto la sufficienza, appelli ordinari di S1 |
+| 5–8 (3 nov – 1 dic) | ciclo sulle prove; riserva `2025-01-29`, `2025-02-12` |
 
 ## Da rilevare all'apertura del corso
 
-- Contenuto e struttura dell'archivio delle prove: quante prove, con o senza soluzione, quali
-  tipologie ricorrono e come è formulato il progetto del sistema basato su CPU.
+- ~~Contenuto e struttura dell'archivio delle prove~~ — rilevato il 2026-10-06, `prove/INDICE.md`.
+- Se le «domande di carattere generale» della scheda esistono ancora: nei testi pubblicati non compaiono.
 - Se le dispense coprono l'intero programma della scheda (architetture avanzate, unità di
   controllo sequenziali e pipelined) o se parte del programma poggia sul libro di testo.

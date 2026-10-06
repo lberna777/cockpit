@@ -19,7 +19,7 @@ di un sistema basato su CPU. Per superarlo servono **entrambe** le componenti.
 | Rango | Fonte | Stato | Dove |
 |---|---|---|---|
 | 1 — primaria | dispense del docente — 8 moduli + seminario RISC-V | ✅ acquisita 2026-09-14 | `materiali/slide/` |
-| 2 — prove passate | cartella `Prove_esame` del docente (12,7 MB) | ✅ acquisita, **da scompattare** | `prove/` |
+| 2 — prove passate | cartella `Prove_esame` del docente (12,7 MB) | ✅ acquisita, scompattata e indicizzata 2026-10-06 | `prove/INDICE.md` |
 | 3 — libro di testo | Patterson–Hennessy, *Struttura e progetto dei calcolatori* (Zanichelli); Hennessy–Patterson, *Computer Architecture*, capp. 1–5 | ⬜ non reperito | — |
 
 ## Annata del materiale
@@ -36,8 +36,7 @@ di un sistema basato su CPU. Per superarlo servono **entrambe** le componenti.
   Da verificare se esiste un modulo 06 d'esame non pubblicato. Finché non è chiarito, quel punto
   del programma è una fonte mancante ai sensi della regola §7.1.
 - **Libro di testo**: dichiarato in scheda, non reperito.
-- L'archivio delle prove va scompattato e indicizzato: è da lì che si ricavano le tipologie
-  ricorrenti e la forma del progetto richiesto.
+- ~~L'archivio delle prove va scompattato e indicizzato~~ — fatto il 2026-10-06.
 
 ## Note
 - Testa di catena verso `SO` (S2).
