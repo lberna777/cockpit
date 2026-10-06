@@ -3,7 +3,7 @@
 **Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-06
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · prossimo: `/lezione CALC 02`.
+  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02` 🔶 lezione fatta · prossimo: `/lab CALC 02`.
   Sezione in fondo.
 - `FI2` — Fondamenti di Informatica T-2 (12 CFU) · prossimo: `/lab FI2 LAB06`.
 
@@ -146,7 +146,14 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
   rinuncia al 2 dicembre (`piano/piano_laurea.md`, regola 1);
 - sett. 5–8: ciclo sulle prove, dalle più recenti all'indietro; riserva `2025-01-29`, `2025-02-12`.
 
-**Prossimo passo esatto**: `/lezione CALC 02` «Mapping e decodifica delle memorie».
+**Stato dei moduli**:
+- 🔶 **02** «Mapping e decodifica» — lezione creata il 2026-10-06 nel template *progetto su prova*
+  (`corsi/CALC/lezioni/lezione_02_mapping_decodifica.md`), estratto dalla prova `2025-01-08`;
+  passo 1 della procedura nel prontuario `corsi/CALC/appunti/prontuario_CALC.md`.
+- Tutti gli altri: non aperti.
+
+**Prossimo passo esatto**: `/lab CALC 02` — parte memorie della prova `2023-12-21` (1032 MB di
+EPROM, 2 GB di RAM) a freddo, poi confronto con la soluzione ufficiale. Chiude il modulo 02.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
 scheda non compaiono nei testi pubblicati; libro di testo non reperito.
