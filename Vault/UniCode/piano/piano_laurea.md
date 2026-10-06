@@ -83,7 +83,7 @@ duplicano, si raggruppano.
 | Esame | Primo appello utile | Secondo appello | Fonte |
 |---|---|---|---|
 | FI2 | — | — | — |
-| CALC | — | — | — |
+| CALC | 2026-12-02 (anticipato, **da verificare**) | — | Lorenzo, 2026-10-06; AlmaEsami non ancora consultato |
 | MATAP | — | — | — |
 | ELT | — | — | — |
 | SO | — | — | — |
