@@ -9,6 +9,9 @@
 **Insegnamento**: 434701 · **Docenti**: Stefano Mattoccia, Ugo Leone Cavalcanti
 **Tipo di verifica**: scritto con domande, esercizi **e progetto di un sistema basato su CPU**
 
+**Template lezione**: progetto su prova `[2026-10-06, deciso da Lorenzo]` — vedi `/lezione`.
+Prontuario con la procedura d'esame: `appunti/prontuario_CALC.md`.
+
 ## Modalità d'esame (scheda ufficiale 2025/26)
 
 Esame scritto: domande di carattere generale sulle tematiche del corso, esercizi e il progetto
