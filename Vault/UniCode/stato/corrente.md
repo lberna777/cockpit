@@ -10,7 +10,7 @@
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
 
-# FI2
+## ═══ FI2 ═══
 
 ## Perché FI2
 
@@ -128,3 +128,25 @@ la stessa radice — *da dove nasce* la cosa:
 **30 sessioni complete** con testo, start kit e soluzione ufficiale (2020-01 → 2025-02), in
 `prove/`. Il curricolo si costruisce sulle tipologie ricorrenti che emergono da questi testi
 (`CLAUDE.md` §7.3). `15/01/2025` e `12/02/2025` restano di riserva per la verifica finale.
+
+## ═══ CALC ═══
+
+**Aperto il 2026-10-06** per l'appello anticipato del **2 dicembre 2026**, segnalato da Lorenzo e
+non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del materiale
+2024/25; mappa e stato dei moduli in `corsi/CALC/percorso.md`.
+
+**Prova d'esame**: un unico esercizio di progetto di un sistema DLX (memorie, porte in
+*handshake*, reti logiche, *interrupt handler*), invariato dal 2015. Indice delle 62 prove
+(46 con soluzione) in `corsi/CALC/prove/INDICE.md`.
+
+**Calendario (8 settimane)**:
+- sett. 1–3 (6–26 ott): `02`, `03`, `04`, `05`; `00` solo se la prova lo richiede;
+- sett. 4 (27 ott – 2 nov): `07`, `08`, `01`;
+- **checkpoint ~3 nov**: prova `2024-01-19` a freddo, cronometrata. Sotto la sufficienza si
+  rinuncia al 2 dicembre (`piano/piano_laurea.md`, regola 1);
+- sett. 5–8: ciclo sulle prove, dalle più recenti all'indietro; riserva `2025-01-29`, `2025-02-12`.
+
+**Prossimo passo esatto**: `/lezione CALC 02` «Mapping e decodifica delle memorie».
+
+**Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
+scheda non compaiono nei testi pubblicati; libro di testo non reperito.
