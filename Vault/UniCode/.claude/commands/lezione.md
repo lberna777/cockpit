@@ -286,6 +286,9 @@ e chiudi le autoverifiche con l'avvertenza — *se non sei sicuro, all'esame non
 - [ ] Corsi pratici: **prosa ancorata ai comandi/file**, ogni comando a due livelli (meccanismo
       + visione) — NON un walkthrough, niente sequenza passo-passo né anatomia parametri
 - [ ] Corsi formali: ogni procedimento ha il perché funziona e i casi limite
+- [ ] Corsi a progetto su prova: consegna servita dichiarata; notazione del docente riprodotta
+      con `[fonte: ...]`; estratto di una prova reale non di riserva; passo di procedura
+      riportato nel prontuario; entro ~200 righe
 - [ ] Corsi discorsivi: terminologia esatta della fonte, `[fonte: ...]` dove serve
 - [ ] Le connessioni sono specifiche (citano moduli, corsi e concetti precisi)
 - [ ] Pattern di errore di Lorenzo integrati come ⚠️
