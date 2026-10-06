@@ -209,6 +209,9 @@ Un modulo è chiuso — e solo allora entra nel tracker — quando:
   usa; si annota invece «guidato» in `stato/corrente.md`, e quelle voci sono l'inventario da
   rifare a freddo nella preparazione all'esame.
 - **progetto**: il pezzo di progetto compila, gira e fa ciò che deve.
+- **progetto su prova unica** (`CALC`) `[2026-10-06]`: Lorenzo ha svolto **a freddo** la parte di
+  una prova reale servita dal modulo (`/lab`), e il confronto con la soluzione ufficiale non
+  trova errori di sostanza. Le prove di riserva in `prove/INDICE.md` non si usano per chiudere.
 
 ### 7.3 Orientamento alle prove
 
