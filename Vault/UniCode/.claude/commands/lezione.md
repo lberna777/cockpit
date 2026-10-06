@@ -183,6 +183,51 @@ I casi in cui il procedimento non si applica, e come li si riconosce.
 
 ---
 
+### Template — corso a progetto su prova unica
+
+> **Fonti in più da leggere al passo 3**: `corsi/<COD>/prove/INDICE.md`, e il testo e la
+> soluzione ufficiale della prova scelta per l'estratto (preferire le più recenti con soluzione;
+> **mai** quelle che l'indice tiene di riserva per la verifica finale).
+
+```
+# Lezione — <COD> <ID>: <Nome Completo>
+**Corso**: <nome esteso>
+**Materiale**: <dispensa del modulo> · prova <AAAA-MM-GG> (testo + soluzione ufficiale)
+**Prerequisiti**: <moduli già visti da cui dipende questa consegna>
+**Consegna servita**: <a | b | c della prova — e quale parte di essa>
+
+---
+
+## Obiettivo
+Una frase nei termini della prova: quale pezzo dell'elaborato Lorenzo deve saper scrivere
+(es. «la consegna b) per la parte memorie: banchi, decodifica, range»).
+
+## [Sezioni ancorate alle decisioni di progetto] — in prosa
+
+Una sezione per ogni decisione che il modulo insegna a prendere nel progetto (es. «quanti banchi
+e su quali bit», «come si genera il chip-select di una porta»). Per ciascuna, in prosa breve:
+- **la decisione** (cosa si sceglie e in base a quale dato del testo)
+- **il perché** (il meccanismo dalla dispensa: cosa succede sul bus se si sceglie diversamente)
+- **la notazione del docente** — riprodotta, non parafrasata, con `[fonte: <dispensa> sl. N]`
+  o `[fonte: soluzione AAAA-MM-GG]`
+*(⚠️ errori ricorrenti da profilo/errori.md dove rilevanti.)*
+
+## Nella prova
+L'estratto della prova reale che tocca questo modulo: il passo del testo, la parte della
+soluzione ufficiale che vi risponde, e il ragionamento esplicitato che porta dall'uno all'altra.
+Le **criticità** che la soluzione segnala, se ci sono.
+
+## Passo di procedura
+Il passo (o i passi) che questo modulo aggiunge alla **procedura d'esame** del corso, formulato
+come istruzione operativa. Va riportato identico nel prontuario `corsi/<COD>/appunti/prontuario_<COD>.md`,
+nella sezione della procedura, al suo posto nella sequenza.
+
+## Riepilogo
+3 domande-risposta sulle decisioni del modulo (non sulle definizioni).
+```
+
+---
+
 ### Template — corso discorsivo con docente di riferimento
 
 > **Regola vincolante**: l'esame verte sugli argomenti e le spiegazioni della fonte del
