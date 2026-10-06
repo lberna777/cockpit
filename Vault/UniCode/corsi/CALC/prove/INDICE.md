@@ -31,7 +31,7 @@ Varia solo il caso. Gli ingredienti ricorrenti, contati sui 62 testi:
 | porte di I/O a 8 bit con protocollo di *handshake* | 49 |
 | rete logica richiesta esplicitamente («soluzioni puramente software non valide») | 13 |
 | dati *signed* / estensione del segno | 16 |
-| trasferimenti a *word* o *half-word* composti da più porte a 8 bit | ~14 |
+| trasferimenti a *word* o *half-word* composti da più porte a 8 bit | 10 |
 | LED | 10 |
 | contatori / temporizzazione | 8 |
 | porte da abilitare in modo **mutuamente esclusivo**, cicli di trasferimenti alternati | 7 |
