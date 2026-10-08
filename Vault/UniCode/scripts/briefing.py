@@ -193,7 +193,7 @@ def sezione_pianificazione() -> str:
     campi = {}
     for ln in read(PIANIFICAZIONE).splitlines():
         m = re.match(r"^(settimana|mese|giorno):\s*(\S+)", ln)
-        if m:
+        if m and m.group(1) not in campi:   # vale la prima riga: sotto c'è la legenda
             campi[m.group(1)] = m.group(2)
     lunedi = TODAY - dt.timedelta(days=TODAY.weekday())
     dovute = []
