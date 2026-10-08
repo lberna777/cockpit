@@ -18,6 +18,18 @@ Nel momento in cui emerge, senza chiedere conferma (stesso principio di `UniCode
 - nasce un ambito nuovo (un cliente, un esame che si apre, un progetto musicale) → nuovo
   documento in `progetti`.
 
+Dal 2026-10-08 (seconda richiesta di Lorenzo) la Plancia **si evolve con tutta l'attività su
+Claude, non solo UniCode**. Inoltre, sempre senza chiedere:
+
+- si pubblica o si aggiorna un artefatto, un sito, una pagina → documento in `materiali`;
+- si crea una repository o vi si invia lavoro in una sessione → `repo` (nuovo documento o
+  `ultimo_push` aggiornato);
+- una sessione produce qualcosa di sostanziale (studio, lavoro, musica, sistema) → una voce in
+  `diario`. Una voce per risultato, non per ogni modifica.
+
+Le repository si rilevano con `list_repos`, gli artefatti con `Artifact action: "list"`: utili
+per un riallineamento quando la Plancia è rimasta indietro.
+
 A fine risposta, una riga a Lorenzo su cosa è stato registrato o modificato nella Plancia.
 Non inventare scadenze: se Lorenzo non ne dà una, `scadenza: null`.
 
