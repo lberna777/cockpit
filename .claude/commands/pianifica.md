@@ -1,5 +1,6 @@
 ---
-description: "Chiude la sessione di studio: raccoglie il giudizio, aggiorna stato e log, fissa nella Plancia lo studio di domani."
+description: "Fissa insieme a Lorenzo le attività di studio del mese, della settimana o del giorno e le scrive con una data nella Plancia. Uso: /pianifica [mese] [settimana] [giorno|domani]"
+argument-hint: "[mese] [settimana] [giorno|domani]"
 ---
 
 <!-- generato da scripts/unicode_commands.py: non modificare a mano -->
@@ -10,7 +11,7 @@ Comando di studio lanciato da `~/cockpit`. La radice di UniCode è `Vault/UniCod
 e i comandi di shell che li usano vanno eseguiti da lì (`cd Vault/UniCode` o percorso completo).
 
 1. Se in questa sessione non hai ancora letto `Vault/UniCode/CLAUDE.md`, leggilo per intero.
-2. Leggi `Vault/UniCode/.claude/commands/chiudi.md` ed eseguilo alla lettera, con argomenti:
+2. Leggi `Vault/UniCode/.claude/commands/pianifica.md` ed eseguilo alla lettera, con argomenti:
    `$ARGUMENTS`
 3. Le trascrizioni delle sessioni lanciate da cockpit stanno sotto la cartella di progetto di
    cockpit in `~/.claude/projects/` (nel cloud: `-home-user-cockpit`), non sotto quella di

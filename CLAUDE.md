@@ -77,6 +77,8 @@ Impegni, progetti, repository, materiali e diario di Lorenzo si registrano **sub
 chiedere** nella Plancia (https://claude.ai/artifact/B3QifQTD67G5LZmudWk1u4) con `ArtifactData`.
 Il protocollo è **privato** e vive nel database della Plancia, documento `meta/protocollo`:
 leggerlo prima di scrivere. Dal 2026-10-08 non sta più nel repository, che è pubblico.
+Priorità: **studio, poi lavoro, poi svago**; lo studio non resta mai senza data e si pianifica con
+`/pianifica` (mese il giorno 1, settimana il lunedì, domani a `/chiudi`): vedi `UniCode/CLAUDE.md` §5.1.
 
 ## Convenzioni globali
 - **Lingua**: italiano.
