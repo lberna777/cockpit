@@ -19,7 +19,8 @@ ricava dal precedente.
 
 - `piano/piano_laurea.md`: sessione in corso, appelli, checkpoint, regole del piano.
 - `corsi/<COD>/percorso.md` di ogni esame attivo: moduli rimasti e punto di ripresa.
-- La Plancia (`Vault/claude/plancia.md` per URL e schema): leggi con `ArtifactData` le
+- La Plancia (URL nel `CLAUDE.md` di cockpit, protocollo e schema nel documento
+  `meta/protocollo` del suo database): leggi con `ArtifactData` le
   collezioni `progetti` e `attivita`, per vedere cosa è già fissato e cosa è rimasto aperto.
   Le attività di studio aperte **senza data** vanno sistemate in questa esecuzione.
 
