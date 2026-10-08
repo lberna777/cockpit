@@ -7,6 +7,7 @@ Composizione:
   2. esami attivi   — stato/corrente.md, troncato
   3. ripassi dovuti  — da stato/tracker.md, calcolati su oggi
   4. ultime giornate — da log/giornate.md, giorni vuoti inclusi
+  0. in testa, solo se dovuta: la pianificazione di mese, settimana o giorno (stato/pianificazione.md)
 
 Nessuna dipendenza esterna. Ogni sezione degrada da sola se il file manca.
 Invocato da session_end.sh, da giornata.sh e a mano con:  python3 scripts/briefing.py
@@ -29,6 +30,7 @@ ERRORI = os.path.join(ROOT, "profilo", "errori.md")
 CORRENTE = os.path.join(ROOT, "stato", "corrente.md")
 TRACKER = os.path.join(ROOT, "stato", "tracker.md")
 GIORNATE = os.path.join(ROOT, "log", "giornate.md")
+PIANIFICAZIONE = os.path.join(ROOT, "stato", "pianificazione.md")
 OUT = os.path.join(ROOT, "stato", "briefing.md")
 
 # Tetti in caratteri: il costo in context window deve restare prevedibile.
@@ -178,6 +180,41 @@ def sezione_giornate() -> str:
     return "\n".join(ultime)
 
 
+MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto",
+        "settembre", "ottobre", "novembre", "dicembre"]
+
+
+def sezione_pianificazione() -> str:
+    """Pianificazioni dovute: mese dal giorno 1, settimana dal lunedì, giorno da oggi.
+
+    Regola di Lorenzo del 2026-10-08. Se il giorno fissato è passato senza aprire una sessione,
+    la pianificazione resta dovuta e scatta alla prima sessione successiva.
+    """
+    campi = {}
+    for ln in read(PIANIFICAZIONE).splitlines():
+        m = re.match(r"^(settimana|mese|giorno):\s*(\S+)", ln)
+        if m:
+            campi[m.group(1)] = m.group(2)
+    lunedi = TODAY - dt.timedelta(days=TODAY.weekday())
+    dovute = []
+    if campi.get("mese", "") < TODAY.strftime("%Y-%m"):
+        dovute.append(("mese", f"**Mese** — {MESI[TODAY.month - 1]} {TODAY.year} non è ancora pianificato."))
+    sett = parse_date(campi.get("settimana", "")) if campi.get("settimana", "—") != "—" else None
+    if not sett or sett < lunedi:
+        dovute.append(("settimana", f"**Settimana** — quella di lunedì {lunedi.day} {MESI[lunedi.month - 1]} non è ancora pianificata."))
+    giorno = parse_date(campi.get("giorno", "")) if campi.get("giorno", "—") != "—" else None
+    if not giorno or giorno < TODAY:
+        dovute.append(("giorno", "**Oggi** — nessuna attività di studio fissata per oggi (`/chiudi` non l'ha pianificata)."))
+    if not dovute:
+        return ""
+    righe = [f"- {testo}" for _, testo in dovute]
+    ambiti = " ".join(k for k, _ in dovute)
+    righe.append("")
+    righe.append(f"**Prima di ogni altra cosa** proponi a Lorenzo `/pianifica {ambiti}`: le attività di studio "
+                 "vanno fissate con una data nella Plancia (lo studio non resta mai senza data).")
+    return "\n".join(righe)
+
+
 def sezione(titolo: str, corpo: str) -> str:
     corpo = corpo.strip() or "_(vuoto)_"
     return f"## {titolo}\n\n{corpo}\n"
@@ -194,6 +231,11 @@ def build() -> str:
         "> Generato da `scripts/briefing.py`. **Non modificare a mano**: viene sovrascritto.",
         "> È l'unico contesto caricato d'ufficio. Tutto il resto si carica su necessità.",
         "",
+    ]
+    pian = sezione_pianificazione()
+    if pian:
+        parts.append(sezione("Pianificazione dovuta", pian))
+    parts += [
         sezione("Come studia Lorenzo", profilo or "_Profilo non ancora compilato._"),
         sezione("Errori ricorrenti da intercettare", errori or "_Nessun pattern registrato._"),
         sezione("Esami attivi", corrente or "_Nessun esame attivo dichiarato._"),
