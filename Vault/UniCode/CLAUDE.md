@@ -128,6 +128,12 @@ Inoltre, ogni obiettivo che Lorenzo fissa (un appello, un checkpoint, un blocco 
 suo cambio di stato va registrato nella **Plancia di Lorenzo**, secondo il protocollo privato nel
 suo database (documento `meta/protocollo`; rimando nel `CLAUDE.md` di cockpit).
 
+**Pianificazione dello studio** `[2026-10-08, regola di Lorenzo]`. Lo studio non resta mai senza
+data e viene prima del lavoro e dello svago. Mese il giorno 1, settimana il lunedì, giorno dopo a
+`/chiudi` (passo 9); se quel giorno non si apre una sessione, alla prima successiva. Il briefing
+apre con «Pianificazione dovuta» quando una manca (`stato/pianificazione.md`): in quel caso, prima
+di ogni altra cosa, si propone `/pianifica` a Lorenzo.
+
 ### 5.2 A fine sessione — SessionEnd hook, automatico
 
 `scripts/session_end.sh` registra in `log/AAAA-MM.md` la traccia meccanica della sessione — durata,

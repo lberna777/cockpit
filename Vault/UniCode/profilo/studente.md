@@ -24,6 +24,11 @@
 - `[superato 2026-10]` Un solo esame per volta in fase attiva. Gli altri restano in ripasso, non in parallelo.
 - `[2026-10-06]` Più esami attivi in parallelo, per scelta di Lorenzo (`FI2` e `CALC`): il
   controllo del carico passa ai checkpoint per esame (`piano/piano_laurea.md`, regole 1 e 4).
+- `[2026-10-08]` **Lo studio viene prima del lavoro e dello svago, e non resta mai senza data.**
+  Pianificazione per attività, non per ore: il mese il giorno 1, la settimana il lunedì, il giorno
+  dopo a `/chiudi` (o alla prima sessione utile). Registro in `stato/pianificazione.md`,
+  comando `/pianifica`, attività scritte nella Plancia di Lorenzo. Non contraddice il «mai monte
+  ore»: si fissano blocchi di programma con una data, una giornata può averne uno solo.
 
 ## Cosa ha funzionato
 
