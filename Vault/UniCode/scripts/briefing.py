@@ -197,7 +197,8 @@ def sezione_pianificazione() -> str:
             campi[m.group(1)] = m.group(2)
     lunedi = TODAY - dt.timedelta(days=TODAY.weekday())
     dovute = []
-    if campi.get("mese", "") < TODAY.strftime("%Y-%m"):
+    mese = campi.get("mese", "")
+    if not re.match(r"^\d{4}-\d{2}$", mese) or mese < TODAY.strftime("%Y-%m"):
         dovute.append(("mese", f"**Mese** — {MESI[TODAY.month - 1]} {TODAY.year} non è ancora pianificato."))
     sett = parse_date(campi.get("settimana", "")) if campi.get("settimana", "—") != "—" else None
     if not sett or sett < lunedi:
