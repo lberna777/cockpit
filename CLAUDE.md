@@ -71,6 +71,15 @@ Riordinata il 2026-09-01, rivista il 2026-09-14.
   - `tools/` — AgenticOS, claude-code-quest, unicode-ui, UniCode-template, platform-master, cupp
   - `appunti/` — note e piani di sviluppo, non progetti
 
+## Plancia di Lorenzo — tracciamento degli obiettivi
+
+Ogni obiettivo o cosa da fare che Lorenzo fissa — studio, lavoro, musica o qualunque altro
+ambito — va registrato **subito e senza chiedere** nella Plancia
+(https://claude.ai/artifact/B3QifQTD67G5LZmudWk1u4), con `ArtifactData`; così anche i cambi di
+stato. La Plancia segue **tutta** l'attività su Claude: anche repository (`repo`), materiali
+pubblicati (`materiali`) e un diario dei risultati (`diario`). Protocollo e schema:
+`Vault/claude/plancia.md` (regole di Lorenzo del 2026-10-08).
+
 ## Convenzioni globali
 - **Lingua**: italiano.
 - **Handoff**: a ~75% di contesto usa `/handoff` o `/handoffplan` (vedi `~/Sviluppo/CLAUDE.md`).
