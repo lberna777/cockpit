@@ -189,9 +189,25 @@ Una riga in `stato/giornata.md`: `HH:MM · <COD> · prontuario: <cosa aggiunto>`
 
 ---
 
-**9. Conferma finale**
+**9. Pianifica domani** — *non facoltativo dentro `/chiudi`*
+
+Regola di Lorenzo del 2026-10-08: lo studio non resta mai senza data. Esegui
+`.claude/commands/pianifica.md` con ambito `domani`: proponi 1-3 attività di studio concrete per
+domani partendo dal **punto di ripresa** scritto al passo 5, attendi la conferma di Lorenzo,
+scrivile nella Plancia con scadenza domani e aggiorna `giorno:` in `stato/pianificazione.md`.
+
+Se domani è lunedì o il primo del mese, chiedi a Lorenzo se vuole fissare già ora anche la
+settimana o il mese (`/pianifica settimana domani`); altrimenti ci penserà il briefing all'avvio.
+Se Lorenzo dice che domani non studia, scrivi comunque `giorno:` con la data di domani e una
+riga in `stato/giornata.md` (`HH:MM · PIANO · domani niente studio, deciso da Lorenzo`): una
+giornata vuota decisa è un dato, non una dimenticanza.
+
+---
+
+**10. Conferma finale**
 
 Mostra a Lorenzo:
+- Le attività di studio fissate per domani nella Plancia
 - Corso e moduli aggiornati, con i marcatori scritti
 - Il punto esatto da cui ripartirà
 - Il report della revisione errori (passo 7), con gli eventuali candidati trasversali da decidere
