@@ -1,5 +1,5 @@
 ---
-description: "Chiude la sessione di studio: raccoglie il giudizio, aggiorna stato e log. Facoltativo — la traccia meccanica è già automatica."
+description: "Chiude la sessione di studio: raccoglie il giudizio, aggiorna stato e log, fissa nella Plancia lo studio di domani."
 ---
 
 > **Questo comando è facoltativo.** La traccia meccanica della sessione la scrivono già il
