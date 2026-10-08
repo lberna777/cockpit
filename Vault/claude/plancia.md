@@ -44,6 +44,16 @@ Ordine: lavoro 1–9, studio 10–19, musica 20–29, personale 30–39.
 `priorita` (`alta` · `normale`), `note`, `creata`, `aggiornata` (ISO 8601).
 Id leggibili con prefisso del progetto: `fi2-lab`, `calc-checkpoint`, `ari-email`…
 
+`repo/<nome in minuscolo, . → ->`: `nome`, `url`, `visibilita` (`pubblica` · `privata`),
+`ultimo_push` (`AAAA-MM-GG`), `area`, `descrizione`, `gruppo`. Il colore dell'attività
+(verde ≤14 gg, ambra ≤60) lo calcola la pagina da `ultimo_push`.
+
+`materiali/<art-ID artefatto | sito-…>`: `titolo`, `url`, `tipo` (`artefatto` · `sito` · `pagina`),
+`data` (`AAAA-MM-GG`), `area`, `gruppo` (es. `CarGuy`, `Aristocani`), `descrizione`.
+
+`diario/<AAAA-MM-GG-slug>`: `data`, `ora` (`HH:MM` o vuota), `area`, `testo` (una riga),
+`url` facoltativo.
+
 ## Confine con UniCode
 
 Lo stato fine dei moduli resta in `UniCode/stato/` (tracker, briefing). Nella Plancia vanno
