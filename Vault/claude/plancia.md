@@ -54,6 +54,15 @@ Id leggibili con prefisso del progetto: `fi2-lab`, `calc-checkpoint`, `ari-email
 `diario/<AAAA-MM-GG-slug>`: `data`, `ora` (`HH:MM` o vuota), `area`, `testo` (una riga),
 `url` facoltativo.
 
+## Come la pagina le mostra
+
+Schede: **Attività** (`attivita`), **Codice** (`repo`: dove vive il codice), **Pagine**
+(`materiali`: ciò che si apre con un link), **Diario** (`diario`). Le schede Codice e Pagine si
+collegano tramite lo stesso `gruppo` (es. `CarGuy`): tenerlo identico nei due documenti.
+Le attività stanno in quattro colonne per orizzonte: Adesso (in ritardo + 7 giorni), Entro un
+mese, Più avanti, Senza data. Un progetto che porta il nome della sua area (`Musica`,
+`Personale`) non compare nel binario: fa da contenitore generico.
+
 ## Confine con UniCode
 
 Lo stato fine dei moduli resta in `UniCode/stato/` (tracker, briefing). Nella Plancia vanno
