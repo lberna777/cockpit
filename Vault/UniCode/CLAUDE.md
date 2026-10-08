@@ -125,7 +125,8 @@ Formato: `HH:MM · <CODICE> · <fatto in una riga>`. Una riga, non un paragrafo.
 più di una riga, merita un file suo.
 
 Inoltre, ogni obiettivo che Lorenzo fissa (un appello, un checkpoint, un blocco di lavoro) e ogni
-suo cambio di stato va registrato nella **Plancia di Lorenzo**, secondo `Vault/claude/plancia.md`.
+suo cambio di stato va registrato nella **Plancia di Lorenzo**, secondo il protocollo privato nel
+suo database (documento `meta/protocollo`; rimando nel `CLAUDE.md` di cockpit).
 
 ### 5.2 A fine sessione — SessionEnd hook, automatico
 
