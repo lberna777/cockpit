@@ -124,6 +124,9 @@ senza interrompere il lavoro e senza chiedere conferma:
 Formato: `HH:MM · <CODICE> · <fatto in una riga>`. Una riga, non un paragrafo. Se il fatto merita
 più di una riga, merita un file suo.
 
+Inoltre, ogni obiettivo che Lorenzo fissa (un appello, un checkpoint, un blocco di lavoro) e ogni
+suo cambio di stato va registrato nella **Plancia di Lorenzo**, secondo `Vault/claude/plancia.md`.
+
 ### 5.2 A fine sessione — SessionEnd hook, automatico
 
 `scripts/session_end.sh` registra in `log/AAAA-MM.md` la traccia meccanica della sessione — durata,
