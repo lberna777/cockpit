@@ -15,6 +15,7 @@ verificata — l'esame è scritto con domande, esercizi *e* progetto di un siste
 |---|---|---|---|
 | 00 | Complementi ed esercizi di Reti Logiche | `00_Complementi_Esercizi_Reti_Logiche.pdf` | ⬜ |
 | 01 | Introduzione: evoluzione tecnologica, organizzazione gerarchica | `01_Introduzione.pdf` | ⬜ |
+| 02p | Fondamenta per il mapping: macchina, chip, numeri (prerequisito di `02`) | `01` pp. 9, 30–36 · `02` pp. 2–13, 34–38 · `00` es. 10 | 🔶 lezione 2026-10-08 (`lezioni/lezione_02p_fondamenta.md`) |
 | 02 | Mapping e decodifica delle memorie | `02_Mapping_e_decodifica.pdf` | 🔶 lezione 2026-10-06 (`lezioni/lezione_02_mapping_decodifica.md`); si chiude con `/lab CALC 02` su `2023-12-21` |
 | 03 | Linguaggio macchina | `03_Linguaggio_macchina.pdf` | ⬜ |
 | 04 | Interruzioni | `04_Interruzioni.pdf` | ⬜ |

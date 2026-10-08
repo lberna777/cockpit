@@ -3,7 +3,7 @@
 **Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-06
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02` 🔶 lezione fatta · prossimo: `/lab CALC 02`.
+  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` 🔶 lezione fondamenta (2026-10-08), poi `02` 🔶 dalla Decisione 1 · prossimo: `/lab CALC 02`.
   Sezione in fondo.
 - `FI2` — Fondamenti di Informatica T-2 (12 CFU) · prossimo: `/lab FI2 LAB06`.
 

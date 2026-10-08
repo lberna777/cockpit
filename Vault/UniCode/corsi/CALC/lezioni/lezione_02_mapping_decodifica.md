@@ -6,7 +6,7 @@ tags: [CALC, lezione]
 **Corso**: Calcolatori Elettronici T
 **Materiale**: dispensa *02 Mapping e decodifica* (Mattoccia, ed. 2024/25; pagine citate come
 numero di pagina del PDF) · prova `2025-01-08`, testo e traccia di soluzione ufficiale
-**Prerequisiti**: reti logiche combinatorie (decoder, AND di letterali) — modulo `00`, da aprire
+**Prerequisiti**: [[lezione_02p_fondamenta]] (macchina, chip, binario/hex); reti logiche combinatorie (decoder, AND di letterali) — modulo `00`, da aprire
 solo se qui qualcosa non torna
 **Consegna servita**: **a)** la tabella di dispositivi, indirizzi e *chip-select*; **b)** la parte
 memorie: espressioni di decodifica, *range*, collegamenti di `BA` e `BD` ai banchi
