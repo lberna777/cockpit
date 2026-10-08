@@ -3,7 +3,7 @@
 **Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-06
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` 🔶 lezione fondamenta (2026-10-08), poi `02` 🔶 dalla Decisione 1 · prossimo: `/lab CALC 02`.
+  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` 🔶 sezioni 1–5 studiate l'8/10 · prossimo: 02p §6 (esercizio 10), poi `02` dalla Decisione 1, poi `/lab CALC 02`.
   Sezione in fondo.
 - `FI2` — Fondamenti di Informatica T-2 (12 CFU) · prossimo: `/lab FI2 LAB06`.
 
@@ -150,10 +150,22 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
 - 🔶 **02** «Mapping e decodifica» — lezione creata il 2026-10-06 nel template *progetto su prova*
   (`corsi/CALC/lezioni/lezione_02_mapping_decodifica.md`), estratto dalla prova `2025-01-08`;
   passo 1 della procedura nel prontuario `corsi/CALC/appunti/prontuario_CALC.md`.
+- 🔶 **02p** «Fondamenta per il mapping» — lezione creata l'8/10 su richiesta di Lorenzo, perché
+  la 02 dava per scontati quadro fisico, notazione e binario/esadecimale
+  (`corsi/CALC/lezioni/lezione_02p_fondamenta.md`). Studiate le sezioni 1–5 con domande in chat:
+  bus e chi li pilota, chip e piedini, decoder di I livello (sbloccato con l'analogia del
+  condominio dopo che schema e widget non avevano funzionato), 3-state, conversioni. Inciampi:
+  unità K/M nelle potenze di due (32 KB → «5», 64 MB → «7»), lettura del binario (`1100` = 8),
+  causa invertita sul 3-state. Prodotti: prontuario §0, `appunti/cheatsheet_conversioni_CALC.md`,
+  traccia per gli appunti in `grezzi/traccia_02p_2026-10-08.md`. Della 02 letta solo la
+  Decisione 1.
 - Tutti gli altri: non aperti.
 
-**Prossimo passo esatto**: `/lab CALC 02` — parte memorie della prova `2023-12-21` (1032 MB di
-EPROM, 2 GB di RAM) a freddo, poi confronto con la soluzione ufficiale. Chiude il modulo 02.
+**Prossimo passo esatto**: lezione 02p **§6** (esercizio 10 della dispensa 00: rispondere alla
+pausa «perché `CS_RAM_2` ha bisogno di `A11*` e `CS_RAM_1` no?», aiutandosi con il widget della
+sessione dell'8/10), poi §7 e i 6 esercizi «Prova tu» senza soluzioni. Poi lezione 02 dalla
+Decisione 1, poi `/lab CALC 02` (parte memorie della prova `2023-12-21` a freddo; chiude il 02).
+A fine 02p: `/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
 scheda non compaiono nei testi pubblicati; libro di testo non reperito.

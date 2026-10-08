@@ -184,6 +184,13 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   valido con `&&` (`index < 0 && index >= size`, mai vera) invece di `||`. Entrambi derivabili da un caso
   a mano (capacità 3 → 6; indice 1 su `size` 1). Evidenza: codice letto alle 15:35 e 16:20;
   `stato/giornata.md` 15:40, 16:30.
+- [2026-10-08] CALC: 02p §4, causa del «uno solo acceso» attribuita al verso sbagliato: «lavorano
+  opposti, quindi un chip acceso "spegne" GLI ALTRI». Ha colto che la proprietà è in gioco (un solo
+  chip con l'uscita attiva), ma ha dato il comando ai chip invece che al decoder: è il decoder ad
+  accendere un solo `CS`, e gli altri restano in Z perché il loro `CS` è spento, non perché un altro
+  chip li spegne. Nella stessa risposta «opposti», vero solo con 2 chip, preso come regola (con 4 chip
+  vale «al massimo un CS a 1»). Evidenza: trascrizione del 2026-10-08 («un chip acceso "spegne" GLI
+  ALTRI» → «la causa è al contrario»); `corsi/CALC/grezzi/traccia_02p_2026-10-08.md`, Inciampi.
 
 ## Per corso
 
@@ -450,6 +457,33 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   l'ha scritto Claude → correzione da provare: disegnare i passi con un caso numerico prima di scrivere (`/flusso`,
   prontuario §3.13). Ricorrenza della riga «processi interni alle funzioni» del 2026-10-05. Evidenza:
   trascrizione del 2026-10-05 (risposta a «Scrivilo tu, con il metodo del debug»; «ma che è sto minimo»).
+
+### CALC — Calcolatori Elettronici T
+- [2026-10-08] 02p §2: taglia convertita in bit senza l'unità. RAM da 32 KB → «5 piedini perché 32 =
+  2^5»; 64 MB → «2^6 × 2^4 = 10», poi «2», poi «7» → causa: della taglia legge solo il numero e lascia
+  cadere l'unità, e il valore di M non lo conosce (lo pensa 2^4); 512 KB → 19 e 2 GB → 31 corretti da
+  solo dopo la prima correzione → correzione: spezzare sempre in numero × unità e sommare gli
+  esponenti, con K, M, G = 2^10, 2^20, 2^30 (32 KB → 15, 64 MB → 26). Evidenza: trascrizione del
+  2026-10-08 («direi 5 piedini perchè 32 = 2^5», «64 quindi 2^6, immagino per 2^4, quindi 10»,
+  «volevo dire 7 piedini»); `stato/giornata.md` 11:16, 12:17.
+- [2026-10-08] 02, Decisione 1: binario letto senza i pesi. `1100` letto come 8 («pensavo che 1100
+  fosse 8») e proposto come partenza di un chip da 8 byte in uno spazio da 16 (vale 12, non è multiplo
+  di 8, e 12 + 8 esce dallo spazio); alla prova di conversione di `1010`, `0100`, `1110`: «non so
+  farlo» → causa: manca la lettura posizionale (pesi 8 4 2 1), base data per scontata dalla lezione 02
+  → correzione: sommare i pesi dove c'è un 1; partenza allineata = ultimi K bit a zero. Evidenza:
+  trascrizione del 2026-10-08 («no, partirà da 1100», «pensavo che 1100 fosse 8»); traccia 02p,
+  Inciampi.
+- [2026-10-08] 02, Decisione 1: allineamento ridotto alle prime due posizioni. Per un dispositivo da 2
+  byte «parte da 2 o da 0», ricalcando i due soli valori (0 e 8) appena visti per il chip da 8 → causa:
+  la regola «base multipla della taglia» non è stata generalizzata, è stato copiato il numero di
+  partenze del caso precedente → correzione: valgono tutti i multipli della taglia (da 2 byte in 16:
+  0, 2, 4 … 14, cioè 2^3 posizioni per i 3 bit di selezione). Evidenza: trascrizione del 2026-10-08
+  («un dispositivo da 2 byte, ha 1 bit e parte da 2 o da 0»).
+- [2026-10-08] 02p §3: conteggio delle celle da 1. Indirizzo `0 11` → «palazzina B 4 appartamento»
+  (la palazzina è giusta; `11` = 3) → causa: conta le celle come posizioni ordinali (la quarta)
+  invece che col valore del numero binario, che parte da 0 → correzione: la cella *è* il valore dei
+  bit bassi, da 0 (`00` … `11` = celle 0 … 3); su `1 01` subito dopo ha risposto «appartamento numero
+  1», corretto. Evidenza: trascrizione del 2026-10-08; traccia 02p, Inciampi («si conta da 0»).
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
