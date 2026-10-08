@@ -4,8 +4,9 @@ description: "Chiude la sessione di studio: raccoglie il giudizio, aggiorna stat
 
 > **Questo comando è facoltativo.** La traccia meccanica della sessione la scrivono già il
 > SessionEnd hook e il consolidamento serale. `/chiudi` aggiunge **il giudizio**: cosa ha
-> funzionato, cosa è rimasto aperto, da dove si riparte. Se la giornata è finita senza, non è
-> andato perso niente.
+> funzionato, cosa è rimasto aperto, da dove si riparte — e fissa nella Plancia lo studio di
+> domani (passo 9). Se la giornata è finita senza, non è andato perso niente: il briefing del
+> giorno dopo segnala che la giornata non è pianificata e la si fissa all'avvio.
 
 Esegui i passi in ordine.
 
