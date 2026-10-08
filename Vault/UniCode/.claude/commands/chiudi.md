@@ -211,6 +211,7 @@ Mostra a Lorenzo:
 - Corso e moduli aggiornati, con i marcatori scritti
 - Il punto esatto da cui ripartirà
 - Il report della revisione errori (passo 7), con gli eventuali candidati trasversali da decidere
+  (questo e i punti seguenti si mostrano insieme alla proposta del passo 9, per chiedere una volta sola)
 - I moduli con ripasso scaduto da `stato/tracker.md`, se ce ne sono:
   `⚠️ Ripasso scaduto: [moduli]`
 - Che gradini e scadenze dei ripassi si assestano al consolidamento delle 23
