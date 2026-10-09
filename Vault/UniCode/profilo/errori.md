@@ -484,6 +484,22 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   invece che col valore del numero binario, che parte da 0 → correzione: la cella *è* il valore dei
   bit bassi, da 0 (`00` … `11` = celle 0 … 3); su `1 01` subito dopo ha risposto «appartamento numero
   1», corretto. Evidenza: trascrizione del 2026-10-08; traccia 02p, Inciampi («si conta da 0»).
+- [2026-10-09] Ricorrenza di «taglia convertita in bit senza l'unità» (2026-10-08), il giorno dopo: 02p
+  §6, EPROM da 16K → «16 = 2^4», K di nuovo persa; corretto subito in 2^14 alla prima segnalazione
+  («lo sottintendevo»). Terza taglia su quattro in due giorni in cui l'unità cade al primo colpo.
+  Evidenza: trascrizione del 2026-10-09 («16 = 2^4»); `stato/giornata.md` 12:44.
+- [2026-10-09] 02p §6: 2^14 scritto in binario con l'1 in fondo, «0000 0000 0000 001» → causa: non sa
+  che base^n si scrive 1 seguito da n zeri, quindi non ha un modello di dove stia l'1 (subito dopo ha
+  chiesto «perché 1 seguito da 14 zeri se era 2 alla qualcosa»); stessa famiglia della riga del
+  2026-10-08 sul binario letto senza i pesi: manca la notazione posizionale → correzione: 2^n = 1 e n
+  zeri, come 10^n in decimale; raggruppare a 4 **da destra** e completare a sinistra con zeri
+  (`0100 0000 0000 0000` = `4000h`). Evidenza: trascrizione del 2026-10-09; `stato/giornata.md` 13:05.
+- [2026-10-09] 02p §6: `10000h − 4000h` → «12000» → causa: non ha l'aritmetica in base 16 (dichiarato
+  poco prima: «non so fare le somme in esadecimale»): il 16 − 4 = 12 della colonna è giusto, ma lo
+  scrive come due cifre invece della cifra C, e l'1 che ha prestato non viene azzerato → correzione:
+  in hex ogni colonna ha una sola cifra 0…F (12 = C); chi presta scende di 1; verifica inversa
+  `C000h + 4000h = 10000h`. Evidenza: trascrizione del 2026-10-09 («quindi viene 12000»);
+  `stato/giornata.md` 12:34, 13:12; `appunti/prontuario_CALC.md` §0.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

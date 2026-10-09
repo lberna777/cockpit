@@ -1,9 +1,9 @@
 # Stato Corrente — Studio Attivo
 
-**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-06
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-09
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` 🔶 sezioni 1–5 studiate l'8/10 · prossimo: 02p §6 (esercizio 10), poi `02` dalla Decisione 1, poi `/lab CALC 02`.
+  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` 🔶 §1–5 studiate l'8/10, §6 a metà il 9/10 (indirizzi dell'esercizio 10 fatti, CS no) · prossimo: 02p §6 segnali CS, poi §7 e «Prova tu», poi `02` dalla Decisione 1, poi `/lab CALC 02`.
   Sezione in fondo.
 - `FI2` — Fondamenti di Informatica T-2 (12 CFU) · prossimo: `/lab FI2 LAB06`.
 
@@ -159,12 +159,22 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
   causa invertita sul 3-state. Prodotti: prontuario §0, `appunti/cheatsheet_conversioni_CALC.md`,
   traccia per gli appunti in `grezzi/traccia_02p_2026-10-08.md`. Della 02 letta solo la
   Decisione 1.
+  **9/10, mattina — §6 a metà.** Ricavati da Lorenzo, con guida, tutti gli intervalli
+  dell'esercizio 10 (RAM_1 `0000h–1FFFh`, RAM_2 `2000h–27FFh`, RAM_3 `2800h–2FFFh`, EPROM
+  `C000h–FFFFh`); i segnali CS non ancora affrontati. Emerse lacune di aritmetica hex: somme e
+  prestito a 16, cifre A–F nelle colonne (12 scritto «12» invece di C), 2^n = 1 seguito da n zeri
+  (scritto rovesciato), di nuovo la K persa (16K → «2^4»). Sua domanda giusta: perché 8K+2K+2K e
+  non 8K+4K — il testo non impone taglie, la lezione è stata corretta. Prodotti: cheatsheet §10e–g,
+  prontuario §0 inciampi del 9/10.
 - Tutti gli altri: non aperti.
 
-**Prossimo passo esatto**: lezione 02p **§6** (esercizio 10 della dispensa 00: rispondere alla
-pausa «perché `CS_RAM_2` ha bisogno di `A11*` e `CS_RAM_1` no?», aiutandosi con il widget della
-sessione dell'8/10), poi §7 e i 6 esercizi «Prova tu» senza soluzioni. Poi lezione 02 dalla
-Decisione 1, poi `/lab CALC 02` (parte memorie della prova `2023-12-21` a freddo; chiude il 02).
+**Prossimo passo esatto**: lezione 02p **§6, segnali di decodifica** dell'esercizio 10 (gli
+intervalli sono fatti, la mappa è nell'ultimo messaggio della sessione del 9/10 e nella §6):
+scrivere i quattro indirizzi di confine in binario sotto `A15..A0`, trovare quali bit restano
+fissi su ciascun chip, rispondere alla pausa «perché `CS_RAM_2` ha bisogno di `A11*` e `CS_RAM_1`
+no?»; poi rifare i CS nella variante 8K + 4K (`A15*·A13*`, `A15*·A13`). Poi §7 e i 6 esercizi
+«Prova tu» senza soluzioni. Poi lezione 02 dalla Decisione 1, poi `/lab CALC 02` (parte memorie
+della prova `2023-12-21` a freddo; chiude il 02).
 A fine 02p: `/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della

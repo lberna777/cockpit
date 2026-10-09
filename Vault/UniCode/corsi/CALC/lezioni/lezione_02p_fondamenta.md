@@ -171,7 +171,10 @@ Il docente scrive le tabelle proprio così, a gruppi di 4 [fonte: 00 p. 69]:
 **Esercizio 10** [fonte: 00 pp. 68–69]: bus indirizzi a 16 bit (64K caselle, da `0000h` a
 `FFFFh`) e bus dati a 8 bit. 12K di RAM in basso, 16K di EPROM in alto.
 
-- 12K non è una potenza di due: si scompone in **8K + 2K + 2K**, dal più grande, e i chip si
+- 12K non è una potenza di due e va spezzato in chip che lo sono. Il testo non impone taglie:
+  la scomposizione minima sarebbe **8K + 4K** (12 = `1100` in binario), ma il docente sceglie
+  **8K + 2K + 2K**, probabilmente per mostrare più bit di decodifica. Regola: se il testo dà i
+  chip disponibili si usano quelli, altrimenti le potenze di due di N in binario. I chip si
   dispongono a partire da 0:
   `RAM_1 0000h–1FFFh` (8K), `RAM_2 2000h–27FFh` (2K), `RAM_3 2800h–2FFFh` (2K).
   Ognuno parte da un multiplo della propria taglia: è l'**allineamento** della lezione 02.

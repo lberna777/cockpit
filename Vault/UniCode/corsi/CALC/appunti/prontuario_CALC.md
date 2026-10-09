@@ -24,6 +24,13 @@ stato esercitato in sessione. Procedure complete con esempi: [[cheatsheet_conver
 - valore di M sbagliato (2^4 invece di 2^20). Contromisura: K, M, G = 10, 20, 30;
 - leggere `1100` come 8: ricontare i pesi da destra.
 
+**Inciampi del 2026-10-09** (esercizio 10, conti in hex):
+- di nuovo l'unità persa: «16K = 2^4». Contromisura: riscrivere **16 × 2^10** prima di convertire;
+- 2^14 scritto con l'1 in fondo: l'1 sta **a sinistra**, poi 14 zeri, poi gruppi da 4 da destra;
+- `10000h − 4000h` → «12000»: in una colonna va **una cifra** (12 = **C**) e l'1 che presta
+  diventa 0 → `C000h`;
+- quanti chip: numero davanti alla K in binario, un chip per ogni 1 (cheatsheet §10g).
+
 ## 1. Procedura d'esame
 
 La sequenza di decisioni dal testo all'elaborato, consegne a), b), c). Un passo per riga, al suo

@@ -221,6 +221,32 @@ A15..A12 A11..A8 A7..A4 A3..A0
 ```
 `A13` = secondo bit della prima cifra; `A11` = primo bit della seconda.
 
+**e. Colonne con lettere, e il prestito a 16** *(sessione del 2026-10-09)*. La `h` è
+un'etichetta, non una cifra: nel conto non entra. Ogni colonna contiene **una cifra sola**: si
+traduce la lettera (A = 10 … F = 15), si fa il conto, e un risultato da 10 a 15 si ritraduce in
+lettera.
+```
+  1ACh            10000h   (64K: inizio della EPROM da 16K in alto)
++  27h          −  4000h
+  ----            ------
+  1D3h            0C000h   ← 0 − 4: prestito di 16 → 16 − 4 = 12 = C (non «12»);
+                              l'1 che presta diventa 0
+C + 7 = 12 + 7 = 19 ≥ 16 → scrivi 3, riporta 1
+```
+Verifica: `C000h + 4000h` = `10000h` (C + 4 = 16 → 0, riporto 1).
+
+**f. Perché 2^n è «1 seguito da n zeri».** In ogni base, base^n si scrive 1 e n zeri: 10^3 =
+`1000`, 2^3 = `1000` in binario = 8. Per passare all'hex si scrive l'1 **a sinistra**, poi gli
+n zeri, poi si raggruppa a 4 **da destra**:
+```
+2^14 = 100 0000 0000 0000 = 0100 0000 0000 0000 = 4000h
+```
+
+**g. Quanti chip.** Si scrive il numero davanti alla K in binario: **un solo 1** → un chip;
+più 1 → un chip per ogni 1, se il testo non dà le taglie disponibili.
+`16 = 10000` → un chip · `12 = 1100` → 8K + 4K · `24 = 11000` → 16K + 8K. Il docente
+nell'esercizio 10 sceglie 8K + 2K + 2K, che non è la scomposizione minima.
+
 **Regola di posizionamento**: i pezzi grandi vanno **dalla parte dell'estremo fisso**. In basso
 si parte da `0000h` salendo; in alto si parte da `FFFFh` scendendo.
 ```
