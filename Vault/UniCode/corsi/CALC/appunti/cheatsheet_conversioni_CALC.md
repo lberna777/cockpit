@@ -179,6 +179,59 @@ esempio con 3 bit e chip da 4 celle (K = 2):    1 | 0 1
 
 ---
 
+## 10. Conti di mapping in hex (bus a 16 bit)
+
+> Aggiunta il 2026-10-09, dall'esercizio 10 della dispensa (lezione 02p §6). Sono le quattro
+> operazioni che si ripetono in ogni mappa.
+
+**a. Le taglie a 16 bit, a memoria.** Raddoppiando, la cifra raddoppia: 4 → 8 → 1(0) → 2 → 4 → 8.
+
+| 1K | 2K | 4K | 8K | 16K | 32K |
+|---|---|---|---|---|---|
+| `0400h` | `0800h` | `1000h` | `2000h` | `4000h` | `8000h` |
+
+**b. Inizio + taglia = inizio del pezzo dopo.** Si somma cifra per cifra; il riporto scatta a
+16, non a 10.
+```
+  2000h          2800h
++ 0800h  (2K)  + 0800h  (2K)
+  -----          -----
+  2800h          3000h     ← 8 + 8 = 16 = «10» in hex: scrivi 0, riporta 1
+```
+
+**c. Fine = inizio del pezzo dopo − 1.** Gli zeri in fondo diventano **F**, la cifra prima
+scende di 1.
+```
+2800h − 1 = 27FFh      3000h − 1 = 2FFFh      C000h − 1 = BFFFh
+```
+
+**d. Allineamento quando K non è multiplo di 4.** Si guarda la cifra «a metà».
+
+| Taglia | Bit bassi a 0 | In hex |
+|---|---|---|
+| 2K = 2^11 | 11 | ultime 2 cifre `00`, la terza solo **0 o 8** |
+| 4K = 2^12 | 12 | ultime 3 cifre `000` |
+| 8K = 2^13 | 13 | ultime 3 cifre `000`, la quarta **pari** |
+| 16K = 2^14 | 14 | ultime 3 cifre `000`, la quarta **0, 4, 8 o C** |
+
+**Dove stanno i bit** (16 bit = 4 cifre):
+```
+    C      0      0      0
+A15..A12 A11..A8 A7..A4 A3..A0
+```
+`A13` = secondo bit della prima cifra; `A11` = primo bit della seconda.
+
+**Regola di posizionamento**: i pezzi grandi vanno **dalla parte dell'estremo fisso**. In basso
+si parte da `0000h` salendo; in alto si parte da `FFFFh` scendendo.
+```
+12K in alto:  RAM 8K  E000h–FFFFh   (contro la fine)
+              RAM 2K  D800h–DFFFh
+              RAM 2K  D000h–D7FFh
+✘ 8K da D000h: D000h ÷ 2000h = 6,5 → non allineato
+```
+
+---
+
 ## Prova veloce (soluzioni sotto)
 
 1. Bit interni di una EPROM da 256 KB.
