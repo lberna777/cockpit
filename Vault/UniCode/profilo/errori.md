@@ -192,6 +192,48 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   vale «al massimo un CS a 1»). Evidenza: trascrizione del 2026-10-08 («un chip acceso "spegne" GLI
   ALTRI» → «la causa è al contrario»); `corsi/CALC/grezzi/traccia_02p_2026-10-08.md`, Inciampi.
 
+### 6. Confini di un intervallo
+`[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo ragiona bene sul contenuto
+di un intervallo (cosa c'è dentro, come si sceglie un elemento), ma non ne ricava gli **estremi**:
+dove inizia, dove finisce, se l'ultimo è incluso. Gli estremi vengono scritti a intuito e sbagliano
+di uno, oppure non arrivano affatto. Lorenzo lo descrive come fatica a «muoversi» nella struttura.
+
+**Contromisura**: gli estremi non si scrivono a memoria, si derivano da un caso piccolo contato a
+mano (4 celle, un blocco da 2K). Primo = inizio; ultimo = inizio + taglia − 1, perché si conta da
+0. Poi si verifica: il conto degli elementi fra i due estremi deve dare la taglia.
+
+**Dove si ripresenterà**: cicli e indici su array e collezioni (`FI2`, `IDS`); blocchi di memoria e
+range di indirizzi (`CALC`, `SO`); finestre e intervalli di campionamento (`TLC`); range di
+indirizzi IP e sottoreti (`RETI`).
+
+**Occorrenze registrate**
+- [2026-10-01] `FI2` LAB04b: fine fisica (`length`) e fine logica (primo `null`) fuse;
+  `fs[fs.length]` come ultimo elemento. Già registrato sotto `FI2` e sotto il pattern 1.
+- [2026-10-02] `FI2` LAB04c `remove`: tre scarti di uno insieme (`<= size`, `i < size`, azzeramento
+  di `[size]`). Già registrato sotto `FI2`.
+- [2026-10-09] `CALC` 02p Prova tu 3 e 5: «come faccio a sapere dove finisce?» su 1 GB; non sa
+  quali bit di `2800h` sono gli 11 bassi. Giudizio di Lorenzo a `/chiudi`: fatica a «muoversi nella
+  memoria». Già registrato sotto `CALC`.
+
+### 7. Il meccanismo c'è, la regola o il nome no
+`[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
+correttamente un meccanismo, ma non lo collega alla regola o al nome con cui la domanda lo
+richiama. Chiesto per nome, non lo ritrova, anche se lo ha appena usato. All'esame la domanda
+arriva quasi sempre per nome.
+
+**Contromisura**: quando un meccanismo funziona, dargli subito il suo nome e la sua regola in una
+riga («i bit che cambiano *sono* i piedini»). Poi richiamarlo per nome a freddo, più avanti nella
+stessa sessione.
+
+**Dove si ripresenterà**: componenti dell'infrastruttura (`FI2`, `SO`); nomi dei segnali e dei
+componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
+
+**Occorrenze registrate**
+- [2026-09-21] `FI2` ripasso 01 d.4: descritto lo strato che adatta il bytecode senza nominare il
+  **JRE** («il Jqualcosa»). Già registrato sotto `FI2`.
+- [2026-10-09] `CALC` 02p Prova tu 4: «non mi ricordo come si faceva per i piedini», venti minuti
+  dopo aver contato gli 11 bit di cella di RAM_2. Già registrato sotto `CALC`.
+
 ## Per corso
 
 ### `LAS` — Amministrazione di Sistemi (bash/Linux)

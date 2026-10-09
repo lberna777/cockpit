@@ -21,3 +21,4 @@
 15:53 · CALC · prontuario: §0 «Dai range ai CS» (estremi in binario, firma, verifica piedini, CS per confronto, repliche) e inciampi del pomeriggio
 15:53 · PIANO · domani 10/10: lezione CALC 02 Decisioni 1–3 partendo dai 1032 MB (confermato da Lorenzo); 11/10 FI2 LAB06 e 12/10 /lab CALC 02 invariati
 15:54 · CALC · revisione errori (pomeriggio): 2 nuovi, 2 ricorrenze; candidati trasversali: confini di un intervallo (forte, con FI2 array/scarti di uno), meccanismo senza regola (debole)
+16:09 · — · profilo/errori.md: promossi a trasversali, per decisione di Lorenzo, «6. Confini di un intervallo» (FI2 array + CALC memoria) e «7. Il meccanismo c'è, la regola o il nome no» (JRE + piedini); l'1 di 2^14 rovesciato NON è un'istanza del pattern 5.
