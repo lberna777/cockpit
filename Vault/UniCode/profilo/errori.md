@@ -500,6 +500,35 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   in hex ogni colonna ha una sola cifra 0…F (12 = C); chi presta scende di 1; verifica inversa
   `C000h + 4000h = 10000h`. Evidenza: trascrizione del 2026-10-09 («quindi viene 12000»);
   `stato/giornata.md` 12:34, 13:12; `appunti/prontuario_CALC.md` §0.
+- [2026-10-09] Ricorrenza di «binario letto senza i pesi» (2026-10-08) e della riga del mattino su 2^14,
+  nel pomeriggio: 02p §6, `2000h` e `27FFh` scritti «00100000000000 e 0010100111111111», cioè `2000h`
+  con 14 bit invece di 16 e il 7 reso `1001` (vale 9; 7 = `0111`). Le stringhe senza gruppi nascondono
+  tutti e due gli errori, benché la consegna di Claude fosse «ogni cifra hex diventa 4 bit». Corretto
+  scrivendo a gruppi di 4 con i pesi 8-4-2-1; dopo, `2800h`, `2FFFh`, `C000h`, `FFFFh` e `2400h`
+  convertiti giusti da solo, sempre a gruppi. Evidenza: trascrizione del 2026-10-09 pomeriggio
+  («00100000000000 e 0010100111111111»); `stato/giornata.md` 15:14.
+- [2026-10-09] Ricorrenza di «taglia convertita in bit senza l'unità» (2026-10-08), in forma lieve: Prova
+  tu 4, «512 = 2^19» — esponente giusto, l'unità caduta solo nella scrittura (512 da solo è 2^9). Nello
+  stesso giro K tenuta e scritta su 2K («2 * 2^10 = 2^11») e 32 KB. Evidenza: trascrizione del
+  2026-10-09 pomeriggio («quindi 32KB = 2^15 e 512 = 2^19»); `stato/giornata.md` 15:41.
+- [2026-10-09] 02p Prova tu 4: regola dei piedini non recuperata («damn non mi ricordo come si faceva
+  per i piedini»), venti minuti dopo aver contato gli 11 bit che cambiano in RAM_2; e già lì, davanti
+  alla tabella dei fili, «quanti bit cambiano? torna con 2^11?» aveva avuto «non so rispondere» → causa:
+  la regola del 2026-10-08 (§2) è rimasta una procedura a sé, non collegata ai bit di cella della
+  finestra → correzione: piedini A = bit di cella = bit che cambiano fra primo e ultimo indirizzo =
+  esponente della taglia, un solo numero visto da tre lati. Recuperato al primo richiamo. Evidenza:
+  trascrizione del 2026-10-09 pomeriggio («fino ad A11 uguali ma non so rispondere alle altre due»,
+  «damn non mi ricordo…»); `stato/giornata.md` 15:41.
+- [2026-10-09] 02p Prova tu 3 e 5: dalla taglia non sa arrivare alla posizione nella memoria. Su 2K da
+  `2800h`: «2K = 2^11, ma non so riconoscere a quali bit corrispondono in 2800h»; su 1 GB da `00000000h`:
+  «so solo che 1GB = 2^30, come faccio a sapere dove finisce?» → causa: il blocco da 2^n non è visto
+  come gli n bit più a destra (A0 … A(n−1)) che vanno da tutti 0 a tutti 1 sotto una firma fissa; in
+  §6 la stessa lettura l'aveva fatta nel verso estremi → firma, e non la rovescia (taglia → estremi);
+  giudizio di Lorenzo a `/chiudi`: fatica a «muoversi nella memoria» (dove finisce un blocco, ragionare
+  per intervalli) → correzione: i bit bassi si contano da destra, da A0; ultimo indirizzo = primo con
+  gli n bit bassi a 1 = primo + 2^n − 1 (1 GB da 0: 30 uni → `3FFFFFFFh`, verifica `40000000h − 1`);
+  raggruppare a 4 da destra. Recuperato con guida. Evidenza: trascrizione del 2026-10-09 pomeriggio;
+  `stato/giornata.md` 15:41, 15:52.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.

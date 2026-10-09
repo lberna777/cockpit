@@ -31,6 +31,20 @@ stato esercitato in sessione. Procedure complete con esempi: [[cheatsheet_conver
   diventa 0 → `C000h`;
 - quanti chip: numero davanti alla K in binario, un chip per ogni 1 (cheatsheet §10g).
 
+**Dai range ai CS** *(esercizio 10, pomeriggio del 2026-10-09: procedura fatta in sessione)*
+
+| Passo | Come | Esempio (esercizio 10) |
+|---|---|---|
+| **1. Estremi in binario** | primo e ultimo indirizzo, **a gruppi di 4** (16 bit = 4 cifre hex), sotto `A15 … A0` | `2000h` = `0010 0000 0000 0000` · `27FFh` = `0010 0111 1111 1111` |
+| **2. Firma** | le colonne **uguali** sopra e sotto; vale per tutto il blocco perché è allineato | RAM_2: `A15..A11` = `0 0 1 0 0` |
+| **3. Verifica** | i bit che cambiano = esponente della taglia = **piedini** del chip | 11 bit, 2K = 2^11 ✓ |
+| **4. CS** | dalla firma, solo i bit che separano il chip da **ciascun altro chip presente** (EPROM compresa); un bit di cella non entra mai | `CS_RAM_1 = A15*·A13*`: `A15*` contro la EPROM, `A13*` contro RAM_2/3 |
+| **5. Repliche** | un bit di firma omesso fa rispondere il chip anche altrove: lecito solo se lì non c'è nessun altro chip | `CS_EPROM = A15` → attiva su `8000h–FFFFh`, chip solo su `C000h–FFFFh` |
+
+Inciampi: `2000h` scritto con 14 bit e `7` → `1001` (è 9) — scrivere sempre 4 bit per cifra con i
+pesi 8-4-2-1; `CS_RAM_1` ridotto ad `A13*` confrontando solo le RAM (domanda di Claude mal posta, notata da
+Lorenzo) — controllare il CS contro **tutti** gli altri chip.
+
 ## 1. Procedura d'esame
 
 La sequenza di decisioni dal testo all'elaborato, consegne a), b), c). Un passo per riga, al suo

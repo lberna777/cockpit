@@ -3,7 +3,7 @@
 **Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-09
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` 🔶 §1–5 studiate l'8/10, §6 a metà il 9/10 (indirizzi dell'esercizio 10 fatti, CS no) · prossimo: 02p §6 segnali CS, poi §7 e «Prova tu», poi `02` dalla Decisione 1, poi `/lab CALC 02`.
+  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` ✅ chiusa il 9/10 · prossimo: lezione `02` dalla Decisione 1 (10/10), poi `/lab CALC 02` (12/10).
   Sezione in fondo.
 - `FI2` — Fondamenti di Informatica T-2 (12 CFU) · prossimo: `/lab FI2 LAB06`.
 
@@ -150,7 +150,7 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
 - 🔶 **02** «Mapping e decodifica» — lezione creata il 2026-10-06 nel template *progetto su prova*
   (`corsi/CALC/lezioni/lezione_02_mapping_decodifica.md`), estratto dalla prova `2025-01-08`;
   passo 1 della procedura nel prontuario `corsi/CALC/appunti/prontuario_CALC.md`.
-- 🔶 **02p** «Fondamenta per il mapping» — lezione creata l'8/10 su richiesta di Lorenzo, perché
+- ✅ **02p** «Fondamenta per il mapping» — chiusa il 2026-10-09. — lezione creata l'8/10 su richiesta di Lorenzo, perché
   la 02 dava per scontati quadro fisico, notazione e binario/esadecimale
   (`corsi/CALC/lezioni/lezione_02p_fondamenta.md`). Studiate le sezioni 1–5 con domande in chat:
   bus e chi li pilota, chip e piedini, decoder di I livello (sbloccato con l'analogia del
@@ -166,15 +166,22 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
   (scritto rovesciato), di nuovo la K persa (16K → «2^4»). Sua domanda giusta: perché 8K+2K+2K e
   non 8K+4K — il testo non impone taglie, la lezione è stata corretta. Prodotti: cheatsheet §10e–g,
   prontuario §0 inciampi del 9/10.
+  **9/10, pomeriggio — chiusa.** Segnali CS dell'esercizio 10 ricavati da Lorenzo: firma = bit
+  uguali agli estremi (lo schema `A15..A0` capito solo dopo averlo ricostruito da `1FFFh`), pausa
+  su `A11*` risolta da lui, «un CS ha senso solo per confronto con gli altri chip» detto da lui
+  (`CS_EPROM = A15`); dimenticato `A15*` in `CS_RAM_1` (separa dalla EPROM). Spiegate le repliche
+  della decodifica semplificata. «Prova tu» 6/6 da solo, K tenuta. Saltate per scelta la variante
+  8K + 4K e la §7. **Giudizio di Lorenzo**: sicuro su conversioni, firma e CS; fatica a
+  **«muoversi nella memoria»** (dove finisce un blocco, ragionare per intervalli).
 - Tutti gli altri: non aperti.
 
-**Prossimo passo esatto**: lezione 02p **§6, segnali di decodifica** dell'esercizio 10 (gli
-intervalli sono fatti, la mappa è nell'ultimo messaggio della sessione del 9/10 e nella §6):
-scrivere i quattro indirizzi di confine in binario sotto `A15..A0`, trovare quali bit restano
-fissi su ciascun chip, rispondere alla pausa «perché `CS_RAM_2` ha bisogno di `A11*` e `CS_RAM_1`
-no?»; poi rifare i CS nella variante 8K + 4K (`A15*·A13*`, `A15*·A13`). Poi §7 e i 6 esercizi
-«Prova tu» senza soluzioni. Poi lezione 02 dalla Decisione 1, poi `/lab CALC 02` (parte memorie
-della prova `2023-12-21` a freddo; chiude il 02).
+**Prossimo passo esatto**: lezione 02 dalla **Decisione 1**
+(`corsi/CALC/lezioni/lezione_02_mapping_decodifica.md`), ripartendo dall'esercizio lasciato in
+sospeso il 9/10: scomporre i **1032 MB** di EPROM della prova del 21/12/2023 in potenze di due e
+disporli da 0. La corrispondenza con la 02p è già data: `α` = firma, `i` = bit di cella. Per la
+fatica a «muoversi nella memoria»: a ogni blocco disegnare la mappa a colonna (inizio, fine,
+taglia in hex) prima dei CS, e far calcolare a Lorenzo la fine di ogni blocco. Poi Decisioni
+2–3, poi `/lab CALC 02` il 12/10 (parte memorie della prova `2023-12-21` a freddo; chiude il 02).
 A fine 02p: `/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
