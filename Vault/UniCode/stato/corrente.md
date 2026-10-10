@@ -3,7 +3,7 @@
 **Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-09
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` ✅ chiusa il 9/10 · prossimo: lezione `02` dalla Decisione 1 (10/10), poi `/lab CALC 02` (12/10).
+  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` ✅ chiusa il 9/10 · prossimo: lezione `02` dalla Decisione 1 (12/10, slittata per malattia del 10–11/10), poi `/lab CALC 02` (14/10).
   Sezione in fondo.
 - `FI2` — Fondamenti di Informatica T-2 (12 CFU) · prossimo: `/lab FI2 LAB06`.
 
@@ -181,7 +181,7 @@ sospeso il 9/10: scomporre i **1032 MB** di EPROM della prova del 21/12/2023 in 
 disporli da 0. La corrispondenza con la 02p è già data: `α` = firma, `i` = bit di cella. Per la
 fatica a «muoversi nella memoria»: a ogni blocco disegnare la mappa a colonna (inizio, fine,
 taglia in hex) prima dei CS, e far calcolare a Lorenzo la fine di ogni blocco. Poi Decisioni
-2–3, poi `/lab CALC 02` il 12/10 (parte memorie della prova `2023-12-21` a freddo; chiude il 02).
+2–3, poi `/lab CALC 02` il 14/10 (parte memorie della prova `2023-12-21` a freddo; chiude il 02).
 A fine 02p: `/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della

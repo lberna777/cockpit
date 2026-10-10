@@ -7,7 +7,7 @@
 
 settimana: 2026-10-05
 mese: 2026-10
-giorno: 2026-10-10
+giorno: 2026-10-12
 
 <!--
 settimana: il lunedì della settimana pianificata (AAAA-MM-GG)
