@@ -46,7 +46,19 @@ Criteri, dalle regole del piano e dal profilo:
 - un'attività che non ha ancora un giorno ragionevole prende comunque una data: l'ultimo giorno
   della settimana o del mese in cui va fatta.
 
-**Attendi la risposta** e applica le correzioni di Lorenzo prima di scrivere.
+**Giornata a ore** `[2026-10-19, richiesta di Lorenzo]` — quando l'ambito è `giorno` o `domani`,
+oltre alle attività si divide il giorno in **blocchi orari** nella sezione *Giornata* della
+Plancia (collezione `agenda`, schema e regole nel protocollo). Prima di proporre:
+- leggi `agenda` di oggi e domani: i blocchi con `toccato: true` li ha spostati Lorenzo
+  trascinandoli; digli cosa è cambiato e tienine conto;
+- **chiedi a Lorenzo cosa ha intenzione di fare** quel giorno, in un solo messaggio di domande
+  brevi: sveglia, impegni fissi e spostamenti, dove studia e fino a che ora, pasti, doccia e
+  preparazione prima di uscire, svago, lavoro. Non chiedere ciò che ha già detto.
+Poi proponi la giornata in una tabella `ora · cosa`, con lo studio nelle ore migliori e ogni
+attività in scadenza quel giorno collocata in un blocco (o dichiarata senza orario).
+
+**Attendi la risposta** e applica le correzioni di Lorenzo prima di scrivere. Se Lorenzo ha
+chiesto di fare in autonomia, scrivi subito e mostragli il risultato.
 
 **3. Scrivi nella Plancia** — un solo `batch` di `ArtifactData`
 
@@ -57,6 +69,9 @@ Criteri, dalle regole del piano e dal profilo:
 - attività di studio già presenti e senza data: aggiornale con la data concordata
   (`if_version` della lettura al passo 1);
 - se un corso non ha ancora un progetto in `progetti`, crealo (area `studio`, ordine 10-19).
+- per `giorno`/`domani`: i blocchi in `agenda`, id `<AAAA-MM-GG>-<HHMM>`, con `attivita`
+  quando il blocco serve un'attività, `piano_inizio`/`piano_fine` uguali a `inizio`/`fine` e
+  `toccato: false`; nello stesso `batch` riallinea i blocchi `toccato` già letti.
 
 **4. Registra la pianificazione** in `stato/pianificazione.md`, sostituendo solo le righe degli
 ambiti fatti:
