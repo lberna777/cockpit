@@ -28,3 +28,13 @@
 - **2026-10-06** · 3 eventi · ripassi arretrati: 8
 - **2026-10-07** · nessuna attività registrata
 - **2026-10-08** · 15 eventi · ripassi arretrati: 9
+- **2026-10-09** · 18 eventi · chiuso CALC 02p · ripassi arretrati: 9
+- **2026-10-10** · nessuna attività registrata
+- **2026-10-11** · nessuna attività registrata
+- **2026-10-12** · nessuna attività registrata · ripassi arretrati: 9
+- **2026-10-13** · nessuna attività registrata · ripassi arretrati: 10
+- **2026-10-14** · nessuna attività registrata
+- **2026-10-15** · nessuna attività registrata
+- **2026-10-16** · nessuna attività registrata · ripassi arretrati: 10
+- **2026-10-17** · nessuna attività registrata
+- **2026-10-18** · nessuna attività registrata
