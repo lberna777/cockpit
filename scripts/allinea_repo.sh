@@ -34,7 +34,11 @@ while IFS= read -r gitdir; do
     ok+=("$nome ($ramo)")
   else
     avanti="$(git -C "$repo" rev-list --count "origin/$ramo..HEAD")"
-    fermi+=("$nome: $avanti commit locali non inviati, rami divergenti")
+    if [ "$avanti" -gt 0 ]; then
+      fermi+=("$nome: $avanti commit locali non inviati, rami divergenti")
+    else
+      fermi+=("$nome: aggiornamento bloccato da file locali che GitHub sovrascriverebbe")
+    fi
   fi
 done < <(find "$RADICE" -maxdepth 5 -name .git -type d \
            -not -path '*/node_modules/*' -not -path '*/.cache/*' 2>/dev/null | sort)
