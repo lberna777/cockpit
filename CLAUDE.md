@@ -6,6 +6,45 @@ entri nei loro sottoalberi.
 
 ---
 
+## Famiglia delle repository — mappa unica
+
+Decisa da Lorenzo il 2026-10-19. **Questa è l'unica copia della mappa**: gli altri `CLAUDE.md`
+dicono solo chi è il loro padre e rimandano qui. Le repo servono a lavoro agentico: una repo
+padre per argomento, su cui si opera; le figlie sono prodotti o storia del padre e hanno una
+repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il sito).
+
+| Padre (si opera qui) | Gruppo di chat su claude.ai | Figlie |
+| --- | --- | --- |
+| **cockpit** — studio e sistema | **Studio** (cartella `Vault/UniCode`) · **Sistema** (tutto il resto) | Studio: `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica` (esami chiusi), `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi` (materiale vecchio: i corsi vivono in `Vault/UniCode/corsi/`), `UniCode` (template pubblico in inglese), `UniCode-personal` (versione italiana di giugno), `diritto-quiz-app` (prodotto dello studio). Sistema: `claudereset`, `Boot_Debian`, `AgenticOS`, `claude-code-quest` |
+| **Developing** — lavoro per clienti | **Developing** | `lberna777.github.io` (sito portfolio, GitHub Pages), `lberna777` (README del profilo GitHub) |
+| **plugin-creator** — plugin audio JUCE (area lavoro) | **Sviluppo plug-in** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`, `mixer` (vuota). I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
+| **carguy** — autonoma | **Carguy** | — |
+| **bibiciclo** — autonoma | senza gruppo | — |
+
+- **carguy** e **bibiciclo** sono progetti veri nati dai tentativi del sistema che ha preceduto
+  Developing: restano autonomi, e Developing li usa come prova di competenza nel portfolio.
+- **Due repo per il portfolio, non un doppione**: `lberna777.github.io` è il sito (GitHub Pages
+  pubblica solo da una repo con quel nome), `lberna777` è il README mostrato sulla pagina del
+  profilo GitHub (anche lui vuole una repo con il nome dell'utente). Si aggiornano insieme.
+- **Figlie archiviate**: in sola lettura su GitHub. Si consultano, non ci si lavora: le modifiche
+  vanno nel padre.
+- **Regola per i `CLAUDE.md`**: ogni repo ha in testa un blocco «Famiglia» di poche righe (padre,
+  figlie, rimando qui). Le regole valgono nel `CLAUDE.md` del padre e non si ricopiano nelle
+  figlie; profilo e preferenze di Lorenzo stanno nelle preferenze personali di claude.ai.
+  Quando nasce, si archivia o cambia padre una repo, si aggiorna questa tabella e il campo
+  `chat` della repo nella Plancia.
+
+### Chat di amministrazione del sistema (gruppo Sistema)
+
+| Chat | Cosa fa | Dove legge |
+| --- | --- | --- |
+| **Manager** | Scadenze e cose da fare di tutti gli ambiti, punto della settimana, Plancia | `Vault/claude/chat_manager.md` · comando `/manager` |
+| Infrastruttura | Hook, script, memoria (`Vault`), automatismi di studio, questa mappa | questo file |
+| Reset | Esportazione e filtro della memoria di Claude | repo `claudereset` |
+| Computer | Debian, Mac mini, portatile Windows, `Boot_Debian` | progetto `computer` della Plancia |
+
+---
+
 ## Memoria persistente
 
 La memoria vive in `~/cockpit/Vault` ed è **iniettata automaticamente** a ogni avvio dal
@@ -73,15 +112,11 @@ Riordinata il 2026-09-01, rivista il 2026-09-14.
 
 ## Plancia di Lorenzo — tracciamento degli obiettivi
 
-Impegni, progetti, repository, materiali e diario di Lorenzo si registrano **subito e senza
-chiedere** nella Plancia (https://claude.ai/artifact/B3QifQTD67G5LZmudWk1u4) con `ArtifactData`.
-Il protocollo è **privato** e vive nel database della Plancia, documento `meta/protocollo`:
-leggerlo prima di scrivere. Dal 2026-10-08 non sta più nel repository, che è pubblico.
-La sezione **Giornata** (collezione `agenda`) divide oggi e domani in blocchi orari che Lorenzo
-sposta trascinandoli: quando si parla della sua giornata o si pianifica, leggerla e riconoscere
-i blocchi `toccato` (regole nel protocollo).
-Priorità: **studio, poi lavoro, poi svago**; lo studio non resta mai senza data e si pianifica con
-`/pianifica` (mese il giorno 1, settimana il lunedì, domani a `/chiudi`): vedi `UniCode/CLAUDE.md` §5.1.
+Impegni, progetti, repository, materiali, diario e giornata a ore di Lorenzo si registrano
+**subito e senza chiedere** nella Plancia (https://claude.ai/artifact/B3QifQTD67G5LZmudWk1u4) con
+`ArtifactData`. Tutte le regole (schema, priorità, pianificazione dello studio, blocchi `toccato`)
+stanno nel protocollo **privato** del suo database, documento `meta/protocollo`: leggerlo prima
+di scrivere, non ricopiarlo qui.
 
 ## Convenzioni globali
 - **Lingua**: italiano.

@@ -6,6 +6,11 @@ precedenza su qualsiasi comportamento di default.
 **Orizzonte**: dodici esami arretrati e la prova finale, da agosto 2026 a luglio 2028. Il piano per
 sessioni è in `piano/piano_laurea.md`. Nessuna frequenza: la preparazione è interamente autonoma.
 
+**Famiglia**: UniCode è il metodo di studio e vive qui, in `cockpit/Vault/UniCode` (gruppo di chat
+**Studio**). Le repo `Unibo_*`, `Laboratorio_Amministrazione_di_Sistemi`, `UniCode` (template in
+inglese), `UniCode-personal` e `diritto-quiz-app` sono figlie storiche: si consultano, non ci si
+lavora. Mappa completa: `CLAUDE.md` di cockpit, sezione «Famiglia delle repository».
+
 > **Perché questo file è stato riscritto (27/08/2026).** La versione precedente serviva tre esami in
 > una singola sessione e presupponeva corsi frequentati. Il sistema di ripasso che conteneva è
 > fallito per una ragione precisa: l'unico momento in cui qualcuno scriveva era `/chiudi`, eseguito
