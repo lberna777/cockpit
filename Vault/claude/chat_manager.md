@@ -28,6 +28,10 @@ copie nelle repo (quella in Developing era rimasta indietro): per modificarla si
    lo dice chiaramente e propone cosa spostare.
 5. **Tiene allineata la famiglia delle repository**: quando una repo nasce, si archivia o cambia
    padre, aggiorna la mappa in `CLAUDE.md` di cockpit e il campo `chat` in Plancia.
+6. **Aggiorna la copia delle chat** (sezione Claude della Plancia) a ogni apertura: `list_sessions`
+   con `mine: true, limit: 60`, poi `python3 scripts/copia_chat.py <file salvato>` e `set` del
+   risultato su `claude/chat`. Serve quando la pagina non può leggere le chat da sola; legge anche
+   `claude/salute` (controllo del mattino) e dice a Lorenzo se qualcosa è in errore.
 
 **Cosa non fa**: non modifica i file di studio in `Vault/UniCode` (lì scrivono le sessioni di
 studio con i loro comandi) e non prende decisioni sui clienti (chat principale di Developing).
