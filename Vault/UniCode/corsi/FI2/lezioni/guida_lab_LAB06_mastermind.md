@@ -26,7 +26,7 @@ Firme: dai test (`dim()` su Combinazione/Risposta, ma **`dimensione()`** su `Gio
 - Sorteggio: l'enum ha 7 valori, `VUOTO` è l'indice 0 e non va sorteggiato [sl. 26]. Che estremi dai a `nextInt` perché esca 1…6 e mai 0 né 7? (⚠️ pattern 6: la slide scrive «1..7», derivalo da `values().length`)
 - Colori ripetuti: sl. 31–33 hanno tre casi, calcolali a mano **prima** di scrivere `occorrenze` (atteso: neri e bianchi per ciascuno).
 - `sorteggiaCombinazione` deve poter essere **ridefinito** dai test: che visibilità serve? (la slide 25 la dice prima «protetta» poi «privata»: vince il test).
-- ⚠️ Pattern 2: finito quando passano **tutti** i 34 (tasto destro su `test` → *Run As → JUnit Test*: i `MasterMindTest1`–`3` non finiscono in `Test` e si lanciano solo così o uno per uno); più un caso tuo, calcolato a mano.
+- ⚠️ Pattern 2: finito quando passano **tutti** i 34 (tasto destro sulla cartella `test` → *Run As → JUnit Test* li lancia tutti insieme); più un caso tuo, calcolato a mano.
 
 ## Test rosso?
 Non compila (firma/nome/package) · failure (guarda l'atteso: virgole senza spazi, `\t` contati, `VUOTO` in coda) · error (`NullPointerException`: array non riempito di `VUOTO`) → prontuario §1, oppure scrivilo in chat.
