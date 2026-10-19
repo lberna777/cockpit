@@ -1,5 +1,5 @@
 # Scheda — FI2 LAB06: MasterMind
-**Materiale**: `LAB-06-MasterMind.pdf` (sl. 1–43), `Lab06-MasterMind-Startkit.zip` (3 enum pronti, `controller` e `ui` pronti, 8 classi di test, 19 test) · **Modalità**: guidata
+**Materiale**: `LAB-06-MasterMind.pdf` (sl. 1–43), `Lab06-MasterMind-Startkit.zip` (3 enum pronti, `controller` e `ui` pronti, 8 classi di test, 34 esecuzioni) · **Modalità**: guidata
 **Teoria che entra qui**: `09` ⬜ *Enumerativi* — `ordinal()`, `values()` (09 sl. 13–15) · `12` ⬜ *Sistemi a oggetti* — package per funzionalità model/controller/ui (LAB06 sl. 9–12) · `06` 🔶 `StringJoiner` (06 sl. 48–50) · `07` ⬜ `java.util.Random`, `nextInt` (07 sl. 60–61). Non in mappa ma richiesti dai test: `equals` fra oggetti (come in LAB02) e una **classe anonima** che ridefinisce un metodo (anticipo di `13`, 5 righe in chat quando ci arrivi).
 
 ## Setup
@@ -14,7 +14,7 @@
 | 1 | `Combinazione` | array di `PioloDiGioco`, nato tutto `VUOTO`; `dim`, `getPiolo`, `setPiolo`, `equals`, `toString` | `CombinazioneTest` (6) | `StringJoiner(",")` → 06 sl. 49; sl. 17 |
 | 2 | `Risposta` | gemella su `PioloRisposta` + `vittoria()` | `RispostaTest` (6) | sl. 18 |
 | 3 | `Gioco` | piano di gioco: due array paralleli tentativi/risposte, contatore, `Status` | `GiocoTest` (3) | `\t`, `System.lineSeparator()` → sl. 20–23 |
-| 4 | `MasterMind` | il codice segreto e `calcolaRisposta` | `MasterMindTest1`–`3` (4 di cui 1 ripetuto ×5) | `ordinal()` come indice → sl. 34; `Random` → 07 sl. 61 |
+| 4 | `MasterMind` | il codice segreto e `calcolaRisposta` | `MasterMindTest1`–`3` (11 metodi, il sorteggio ripetuto ×5) | `ordinal()` come indice → sl. 34; `Random` → 07 sl. 61 |
 
 Firme: dai test (`dim()` su Combinazione/Risposta, ma **`dimensione()`** su `Gioco`) e dal `Controller`, che chiama anche `situazione()`. Algoritmo dei piolini: sl. 6 e 28–33.
 
@@ -26,7 +26,7 @@ Firme: dai test (`dim()` su Combinazione/Risposta, ma **`dimensione()`** su `Gio
 - Sorteggio: l'enum ha 7 valori, `VUOTO` è l'indice 0 e non va sorteggiato [sl. 26]. Che estremi dai a `nextInt` perché esca 1…6 e mai 0 né 7? (⚠️ pattern 6: la slide scrive «1..7», derivalo da `values().length`)
 - Colori ripetuti: sl. 31–33 hanno tre casi, calcolali a mano **prima** di scrivere `occorrenze` (atteso: neri e bianchi per ciascuno).
 - `sorteggiaCombinazione` deve poter essere **ridefinito** dai test: che visibilità serve? (la slide 25 la dice prima «protetta» poi «privata»: vince il test).
-- ⚠️ Pattern 2: finito quando passano **tutti** i 19 test; più un caso tuo, calcolato a mano.
+- ⚠️ Pattern 2: finito quando passano **tutti** i 34 (tasto destro su `test` → *Run As → JUnit Test*: i `MasterMindTest1`–`3` non finiscono in `Test` e si lanciano solo così o uno per uno); più un caso tuo, calcolato a mano.
 
 ## Test rosso?
 Non compila (firma/nome/package) · failure (guarda l'atteso: virgole senza spazi, `\t` contati, `VUOTO` in coda) · error (`NullPointerException`: array non riempito di `VUOTO`) → prontuario §1, oppure scrivilo in chat.
