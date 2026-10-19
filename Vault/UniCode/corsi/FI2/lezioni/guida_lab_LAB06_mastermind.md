@@ -1,3 +1,7 @@
+---
+tags: [FI2, guida-lab]
+---
+
 # Scheda — FI2 LAB06: MasterMind
 **Materiale**: `LAB-06-MasterMind.pdf` (sl. 1–43), `Lab06-MasterMind-Startkit.zip` (3 enum pronti, `controller` e `ui` pronti, 8 classi di test, 34 esecuzioni) · **Modalità**: guidata
 **Teoria che entra qui**: `09` ⬜ *Enumerativi* — `ordinal()`, `values()` (09 sl. 13–15) · `12` ⬜ *Sistemi a oggetti* — package per funzionalità model/controller/ui (LAB06 sl. 9–12) · `06` 🔶 `StringJoiner` (06 sl. 48–50) · `07` ⬜ `java.util.Random`, `nextInt` (07 sl. 60–61). Non in mappa ma richiesti dai test: `equals` fra oggetti (come in LAB02) e una **classe anonima** che ridefinisce un metodo (anticipo di `13`, 5 righe in chat quando ci arrivi).
