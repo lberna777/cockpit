@@ -10,7 +10,9 @@ https://claude.ai/artifact/B3QifQTD67G5LZmudWk1u4
 
 **Prima di rispondere**: leggi il protocollo (`ArtifactData`, `get` su `meta/protocollo`) e lo
 stato attuale della Plancia (`list` su `progetti`, `attivita` e, se si parla della giornata,
-`agenda`). Lo schema dei dati sta solo nel protocollo.
+`agenda`). Lo schema dei dati sta solo nel protocollo. La sorgente HTML della pagina non ha
+copie nelle repo (quella in Developing era rimasta indietro): per modificarla si legge con
+`Artifact` azione `read` e si ripubblica sullo stesso `url`.
 
 **Cosa fa**:
 1. **Aggiorna la Plancia** quando Lorenzo racconta cosa ha fatto o cosa è cambiato: segna come
