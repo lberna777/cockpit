@@ -5,7 +5,7 @@
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
   del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` ✅ chiusa il 9/10 · prossimo: lezione `02` dalla Decisione 1 (12/10, slittata per malattia del 10–11/10), poi `/lab CALC 02` (14/10).
   Sezione in fondo.
-- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · 🔶 `LAB06` MasterMind **in corso** dal 19/10 (scheda `corsi/FI2/lezioni/guida_lab_LAB06_mastermind.md`, startkit in `esame_FI2/da_importare/LAB06_MasterMind-191026`).
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · 🔶 `LAB06` MasterMind **in corso** dal 19/10 (scheda `corsi/FI2/lezioni/guida_lab_LAB06_mastermind.md`, startkit in `esame_FI2/da_importare/LAB06_MasterMind-191026`, **importato in Eclipse il 19/10**). Ripresa 21/10: costruire in chat la procedura d'esame (obiettivi del 5/10), poi leggere sl. 17–18 e `CombinazioneTest`, caso a mano, scrivere `Combinazione`.
 
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
