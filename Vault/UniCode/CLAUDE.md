@@ -161,7 +161,7 @@ resta comunque registrata — perde la parte interpretativa, non il fatto.
 
 ## 6. Handoff e continuità di sessione
 
-`/handoff` al ~75% di contesto. Il file va in `plans/handoffs/HANDOFF_<codice-argomento>_<data>.md`
+`/handoff` al 50% del contesto, in automatico (hook di cockpit, procedura in `.claude/commands/handoff.md`). Il file va in `plans/handoffs/HANDOFF_<codice-argomento>_<data>.md`
 e **deve** chiudersi con tre sezioni non negoziabili: *Concetti assimilati*, *Ancora poco chiaro*,
 *Prossimo passo esatto*. La terza è quella che rende l'handoff riutilizzabile: "continuare con
 Controlli" non è un prossimo passo, "risolvere l'esercizio 4 della prova del 12/01/2024, diagrammi

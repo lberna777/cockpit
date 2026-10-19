@@ -25,6 +25,10 @@ Ogni sessione porta l'etichetta del suo gruppo (`studio`, `sistema`, `progetti`,
 `set_session_tags` e `set_session_title` quando la sessione non ce l'ha. Le sessioni concluse
 o superate si archiviano: lo stato vero sta nelle repo e nella Plancia, non nelle chat.
 
+**Chat piena**: al 50% del contesto un hook fa partire `/handoff`. Claude scrive l'handoff, apre
+la sessione che la sostituisce (stesso titolo con « (segue)», stesse etichette, stesso ramo) e ti
+dà il link; la sessione nuova archivia la vecchia. Va solo spostata nel gruppo giusto.
+
 ## Cosa si fa in cloud e cosa no
 
 | Lavoro | Cloud | Serve una macchina |

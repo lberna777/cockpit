@@ -125,7 +125,9 @@ di scrivere, non ricopiarlo qui.
 
 ## Convenzioni globali
 - **Lingua**: italiano.
-- **Handoff**: a ~75% di contesto usa `/handoff` o `/handoffplan` (vedi `~/Sviluppo/CLAUDE.md`).
+- **Handoff**: al 50% del contesto l'hook `.claude/hooks/context_handoff.py` fa partire `/handoff`
+  (`.claude/commands/handoff.md`): scrive l'handoff, crea la sessione che sostituisce questa e le
+  affida l'archiviazione della vecchia. Hook e comando sono identici in tutte le repo padri.
 - **Skill custom**: `lorenzo-skills` (audio-dsp-debug, game-scope-guard, studia, unicode-output-gate,
   unicode-session-close, unicode-link-note).
 - **Recap del giorno**: annota le attività in `Vault/attivita_oggi.md` durante la giornata;

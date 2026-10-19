@@ -58,6 +58,15 @@
             "timeout": 60
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/context_handoff.py\"",
+            "timeout": 15
+          }
+        ]
       }
     ],
     "PostToolUse": [
