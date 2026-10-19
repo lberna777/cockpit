@@ -50,14 +50,13 @@ eliminare doppioni nei `CLAUDE.md` e preparare un modo di lavorare il più possi
 - Carguy: il ramo `fix/mappe-feed-e-classifica-iphone` aspetta la decisione di Lorenzo (unire a
   main?); sul Mac mini controllare `git status` in carguy (a fine settembre risultavano 17 commit
   non inviati) e lanciare `scripts/allinea_repo.sh` anche lì.
-- Ramo `locale-2026-10-19` su cockpit: Lorenzo l'ha cancellato? Da verificare con `git ls-remote`.
 - I gruppi dell'app non sono raggiungibili dagli strumenti: Lorenzo sposta le chat a mano.
 
 ## Prossimo passo esatto
 
-Verificare su GitHub che il ramo `locale-2026-10-19` di cockpit non esista più, poi chiedere a
-Lorenzo se aprire una chat di prova in **Studio · cockpit** con `/stato` per vedere l'hook del
-titolo in azione.
+Controllare che questa sessione abbia ricevuto da sola titolo ed etichetta: è la prima prova
+reale di `titolo_chat.py`. Poi chiedere a Lorenzo se aprire una chat di prova in
+**Studio · cockpit** con `/stato` per vederlo in azione anche lì.
 
 ## Da leggere per primi
 
