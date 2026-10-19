@@ -15,9 +15,9 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 
 | Padre (si opera qui) | Gruppo di chat su claude.ai | Figlie |
 | --- | --- | --- |
-| **cockpit** — studio e sistema | **Studio** (cartella `Vault/UniCode`) · **Sistema** (tutto il resto) | Studio: `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica` (esami chiusi), `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi` (materiale vecchio: i corsi vivono in `Vault/UniCode/corsi/`), `UniCode` (template pubblico in inglese), `UniCode-personal` (versione italiana di giugno), `diritto-quiz-app` (prodotto dello studio). Sistema: `claudereset`, `Boot_Debian`, `AgenticOS`, `claude-code-quest` |
+| **cockpit** — studio e sistema | **Studio** (cartella `Vault/UniCode`) · **Sistema** (tutto il resto) | Studio: `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica` (esami chiusi), `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi` (materiale vecchio: i corsi vivono in `Vault/UniCode/corsi/`), `UniCode` (template pubblico in inglese), `UniCode-personal` (versione italiana di giugno), `diritto-quiz-app` (prodotto dello studio). Sistema: `claudereset`, `Boot_Debian`, `AgenticOS` |
 | **Developing** — lavoro per clienti | **Developing** | `lberna777.github.io` (sito portfolio, GitHub Pages), `lberna777` (README del profilo GitHub) |
-| **plugin-creator** — plugin audio JUCE (area lavoro) | **Sviluppo plug-in** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`, `mixer` (vuota). I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
+| **plugin-creator** — plugin audio JUCE (area lavoro) | **Sviluppo plug-in** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`. I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
 | **carguy** — autonoma | **Carguy** | — |
 | **bibiciclo** — autonoma | senza gruppo | — |
 
@@ -26,11 +26,11 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 - **Due repo per il portfolio, non un doppione**: `lberna777.github.io` è il sito (GitHub Pages
   pubblica solo da una repo con quel nome), `lberna777` è il README mostrato sulla pagina del
   profilo GitHub (anche lui vuole una repo con il nome dell'utente). Si aggiornano insieme.
-- **Figlie da archiviare** (in sola lettura su GitHub, deciso il 2026-10-19): `UniCode`,
-  `UniCode-personal`, `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica`,
-  `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi`, `AgenticOS`,
-  `claude-code-quest`, `mixer`. Si consultano, non ci si lavora: le modifiche vanno
-  nel padre.
+- **Figlie archiviate** (sola lettura su GitHub dal 2026-10-19): `UniCode`, `UniCode-personal`,
+  `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica`,
+  `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi`, `AgenticOS`.
+  Si consultano, non ci si lavora: le modifiche vanno nel padre. `mixer` e `claude-code-quest`
+  sono state cancellate.
 - **Regola per i `CLAUDE.md`**: ogni repo ha in testa un blocco «Famiglia» di poche righe (padre,
   figlie, rimando qui). Le regole valgono nel `CLAUDE.md` del padre e non si ricopiano nelle
   figlie; profilo e preferenze di Lorenzo stanno nelle preferenze personali di claude.ai.
