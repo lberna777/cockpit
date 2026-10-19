@@ -28,7 +28,8 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
   profilo GitHub (anche lui vuole una repo con il nome dell'utente). Si aggiornano insieme.
 - **Figlie da archiviare** (in sola lettura su GitHub, deciso il 2026-10-19): `UniCode`,
   `UniCode-personal`, `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica`,
-  `AgenticOS`, `claude-code-quest`, `mixer`. Si consultano, non ci si lavora: le modifiche vanno
+  `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi`, `AgenticOS`,
+  `claude-code-quest`, `mixer`. Si consultano, non ci si lavora: le modifiche vanno
   nel padre.
 - **Regola per i `CLAUDE.md`**: ogni repo ha in testa un blocco «Famiglia» di poche righe (padre,
   figlie, rimando qui). Le regole valgono nel `CLAUDE.md` del padre e non si ricopiano nelle
