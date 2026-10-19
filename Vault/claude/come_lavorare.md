@@ -19,6 +19,11 @@ Ogni sessione cloud si apre selezionando la repo **padre** del suo gruppo.
 
 Regola: **una chat, un lavoro**. Cambio di argomento → chat nuova.
 
+Ogni sessione porta l'etichetta del suo gruppo (`studio`, `sistema`, `developing`, `plugin`,
+`carguy`) e un titolo che comincia con il nome del gruppo («Studio · …»). Claude la mette con
+`set_session_tags` e `set_session_title` quando la sessione non ce l'ha. Le sessioni concluse
+o superate si archiviano: lo stato vero sta nelle repo e nella Plancia, non nelle chat.
+
 ## Cosa si fa in cloud e cosa no
 
 | Lavoro | Cloud | Serve una macchina |
