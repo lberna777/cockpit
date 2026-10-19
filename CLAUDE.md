@@ -16,7 +16,7 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 | Padre (si opera qui) | Gruppo di chat su claude.ai | Figlie |
 | --- | --- | --- |
 | **cockpit** — studio e sistema | **Studio · cockpit** (cartella `Vault/UniCode`) · **Sistema · cockpit** (tutto il resto) | Studio: `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica` (esami chiusi), `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi` (materiale vecchio: i corsi vivono in `Vault/UniCode/corsi/`), `UniCode` (template pubblico in inglese), `UniCode-personal` (versione italiana di giugno), `diritto-quiz-app` (prodotto dello studio). Sistema: `claudereset`, `Boot_Debian`, `AgenticOS` |
-| **Developing** — lavoro per clienti | **Clienti · Developing** | `lberna777.github.io` (sito portfolio, GitHub Pages), `lberna777` (README del profilo GitHub) |
+| **Developing** — lavoro per clienti | **Progetti · Developing** (clienti) · **Portfolio · Developing** (brand, sito, profilo) | `lberna777.github.io` (sito portfolio, GitHub Pages), `lberna777` (README del profilo GitHub) |
 | **plugin-creator** — plugin audio JUCE (area lavoro) | **Plugin · plugin-creator** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`. I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
 | **carguy** — autonoma | **CarGuy · carguy** | — |
 | **bibiciclo** — autonoma | senza gruppo | — |

@@ -12,15 +12,16 @@ Il nome di ogni gruppo dice cosa si fa e quale repo **padre** selezionare (nomi 
 | --- | --- | --- | --- |
 | **Studio · cockpit** | `cockpit` | `/sessione`, `/lab FI2 LAB06`, `/pianifica`… | Solo studio; una chat per sessione, chiusa con `/chiudi` |
 | **Sistema · cockpit** | `cockpit` | `/manager` oppure «infrastruttura: …» | Plancia e scadenze, mappa delle repo, hook, computer, reset |
-| **Clienti · Developing** | `Developing` | `/principale`, `/aristocani`, `/polisportiva`, `/noone` | Clienti e brand; il sito (`lberna777.github.io`) si aggiunge con `add_repo` |
+| **Progetti · Developing** | `Developing` | `/principale`, `/aristocani`, `/polisportiva`, `/noone` | Clienti: strategia, demo, sviluppo |
+| **Portfolio · Developing** | `Developing` | `/portfolio` | Brand, sito (`lberna777.github.io`) e profilo GitHub, aggiunti con `add_repo` |
 | **Plugin · plugin-creator** | `plugin-creator` | il nome del plugin | Una chat per plugin |
 | **CarGuy · carguy** | `carguy` | — | Solo l'app |
 | senza gruppo | nessuna, o `bibiciclo` | — | Domande veloci |
 
 Regola: **una chat, un lavoro**. Cambio di argomento → chat nuova.
 
-Ogni sessione porta l'etichetta del suo gruppo (`studio`, `sistema`, `developing`, `plugin`,
-`carguy`) e un titolo che comincia con il nome del gruppo («Studio · cockpit — …»). Claude la mette con
+Ogni sessione porta l'etichetta del suo gruppo (`studio`, `sistema`, `progetti`, `portfolio`,
+`plugin`, `carguy`) e un titolo che comincia con il nome del gruppo («Studio · cockpit — …»). Claude la mette con
 `set_session_tags` e `set_session_title` quando la sessione non ce l'ha. Le sessioni concluse
 o superate si archiviano: lo stato vero sta nelle repo e nella Plancia, non nelle chat.
 
