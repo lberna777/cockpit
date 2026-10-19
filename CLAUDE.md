@@ -31,6 +31,8 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
   `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi`, `AgenticOS`.
   Si consultano, non ci si lavora: le modifiche vanno nel padre. `mixer` e `claude-code-quest`
   sono state cancellate.
+- **Topic GitHub** (`padre`, `autonoma`, `famiglia-cockpit|developing|plugin`): li mette
+  `scripts/topics_famiglie.sh` dal laptop con `gh`; se la mappa cambia, si aggiorna anche lui.
 - **Regola per i `CLAUDE.md`**: ogni repo ha in testa un blocco «Famiglia» di poche righe (padre,
   figlie, rimando qui). Le regole valgono nel `CLAUDE.md` del padre e non si ricopiano nelle
   figlie; profilo e preferenze di Lorenzo stanno nelle preferenze personali di claude.ai.
