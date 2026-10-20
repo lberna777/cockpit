@@ -9,3 +9,4 @@
 12:16 · CALC · 02: 2^30 = 40000000h ricavato da solo (padding 100→0100 ok); non capita la domanda «ultimo indirizzo del blocco» (fatica nota: muoversi nella memoria).
 12:25 · CALC · 02: attribuito 3FFFFFFFh come fine del blocco da 512 MB (è la fine di quello da 1 GB): blocchi confusi, di nuovo «muoversi nella memoria».
 12:31 · CALC · 02: 512 MB → esponente 9·3 = 27 (moltiplicato invece di sommare i 20 di M): 2^27 = 8000000h al posto di 2^29. Ricorre l'inciampo delle unità K/M.
+12:40 · CALC · 02: blocco 512 MB chiuso da solo (20000000h, 60000000h, 5FFFFFFFh). 64 MB scritto 2^6 (persa di nuovo la M, +20) → fine A0000000h−1, blocco da 1 GB.
