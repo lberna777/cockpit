@@ -127,9 +127,17 @@ RAM            80000000h:FFFFFFFFh, 4 banchi da 512 MB
 EPROM_64_MB    60000000h:63FFFFFFh, 4 banchi da 16 MB
 EPROM_512_MB   40000000h:5FFFFFFFh, 4 banchi da 128 MB
 EPROM_1GB      00000000h:3FFFFFFFh, 4 banchi da 256 MB
-CS_INPUT       = BA31*·BA30·BA29·BA28·BE0·BE1
-RESET_P        = BA31*·BA30·BA29·BA28·BE2·MEMWR
+
+CS_RAM_0           = BA31·BE0             (… _1, _2, _3 con BE1, BE2, BE3)
+CS_INPUT           = BA31*·BA30·BA29·BA28·BE0·BE1
+RESET_P            = BA31*·BA30·BA29·BA28·BE2·MEMWR
+CS_EPROM_64MB_0    = BA31*·BA30·BA29·BA28*·BE0   (… _1, _2, _3)
+CS_EPROM_512MB_0   = BA31*·BA30·BA29*·BE0        (… _1, _2, _3)
+CS_EPROM_1GB_0     = BA31*·BA30*·BE0             (… _1, _2, _3)
 ```
+Le prime quattro righe sono la tabella dei dispositivi (consegna a), non espressioni: i CS
+vengono dopo, **uno per banco**: CS del blocco · `BEi` del banco. `[2026-10-20: righe dei CS
+delle memorie aggiunte all'estratto, che le aveva tagliate]`
 `CS_INPUT` e `RESET_P` mostrano in anticipo i moduli `04`–`05`. La porta occupa la zona libera
 tra 64 MB e 2 GB. Le due porte da 8 bit lette insieme sono una *half-word*, e la selezionano i
 due banchi bassi, `BE0·BE1`. Il comando di reset è un byte all'indirizzo `70000002h`, cioè il
