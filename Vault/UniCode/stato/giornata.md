@@ -20,3 +20,4 @@
 15:15 · CALC · 02: proposto da Lorenzo l'ordine «prima tutte le firme, poi tutti i CS» (adottato). Firma EPROM 64 MB = 011000 (BA31..26) trovata da solo.
 15:18 · CALC · 02: firma RAM = BA31 = 1 trovata da solo. Tabella delle firme completa.
 15:37 · CALC · 02: mapping della porta capito dopo 3 spiegazioni fallite (dimezzamento, caselle): sbloccato dalla sua regola «prendi un indirizzo comodo nel buco e confronta la sua firma con le altre».
+15:43 · CALC · 02: CS_EPROM_512MB = BA31*·BA30·BA29* da solo, coincide con la soluzione ufficiale.
