@@ -14,3 +14,4 @@
 13:02 · CALC · 02: RAM 2 GB presa come 2000 MB (decimale) e scomposta; metodo dall'alto (FFFFFFFF − taglia + 1) trovato da solo, ma chiamato «fine» invece di «inizio».
 13:14 · CALC · 02: chip-select non capiti con la tabella abbreviata (solo prime cifre hex): chiesto tutto esplicito a 32 bit.
 13:17 · CALC · pausa di un'ora; /chiudi intermedio (stato, log, prontuario). Ripresa: firma EPROM 1 GB a 32 bit, poi EPROM 512 MB passo 1.
+13:18 · CALC · prontuario §0: inciampi del 20/10 (fine blocco, blocco in alto, k·2^n, 8 cifre, unità M, 2 GB = 2048 MB).
