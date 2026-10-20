@@ -3,8 +3,6 @@
 <!-- Claude appende qui, una riga per fatto: HH:MM · CODICE · fatto.
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
-<<<<<<< HEAD
-=======
 11:51 · CALC · sessione aperta su 02 (lezione, Decisione 1: scomposizione 1032 MB della prova 2023-12-21).
 12:05 · CALC · 02: scomposizione di 1600 MB scritta 2^10+2^9+2^8 (=1792), terzo termine sbagliato e somma non verificata (pattern «far quadrare i numeri»).
 12:07 · CALC · 02: non capito perché 2^30 in binario è 1 seguito da 30 zeri (scambiato per «2»): ripreso dalla base 10 (10^3 = 1000).
@@ -39,4 +37,3 @@
 16:40 · CALC · artefatto aggiornato: formula delle repliche, formazione di CS_INPUT, RESET_P pezzo per pezzo con pulsante dedicato.
 16:40 · PIANO · 21/10: FI2 LAB06 la mattina, CALC 02 il pomeriggio (piedini, bus dati, interfacciamento, Decisione 3); /lab CALC 02 → 22/10; lezione 03 → 23/10.
 16:42 · PIANO · 21/10 scritto nella Plancia: capelli 09:45–10:30, FI2 10:30–13:00 e 14:00–15:00, CALC 15:15–17:30; fi2-lab test verdi → 23/10, calc-lab02 → 22/10, lezione 03 → 23/10.
->>>>>>> origin/master

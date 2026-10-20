@@ -38,8 +38,4 @@
 - **2026-10-16** · nessuna attività registrata · ripassi arretrati: 10
 - **2026-10-17** · nessuna attività registrata
 - **2026-10-18** · nessuna attività registrata
-<<<<<<< HEAD
-- **2026-10-19** · 1 eventi · ripassi arretrati: 10
-=======
 - **2026-10-19** · 7 eventi · ripassi arretrati: 10
->>>>>>> origin/master
