@@ -21,3 +21,7 @@
 15:18 · CALC · 02: firma RAM = BA31 = 1 trovata da solo. Tabella delle firme completa.
 15:37 · CALC · 02: mapping della porta capito dopo 3 spiegazioni fallite (dimezzamento, caselle): sbloccato dalla sua regola «prendi un indirizzo comodo nel buco e confronta la sua firma con le altre».
 15:43 · CALC · 02: CS_EPROM_512MB = BA31*·BA30·BA29* da solo, coincide con la soluzione ufficiale.
+15:48 · CALC · 02: CS_EPROM_64MB = BA31*·BA30·BA29·BA28* (fino a BA28, da solo) e repliche: 4 copie a 60/64/68/6C000000h trovate da solo.
+15:54 · CALC · 02: zona del CS 010 calcolata 40000000h–4FFFFFFFh (BA28 tenuto fisso a 0 per completare la cifra hex; è 5FFFFFFFh).
+15:55 · CALC · 02: corretto da solo (5FFFFFFFh) e osservazione sua: con 3 bit fissi la zona occupa più di una cifra hex.
+15:57 · CALC · 02: CS_RAM = BA31 e zona 80000000h–FFFFFFFFh da solo. Tutti i CS della prova 2025-01-08 ricavati da Lorenzo (punto 3–4 della lezione); manca Decisione 2 (banchi, BE).
