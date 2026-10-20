@@ -23,6 +23,41 @@ tags: [CALC, appunti]
 |---|---|---|
 | 2^10 | 2^20 | 2^30 |
 
+### 1a. Perché in binario una potenza di due è «1 seguito da zeri» `[2026-10-20]`
+
+In **ogni base**, la base elevata alla n si scrive come un 1 seguito da n zeri, perché «10» vuol
+dire *la base stessa*. In base 10 è un fatto noto; in base 2 funziona allo stesso modo.
+
+**Base 10**
+
+| Potenza di 10 | In decimale | Zeri dopo l'1 |
+|---|---|---|
+| 10^0 | 1 | 0 |
+| 10^1 | 10 | 1 |
+| 10^2 | 100 | 2 |
+| 10^3 | 1000 | 3 |
+| 10^6 | 1000000 | 6 |
+
+**Base 2**: stessa regola, ma a ogni zero aggiunto il valore **raddoppia** invece di decuplicare.
+
+| Potenza di 2 | Valore in decimale | In binario | Zeri dopo l'1 |
+|---|---|---|---|
+| 2^0 | 1 | `1` | 0 |
+| 2^1 | 2 | `10` | 1 |
+| 2^2 | 4 | `100` | 2 |
+| 2^3 | 8 | `1000` | 3 |
+| 2^4 | 16 | `10000` | 4 |
+| 2^5 | 32 | `100000` | 5 |
+| 2^6 | 64 | `1000000` | 6 |
+| 2^7 | 128 | `10000000` | 7 |
+| 2^8 | 256 | `100000000` | 8 |
+| 2^10 | 1024 (1 K) | `1` + 10 zeri | 10 |
+| 2^20 | 1.048.576 (1 M) | `1` + 20 zeri | 20 |
+| 2^30 | 1.073.741.824 (1 G) | `1` + 30 zeri | 30 |
+
+> ⚠️ Inciampo del 20/10: `1000…0` (trenta zeri) letto come «2». Non è 2: è **2^30**, cioè
+> 1 GB. L'esponente si legge **contando gli zeri**, non guardando l'1.
+
 ---
 
 ## 2. Da una taglia ai bit interni (K)
