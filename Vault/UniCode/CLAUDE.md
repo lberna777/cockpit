@@ -6,6 +6,11 @@ precedenza su qualsiasi comportamento di default.
 **Orizzonte**: dodici esami arretrati e la prova finale, da agosto 2026 a luglio 2028. Il piano per
 sessioni è in `piano/piano_laurea.md`. Nessuna frequenza: la preparazione è interamente autonoma.
 
+**Famiglia**: UniCode è il metodo di studio e vive qui, in `cockpit/Vault/UniCode` (gruppo di chat
+**Studio**). Le repo `Unibo_*`, `Laboratorio_Amministrazione_di_Sistemi`, `UniCode` (template in
+inglese), `UniCode-personal` e `diritto-quiz-app` sono figlie storiche: si consultano, non ci si
+lavora. Mappa completa: `CLAUDE.md` di cockpit, sezione «Famiglia delle repository».
+
 > **Perché questo file è stato riscritto (27/08/2026).** La versione precedente serviva tre esami in
 > una singola sessione e presupponeva corsi frequentati. Il sistema di ripasso che conteneva è
 > fallito per una ragione precisa: l'unico momento in cui qualcuno scriveva era `/chiudi`, eseguito
@@ -141,8 +146,12 @@ file toccati, moduli citati — e rigenera `stato/briefing.md`. Non dipende da L
 
 ### 5.3 A fine giornata — cron serale, automatico
 
-`scripts/giornata.sh`, alle 23:00, consolida `stato/giornata.md` in `log/giornate.md`, fa avanzare
-`stato/tracker.md` secondo gli intervalli di ripasso, rigenera il briefing e azzera `giornata.md`.
+`scripts/giornata_laptop.sh` (timer systemd del laptop), alle 23:00, fa `git pull`, poi
+`scripts/giornata.py` consolida `stato/giornata.md` in `log/giornate.md`, fa avanzare
+`stato/tracker.md` secondo gli intervalli di ripasso, rigenera il briefing e azzera `giornata.md`;
+infine committa e invia su master. `[2026-10-20]` Prima il timer non inviava, e il consolidamento
+del cloud del giorno dopo divergeva al `git pull` del laptop: se il pull non riesce, il laptop non
+consolida e lascia fare al recupero della sessione successiva.
 
 **Gira anche nei giorni in cui non hai aperto nulla**, e in quel caso scrive `nessuna attività`.
 Questo è deliberato: una settimana vuota è un dato, e il piano prevede che vada compensata entro le
@@ -156,7 +165,7 @@ resta comunque registrata — perde la parte interpretativa, non il fatto.
 
 ## 6. Handoff e continuità di sessione
 
-`/handoff` al ~75% di contesto. Il file va in `plans/handoffs/HANDOFF_<codice-argomento>_<data>.md`
+`/handoff` al 50% del contesto, in automatico (hook di cockpit, procedura in `.claude/commands/handoff.md`). Il file va in `plans/handoffs/HANDOFF_<codice-argomento>_<data>.md`
 e **deve** chiudersi con tre sezioni non negoziabili: *Concetti assimilati*, *Ancora poco chiaro*,
 *Prossimo passo esatto*. La terza è quella che rende l'handoff riutilizzabile: "continuare con
 Controlli" non è un prossimo passo, "risolvere l'esercizio 4 della prova del 12/01/2024, diagrammi

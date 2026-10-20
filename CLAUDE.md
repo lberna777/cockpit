@@ -6,6 +6,50 @@ entri nei loro sottoalberi.
 
 ---
 
+## Famiglia delle repository — mappa unica
+
+Decisa da Lorenzo il 2026-10-19. **Questa è l'unica copia della mappa**: gli altri `CLAUDE.md`
+dicono solo chi è il loro padre e rimandano qui. Le repo servono a lavoro agentico: una repo
+padre per argomento, su cui si opera; le figlie sono prodotti o storia del padre e hanno una
+repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il sito).
+
+| Padre (si opera qui) | Gruppo di chat su claude.ai | Figlie |
+| --- | --- | --- |
+| **cockpit** — studio e sistema | **Studio · cockpit** (cartella `Vault/UniCode`) · **Sistema · cockpit** (tutto il resto) | Studio: `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica` (esami chiusi), `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi` (materiale vecchio: i corsi vivono in `Vault/UniCode/corsi/`), `UniCode` (template pubblico in inglese), `UniCode-personal` (versione italiana di giugno), `diritto-quiz-app` (prodotto dello studio). Sistema: `claudereset`, `Boot_Debian`, `AgenticOS` |
+| **Developing** — lavoro per clienti | **Progetti · Developing** (clienti) · **Portfolio · Developing** (brand, sito, profilo) | `lberna777.github.io` (sito portfolio, GitHub Pages), `lberna777` (README del profilo GitHub) |
+| **plugin-creator** — plugin audio JUCE (area lavoro) | **Plugin · plugin-creator** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`. I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
+| **carguy** — autonoma | **CarGuy · carguy** | — |
+| **bibiciclo** — autonoma | senza gruppo | — |
+
+- **carguy** e **bibiciclo** sono progetti veri nati dai tentativi del sistema che ha preceduto
+  Developing: restano autonomi, e Developing li usa come prova di competenza nel portfolio.
+- **Due repo per il portfolio, non un doppione**: `lberna777.github.io` è il sito (GitHub Pages
+  pubblica solo da una repo con quel nome), `lberna777` è il README mostrato sulla pagina del
+  profilo GitHub (anche lui vuole una repo con il nome dell'utente). Si aggiornano insieme.
+- **Figlie archiviate** (sola lettura su GitHub dal 2026-10-19): `UniCode`, `UniCode-personal`,
+  `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica`,
+  `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi`, `AgenticOS`.
+  Si consultano, non ci si lavora: le modifiche vanno nel padre. `mixer` e `claude-code-quest`
+  sono state cancellate.
+- **Topic GitHub** (`padre`, `autonoma`, `famiglia-cockpit|developing|plugin`): li mette
+  `scripts/topics_famiglie.sh` dal laptop con `gh`; se la mappa cambia, si aggiorna anche lui.
+- **Regola per i `CLAUDE.md`**: ogni repo ha in testa un blocco «Famiglia» di poche righe (padre,
+  figlie, rimando qui). Le regole valgono nel `CLAUDE.md` del padre e non si ricopiano nelle
+  figlie; profilo e preferenze di Lorenzo stanno nelle preferenze personali di claude.ai.
+  Quando nasce, si archivia o cambia padre una repo, si aggiorna questa tabella e il campo
+  `chat` della repo nella Plancia.
+
+### Chat di amministrazione del sistema (gruppo Sistema · cockpit)
+
+| Chat | Cosa fa | Dove legge |
+| --- | --- | --- |
+| **Manager** | Scadenze e cose da fare di tutti gli ambiti, punto della settimana, Plancia | `Vault/claude/chat_manager.md` · comando `/manager` |
+| Infrastruttura | Hook, script, memoria (`Vault`), automatismi di studio, questa mappa | questo file |
+| Reset | Esportazione e filtro della memoria di Claude | repo `claudereset` |
+| Computer | Debian, Mac mini, portatile Windows, `Boot_Debian` | progetto `computer` della Plancia |
+
+---
+
 ## Memoria persistente
 
 La memoria vive in `~/cockpit/Vault` ed è **iniettata automaticamente** a ogni avvio dal
@@ -73,23 +117,47 @@ Riordinata il 2026-09-01, rivista il 2026-09-14.
 
 ## Plancia di Lorenzo — tracciamento degli obiettivi
 
-Impegni, progetti, repository, materiali e diario di Lorenzo si registrano **subito e senza
-chiedere** nella Plancia (https://claude.ai/artifact/B3QifQTD67G5LZmudWk1u4) con `ArtifactData`.
-Il protocollo è **privato** e vive nel database della Plancia, documento `meta/protocollo`:
-leggerlo prima di scrivere. Dal 2026-10-08 non sta più nel repository, che è pubblico.
-La sezione **Giornata** (collezione `agenda`) divide oggi e domani in blocchi orari che Lorenzo
-sposta trascinandoli: quando si parla della sua giornata o si pianifica, leggerla e riconoscere
-i blocchi `toccato` (regole nel protocollo).
-Priorità: **studio, poi lavoro, poi svago**; lo studio non resta mai senza data e si pianifica con
-`/pianifica` (mese il giorno 1, settimana il lunedì, domani a `/chiudi`): vedi `UniCode/CLAUDE.md` §5.1.
+Impegni, progetti, repository, materiali, diario e giornata a ore di Lorenzo si registrano
+**subito e senza chiedere** nella Plancia (https://claude.ai/artifact/B3QifQTD67G5LZmudWk1u4) con
+`ArtifactData`. Tutte le regole (schema, priorità, pianificazione dello studio, blocchi `toccato`)
+stanno nel protocollo **privato** del suo database, documento `meta/protocollo`: leggerlo prima
+di scrivere, non ricopiarlo qui.
 
 ## Convenzioni globali
 - **Lingua**: italiano.
-- **Handoff**: a ~75% di contesto usa `/handoff` o `/handoffplan` (vedi `~/Sviluppo/CLAUDE.md`).
+- **Handoff**: al 50% del contesto l'hook `.claude/hooks/context_handoff.py` fa partire `/handoff`
+  (`.claude/commands/handoff.md`): scrive l'handoff, crea la sessione che sostituisce questa e le
+  affida l'archiviazione della vecchia. Hook e comando sono identici in tutte le repo padri.
 - **Skill custom**: `lorenzo-skills` (audio-dsp-debug, game-scope-guard, studia, unicode-output-gate,
   unicode-session-close, unicode-link-note).
 - **Recap del giorno**: annota le attività in `Vault/attivita_oggi.md` durante la giornata;
   il recap le raccoglie e poi archivia il file.
+
+## Modelli: chi pensa e chi esegue (advisor pattern)
+
+Deciso da Lorenzo il 2026-10-20. Copia identica nei `CLAUDE.md` di cockpit, Developing,
+plugin-creator, carguy e bibiciclo; l'originale è in cockpit: se lo cambi, ricopialo nelle altre.
+I due subagenti stanno in `.claude/agents/`, identici in tutte e cinque le repo.
+
+| Livello | Chi | Che cosa fa |
+| --- | --- | --- |
+| **Advisor** | La sessione stessa, su **Opus** (`"model": "opus"` in `.claude/settings.json`) | Organizza, pianifica, decide, parla con Lorenzo, scrive gli incarichi, **giudica ogni consegna**, fa commit e push |
+| **Sviluppatore** | Subagente `sviluppatore`, su **Sonnet** | Codice su un piano già deciso: implementa, scrive e fa girare i test, corregge finché passano |
+| **Esecutore** | Subagente `esecutore`, su **Haiku** | Lavori ripetitivi e veloci: estrazioni, inventari, conversioni, modifiche meccaniche su molti file, controlli in serie |
+
+- **Si delega** ciò che è definito e verificabile: chi lo riceve non deve scegliere niente.
+  **Resta all'advisor** ciò che chiede giudizio: architettura e piani, testi che contano, scelte
+  di stile, privacy e dati personali, ogni decisione e ogni domanda per Lorenzo.
+- **Studio** (cockpit, `Vault/UniCode`): lezioni, lab, spiegazioni, verifiche e giudizi su come va
+  Lorenzo restano all'advisor. All'esecutore vanno conversioni in PDF, indici, collegamenti tra le
+  note, controlli su molti file.
+- **Incarico** (`Agent` con `subagent_type: "sviluppatore"` o `"esecutore"`): obiettivo in una
+  frase, file di partenza, uscita attesa (percorsi e formato), criterio di completamento (per il
+  codice: quali test devono passare), cosa non fare. Incarichi indipendenti in parallelo.
+- **Controllo**: l'advisor rilegge ogni consegna prima del commit (per intero il codice e i testi,
+  a campione i lavori in serie). I subagenti non fanno commit né push. Se una consegna non passa,
+  la corregge l'advisor o la rimanda con un incarico più preciso.
+- **Non si delega** un lavoro che l'advisor finisce prima di quanto serva a scrivere l'incarico.
 
 ## graphify
 

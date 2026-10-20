@@ -1,4 +1,5 @@
 {
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -58,6 +59,15 @@
             "timeout": 60
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/context_handoff.py\"",
+            "timeout": 15
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -68,6 +78,17 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/scripts/cloud_autosave.sh\"",
             "timeout": 90
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/titolo_chat.py\"",
+            "timeout": 10
           }
         ]
       }

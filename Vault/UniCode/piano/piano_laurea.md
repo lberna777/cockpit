@@ -82,8 +82,8 @@ duplicano, si raggruppano.
 
 | Esame | Primo appello utile | Secondo appello | Fonte |
 |---|---|---|---|
-| FI2 | — | — | — |
-| CALC | 2026-12-02 (anticipato, **da verificare**) | — | Lorenzo, 2026-10-06; AlmaEsami non ancora consultato |
+| FI2 | **2027-01-13, ore 9:00** (iscritto) | — | Lorenzo, 2026-10-20 |
+| CALC | **2026-12-22, ore 9:00** (iscritto) | — | Lorenzo, 2026-10-20 (prima indicato il 2/12 anticipato, che non c'era) |
 | MATAP | — | — | — |
 | ELT | — | — | — |
 | SO | — | — | — |
@@ -150,11 +150,19 @@ l'esame perso, è stato il tempo speso su un esame poi abbandonato.
 > finestra: sei settimane prima del 19 dicembre cade intorno al **7 novembre 2026**. Va
 > ricalcolato sul primo appello reale appena la prenotazione si apre.
 
+> `[2026-10-20]` **Ricalcolato**: il primo appello della sessione è `CALC` il **22 dicembre 2026**, quindi
+> il checkpoint di sessione cade il **~10 novembre 2026** (insieme a quello di `CALC`). Checkpoint
+> proprio di `FI2`, sei settimane prima del suo appello del **13 gennaio 2027**: **~2 dicembre 2026**.
+
 > `[2026-10-06]` **Checkpoint proprio di `CALC`: ~3 novembre 2026**, quattro settimane prima
 > dell'appello anticipato del 2 dicembre (non sei: l'appello è stato scoperto a otto settimane).
 > Prova a freddo cronometrata `2024-01-19` (`corsi/CALC/prove/INDICE.md`). Sotto la sufficienza
 > si rinuncia al 2 dicembre e `CALC` torna sugli appelli ordinari di S1: il lavoro fatto non va
 > perso, perché l'esame è comunque in quella sessione.
+
+> `[2026-10-20]` **Superato**: l'appello è il **22 dicembre 2026 alle 9:00** e Lorenzo è iscritto.
+> Non è più anticipato, quindi vale la regola ordinaria delle sei settimane: **checkpoint ~10 novembre
+> 2026**, stessa prova a freddo `2024-01-19`. Sotto la sufficienza si passa al secondo appello di S1.
 
 **2. Si taglia dal fondo, mai la testa di una catena.** L'esame che si toglie è l'ultimo in
 ordine di priorità nella sessione, e non deve avere code che dipendono da lui. La tabella qui

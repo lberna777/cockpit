@@ -1,11 +1,10 @@
 # Stato Corrente — Studio Attivo
 
-**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-09
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-20
 
-- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` ✅ chiusa il 9/10 · prossimo: lezione `02` dalla Decisione 1 (12/10, slittata per malattia del 10–11/10), poi `/lab CALC 02` (14/10).
+- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
   Sezione in fondo.
-- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · prossimo: `/lab FI2 LAB06`.
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · 🔶 `LAB06` MasterMind **in corso** dal 19/10 (scheda `corsi/FI2/lezioni/guida_lab_LAB06_mastermind.md`, startkit in `esame_FI2/da_importare/LAB06_MasterMind-191026`, **importato in Eclipse il 19/10**). Ripresa 21/10: costruire in chat la procedura d'esame (obiettivi del 5/10), poi leggere sl. 17–18 e `CombinazioneTest`, caso a mano, scrivere `Combinazione`.
 
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
@@ -131,15 +130,15 @@ la stessa radice — *da dove nasce* la cosa:
 
 ## ═══ CALC ═══
 
-**Aperto il 2026-10-06** per l'appello anticipato del **2 dicembre 2026**, segnalato da Lorenzo e
-non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del materiale
+**Aperto il 2026-10-06** per un appello anticipato del 2 dicembre che non c'era. `[2026-10-20]` Lorenzo
+è **iscritto all'appello del 22 dicembre 2026, ore 9:00**: è il primo appello di S1, non più anticipato. Edizione del materiale
 2024/25; mappa e stato dei moduli in `corsi/CALC/percorso.md`.
 
 **Prova d'esame**: un unico esercizio di progetto di un sistema DLX (memorie, porte in
 *handshake*, reti logiche, *interrupt handler*), invariato dal 2015. Indice delle 62 prove
 (46 con soluzione) in `corsi/CALC/prove/INDICE.md`.
 
-**Calendario (8 settimane)**:
+**Calendario (8 settimane)** `[superato 2026-10-20: l'appello è il 22/12, il checkpoint passa a ~10 nov; calendario da rifare con /pianifica]`:
 - sett. 1–3 (6–26 ott): `02`, `03`, `04`, `05`; `00` solo se la prova lo richiede;
 - sett. 4 (27 ott – 2 nov): `07`, `08`, `01`;
 - **checkpoint ~3 nov**: prova `2024-01-19` a freddo, cronometrata. Sotto la sufficienza si
@@ -150,6 +149,27 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
 - 🔶 **02** «Mapping e decodifica» — lezione creata il 2026-10-06 nel template *progetto su prova*
   (`corsi/CALC/lezioni/lezione_02_mapping_decodifica.md`), estratto dalla prova `2025-01-08`;
   passo 1 della procedura nel prontuario `corsi/CALC/appunti/prontuario_CALC.md`.
+  **20/10 — punti 1–2 della prova `2025-01-08` fatti, CS a metà.** Ricavata da Lorenzo, con
+  guida, la mappa completa: 1600 = 1024+512+64; EPROM `00000000h–3FFFFFFFh`,
+  `40000000h–5FFFFFFFh`, `60000000h–63FFFFFFh`; RAM `80000000h–FFFFFFFFh` con il metodo
+  dall'alto (FFFFFFFFh − taglia + 1) trovato da lui. Inciampi: la M persa due volte (512 MB →
+  esponente 9·3 = 27; 64 MB → 2^6), 2 GB letti come 2000 MB, cifre perse (7 invece di 8),
+  `1` + 30 zeri letto «2», prestito/riporto hex dimenticati (rifatti in colonna), «ultimo
+  indirizzo» non capito finché non è arrivato l'esempio dei posti al cinema (fine = inizio +
+  taglia − 1). Sua osservazione giusta: k·2^n = k in binario + n zeri (il 3·2^29 = `60000000h`).
+  Chip-select: non capiti con la tabella ridotta alle prime cifre hex; rispiegata la firma
+  per esteso a 32 bit sull'EPROM da 1 GB, **non ancora letta da Lorenzo** (pausa). Il testo
+  della 21/12/2023 (1032 MB) resta intatto per il lab a freddo. Prodotto: cheatsheet §1a.
+  **20/10, pomeriggio — CS fatti, Decisione 2 a metà.** Firme a 32 bit (512 MB, 64 MB, RAM) e
+  tutti i CS ricavati da lui, coincidenti con la soluzione; idea sua: prima tutte le firme, poi
+  tutti i CS. Porta nel buco capita solo con la sua regola («indirizzo tondo nel buco, confronto
+  la firma con le altre») dopo tre spiegazioni fallite. Zone dei CS e repliche (64 MB: 4 copie)
+  trovate da lui; mutua esclusione verificata. Decisione 2: «4 banchi da taglia/4» capito con
+  l'esempio a 8 byte, `CS_..._i = CS blocco · BEi` fatto; banco/riga (BA1–0 / BA2) e piedini RAM
+  `A[28..0] ← BA[30..2]` fatti, poi **piedini non capiti** sul 64 MB, stanco. Decisione 3 non
+  letta (sostanza già fatta: semplificata e repliche). Prodotto l'artefatto
+  «Prova DLX 8 gennaio 2025» (https://claude.ai/artifact/5iHgc8vnP9dtjop3fQ8j3w, sorgente
+  `corsi/CALC/appunti/prova_2025-01-08_svolta.html`): i 10 passi collegati alla soluzione intera.
 - ✅ **02p** «Fondamenta per il mapping» — chiusa il 2026-10-09. — lezione creata l'8/10 su richiesta di Lorenzo, perché
   la 02 dava per scontati quadro fisico, notazione e binario/esadecimale
   (`corsi/CALC/lezioni/lezione_02p_fondamenta.md`). Studiate le sezioni 1–5 con domande in chat:
@@ -175,14 +195,20 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
   **«muoversi nella memoria»** (dove finisce un blocco, ragionare per intervalli).
 - Tutti gli altri: non aperti.
 
-**Prossimo passo esatto**: lezione 02 dalla **Decisione 1**
-(`corsi/CALC/lezioni/lezione_02_mapping_decodifica.md`), ripartendo dall'esercizio lasciato in
-sospeso il 9/10: scomporre i **1032 MB** di EPROM della prova del 21/12/2023 in potenze di due e
-disporli da 0. La corrispondenza con la 02p è già data: `α` = firma, `i` = bit di cella. Per la
-fatica a «muoversi nella memoria»: a ogni blocco disegnare la mappa a colonna (inizio, fine,
-taglia in hex) prima dei CS, e far calcolare a Lorenzo la fine di ogni blocco. Poi Decisioni
-2–3, poi `/lab CALC 02` il 14/10 (parte memorie della prova `2023-12-21` a freddo; chiude il 02).
-A fine 02p: `/appunti CALC 02p` dalla traccia.
+**Giudizio di Lorenzo (20/10)**: chiari scomposizione, banchi, mappa, firme, CS, mutua
+esclusione; porte «più o meno» (cosa fanno: moduli 04–05); repliche faticose → formula nel passo 5
+dell'artefatto; legame banchi–CS–BE a metà, `CS_INPUT` e `RESET_P` non chiari (box aggiunti nei
+passi 7 e 9); **piedini, bus dati e interfacciamento per nulla**. Mancano, rispetto alla soluzione:
+passi 8 (piedini, bus dati, schemi pp. 9–12), 9 (porte, pulsante, reti) e 10 (handler).
+
+**Prossimo passo esatto** `[2026-10-20, sera; pomeriggio del 21/10]`: prima 5 minuti sui box
+nuovi dei passi 7 e 9 (`CS_INPUT`, `RESET_P`), poi riprendere la Decisione 2 dai **piedini**, con
+il passo 8 dell'artefatto «Prova DLX 8 gennaio 2025» aperto: rifare l'esempio a 8 byte
+(BA1–0 = banco, BA2 = riga), poi far ricavare a Lorenzo `A[23..0] ← BA[25..2]` per il banco
+da 16 MB e chiedergli quali bit restano fuori da CS e piedini (BA27, BA26 → le 4 repliche).
+Poi leggere la Decisione 3 (10 minuti, la sostanza è fatta) e chiudere la lezione. Poi
+`/lab CALC 02` sulla prova `2023-12-21` a freddo (chiude il 02; il 1032 MB non va guidato
+prima). A fine 02p: `/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
 scheda non compaiono nei testi pubblicati; libro di testo non reperito.
