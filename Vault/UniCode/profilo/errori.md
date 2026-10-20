@@ -224,6 +224,12 @@ indirizzi IP e sottoreti (`RETI`).
   del blocco», mentre è l'inizio (la fine in alto è fissa a `FFFFFFFFh`). Evidenza: trascrizione del
   2026-10-20 («non ho capito la domanda»; «ffffffff - 40000000 = bfffffff a cui sommo 1 per trovare la
   vera fine del blocco»); `stato/giornata.md` 12:16, 13:02.
+- [2026-10-20] CALC: lezione 02, pomeriggio, zona di un CS. Per `CS_EPROM_512MB = BA31*·BA30·BA29*` (3 bit
+  fissi) la fine della zona data come `4FFFFFFFh`: BA28, fuori dal CS e quindi libero, tenuto a 0 anche
+  nell'estremo alto per chiudere la cifra hex (è `5FFFFFFFh`). Corretto da solo alla prima domanda, con
+  l'osservazione che con 3 bit fissi la zona copre più di una cifra. Evidenza: trascrizione del
+  2026-10-20 («da 40000000 a 4fffffff» → «1, quindi 0101 = 5, la zona finisce a 5FFFFFFF»);
+  `stato/giornata.md` 15:54–15:55.
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
