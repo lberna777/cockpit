@@ -32,3 +32,4 @@
 16:23 · CALC · 02: banco/riga dall'esempio a 8 byte (BA1-BA0 banco, BA2 riga) e piedini RAM A28..A0 ← BA30..BA2, da solo.
 16:27 · CALC · 02: piedini dei banchi non capiti (64 MB: nessuna idea); Lorenzo stanco, si chiude. Chiede un artefatto che illustri la prova 2025-01-08 svolta, collegata alla soluzione intera.
 16:31 · CALC · artefatto «Prova DLX 8 gennaio 2025» pubblicato (10 passi ↔ soluzione intera); corretta la spiegazione di RESET_P (azzera il FFD P_PREMUTO, non le porte).
+16:32 · CALC · revisione errori (pomeriggio): 0 nuovi, 1 ricorrenza (trasv. 6: zona del CS 010 chiusa a 4FFFFFFFh).
