@@ -123,6 +123,10 @@ ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazion
   risolto» senza modificare né rilanciare il test; il file non era cambiato e il test restava rosso («Non è
   risolto», dopo la lettura del file). Il calcolo a mano 8,25 vs 7,75 era già in chat. Evidenza:
   trascrizione del 2026-10-05 («ok direi risolto», poi «ho sistemato i tre punti»).
+- [2026-10-20] CALC: lezione 02, 1600 MB scomposti «2^10 + 2^9 + 2^8» e consegnati senza sommare (fanno
+  1792); il terzo termine giusto (64) è arrivato solo dopo la tabella di Claude con il totale. Evidenza:
+  trascrizione del 2026-10-20 («quindi 2^10 + 2^9 + 2^8» → «ho sbagliato potenza, volevo dire 64»);
+  `stato/giornata.md` 12:05.
 
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
