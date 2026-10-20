@@ -36,3 +36,4 @@
 16:40 · CALC · giudizio di Lorenzo: chiari scomposizione, banchi, mappa, firme, CS, mutua esclusione; porta «più o meno» (non sa cosa fanno le porte); repliche faticose (chiede una formula); BE e legame banchi–CS a metà, CS_INPUT e RESET_P non chiari; piedini, bus dati e interfacciamento per nulla.
 16:40 · CALC · artefatto aggiornato: formula delle repliche, formazione di CS_INPUT, RESET_P pezzo per pezzo con pulsante dedicato.
 16:40 · PIANO · 21/10: FI2 LAB06 la mattina, CALC 02 il pomeriggio (piedini, bus dati, interfacciamento, Decisione 3); /lab CALC 02 → 22/10; lezione 03 → 23/10.
+16:42 · PIANO · 21/10 scritto nella Plancia: capelli 09:45–10:30, FI2 10:30–13:00 e 14:00–15:00, CALC 15:15–17:30; fi2-lab test verdi → 23/10, calc-lab02 → 22/10, lezione 03 → 23/10.
