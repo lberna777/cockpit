@@ -39,6 +39,11 @@ stato esercitato in sessione. Procedure complete con esempi: [[cheatsheet_conver
 | **Blocco in alto** (RAM) | fine = `FFFFFFFFh`; **inizio** = `FFFFFFFFh − taglia + 1` | 2 GB: `FFFFFFFFh − 80000000h + 1 = 80000000h` |
 | **k · 2^n in hex** | k in binario, poi n zeri, poi gruppi da 4 da destra | 3·2^29 = `11` + 29 zeri = `60000000h` |
 | **8 cifre sempre** | un indirizzo DLX ha 8 cifre hex: se ne conti 7, ne manca una | `4000000h` → `04000000h` |
+| **Ordine dei CS** | prima **tutte le firme** in una tabella (una riga per dispositivo), poi i CS confrontando le righe | idea di Lorenzo, 20/10 |
+| **Dove mettere una porta** | prendi un indirizzo **tondo** nel buco libero, scrivi i suoi bit alti, confrontali con le firme: ti fermi al bit che la separa da tutti | buco `64000000h`–`7FFFFFFFh` → `70000000h` = `0111` → `BA31*·BA30·BA29·BA28` |
+| **Zona di un CS** | bit del CS + tutti 0 → inizio; bit del CS + tutti 1 → fine. Con 4 bit copre 1 cifra hex, 3 bit 2 cifre, 2 bit 4, 1 bit 8 | `010` → `40000000h`–`5FFFFFFFh` (non `4FFFFFFFh`) |
+| **Repliche** | ogni bit che non arriva né al CS né ai piedini del chip raddoppia le copie; lecito solo se la zona del CS contiene solo il chip e spazio libero | EPROM 64 MB, CS su `0110`: 4 copie a `60`/`64`/`68`/`6C000000h` · porta (0 piedini): tutta `7xxxxxxxh` |
+| **Mutua esclusione** | per ogni coppia (n·(n−1)/2) un bit affermato in uno e negato nell'altro | 512 MB – 64 MB su BA29 · 64 MB – porta su BA28 |
 
 - unità persa ancora: «512 MB → 9·3 = 27», «64 MB → 2^6». Gli esponenti di numero e unità si
   **sommano** (2^9 · 2^20 = 2^29), e M vale 2^20, non 10^6;
