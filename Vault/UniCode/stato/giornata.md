@@ -33,3 +33,6 @@
 16:27 · CALC · 02: piedini dei banchi non capiti (64 MB: nessuna idea); Lorenzo stanco, si chiude. Chiede un artefatto che illustri la prova 2025-01-08 svolta, collegata alla soluzione intera.
 16:31 · CALC · artefatto «Prova DLX 8 gennaio 2025» pubblicato (10 passi ↔ soluzione intera); corretta la spiegazione di RESET_P (azzera il FFD P_PREMUTO, non le porte).
 16:32 · CALC · revisione errori (pomeriggio): 0 nuovi, 1 ricorrenza (trasv. 6: zona del CS 010 chiusa a 4FFFFFFFh).
+16:40 · CALC · giudizio di Lorenzo: chiari scomposizione, banchi, mappa, firme, CS, mutua esclusione; porta «più o meno» (non sa cosa fanno le porte); repliche faticose (chiede una formula); BE e legame banchi–CS a metà, CS_INPUT e RESET_P non chiari; piedini, bus dati e interfacciamento per nulla.
+16:40 · CALC · artefatto aggiornato: formula delle repliche, formazione di CS_INPUT, RESET_P pezzo per pezzo con pulsante dedicato.
+16:40 · PIANO · 21/10: FI2 LAB06 la mattina, CALC 02 il pomeriggio (piedini, bus dati, interfacciamento, Decisione 3); /lab CALC 02 → 22/10; lezione 03 → 23/10.

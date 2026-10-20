@@ -171,6 +171,17 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
     <tr><td>RAM</td><td class="m">1</td><td class="m">BA31</td><td class="m">80000000h–FFFFFFFFh</td><td>no</td></tr>
   </table></div>
   <div class="why"><b>Zona del CS:</b> bit del CS seguiti da tutti 0 = inizio, seguiti da tutti 1 = fine. Con 4 bit la zona copre 1 cifra hex, con 3 bit 2 cifre (<code>010</code> → 4 e 5), con 2 bit 4 cifre, con 1 bit 8. <b>Repliche:</b> ogni bit che non arriva né al CS né ai piedini del chip fa comparire il chip in più punti. È lecito solo se la zona del CS contiene il chip e spazio libero: è la «criticità» da controllare.</div>
+  <div class="why"><b>Formula delle repliche.</b> Chiama <i>c</i> i bit <code>BA</code> nel CS e <i>k</i> l'esponente della taglia del blocco (2^k byte).<br>
+  • <b>Riconoscere il caso:</b> ci sono repliche se e solo se <i>c</i> &lt; 32 − <i>k</i>, cioè se nel CS hai messo meno bit della firma.<br>
+  • <b>Spazio occupato:</b> la zona del CS è grande 2^(32 − <i>c</i>) byte.<br>
+  • <b>Numero di copie:</b> 2^(32 − <i>c</i> − <i>k</i>) = 2^(bit di firma tolti).</div>
+  <div class="tbl"><table class="t">
+    <tr><th>Blocco</th><th>k</th><th>firma = 32 − k</th><th>c (bit nel CS)</th><th>zona 2^(32−c)</th><th>copie 2^(32−c−k)</th></tr>
+    <tr><td>EPROM 1 GB</td><td>30</td><td>2</td><td>2</td><td>2^30 = 1 GB</td><td>2^0 = 1 (nessuna replica)</td></tr>
+    <tr><td>EPROM 512 MB</td><td>29</td><td>3</td><td>3</td><td>2^29 = 512 MB</td><td>1</td></tr>
+    <tr><td>EPROM 64 MB</td><td>26</td><td>6</td><td>4</td><td>2^28 = 256 MB</td><td><b>2^2 = 4</b></td></tr>
+    <tr><td>RAM</td><td>31</td><td>1</td><td>1</td><td>2^31 = 2 GB</td><td>1</td></tr>
+  </table></div>
   <div class="links"><span>Produce (senza i BE):</span><button class="go" data-sol="s-cs-ram s-cs-e64 s-cs-e512 s-cs-e1g s-cs-input s-resetp">→ espressioni di decodifica</button></div>
 </section>
 
@@ -206,6 +217,8 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
     <tr><td class="m">0 0 0 1</td><td>byte, banco 0</td></tr>
   </table></div>
   <p>Di conseguenza il CS di ogni banco è <b>CS del blocco · BEi</b>. Il ragionamento sta nei 5 CS del passo 5; le 16 righe per banco sono copiatura.</p>
+  <div class="why"><b>Come si forma CS_INPUT.</b> Con la stessa regola, «zona · banchi»:<br>
+  <code>BA31*·BA30·BA29·BA28</code> = zona delle porte (passo 4) · <code>BE0·BE1</code> = la porta A sta nel banco 0 (<code>70000000h</code>), la porta B nel banco 1 (<code>70000001h</code>), e si leggono sempre insieme (half-word bassa). Una memoria ha 4 CS perché ogni banco si può leggere da solo; le due porte ne hanno <b>uno solo</b>, perché il testo vuole «esclusivamente trasferimenti a 16 bit».</div>
   <div class="links"><span>Produce:</span><button class="go" data-sol="s-ram s-e64 s-e512 s-e1g">→ «4 banchi da …»</button><button class="go" data-sol="s-cs-ram s-cs-e64 s-cs-e512 s-cs-e1g">→ CS per banco</button><button class="go" data-sol="s-cs-input">→ BE0·BE1 delle porte</button></div>
 </section>
 
@@ -236,7 +249,12 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
     <tr><td class="m">SWITCH_BUS</td><td>flip-flop che «congela» P_PREMUTO sul fronte di MEMRD della lettura a 16 bit. Se vale 1, INPUT_A va su <code>BD[15..8]</code> e INPUT_B su <code>BD[7..0]</code>; se vale 0, il contrario.</td></tr>
     <tr><td class="m">INT_DLX</td><td><code>INT_INPUT_A · INT_INPUT_B</code>: l'interrupt parte quando entrambe le porte hanno un dato.</td></tr>
   </table></div>
-  <div class="links"><span>Vedi:</span><button class="go" data-sol="s-p4">→ porte in input</button><button class="go" data-sol="s-p5">→ porta in output</button><button class="go" data-sol="s-p6 s-resetp">→ pulsante P</button><button class="go" data-sol="s-p7 s-int">→ collegamento al bus</button></div>
+  <div class="why"><b>RESET_P, pezzo per pezzo.</b> <code>RESET_P = BA31*·BA30·BA29·BA28 · BE2 · MEMWR</code><br>
+  • <code>BA31*·BA30·BA29·BA28</code>: la zona delle porte (passo 4), riusata perché lì c'è posto;<br>
+  • <code>BE2</code>: il byte <code>70000002h</code>, cioè il banco 2 (banchi 0 e 1 sono già delle porte in input);<br>
+  • <code>MEMWR</code>: vale solo in <b>scrittura</b>.<br>
+  Non accende nessun chip: è un <b>comando dal software</b>. L'handler scrive un byte a <code>70000002h</code> (istruzione <code>SB R0,0x0002(R20)</code>) e così azzera il flip-flop P_PREMUTO, quello che ricorda che il pulsante P è stato premuto. L'azzeramento passa solo se <code>SWITCH_BUS = 1</code>, cioè se la pressione è già stata usata. Il <i>come</i> si forma (zona, banco, scrittura) è di questa lezione; il <i>perché</i> serve è del pulsante P, moduli 04–05.</div>
+  <div class="links"><span>Vedi:</span><button class="go" data-sol="s-resp-addr s-resetp s-p6">→ RESET_P</button><button class="go" data-sol="s-p4">→ porte in input</button><button class="go" data-sol="s-p5">→ porta in output</button><button class="go" data-sol="s-p6 s-resetp">→ pulsante P</button><button class="go" data-sol="s-p7 s-int">→ collegamento al bus</button></div>
 </section>
 
 <section class="step" id="p10">
@@ -251,7 +269,7 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
     <tr><td class="m">SH R21,0x0004(R20)</td><td>scrive i 16 bit a <code>80000004h</code>, come chiede il testo</td></tr>
     <tr><td class="m">RFE</td><td>ritorno dall'interrupt</td></tr>
   </table></div>
-  <div class="links"><span>Produce:</span><button class="go" data-sol="s-code">→ codice dell'handler</button></div>
+  <div class="links"><span>Produce:</span><button class="go" data-sol="s-code">→ codice dell'handler</button><button class="go" data-sol="s-resetp">→ RESET_P usato dalla SB</button></div>
 </section>
 
 </main>
