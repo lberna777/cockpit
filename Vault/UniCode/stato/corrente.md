@@ -196,15 +196,13 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
   **«muoversi nella memoria»** (dove finisce un blocco, ragionare per intervalli).
 - Tutti gli altri: non aperti.
 
-**Prossimo passo esatto** `[2026-10-20, pausa]`: Lorenzo rilegge l'ultimo messaggio della chat
-(firma dell'EPROM 1 GB per esteso: estremi `00000000h`/`3FFFFFFFh` in 32 bit uno sotto l'altro,
-colonne uguali = `BA31 BA30 = 0 0`, 30 bit che cambiano = 2^30) e dice se è chiaro. Poi fa da
-solo il **passo 1 sull'EPROM 512 MB** (`40000000h`/`5FFFFFFFh` in binario a 32 bit), firma e
-verifica; poi EPROM 64 MB (la firma lunga `BA31..BA26` e la semplificazione a `BA28*` contro la
-porta a `70000000h`, punto 4 della lezione) e RAM (`BA31`). Tabelle **sempre a 32 bit**, non
-ridotte alle prime cifre. Poi Decisioni 2–3 (banchi, `BE`), poi `/lab CALC 02` sulla prova
-`2023-12-21` a freddo (chiude il 02; il 1032 MB non va guidato prima). A fine 02p:
-`/appunti CALC 02p` dalla traccia.
+**Prossimo passo esatto** `[2026-10-20, sera]`: riprendere la Decisione 2 dai **piedini**, con
+il passo 8 dell'artefatto «Prova DLX 8 gennaio 2025» aperto: rifare l'esempio a 8 byte
+(BA1–0 = banco, BA2 = riga), poi far ricavare a Lorenzo `A[23..0] ← BA[25..2]` per il banco
+da 16 MB e chiedergli quali bit restano fuori da CS e piedini (BA27, BA26 → le 4 repliche).
+Poi leggere la Decisione 3 (10 minuti, la sostanza è fatta) e chiudere la lezione. Poi
+`/lab CALC 02` sulla prova `2023-12-21` a freddo (chiude il 02; il 1032 MB non va guidato
+prima). A fine 02p: `/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
 scheda non compaiono nei testi pubblicati; libro di testo non reperito.
