@@ -15,3 +15,4 @@
 13:17 · CALC · pausa di un'ora; /chiudi intermedio (stato, log, prontuario). Ripresa: firma EPROM 1 GB a 32 bit, poi EPROM 512 MB passo 1.
 13:18 · CALC · prontuario §0: inciampi del 20/10 (fine blocco, blocco in alto, k·2^n, 8 cifre, unità M, 2 GB = 2048 MB).
 13:18 · CALC · revisione errori: 1 nuovo (indirizzi a 7 cifre), 6 ricorrenze (trasv. 2, trasv. 6 ×2, unità, 2^n in binario, aritmetica hex).
+15:06 · CALC · ripresa dopo la pausa: firma EPROM 1 GB a 32 bit riletta, «mi torna». Avanti con EPROM 512 MB passo 1.
