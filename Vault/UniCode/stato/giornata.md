@@ -26,3 +26,4 @@
 15:55 · CALC · 02: corretto da solo (5FFFFFFFh) e osservazione sua: con 3 bit fissi la zona occupa più di una cifra hex.
 15:57 · CALC · 02: CS_RAM = BA31 e zona 80000000h–FFFFFFFFh da solo. Tutti i CS della prova 2025-01-08 ricavati da Lorenzo (punto 3–4 della lezione); manca Decisione 2 (banchi, BE).
 16:07 · CALC · 02: mutua esclusione dei 5 CS verificata (10 coppie; 512–64 su BA29, 64–porta su BA28). Prontuario §0: ordine dei CS, porta nel buco, zona del CS, repliche, mutua esclusione.
+16:09 · CALC · decisione di Lorenzo: Decisione 2 fino alle 17:30; il lab a freddo slitta (data da fissare al /chiudi).
