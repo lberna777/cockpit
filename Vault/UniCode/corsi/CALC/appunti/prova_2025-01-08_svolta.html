@@ -1,0 +1,417 @@
+<title>Prova DLX 8 gennaio 2025</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: due colonne su schermo largo — a sinistra lo svolgimento a passi, a destra la soluzione ufficiale fissa;
+   ogni passo accende le righe della soluzione che produce, e ogni riga riporta al suo passo. */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18212b; --muted:#5a6876; --rule:#d5dce3;
+  --accent:#0b5d7a; --accent-soft:#dcedf3; --hit:#ffd970; --hit-ink:#3b2a00;
+  --ok:#1f7a4a; --warn:#a4570b; --bit0:#e7ecf1; --firma:#bfe3cf; --firma-ink:#0e4a2c; --var:#f6e3c8;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10161c; --panel:#18212a; --ink:#e4ebf1; --muted:#9aa9b6; --rule:#2c3946;
+  --accent:#6cc3e0; --accent-soft:#163543; --hit:#6b5410; --hit-ink:#fff1c2;
+  --ok:#6fd39c; --warn:#f0a95b; --bit0:#22303c; --firma:#1d5a3b; --firma-ink:#c9f3da; --var:#4a3518; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10161c; --panel:#18212a; --ink:#e4ebf1; --muted:#9aa9b6; --rule:#2c3946;
+  --accent:#6cc3e0; --accent-soft:#163543; --hit:#6b5410; --hit-ink:#fff1c2;
+  --ok:#6fd39c; --warn:#f0a95b; --bit0:#22303c; --firma:#1d5a3b; --firma-ink:#c9f3da; --var:#4a3518; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:1360px;margin:0 auto;padding-block:24px 64px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+header.top{display:grid;gap:6px;margin-bottom:22px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.4vw,44px);line-height:1.05;margin:0;text-wrap:balance}
+.lede{max-width:70ch;color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+@media (min-width:1060px){.grid{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+  aside.sol{position:sticky;top:max(12px, env(safe-area-inset-top, 0px));max-height:calc(100vh - 24px);overflow:auto}}
+main{display:grid;gap:18px;min-width:0}
+section.step{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:18px 18px 16px;display:grid;gap:12px;min-width:0;scroll-margin-top:16px}
+section.step.hit{outline:3px solid var(--hit)}
+.step h2{font-family:var(--f-display);font-weight:600;font-size:21px;margin:0;display:flex;gap:10px;align-items:baseline;text-wrap:balance}
+.step h2 .n{font-family:var(--f-mono);font-size:13px;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px;flex:none}
+.step p{margin:0;max-width:72ch}
+.why{border-left:3px solid var(--accent);padding:6px 12px;background:var(--accent-soft);border-radius:0 6px 6px 0;max-width:72ch}
+.why b{color:var(--accent)}
+.trap{border-left:3px solid var(--warn);padding:6px 12px;max-width:72ch}
+.trap b{color:var(--warn)}
+.tag04{font-family:var(--f-mono);font-size:12px;color:var(--warn);border:1px dashed var(--warn);border-radius:4px;padding:1px 6px}
+.links{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.links span{font-size:13px;color:var(--muted)}
+button.go{font:600 12.5px/1 var(--f-mono);color:var(--accent);background:transparent;border:1px solid var(--accent);border-radius:999px;padding:6px 10px;cursor:pointer}
+button.go:hover,button.go:focus-visible{background:var(--accent);color:var(--panel);outline:none}
+.tbl{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.t{font-size:14.5px}
+table.t th,table.t td{border-bottom:1px solid var(--rule);padding:6px 10px;text-align:left;vertical-align:top}
+table.t th{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+code,.m{font-family:var(--f-mono);font-size:.92em}
+.ok{color:var(--ok);font-weight:700}
+/* tabelle a 32 bit */
+.bits{font-family:var(--f-mono);font-size:12px;border-collapse:separate;border-spacing:0}
+.bits td,.bits th{width:19px;min-width:19px;text-align:center;padding:3px 0}
+.bits th{color:var(--muted);font-weight:400;font-size:10.5px}
+.bits td.l,.bits th.l{width:auto;min-width:64px;text-align:left;padding-right:8px;color:var(--muted);font-family:var(--f-body);font-size:12.5px;white-space:nowrap}
+.bits td.b{background:var(--bit0)}
+.bits td.f{background:var(--firma);color:var(--firma-ink);font-weight:600}
+.bits td.v{background:var(--var)}
+.bits .g{border-left:6px solid var(--panel)}
+.bits tr.eq td.f{font-weight:700}
+.bits caption{caption-side:top;text-align:left;font-family:var(--f-body);font-size:14px;padding-bottom:6px;color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:5px}
+pre.code{font-family:var(--f-mono);font-size:13px;background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;margin:0;overflow-x:auto;line-height:1.6}
+/* soluzione */
+aside.sol{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:16px;min-width:0}
+aside.sol h2{font-family:var(--f-display);font-weight:800;font-size:22px;margin:0 0 2px}
+aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
+.sec{margin-top:14px}
+.sec h3{font-family:var(--f-mono);font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 4px;display:flex;justify-content:space-between;gap:8px}
+.ln{display:block;width:100%;text-align:left;font-family:var(--f-mono);font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:var(--ink);background:transparent;border:0;border-left:3px solid transparent;padding:2px 8px;cursor:pointer;border-radius:0 4px 4px 0}
+.ln:hover,.ln:focus-visible{border-left-color:var(--accent);outline:none;background:var(--accent-soft)}
+.ln.hit{background:var(--hit);color:var(--hit-ink);border-left-color:var(--hit-ink)}
+.ln.txt{font-family:var(--f-body);font-size:13.5px;white-space:normal}
+.ln.c{color:var(--muted)}
+.ln.c.hit{color:var(--hit-ink)}
+.hint{font-size:13px;color:var(--muted);margin:0}
+@media (prefers-reduced-motion:no-preference){.ln,section.step{transition:background .2s, outline-color .2s}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <span class="eyebrow">CALC · Calcolatori Elettronici T · lezione 02 · prova dell'8 gennaio 2025</span>
+  <h1>Prova DLX dell'8 gennaio 2025, svolta passo per passo</h1>
+  <p class="lede">A sinistra lo svolgimento, nell'ordine in cui lo fai all'esame. A destra la soluzione ufficiale intera. Premi un pulsante <b>→</b> in un passo per accendere le righe della soluzione che quel passo produce; premi una riga della soluzione per tornare al passo che la spiega.</p>
+</header>
+
+<div class="grid">
+<main id="steps">
+
+<section class="step" id="p0">
+  <h2><span class="n">0</span>Il testo</h2>
+  <p>«Progettare un sistema, basato su un processore DLX dotato di <b>1600 MB di EPROM mappata agli indirizzi bassi</b> e <b>2 GB di RAM mappata agli indirizzi alti</b>. Nel sistema sono presenti anche delle porte in input e output, già progettate, ciascuna in grado di trasferire 8 bit mediante il protocollo di handshake. In particolare, sono presenti due porte in input, denominate INPUT_A e INPUT_B, mediante le quali dovranno essere eseguiti esclusivamente trasferimenti a 16 bit (normalmente, vedi dopo, INPUT_A fornisce gli 8 bit meno significativi) e una porta in output, OUTPUT, mediante la quale, quando possibile, dovrà essere inviato all'esterno il dato letto da INPUT_A contemporaneamente alla lettura dalla medesima porta in input. […] è anche presente un pulsante P che, se premuto, indica che il dato letto da INPUT_A dovrà essere considerato il byte più significativo […]. Il valore a 16 bit letto dalle due porte in input […] dovrà essere sempre scritto, come half-word, all'indirizzo 80000004h.»</p>
+  <div class="tbl"><table class="t">
+    <tr><th>Consegna</th><th>Cosa chiede</th><th>Passi qui</th></tr>
+    <tr><td>a)</td><td>dispositivi, indirizzi e segnali di chip-select</td><td>1–5</td></tr>
+    <tr><td>b)</td><td>espressioni di decodifica, range, connessioni con i bus; criticità</td><td>5–9</td></tr>
+    <tr><td>c)</td><td>codice dell'interrupt handler (R20–R25 non da ripristinare)</td><td>10</td></tr>
+  </table></div>
+  <p class="hint">Testo integrale: <code>corsi/CALC/prove/2025-01-08-Testo.pdf</code>. Soluzione: <code>2025-01-08-Soluzione.pdf</code> (12 pagine).</p>
+</section>
+
+<section class="step" id="p1">
+  <h2><span class="n">1</span>Scomporre le taglie in potenze di due</h2>
+  <p>Un chip ha sempre una taglia potenza di due. 1600 MB non lo è, quindi si spezza in blocchi che lo sono, partendo dalla potenza più grande che ci sta e sottraendo.</p>
+  <div class="tbl"><table class="t">
+    <tr><th>Resto</th><th>Potenza più grande che ci sta</th><th>In byte</th><th>Resta</th></tr>
+    <tr><td>1600 MB</td><td>1024 MB = 1 GB</td><td class="m">2^10 · 2^20 = 2^30</td><td>576 MB</td></tr>
+    <tr><td>576 MB</td><td>512 MB</td><td class="m">2^9 · 2^20 = 2^29</td><td>64 MB</td></tr>
+    <tr><td>64 MB</td><td>64 MB</td><td class="m">2^6 · 2^20 = 2^26</td><td>0 <span class="ok">✓</span></td></tr>
+  </table></div>
+  <p>La RAM da 2 GB = 2048 MB = 2^31 è già una potenza di due: un blocco solo.</p>
+  <div class="trap"><b>Trappole di oggi.</b> Le unità si <b>sommano</b> all'esponente (K = +10, M = +20, G = +30), non si moltiplicano: 512 MB è 2^(9+20), non 2^(9·3). 2 GB sono 2048 MB, non 2000. E la somma si ricontrolla sempre: 1024+512+256 fa 1792, non 1600.</div>
+  <div class="links"><span>Produce:</span><button class="go" data-sol="s-ram s-e64 s-e512 s-e1g">→ tabella dei dispositivi</button></div>
+</section>
+
+<section class="step" id="p2">
+  <h2><span class="n">2</span>Mettere i blocchi in fila: la mappa</h2>
+  <p>Le EPROM partono da <code>0</code>, dal blocco più grande al più piccolo: così ognuno cade su un multiplo della propria taglia (allineamento, dispensa 02 p. 38). La RAM va in alto e finisce a <code>FFFFFFFFh</code>.</p>
+  <div class="why"><b>Fine di un blocco.</b> Si conta da 0, come i posti di una fila al cinema: 10 posti vanno da 0 a 9. Quindi <b>primo fuori = inizio + taglia</b> e <b>fine = primo fuori − 1</b>. Per un blocco in alto: fine = <code>FFFFFFFFh</code>, <b>inizio = FFFFFFFFh − taglia + 1</b>.</div>
+  <div class="tbl"><table class="t">
+    <tr><th>Blocco</th><th>Inizio</th><th>Taglia (hex)</th><th>Primo fuori</th><th>Fine</th></tr>
+    <tr><td>EPROM 1 GB</td><td class="m">00000000h</td><td class="m">40000000h</td><td class="m">40000000h</td><td class="m">3FFFFFFFh</td></tr>
+    <tr><td>EPROM 512 MB</td><td class="m">40000000h</td><td class="m">20000000h</td><td class="m">60000000h</td><td class="m">5FFFFFFFh</td></tr>
+    <tr><td>EPROM 64 MB</td><td class="m">60000000h</td><td class="m">04000000h</td><td class="m">64000000h</td><td class="m">63FFFFFFh</td></tr>
+    <tr><td><i>libero</i></td><td class="m">64000000h</td><td colspan="2"></td><td class="m">7FFFFFFFh</td></tr>
+    <tr><td>RAM 2 GB</td><td class="m">FFFFFFFFh − 80000000h + 1 = 80000000h</td><td class="m">80000000h</td><td>—</td><td class="m">FFFFFFFFh</td></tr>
+  </table></div>
+  <div class="trap"><b>Controllo veloce.</b> Un indirizzo DLX ha sempre <b>8 cifre</b> esadecimali: <code>4000000h</code> ne ha 7, è <code>04000000h</code>. La taglia in hex è «1 seguito da n zeri» raggruppato a 4 da destra: 2^26 = 6 gruppi + <code>100</code> avanzato = <code>04000000h</code>.</div>
+  <div class="links"><span>Produce:</span><button class="go" data-sol="s-ram s-e64 s-e512 s-e1g">→ i range nella tabella</button></div>
+</section>
+
+<section class="step" id="p3">
+  <h2><span class="n">3</span>Le firme, per esteso a 32 bit</h2>
+  <p>La firma di un blocco sono i bit <b>uguali</b> tra il primo e l'ultimo indirizzo: dentro il blocco non cambiano mai, come la scala di un condominio per tutti i suoi appartamenti. I bit che cambiano sono tanti quanto l'esponente della taglia: è la verifica.</p>
+  <div class="legend"><span><i class="sw" style="background:var(--firma)"></i>firma (uguali)</span><span><i class="sw" style="background:var(--var)"></i>cambiano (scelgono il byte)</span></div>
+  <div id="bitTables" style="display:grid;gap:18px"></div>
+  <div class="why"><b>Prima tutte le firme, poi tutti i CS.</b> Con tutte le righe davanti, ogni confronto lo fai una volta sola.</div>
+</section>
+
+<section class="step" id="p4">
+  <h2><span class="n">4</span>Dove mettere le porte</h2>
+  <p>Le porte vanno in una zona dove non risponde nessun altro: l'unico buco è <code>64000000h–7FFFFFFFh</code>. Si prende un indirizzo <b>tondo</b> nel buco, si scrive in binario e si confronta con le firme: ci si ferma al bit che la separa da tutti.</p>
+  <div class="tbl"><table class="t">
+    <tr><th>Dispositivo</th><th>Firma</th><th>Porta <code>0111</code> (70000000h) diversa su</th></tr>
+    <tr><td>RAM</td><td class="m">1</td><td class="m">BA31</td></tr>
+    <tr><td>EPROM 1 GB</td><td class="m">0 0</td><td class="m">BA30</td></tr>
+    <tr><td>EPROM 512 MB</td><td class="m">0 1 0</td><td class="m">BA29</td></tr>
+    <tr><td>EPROM 64 MB</td><td class="m">0 1 1 0 0 0</td><td class="m">BA28</td></tr>
+  </table></div>
+  <p>Il bit più basso che serve è BA28: <code>BA31*·BA30·BA29·BA28</code>. Con un indirizzo meno tondo, per esempio <code>64000000h</code>, servirebbero 6 bit: funziona lo stesso, ma il CS è più lungo.</p>
+  <p>Le due porte in input si leggono sempre insieme (16 bit): occupano <code>70000000h</code> (banco 0) e <code>70000001h</code> (banco 1). Il byte <code>70000002h</code> (banco 2) la soluzione lo usa per un segnale di comando, <code>RESET_P</code> (passo 9).</p>
+  <div class="links"><span>Produce:</span><button class="go" data-sol="s-in-addr s-resp-addr">→ indirizzi delle porte</button></div>
+</section>
+
+<section class="step" id="p5">
+  <h2><span class="n">5</span>Chip-select dei blocchi, zone e repliche</h2>
+  <p>Per ogni blocco tieni solo i bit della firma che lo separano da qualche altro dispositivo. È la decodifica <b>semplificata</b>, «quella da usare all'esame» (dispensa 02 p. 42). Bit a 1 → <code>BAx</code>, bit a 0 → <code>BAx*</code>.</p>
+  <div class="tbl"><table class="t">
+    <tr><th>Blocco</th><th>Firma</th><th>CS del blocco</th><th>Zona del CS</th><th>Repliche</th></tr>
+    <tr><td>EPROM 1 GB</td><td class="m">00</td><td class="m">BA31*·BA30*</td><td class="m">00000000h–3FFFFFFFh</td><td>no</td></tr>
+    <tr><td>EPROM 512 MB</td><td class="m">010</td><td class="m">BA31*·BA30·BA29*</td><td class="m">40000000h–5FFFFFFFh</td><td>no</td></tr>
+    <tr><td>EPROM 64 MB</td><td class="m">011000</td><td class="m">BA31*·BA30·BA29·BA28*</td><td class="m">60000000h–6FFFFFFFh</td><td>4 copie: 60, 64, 68, 6C000000h</td></tr>
+    <tr><td>porte</td><td class="m">0111</td><td class="m">BA31*·BA30·BA29·BA28</td><td class="m">70000000h–7FFFFFFFh</td><td>ovunque in 7xxxxxxxh</td></tr>
+    <tr><td>RAM</td><td class="m">1</td><td class="m">BA31</td><td class="m">80000000h–FFFFFFFFh</td><td>no</td></tr>
+  </table></div>
+  <div class="why"><b>Zona del CS:</b> bit del CS seguiti da tutti 0 = inizio, seguiti da tutti 1 = fine. Con 4 bit la zona copre 1 cifra hex, con 3 bit 2 cifre (<code>010</code> → 4 e 5), con 2 bit 4 cifre, con 1 bit 8. <b>Repliche:</b> ogni bit che non arriva né al CS né ai piedini del chip fa comparire il chip in più punti. È lecito solo se la zona del CS contiene il chip e spazio libero: è la «criticità» da controllare.</div>
+  <div class="links"><span>Produce (senza i BE):</span><button class="go" data-sol="s-cs-ram s-cs-e64 s-cs-e512 s-cs-e1g s-cs-input s-resetp">→ espressioni di decodifica</button></div>
+</section>
+
+<section class="step" id="p6">
+  <h2><span class="n">6</span>Mutua esclusione</h2>
+  <p>Per ogni coppia di CS (5 · 4 / 2 = 10 coppie) serve un bit affermato in uno e negato nell'altro: così i due non si accendono mai insieme.</p>
+  <div class="tbl"><table class="t">
+    <tr><th></th><th>1 GB</th><th>512 MB</th><th>64 MB</th><th>porte</th></tr>
+    <tr><th>RAM</th><td class="m">BA31</td><td class="m">BA31</td><td class="m">BA31</td><td class="m">BA31</td></tr>
+    <tr><th>1 GB</th><td></td><td class="m">BA30</td><td class="m">BA30</td><td class="m">BA30</td></tr>
+    <tr><th>512 MB</th><td></td><td></td><td class="m">BA29</td><td class="m">BA29</td></tr>
+    <tr><th>64 MB</th><td></td><td></td><td></td><td class="m">BA28</td></tr>
+  </table></div>
+  <p>Tutte le coppie hanno il loro bit <span class="ok">✓</span>. Nella soluzione questo controllo non si scrive: è ciò che ti permette di non avere criticità da segnalare.</p>
+</section>
+
+<section class="step" id="p7">
+  <h2><span class="n">7</span>Banchi e byte enable</h2>
+  <p>Il DLX legge 32 bit per ciclo, ma ogni memoria ha un parallelismo che «è sempre 8 bit!» (p. 55). Quindi ogni blocco è fatto di <b>4 chip affiancati</b>, i banchi, come quattro palazzi con i montacarichi che salgono insieme allo stesso piano (pp. 56–58). I byte vanno a turno: il byte 0 nel banco 0, l'1 nel banco 1, …, il 4 di nuovo nel banco 0 (p. 65). Ogni banco ne riceve un quarto, quindi la regola è fissa: <b>4 banchi da taglia/4</b>.</p>
+  <div class="tbl"><table class="t">
+    <tr><th>Blocco</th><th>Taglia</th><th>Banco</th></tr>
+    <tr><td>RAM</td><td>2 GB = 2^31</td><td>512 MB = 2^29</td></tr>
+    <tr><td>EPROM 1 GB</td><td>2^30</td><td>256 MB = 2^28</td></tr>
+    <tr><td>EPROM 512 MB</td><td>2^29</td><td>128 MB = 2^27</td></tr>
+    <tr><td>EPROM 64 MB</td><td>2^26</td><td>16 MB = 2^24</td></tr>
+  </table></div>
+  <p>I bit BA1 e BA0 sceglierebbero il banco, ma il DLX non li emette: al loro posto emette <code>BE3–BE0</code>, uno per banco, che possono accenderne più di uno insieme (p. 66).</p>
+  <div class="tbl"><table class="t">
+    <tr><th>BE3 BE2 BE1 BE0</th><th>Accesso</th></tr>
+    <tr><td class="m">1 1 1 1</td><td>word, 32 bit</td></tr>
+    <tr><td class="m">0 0 1 1</td><td>half-word bassa (banchi 0 e 1): è la lettura delle due porte</td></tr>
+    <tr><td class="m">1 1 0 0</td><td>half-word alta</td></tr>
+    <tr><td class="m">0 0 0 1</td><td>byte, banco 0</td></tr>
+  </table></div>
+  <p>Di conseguenza il CS di ogni banco è <b>CS del blocco · BEi</b>. Il ragionamento sta nei 5 CS del passo 5; le 16 righe per banco sono copiatura.</p>
+  <div class="links"><span>Produce:</span><button class="go" data-sol="s-ram s-e64 s-e512 s-e1g">→ «4 banchi da …»</button><button class="go" data-sol="s-cs-ram s-cs-e64 s-cs-e512 s-cs-e1g">→ CS per banco</button><button class="go" data-sol="s-cs-input">→ BE0·BE1 delle porte</button></div>
+</section>
+
+<section class="step" id="p8">
+  <h2><span class="n">8</span>Piedini di indirizzo e bus dati</h2>
+  <p>Dentro un banco, l'indirizzo della cella è la <b>riga</b>: con l'esempio da 8 byte, BA1–BA0 dicono il banco e BA2 la riga. Per questo i piedini del banco partono da BA2, con uno sfasamento di 2 (p. 66).</p>
+  <div class="why"><b>Regola.</b> Banco da 2^k byte → piedini <code>A[k−1..0]</code> collegati a <code>BA[k+1..2]</code>. Il banco <i>i</i> sta sui fili dati <code>BD[8i+7..8i]</code>. Le RAM ricevono <code>MEMRD</code> su RD e <code>MEMWR</code> su WR, le EPROM solo <code>MEMRD</code>.</div>
+  <div class="tbl"><table class="t">
+    <tr><th>Banco</th><th>k</th><th>Piedini</th><th>← Bus</th><th>Bit fuori da CS e piedini</th></tr>
+    <tr><td>RAM, 512 MB</td><td>29</td><td class="m">A[28..0]</td><td class="m">BA[30..2]</td><td>nessuno (BA31 nel CS)</td></tr>
+    <tr><td>EPROM 1 GB, 256 MB</td><td>28</td><td class="m">A[27..0]</td><td class="m">BA[29..2]</td><td>nessuno (BA31–30 nel CS)</td></tr>
+    <tr><td>EPROM 512 MB, 128 MB</td><td>27</td><td class="m">A[26..0]</td><td class="m">BA[28..2]</td><td>nessuno (BA31–29 nel CS)</td></tr>
+    <tr><td>EPROM 64 MB, 16 MB</td><td>24</td><td class="m">A[23..0]</td><td class="m">BA[25..2]</td><td><b>BA27, BA26</b> → 2^2 = 4 repliche</td></tr>
+  </table></div>
+  <p>L'ultima riga chiude il cerchio del passo 5: l'EPROM da 64 MB si replica 4 volte proprio perché BA27 e BA26 non arrivano né al suo CS né ai suoi piedini.</p>
+  <div class="links"><span>Produce:</span><button class="go" data-sol="s-if-ram s-if-e1g s-if-e512 s-if-e64">→ schemi di interfacciamento</button></div>
+</section>
+
+<section class="step" id="p9">
+  <h2><span class="n">9</span>Porte, pulsante e reti logiche <span class="tag04">moduli 04–05</span></h2>
+  <p>Questa parte si progetta con le dispense 04 (interruzioni) e 05 (handshake). Qui c'è solo come si <b>legge</b> ogni pezzo della soluzione.</p>
+  <div class="tbl"><table class="t">
+    <tr><th>Pezzo</th><th>Cosa fa, dalla soluzione</th></tr>
+    <tr><td class="m">CS_INPUT</td><td>accende insieme le due porte in input: zona <code>7xxxxxxxh</code> e banchi 0–1 (<code>BE0·BE1</code>), cioè una lettura a 16 bit.</td></tr>
+    <tr><td class="m">OUTPUT</td><td>porta in output con CS = <code>CS_INPUT·OUTPUT_PORT_READY</code> e WR = <code>MEMRD</code>: scrive il dato di INPUT_A <b>mentre</b> viene letto, senza un ciclo di bus suo. <code>OUTPUT_PORT_READY</code> viene da un flip-flop D campionato da MEMRD.</td></tr>
+    <tr><td class="m">P_PREMUTO</td><td>flip-flop che ricorda la pressione di P (D = 1, clock = P). Si azzera con <code>RESET + RESET_P·SWITCH_BUS</code>.</td></tr>
+    <tr><td class="m">RESET_P</td><td>non è un chip-select: è un <b>comando</b>. Una scrittura a <code>70000002h</code> (banco 2, <code>BE2·MEMWR</code>) azzera P_PREMUTO, ma solo se la pressione è già stata usata (<code>SWITCH_BUS = 1</code>).</td></tr>
+    <tr><td class="m">SWITCH_BUS</td><td>flip-flop che «congela» P_PREMUTO sul fronte di MEMRD della lettura a 16 bit. Se vale 1, INPUT_A va su <code>BD[15..8]</code> e INPUT_B su <code>BD[7..0]</code>; se vale 0, il contrario.</td></tr>
+    <tr><td class="m">INT_DLX</td><td><code>INT_INPUT_A · INT_INPUT_B</code>: l'interrupt parte quando entrambe le porte hanno un dato.</td></tr>
+  </table></div>
+  <div class="links"><span>Vedi:</span><button class="go" data-sol="s-p4">→ porte in input</button><button class="go" data-sol="s-p5">→ porta in output</button><button class="go" data-sol="s-p6 s-resetp">→ pulsante P</button><button class="go" data-sol="s-p7 s-int">→ collegamento al bus</button></div>
+</section>
+
+<section class="step" id="p10">
+  <h2><span class="n">10</span>Interrupt handler (consegna c)</h2>
+  <p>Ogni istruzione usa un indirizzo che hai ricavato nei passi precedenti.</p>
+  <div class="tbl"><table class="t">
+    <tr><th>Istruzione</th><th>Perché quell'indirizzo</th></tr>
+    <tr><td class="m">LHI R20,0x7000</td><td>R20 = <code>70000000h</code>, la zona delle porte (passo 4)</td></tr>
+    <tr><td class="m">LHU R21,0x0000(R20)</td><td>legge una half-word a <code>70000000h</code>: <code>BE0·BE1</code> → <code>CS_INPUT</code>, i 16 bit delle due porte</td></tr>
+    <tr><td class="m">SB R0,0x0002(R20)</td><td>scrive un byte a <code>70000002h</code>: <code>BE2·MEMWR</code> → <code>RESET_P</code></td></tr>
+    <tr><td class="m">LHI R20,0x8000</td><td>R20 = <code>80000000h</code>, la RAM</td></tr>
+    <tr><td class="m">SH R21,0x0004(R20)</td><td>scrive i 16 bit a <code>80000004h</code>, come chiede il testo</td></tr>
+    <tr><td class="m">RFE</td><td>ritorno dall'interrupt</td></tr>
+  </table></div>
+  <div class="links"><span>Produce:</span><button class="go" data-sol="s-code">→ codice dell'handler</button></div>
+</section>
+
+</main>
+
+<aside class="sol" id="sol" aria-label="Soluzione ufficiale">
+  <h2>Soluzione ufficiale</h2>
+  <p class="src">«Traccia soluzione, 8 gennaio 2025», trascritta. Gli schemi disegnati sono riassunti a parole; per il disegno, pagina indicata del PDF.</p>
+
+  <div class="sec"><h3><span>Dispositivi di memoria</span><span>p. 2</span></h3>
+    <button class="ln" id="s-ram" data-step="p1 p2 p7">RAM            80000000h:FFFFFFFFh, 4 banchi da 512 MB</button>
+    <button class="ln" id="s-e64" data-step="p1 p2 p7">EPROM_64_MB    60000000h:63FFFFFFh, 4 banchi da 16 MB</button>
+    <button class="ln" id="s-e512" data-step="p1 p2 p7">EPROM_512_MB   40000000h:5FFFFFFFh, 4 banchi da 128 MB</button>
+    <button class="ln" id="s-e1g" data-step="p1 p2 p7">EPROM_1GB      00000000h:3FFFFFFFh, 4 banchi da 256 MB</button>
+  </div>
+
+  <div class="sec"><h3><span>Porte, chip-select e segnali</span><span>p. 2</span></h3>
+    <button class="ln" id="s-in-addr" data-step="p4">CS_INPUT       70000000/1h</button>
+    <button class="ln" id="s-resp-addr" data-step="p4 p9">RESET_P        70000002h</button>
+  </div>
+
+  <div class="sec"><h3><span>Segnali di decodifica</span><span>p. 3</span></h3>
+    <div id="s-cs-ram" data-group="1">
+      <button class="ln" data-step="p5 p7">CS_RAM_0         = BA31·BE0</button>
+      <button class="ln" data-step="p5 p7">CS_RAM_1         = BA31·BE1</button>
+      <button class="ln" data-step="p5 p7">CS_RAM_2         = BA31·BE2</button>
+      <button class="ln" data-step="p5 p7">CS_RAM_3         = BA31·BE3</button>
+    </div>
+    <button class="ln" id="s-cs-input" data-step="p5 p7 p9">CS_INPUT         = BA31*·BA30·BA29·BA28·BE0·BE1</button>
+    <button class="ln" id="s-resetp" data-step="p5 p9">RESET_P          = BA31*·BA30·BA29·BA28·BE2·MEMWR</button>
+    <div id="s-cs-e64" data-group="1">
+      <button class="ln" data-step="p5 p7">CS_EPROM_64MB_0  = BA31*·BA30·BA29·BA28*·BE0</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_64MB_1  = BA31*·BA30·BA29·BA28*·BE1</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_64MB_2  = BA31*·BA30·BA29·BA28*·BE2</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_64MB_3  = BA31*·BA30·BA29·BA28*·BE3</button>
+    </div>
+    <div id="s-cs-e512" data-group="1">
+      <button class="ln" data-step="p5 p7">CS_EPROM_512MB_0 = BA31*·BA30·BA29*·BE0</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_512MB_1 = BA31*·BA30·BA29*·BE1</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_512MB_2 = BA31*·BA30·BA29*·BE2</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_512MB_3 = BA31*·BA30·BA29*·BE3</button>
+    </div>
+    <div id="s-cs-e1g" data-group="1">
+      <button class="ln" data-step="p5 p7">CS_EPROM_1GB_0   = BA31*·BA30*·BE0</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_1GB_1   = BA31*·BA30*·BE1</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_1GB_2   = BA31*·BA30*·BE2</button>
+      <button class="ln" data-step="p5 p7">CS_EPROM_1GB_3   = BA31*·BA30*·BE3</button>
+    </div>
+  </div>
+
+  <div class="sec"><h3><span>Porte in input</span><span>p. 4</span></h3>
+    <div id="s-p4" data-group="1">
+      <button class="ln txt" data-step="p9">«Nel sistema sono presenti due porte in input, INPUT_PORT_A e INPUT_PORT_B, attive sempre contemporaneamente per eseguire trasferimenti a 16 bit. I dati letti dalle due porte dovranno essere inviati sul bus dati BD[15..0] in accordo alle modalità previste dal testo.»</button>
+      <button class="ln" data-step="p9">INPUT_PORT_A/B:  CS ← CS_INPUT · RD ← MEMRD · RESET ← RESET
+                 D[7..0] → DATA_A / DATA_B · INT → INT_INPUT_A / INT_INPUT_B
+                 lato esterno: STB, IBF, DATA_IN[7..0]  (schema)</button>
+    </div>
+  </div>
+
+  <div class="sec"><h3><span>Porta in output</span><span>p. 5</span></h3>
+    <div id="s-p5" data-group="1">
+      <button class="ln txt" data-step="p9">«Nel sistema è anche presente una porta in output, nella quale dovrà essere inviato il dato letto dalla porta A quando la porta in output è in grado di eseguire un trasferimento. Tale evenienza è codificata dal segnale OUTPUT_PORT_READY.»</button>
+      <button class="ln" data-step="p9">OUTPUT_PORT:  CS ← CS_INPUT·OUTPUT_PORT_READY · WR ← MEMRD
+              D[7..0] ← DATA_A[7..0] · INT → INT_OUTPUT
+FFD:  D ← INT_OUTPUT · clock ← MEMRD · A_RES ← RESET · Q = OUTPUT_PORT_READY</button>
+    </div>
+  </div>
+
+  <div class="sec"><h3><span>Pulsante P</span><span>p. 6</span></h3>
+    <div id="s-p6" data-group="1">
+      <button class="ln" data-step="p9">FFD:  D ← 1 · clock ← P · A_RES ← RESET + RESET_P·SWITCH_BUS
+      Q = P_PREMUTO</button>
+      <button class="ln txt c" data-step="p9">«Il FFD riceve il reset via software solo se il pulsante è stato premuto ed effettivamente tale informazione è stata utilizzata (SWITCH_BUS=1) per invertire il ruolo delle due porte in input. In tal modo, si evita di perdere pressioni del pulsante durante un trasferimento dalle due porte in input.»</button>
+      <button class="ln" data-step="p9">FFD:  D ← (CS_INPUT ? P_PREMUTO : SWITCH_BUS) · clock ← MEMRD
+      A_RES ← RESET · Q = SWITCH_BUS</button>
+      <button class="ln txt c" data-step="p9">«Il FFD congela lo stato di P_PREMUTO sul fronte di salita del segnale MEMRD del ciclo di bus che trasferirà 16 bit dalle due porte in input.»</button>
+    </div>
+  </div>
+
+  <div class="sec"><h3><span>Collegamento al bus dati</span><span>p. 7</span></h3>
+    <div id="s-p7" data-group="1">
+      <button class="ln" data-step="p9">DATA_A → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS*
+DATA_A → BD[15..8]  se CS_INPUT·MEMRD·SWITCH_BUS
+DATA_B → BD[15..8]  se CS_INPUT·MEMRD·SWITCH_BUS*
+DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
+    </div>
+    <button class="ln" id="s-int" data-step="p9">INT_DLX = INT_INPUT_A·INT_INPUT_B</button>
+  </div>
+
+  <div class="sec"><h3><span>Interrupt handler</span><span>p. 8</span></h3>
+    <div id="s-code" data-group="1">
+      <button class="ln" data-step="p10">00000000: LHI   R20,0x7000        ; R20 = 70000000h</button>
+      <button class="ln" data-step="p10">00000004: LHU   R21,0x0000(R20)   ; legge 16 bit dalle porte in input</button>
+      <button class="ln" data-step="p10">00000008: SB    R0, 0x0002(R20)   ; reset di P_PREMUTO, se SWITCH_BUS=1</button>
+      <button class="ln" data-step="p10">0000000C: LHI   R20,0x8000        ; R20 = 80000000h</button>
+      <button class="ln" data-step="p10">00000010: SH    R21,0x0004(R20)   ; scrive i 16 bit letti a 80000004h</button>
+      <button class="ln" data-step="p10">00000014: RFE</button>
+    </div>
+  </div>
+
+  <div class="sec"><h3><span>Interfacciamento memorie</span><span>pp. 9–12</span></h3>
+    <button class="ln" id="s-if-ram" data-step="p8">RAM_3..RAM_0:  CS ← CS_RAM_i · RD ← MEMRD · WR ← MEMWR
+               A[28..0] ← BA[30..2] · RAM_i su BD[8i+7..8i]</button>
+    <button class="ln" id="s-if-e1g" data-step="p8">EPROM_1GB_3..0:  CS ← CS_EPROM_1GB_i · RD ← MEMRD
+                 A[27..0] ← BA[29..2] · banco i su BD[8i+7..8i]</button>
+    <button class="ln" id="s-if-e512" data-step="p8">EPROM_512_3..0:  CS ← CS_EPROM_512_i · RD ← MEMRD
+                 A[26..0] ← BA[28..2] · banco i su BD[8i+7..8i]</button>
+    <button class="ln" id="s-if-e64" data-step="p8">EPROM_64_3..0:   CS ← CS_EPROM_64_i · RD ← MEMRD
+                 A[23..0] ← BA[25..2] · banco i su BD[8i+7..8i]</button>
+  </div>
+</aside>
+</div>
+</div>
+
+<script>
+(function(){
+  // Tabelle a 32 bit: estremi di ogni blocco, firma = colonne uguali.
+  var blocchi=[
+    {nome:"EPROM 1 GB",ini:"00000000",fin:"3FFFFFFF",esp:30},
+    {nome:"EPROM 512 MB",ini:"40000000",fin:"5FFFFFFF",esp:29},
+    {nome:"EPROM 64 MB",ini:"60000000",fin:"63FFFFFF",esp:26},
+    {nome:"RAM 2 GB",ini:"80000000",fin:"FFFFFFFF",esp:31}
+  ];
+  function bin(h){return h.split("").map(function(c){return parseInt(c,16).toString(2).padStart(4,"0")}).join("")}
+  var box=document.getElementById("bitTables");
+  blocchi.forEach(function(b){
+    var a=bin(b.ini), z=bin(b.fin), n=0; while(n<32 && a[n]===z[n]) n++;
+    var t='<div class="tbl"><table class="bits"><caption><b>'+b.nome+'</b> · <span class="m">'+b.ini+'h</span> – <span class="m">'+b.fin+'h</span> · firma <span class="m">BA31'+(n>1?'..BA'+(32-n):'')+' = '+a.slice(0,n).split("").join(" ")+'</span> · cambiano '+(32-n)+' bit = 2^'+b.esp+' '+(32-n===b.esp?'<span class="ok">✓</span>':'✗')+'</caption>';
+    t+='<tr><th class="l">bit</th>';
+    for(var i=0;i<32;i++){t+='<th'+(i%4===0&&i>0?' class="g"':'')+'>'+(31-i)+'</th>'}
+    t+='</tr>';
+    [["inizio",a],["fine",z]].forEach(function(r){
+      t+='<tr><td class="l">'+r[0]+'</td>';
+      for(var i=0;i<32;i++){t+='<td class="'+(i<n?'f':'v')+(i%4===0&&i>0?' g':'')+'">'+r[1][i]+'</td>'}
+      t+='</tr>';
+    });
+    t+='<tr class="eq"><td class="l">uguali?</td>';
+    for(var i=0;i<32;i++){t+='<td class="'+(i%4===0&&i>0?'g':'')+'">'+(i<n?'=':'≠')+'</td>'}
+    t+='</tr></table></div>';
+    box.insertAdjacentHTML("beforeend",t);
+  });
+
+  // Collegamenti passo ↔ soluzione
+  var wide=window.matchMedia("(min-width:1060px)");
+  function clear(){document.querySelectorAll(".hit").forEach(function(e){e.classList.remove("hit")})}
+  function linesOf(id){var el=document.getElementById(id); if(!el) return []; return el.dataset.group? Array.prototype.slice.call(el.querySelectorAll(".ln")) : [el]}
+  document.querySelectorAll("button.go").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      clear(); var first=null;
+      btn.dataset.sol.split(" ").forEach(function(id){linesOf(id).forEach(function(l){l.classList.add("hit"); if(!first) first=l})});
+      btn.closest("section.step").classList.add("hit");
+      if(first) first.scrollIntoView({block:wide.matches?"nearest":"center",behavior:"smooth"});
+    });
+  });
+  document.querySelectorAll(".ln").forEach(function(l){
+    l.addEventListener("click",function(){
+      clear(); l.classList.add("hit");
+      var ids=l.dataset.step.split(" "); var s=document.getElementById(ids[ids.length-1]);
+      ids.forEach(function(id){var e=document.getElementById(id); if(e) e.classList.add("hit")});
+      if(s) s.scrollIntoView({block:"start",behavior:"smooth"});
+    });
+  });
+})();
+</script>
