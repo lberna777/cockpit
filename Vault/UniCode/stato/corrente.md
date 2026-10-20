@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-09
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-20
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
   del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` ✅ chiusa il 9/10 · prossimo: lezione `02` dalla Decisione 1 (12/10, slittata per malattia del 10–11/10), poi `/lab CALC 02` (14/10).
