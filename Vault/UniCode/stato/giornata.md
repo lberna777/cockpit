@@ -30,3 +30,4 @@
 16:19 · CALC · 02: Decisione 2, 4 banchi da taglia/4 capito con l'esempio a 8 byte («più logico del previsto»); CS_INPUT/RESET_P spiegati; estratto della lezione corretto (mancavano i CS delle memorie con BEi).
 16:22 · CALC · 02: CS_EPROM_512MB_2 = BA31*·BA30·BA29*·BE2 da solo.
 16:23 · CALC · 02: banco/riga dall'esempio a 8 byte (BA1-BA0 banco, BA2 riga) e piedini RAM A28..A0 ← BA30..BA2, da solo.
+16:27 · CALC · 02: piedini dei banchi non capiti (64 MB: nessuna idea); Lorenzo stanco, si chiude. Chiede un artefatto che illustri la prova 2025-01-08 svolta, collegata alla soluzione intera.
