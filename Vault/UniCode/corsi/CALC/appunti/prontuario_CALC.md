@@ -31,6 +31,22 @@ stato esercitato in sessione. Procedure complete con esempi: [[cheatsheet_conver
   diventa 0 → `C000h`;
 - quanti chip: numero davanti alla K in binario, un chip per ogni 1 (cheatsheet §10g).
 
+**Inciampi del 2026-10-20** (prova `2025-01-08`, mappa a 32 bit):
+
+| Regola | Come | Esempio fatto |
+|---|---|---|
+| **Fine di un blocco** | primo fuori = inizio + taglia; **fine = primo fuori − 1** (si conta da 0) | `40000000h + 20000000h = 60000000h` → fine `5FFFFFFFh` |
+| **Blocco in alto** (RAM) | fine = `FFFFFFFFh`; **inizio** = `FFFFFFFFh − taglia + 1` | 2 GB: `FFFFFFFFh − 80000000h + 1 = 80000000h` |
+| **k · 2^n in hex** | k in binario, poi n zeri, poi gruppi da 4 da destra | 3·2^29 = `11` + 29 zeri = `60000000h` |
+| **8 cifre sempre** | un indirizzo DLX ha 8 cifre hex: se ne conti 7, ne manca una | `4000000h` → `04000000h` |
+
+- unità persa ancora: «512 MB → 9·3 = 27», «64 MB → 2^6». Gli esponenti di numero e unità si
+  **sommano** (2^9 · 2^20 = 2^29), e M vale 2^20, non 10^6;
+- **2 GB = 2048 MB**, non 2000: è già una potenza di due (2^31), non si scompone;
+- `FFFFFFFFh − taglia + 1` dà l'**inizio**, non la fine, del blocco in alto;
+- prestito: la prima cifra ≠ 0 scende di 1, gli zeri a destra diventano F; riporto: si porta
+  **1** a sinistra, non 16.
+
 **Dai range ai CS** *(esercizio 10, pomeriggio del 2026-10-09: procedura fatta in sessione)*
 
 | Passo | Come | Esempio (esercizio 10) |
