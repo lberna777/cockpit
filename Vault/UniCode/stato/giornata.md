@@ -28,3 +28,4 @@
 16:07 · CALC · 02: mutua esclusione dei 5 CS verificata (10 coppie; 512–64 su BA29, 64–porta su BA28). Prontuario §0: ordine dei CS, porta nel buco, zona del CS, repliche, mutua esclusione.
 16:09 · CALC · decisione di Lorenzo: Decisione 2 fino alle 17:30; il lab a freddo slitta (data da fissare al /chiudi).
 16:19 · CALC · 02: Decisione 2, 4 banchi da taglia/4 capito con l'esempio a 8 byte («più logico del previsto»); CS_INPUT/RESET_P spiegati; estratto della lezione corretto (mancavano i CS delle memorie con BEi).
+16:22 · CALC · 02: CS_EPROM_512MB_2 = BA31*·BA30·BA29*·BE2 da solo.
