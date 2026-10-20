@@ -43,6 +43,7 @@ stato esercitato in sessione. Procedure complete con esempi: [[cheatsheet_conver
 | **Dove mettere una porta** | prendi un indirizzo **tondo** nel buco libero, scrivi i suoi bit alti, confrontali con le firme: ti fermi al bit che la separa da tutti | buco `64000000h`–`7FFFFFFFh` → `70000000h` = `0111` → `BA31*·BA30·BA29·BA28` |
 | **Zona di un CS** | bit del CS + tutti 0 → inizio; bit del CS + tutti 1 → fine. Con 4 bit copre 1 cifra hex, 3 bit 2 cifre, 2 bit 4, 1 bit 8 | `010` → `40000000h`–`5FFFFFFFh` (non `4FFFFFFFh`) |
 | **Repliche** | ogni bit che non arriva né al CS né ai piedini del chip raddoppia le copie; lecito solo se la zona del CS contiene solo il chip e spazio libero | EPROM 64 MB, CS su `0110`: 4 copie a `60`/`64`/`68`/`6C000000h` · porta (0 piedini): tutta `7xxxxxxxh` |
+| **Formula repliche** | c = bit BA nel CS, blocco 2^k: repliche ⇔ c < 32 − k; zona 2^(32−c); copie 2^(32−c−k) | 64 MB: c = 4, k = 26 → zona 2^28, copie 2^2 = 4 |
 | **Mutua esclusione** | per ogni coppia (n·(n−1)/2) un bit affermato in uno e negato nell'altro | 512 MB – 64 MB su BA29 · 64 MB – porta su BA28 |
 
 - unità persa ancora: «512 MB → 9·3 = 27», «64 MB → 2^6». Gli esponenti di numero e unità si
