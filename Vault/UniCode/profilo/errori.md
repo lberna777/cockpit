@@ -218,6 +218,12 @@ indirizzi IP e sottoreti (`RETI`).
 - [2026-10-09] `CALC` 02p Prova tu 3 e 5: «come faccio a sapere dove finisce?» su 1 GB; non sa
   quali bit di `2800h` sono gli 11 bassi. Giudizio di Lorenzo a `/chiudi`: fatica a «muoversi nella
   memoria». Già registrato sotto `CALC`.
+- [2026-10-20] CALC: lezione 02, estremi dei blocchi. Davanti a «qual è l'ultimo indirizzo del blocco»
+  da 1 GB (primo fuori `40000000h` già trovato): «non ho capito la domanda», sbloccato con l'esempio
+  dei posti 0…9. Sulla RAM in cima, `FFFFFFFFh − taglia + 1` trovato da solo ma chiamato «la vera fine
+  del blocco», mentre è l'inizio (la fine in alto è fissa a `FFFFFFFFh`). Evidenza: trascrizione del
+  2026-10-20 («non ho capito la domanda»; «ffffffff - 40000000 = bfffffff a cui sommo 1 per trovare la
+  vera fine del blocco»); `stato/giornata.md` 12:16, 13:02.
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
