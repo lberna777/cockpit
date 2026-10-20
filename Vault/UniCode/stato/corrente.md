@@ -161,6 +161,16 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
   Chip-select: non capiti con la tabella ridotta alle prime cifre hex; rispiegata la firma
   per esteso a 32 bit sull'EPROM da 1 GB, **non ancora letta da Lorenzo** (pausa). Il testo
   della 21/12/2023 (1032 MB) resta intatto per il lab a freddo. Prodotto: cheatsheet §1a.
+  **20/10, pomeriggio — CS fatti, Decisione 2 a metà.** Firme a 32 bit (512 MB, 64 MB, RAM) e
+  tutti i CS ricavati da lui, coincidenti con la soluzione; idea sua: prima tutte le firme, poi
+  tutti i CS. Porta nel buco capita solo con la sua regola («indirizzo tondo nel buco, confronto
+  la firma con le altre») dopo tre spiegazioni fallite. Zone dei CS e repliche (64 MB: 4 copie)
+  trovate da lui; mutua esclusione verificata. Decisione 2: «4 banchi da taglia/4» capito con
+  l'esempio a 8 byte, `CS_..._i = CS blocco · BEi` fatto; banco/riga (BA1–0 / BA2) e piedini RAM
+  `A[28..0] ← BA[30..2]` fatti, poi **piedini non capiti** sul 64 MB, stanco. Decisione 3 non
+  letta (sostanza già fatta: semplificata e repliche). Prodotto l'artefatto
+  «Prova DLX 8 gennaio 2025» (https://claude.ai/artifact/5iHgc8vnP9dtjop3fQ8j3w, sorgente
+  `corsi/CALC/appunti/prova_2025-01-08_svolta.html`): i 10 passi collegati alla soluzione intera.
 - ✅ **02p** «Fondamenta per il mapping» — chiusa il 2026-10-09. — lezione creata l'8/10 su richiesta di Lorenzo, perché
   la 02 dava per scontati quadro fisico, notazione e binario/esadecimale
   (`corsi/CALC/lezioni/lezione_02p_fondamenta.md`). Studiate le sezioni 1–5 con domande in chat:
