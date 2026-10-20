@@ -150,6 +150,17 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
 - 🔶 **02** «Mapping e decodifica» — lezione creata il 2026-10-06 nel template *progetto su prova*
   (`corsi/CALC/lezioni/lezione_02_mapping_decodifica.md`), estratto dalla prova `2025-01-08`;
   passo 1 della procedura nel prontuario `corsi/CALC/appunti/prontuario_CALC.md`.
+  **20/10 — punti 1–2 della prova `2025-01-08` fatti, CS a metà.** Ricavata da Lorenzo, con
+  guida, la mappa completa: 1600 = 1024+512+64; EPROM `00000000h–3FFFFFFFh`,
+  `40000000h–5FFFFFFFh`, `60000000h–63FFFFFFh`; RAM `80000000h–FFFFFFFFh` con il metodo
+  dall'alto (FFFFFFFFh − taglia + 1) trovato da lui. Inciampi: la M persa due volte (512 MB →
+  esponente 9·3 = 27; 64 MB → 2^6), 2 GB letti come 2000 MB, cifre perse (7 invece di 8),
+  `1` + 30 zeri letto «2», prestito/riporto hex dimenticati (rifatti in colonna), «ultimo
+  indirizzo» non capito finché non è arrivato l'esempio dei posti al cinema (fine = inizio +
+  taglia − 1). Sua osservazione giusta: k·2^n = k in binario + n zeri (il 3·2^29 = `60000000h`).
+  Chip-select: non capiti con la tabella ridotta alle prime cifre hex; rispiegata la firma
+  per esteso a 32 bit sull'EPROM da 1 GB, **non ancora letta da Lorenzo** (pausa). Il testo
+  della 21/12/2023 (1032 MB) resta intatto per il lab a freddo. Prodotto: cheatsheet §1a.
 - ✅ **02p** «Fondamenta per il mapping» — chiusa il 2026-10-09. — lezione creata l'8/10 su richiesta di Lorenzo, perché
   la 02 dava per scontati quadro fisico, notazione e binario/esadecimale
   (`corsi/CALC/lezioni/lezione_02p_fondamenta.md`). Studiate le sezioni 1–5 con domande in chat:
