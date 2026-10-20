@@ -186,14 +186,15 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
   **«muoversi nella memoria»** (dove finisce un blocco, ragionare per intervalli).
 - Tutti gli altri: non aperti.
 
-**Prossimo passo esatto**: lezione 02 dalla **Decisione 1**
-(`corsi/CALC/lezioni/lezione_02_mapping_decodifica.md`), ripartendo dall'esercizio lasciato in
-sospeso il 9/10: scomporre i **1032 MB** di EPROM della prova del 21/12/2023 in potenze di due e
-disporli da 0. La corrispondenza con la 02p è già data: `α` = firma, `i` = bit di cella. Per la
-fatica a «muoversi nella memoria»: a ogni blocco disegnare la mappa a colonna (inizio, fine,
-taglia in hex) prima dei CS, e far calcolare a Lorenzo la fine di ogni blocco. Poi Decisioni
-2–3, poi `/lab CALC 02` il 14/10 (parte memorie della prova `2023-12-21` a freddo; chiude il 02).
-A fine 02p: `/appunti CALC 02p` dalla traccia.
+**Prossimo passo esatto** `[2026-10-20, pausa]`: Lorenzo rilegge l'ultimo messaggio della chat
+(firma dell'EPROM 1 GB per esteso: estremi `00000000h`/`3FFFFFFFh` in 32 bit uno sotto l'altro,
+colonne uguali = `BA31 BA30 = 0 0`, 30 bit che cambiano = 2^30) e dice se è chiaro. Poi fa da
+solo il **passo 1 sull'EPROM 512 MB** (`40000000h`/`5FFFFFFFh` in binario a 32 bit), firma e
+verifica; poi EPROM 64 MB (la firma lunga `BA31..BA26` e la semplificazione a `BA28*` contro la
+porta a `70000000h`, punto 4 della lezione) e RAM (`BA31`). Tabelle **sempre a 32 bit**, non
+ridotte alle prime cifre. Poi Decisioni 2–3 (banchi, `BE`), poi `/lab CALC 02` sulla prova
+`2023-12-21` a freddo (chiude il 02; il 1032 MB non va guidato prima). A fine 02p:
+`/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
 scheda non compaiono nei testi pubblicati; libro di testo non reperito.
