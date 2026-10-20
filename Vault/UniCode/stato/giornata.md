@@ -12,3 +12,4 @@
 12:40 · CALC · 02: blocco 512 MB chiuso da solo (20000000h, 60000000h, 5FFFFFFFh). 64 MB scritto 2^6 (persa di nuovo la M, +20) → fine A0000000h−1, blocco da 1 GB.
 12:43 · CALC · 02: mappa EPROM della prova 2025-01-08 completata da Lorenzo (3 blocchi, inizio/taglia/fine), coincide con la soluzione ufficiale. Inciampi: unità M (2 volte), cifre perse (7 invece di 8).
 13:02 · CALC · 02: RAM 2 GB presa come 2000 MB (decimale) e scomposta; metodo dall'alto (FFFFFFFF − taglia + 1) trovato da solo, ma chiamato «fine» invece di «inizio».
+13:14 · CALC · 02: chip-select non capiti con la tabella abbreviata (solo prime cifre hex): chiesto tutto esplicito a 32 bit.
