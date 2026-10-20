@@ -21,3 +21,4 @@
 15:18 · CALC · 02: firma RAM = BA31 = 1 trovata da solo. Tabella delle firme completa.
 15:37 · CALC · 02: mapping della porta capito dopo 3 spiegazioni fallite (dimezzamento, caselle): sbloccato dalla sua regola «prendi un indirizzo comodo nel buco e confronta la sua firma con le altre».
 15:43 · CALC · 02: CS_EPROM_512MB = BA31*·BA30·BA29* da solo, coincide con la soluzione ufficiale.
+15:48 · CALC · 02: CS_EPROM_64MB = BA31*·BA30·BA29·BA28* (fino a BA28, da solo) e repliche: 4 copie a 60/64/68/6C000000h trovate da solo.
