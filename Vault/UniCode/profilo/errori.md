@@ -581,6 +581,31 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   gli n bit bassi a 1 = primo + 2^n − 1 (1 GB da 0: 30 uni → `3FFFFFFFh`, verifica `40000000h − 1`);
   raggruppare a 4 da destra. Recuperato con guida. Evidenza: trascrizione del 2026-10-09 pomeriggio;
   `stato/giornata.md` 15:41, 15:52.
+- [2026-10-20] Ricorrenza di «taglia convertita in bit senza l'unità» (2026-10-08), tre volte nella
+  stessa sessione, ognuna con un modo diverso di perdere l'unità: 512 MB → «moltiplicato per 3 e veniva
+  27» (esponenti moltiplicati, 9·3, con M presa dal decimale 10^6), quindi `8000000h` = 2^27 invece di
+  2^29; 64 MB → «2^6», fine `A0000000h − 1` (un blocco largo quanto quello da 1 GB, non controllato);
+  2 GB → «2000mb», scomposti in 1024 + 512 + 256 + 128 + 64 + 16 invece di 2048 MB = 2^31. Corretti dopo
+  la segnalazione. La regola K/M/G = +10/+20/+30 non è ancora automatica. Evidenza: trascrizione del
+  2026-10-20 («ho moltiplicato per 3 e veniva 27», «2^6, quindi parte da 60000000h e arriva a
+  A0000000h-1», «ho scomposto 2000mb»); `stato/giornata.md` 12:31, 12:40, 13:02.
+- [2026-10-20] Ricorrenza di «2^14 scritto in binario con l'1 in fondo» (2026-10-09): davanti a «2^30 è un
+  1 seguito da 30 zeri», «ma come fa 2 a essere 1000000000000000000000000000000» → 2^30 letto come 2,
+  cioè la regola base^n = 1 e n zeri ancora non posseduta undici giorni dopo. Recuperato dalla base 10
+  (10^3 = 1000); dopo, 2^30 = `40000000h` e 2^29 = `20000000h` ricavati con il padding giusto. Evidenza:
+  trascrizione del 2026-10-20; `stato/giornata.md` 12:07; `appunti/cheatsheet_conversioni_CALC.md` §1a.
+- [2026-10-20] Ricorrenza di «aritmetica in base 16 assente» (2026-10-09): «non mi ricordo come fare
+  40000000 - 0001» (prestito che trasforma gli zeri in F), poi su `7FFFFFFFh + 1` «ma riporto di 16 no?
+  quindi alla fine ho 7 piu 16» → stessa confusione del 9/10 fra il valore della colonna (16) e ciò che
+  passa a sinistra (1) → correzione: F + 1 = `10h`, si scrive 0 e si riporta **1**. Evidenza:
+  trascrizione del 2026-10-20 (citazioni sopra; richiesta «fammi vedere come si conta da 0 a 16 in esa»).
+- [2026-10-20] Lezione 02: indirizzi DLX scritti con 7 cifre esadecimali invece di 8. `8000000h` per
+  512 MB, `4000000h` per 64 MB, e nella somma `60000000h + 04000000h` il risultato «6400000h - 1»: la
+  cifra persa cambia il valore (`6400000h` ≠ `64000000h`) → causa: non usa la larghezza fissa del bus
+  (32 bit = 8 cifre) come controllo, e incolonna a occhio stringhe di zeri → correzione: ogni indirizzo
+  DLX si scrive su 8 cifre, con gli zeri a sinistra (`04000000h`), prima di sommarlo o sottrarlo; 7
+  cifre = errore. Corretto alla segnalazione. Evidenza: trascrizione del 2026-10-20 («512mb sono 8000000
+  in esa», «mi viene 4000000h», «6400000h - 1»); `stato/giornata.md` 12:43 («cifre perse»).
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
