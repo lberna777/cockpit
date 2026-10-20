@@ -196,7 +196,14 @@ non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del m
   **«muoversi nella memoria»** (dove finisce un blocco, ragionare per intervalli).
 - Tutti gli altri: non aperti.
 
-**Prossimo passo esatto** `[2026-10-20, sera]`: riprendere la Decisione 2 dai **piedini**, con
+**Giudizio di Lorenzo (20/10)**: chiari scomposizione, banchi, mappa, firme, CS, mutua
+esclusione; porte «più o meno» (cosa fanno: moduli 04–05); repliche faticose → formula nel passo 5
+dell'artefatto; legame banchi–CS–BE a metà, `CS_INPUT` e `RESET_P` non chiari (box aggiunti nei
+passi 7 e 9); **piedini, bus dati e interfacciamento per nulla**. Mancano, rispetto alla soluzione:
+passi 8 (piedini, bus dati, schemi pp. 9–12), 9 (porte, pulsante, reti) e 10 (handler).
+
+**Prossimo passo esatto** `[2026-10-20, sera; pomeriggio del 21/10]`: prima 5 minuti sui box
+nuovi dei passi 7 e 9 (`CS_INPUT`, `RESET_P`), poi riprendere la Decisione 2 dai **piedini**, con
 il passo 8 dell'artefatto «Prova DLX 8 gennaio 2025» aperto: rifare l'esempio a 8 byte
 (BA1–0 = banco, BA2 = riga), poi far ricavare a Lorenzo `A[23..0] ← BA[25..2]` per il banco
 da 16 MB e chiedergli quali bit restano fuori da CS e piedini (BA27, BA26 → le 4 repliche).
