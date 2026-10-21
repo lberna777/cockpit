@@ -83,14 +83,16 @@ public class Gioco {
 	
 	public String situazione() {
 		StringBuilder sb = new StringBuilder();
+		while(this.tentativiEffettuati() < this.maxTentativi()) {
 		sb.append(this.tentativiEffettuati() + 1);
 		sb.append(")");
 		sb.append(" " + this.tentativi[this.tentativiEffettuati()].toString());
 		sb.append("\t\t");
 		sb.append(this.risposte[this.tentativiEffettuati()].toString());
 		sb.append(System.lineSeparator());
-		
+		}
 		return sb.toString();
+		
 	}
 	
 	
