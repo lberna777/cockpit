@@ -18,8 +18,7 @@ import subprocess
 from datetime import date, timedelta
 from pathlib import Path
 
-HOME = Path.home()
-RECAP_DIR = HOME / "cockpit" / "Vault" / "recap"
+RECAP_DIR = Path(__file__).resolve().parent.parent / "Vault" / "recap"  # cockpit che contiene lo script
 ARCHIVE = RECAP_DIR / "_archive"
 OLLAMA_MODEL = "llama3.2:3b"
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
@@ -51,7 +50,7 @@ def ollama_summary(facts: str, period_label: str) -> str:
         "Attieniti ai fatti, non inventare.\n\n" + facts
     )
     try:
-        r = subprocess.run(["ollama", "run", OLLAMA_MODEL], input=prompt,
+        r = subprocess.run(["ollama", "run", "--nowordwrap", OLLAMA_MODEL], input=prompt,
                            capture_output=True, text=True, timeout=180)
         s = ANSI_RE.sub("", r.stdout).strip()
         return s if s else "_(sintesi non disponibile)_"
