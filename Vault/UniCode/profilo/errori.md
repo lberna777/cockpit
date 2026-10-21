@@ -538,6 +538,44 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   l'ha scritto Claude → correzione da provare: disegnare i passi con un caso numerico prima di scrivere (`/flusso`,
   prontuario §3.13). Ricorrenza della riga «processi interni alle funzioni» del 2026-10-05. Evidenza:
   trascrizione del 2026-10-05 (risposta a «Scrivilo tu, con il metodo del debug»; «ma che è sto minimo»).
+- [2026-10-21] LAB06: firme prese dai campi o a memoria invece che dal test. Costruttore
+  `Combinazione(PioloDiGioco[] pioli)` (il test fa `new Combinazione(4)`), senza `new` dell'array e con il
+  ciclo su `this.dim`, campo mai assegnato (vale 0) invece del parametro; `getPiolo` che restituisce
+  `String` (`.rgb()`); costruttore di `Gioco` con tutti e sei i campi come parametri (`Gioco(int
+  maxTentativi, int dim, int numTentativi, Combinazione[] tentativi, …)`) → causa: *Generate constructor
+  using fields* preso come punto di partenza, firma ricavata dai campi invece che dalla chiamata del test;
+  stessa famiglia di `Ticket` (2026-10-05) e dei costruttori del LAB04c (2026-10-02, parametro e campo
+  fusi) → correzione: la firma si copia dalla riga del test che chiama (`new Gioco(10,4)`); il costruttore
+  crea l'array dal parametro e ne riempie le celle. La failure di `getPiolo` l'ha diagnosticata da solo.
+  Evidenza: trascrizione del 2026-10-21, 15:33, 15:40, 16:38; commit `885deb5`, `0368ad9`;
+  `stato/giornata.md` 15:33, 15:41.
+- [2026-10-21] LAB06: stato restituito ma non salvato, stampa al posto del risultato. `registraMossa` v1
+  con `return Status.VITTORIA` / `PERSO` / `IN_CORSO` senza assegnare il campo `status` (dopo la vittoria
+  `stato()` resta `IN_CORSO`, e `GiocoTest` non lo mostra); `toString` di `Combinazione` chiuso con la
+  stampa dello `StringJoiner` («non capisco cosa devo mettere nel return statement se gia stampo li») →
+  causa: non separa ciò che il metodo consegna al chiamante da ciò che deve lasciare nell'oggetto (il
+  campo) o che spetta al chiamante (la stampa); ricorrenza della stampa dentro `equals` (2026-09-30) e del
+  campo non aggiornato in `put` (2026-10-02) → correzione: in ogni ramo `this.status = …`, poi `return
+  this.status`; un metodo che risponde restituisce, non stampa. Evidenza: trascrizione del 2026-10-21,
+  15:59, 16:51; commit `5515286` → `10d166a`; `stato/giornata.md` 16:00, 16:54.
+- [2026-10-21] Ricorrenza di «forma dell'output ricavata a memoria, non dal test» (2026-10-02, 2026-10-05):
+  `Gioco.toString` con `"Situazione: \n"` (spazio in più, `\n` invece di `lineSeparator()`) e lo stato
+  senza il prefisso `"Gioco: "` che il test cerca («a me sembra giusto ma sempre tutti i test blu»).
+  Evidenza: trascrizione del 2026-10-21, 17:23; `stato/giornata.md` 17:23.
+- [2026-10-21] Ottava ricorrenza della risposta a metà, nel codice: della tabella di Claude con le modifiche
+  a `situazione` ha applicato ciclo, indici delle celle e regola delle tab, non il numero di riga `i + 1`
+  («È l'unica riga della tabella di prima che non avevi cambiato»); del costruttore di `Combinazione` ha
+  corretto tutto tranne il campo `int dim` da togliere, rimasto (assegnato e mai letto) e ricopiato in
+  `Risposta`. Nella stessa sessione `risposta.vittoria() == true` (ridondanza). Resta candidato
+  trasversale (nessun altro corso). Evidenza: trascrizione del 2026-10-21, 15:33, 17:23; commit
+  `b3b8a4a`; `model/Combinazione.java`, `model/Risposta.java`.
+- [2026-10-21] Ricorrenza di «processi interni alle funzioni» (2026-10-05): davanti a `situazione` «ma cosa
+  sono ste tab […] non ci capisco niente, cosa deve fare situazione, cosa deve stampare, quando lo deve
+  stampare»; in `Gioco` perso sul contatore finché Claude non ha fissato i campi. Giudizio a `/chiudi`:
+  «le funzioni piu complesse come situazione […] mi hanno portato in confusione nel capire la logica».
+  Lorenzo ne trae una regola di procedura: campi → costruttore → metodi che cambiano lo stato → metodi
+  che lo leggono. Evidenza: trascrizione del 2026-10-21, 16:30–16:32, 17:13, 18:01; `stato/giornata.md`
+  16:30, 16:32.
 
 ### CALC — Calcolatori Elettronici T
 - [2026-10-08] 02p §2: taglia convertita in bit senza l'unità. RAM da 32 KB → «5 piedini perché 32 =
