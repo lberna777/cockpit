@@ -7,3 +7,4 @@
 14:38 · FI2 · procedura d'esame avviata in chat su Combinazione (passo 1: testo e test → contratto).
 15:09 · FI2 · LAB06 passo 3: «array di dimensione dim-1» per il costruttore → taglia e ultimo indice fusi (pattern 6, confini). Prima: c presentata come «un array» invece che oggetto che contiene un array, equals «confronta i pioli» invece delle combinazioni (pattern 1).
 15:33 · FI2 · LAB06 costruttore v1: parametro PioloDiGioco[] invece di int dim (probabile generazione di Eclipse), array mai creato, ciclo su campo this.dim mai assegnato (=0), celle a null invece di VUOTO, campi senza private. dim() giusto.
+15:41 · FI2 · LAB06 Combinazione: costruttore, dim(), getPiolo → testInizialmenteVuota verde. Failure di getPiolo (String rgb invece di PioloDiGioco) diagnosticata da Lorenzo da solo.
