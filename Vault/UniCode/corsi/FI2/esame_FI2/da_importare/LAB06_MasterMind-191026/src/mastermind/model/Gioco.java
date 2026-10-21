@@ -50,22 +50,38 @@ public class Gioco {
 		
 		numTentativi++;
 		
-		if(risposta.vittoria() == true) {
-			return Status.VITTORIA;
+		if(risposta.vittoria()) {
+			this.status = Status.VITTORIA;
 		} else if (this.tentativiRimasti() == 0) {
-			return Status.PERSO;
-		} else return Status.IN_CORSO;
+			this.status = Status.PERSO;
+		} else this.status = Status.IN_CORSO;
 		
-		
+		return this.status;
 	}
 	
 	public Combinazione ultimoTentativo() {
-		return tentativi[this.tentativiEffettuati()];
+		if(this.tentativiEffettuati() == 0) {
+			return null;
+		}
+		return tentativi[this.tentativiEffettuati()-1];
 	}
 	
 	public Risposta ultimaRisposta() {
-		return risposte[this.tentativiEffettuati()];
+		if(this.tentativiEffettuati() == 0) {
+			return null;
+		}
+		return risposte[this.tentativiEffettuati()-1];
 	}
+	
+	public Combinazione tentativo(int i) {
+		return tentativi[i];
+	}
+	
+	public Risposta risposta(int i) {
+		return risposte[i];
+	}
+	
+	
 	
 	
 	
