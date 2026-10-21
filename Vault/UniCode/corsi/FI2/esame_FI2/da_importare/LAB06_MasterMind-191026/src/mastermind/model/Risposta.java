@@ -55,5 +55,14 @@ public class Risposta {
 		return sj.toString();
 	}
 	
+	public boolean vittoria() {
+		for(int i = 0; i < this.dim(); i++) {
+			if(this.getPiolo(i) != PioloRisposta.NERO) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 
 }
