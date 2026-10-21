@@ -20,7 +20,12 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 | **plugin-creator** — plugin audio JUCE (area lavoro) | **Plugin · plugin-creator** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`. I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
 | **carguy** — autonoma | **CarGuy · carguy** | — |
 | **bibiciclo** — autonoma | senza gruppo | — |
+| **home** — autonoma, **solo locale** (la cartella `~` del PC Debian, nessun remote) | **Debian · home** (chat locali del Code tab, non cloud) | — |
 
+- **home** (dal 2026-10-21) è la prima repo solo locale: traccia per lista bianca dotfile,
+  configurazione di Claude Code e auto-memoria della home (`~/CLAUDE.md`, `~/.gitignore`). Non ha
+  remote, quindi le chat cloud non la aprono: la vedono attraverso questa mappa e `repo/home` nella
+  Plancia. Le repo sotto `~` (cockpit, `~/Sviluppo/...`) restano indipendenti.
 - **carguy** e **bibiciclo** sono progetti veri nati dai tentativi del sistema che ha preceduto
   Developing: restano autonomi, e Developing li usa come prova di competenza nel portfolio.
 - **Due repo per il portfolio, non un doppione**: `lberna777.github.io` è il sito (GitHub Pages
