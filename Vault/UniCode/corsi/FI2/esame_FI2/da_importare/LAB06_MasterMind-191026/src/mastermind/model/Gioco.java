@@ -60,12 +60,28 @@ public class Gioco {
 	}
 	
 	public Combinazione ultimoTentativo() {
-		return tentativi[this.tentativiEffettuati()];
+		if(this.tentativiEffettuati() == 0) {
+			return null;
+		}
+		return tentativi[this.tentativiEffettuati()-1];
 	}
 	
 	public Risposta ultimaRisposta() {
-		return risposte[this.tentativiEffettuati()];
+		if(this.tentativiEffettuati() == 0) {
+			return null;
+		}
+		return risposte[this.tentativiEffettuati()-1];
 	}
+	
+	public Combinazione tentativo(int i) {
+		return tentativi[i];
+	}
+	
+	public Risposta risposta(int i) {
+		return risposte[i];
+	}
+	
+	
 	
 	
 	
