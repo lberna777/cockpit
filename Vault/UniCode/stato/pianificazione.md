@@ -12,5 +12,5 @@ giorno: 2026-10-22
 <!--
 settimana: il lunedì della settimana pianificata (AAAA-MM-GG)
 mese:      il mese pianificato (AAAA-MM)
-giorno: 2026-10-22
+giorno:    l'ultimo giorno per cui sono state fissate le attività di studio (AAAA-MM-GG)
 -->
