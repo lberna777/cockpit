@@ -1,5 +1,7 @@
 package mastermind.model;
 
+import java.util.StringJoiner;
+
 public class Combinazione {
 	
 	
@@ -29,6 +31,11 @@ public class Combinazione {
 	}
 	
 	public boolean equals(Combinazione c2) {
+		
+		if(c2 == null) {
+			return false;
+		}
+		
 		if(this.dim() == c2.dim()) {
 			for(int i=0; i<this.dim(); i++) {
 				if (this.pioli[i] != c2.pioli[i]) {
@@ -40,6 +47,14 @@ public class Combinazione {
 		return false;
 	}
 	
+	
+	public String toString() {
+		StringJoiner sj = new StringJoiner(",");
+		for (int i = 0; i < this.dim(); i++) {
+			sj.add(this.pioli[i].toString());
+		}
+		return sj.toString();
+	}
 	
 	
 	
