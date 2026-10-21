@@ -564,9 +564,8 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   Evidenza: trascrizione del 2026-10-21, 17:23; `stato/giornata.md` 17:23.
 - [2026-10-21] Ottava ricorrenza della risposta a metà, nel codice: della tabella di Claude con le modifiche
   a `situazione` ha applicato ciclo, indici delle celle e regola delle tab, non il numero di riga `i + 1`
-  («È l'unica riga della tabella di prima che non avevi cambiato»); del costruttore di `Combinazione` ha
-  corretto tutto tranne il campo `int dim` da togliere, rimasto (assegnato e mai letto) e ricopiato in
-  `Risposta`. Nella stessa sessione `risposta.vittoria() == true` (ridondanza). Resta candidato
+  («È l'unica riga della tabella di prima che non avevi cambiato»). Nella stessa sessione
+  `risposta.vittoria() == true` (ridondanza). Resta candidato
   trasversale (nessun altro corso). Evidenza: trascrizione del 2026-10-21, 15:33, 17:23; commit
   `b3b8a4a`; `model/Combinazione.java`, `model/Risposta.java`.
 - [2026-10-21] Ricorrenza di «processi interni alle funzioni» (2026-10-05): davanti a `situazione` «ma cosa
