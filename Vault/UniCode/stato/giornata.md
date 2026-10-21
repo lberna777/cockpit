@@ -17,3 +17,4 @@
 16:54 · FI2 · LAB06 Gioco: registraMossa corretta (status assegnato al campo); ultimoTentativo/ultimaRisposta su [numTentativi] invece di [numTentativi-1] → di nuovo pattern 6 (prima cella libera vs ultima piena), caso 0 mosse non gestito.
 17:08 · FI2 · LAB06 situazione v1: StringBuilder giusto e formato della riga giusto, ma niente ciclo (una sola riga) e indice tentativiEffettuati = prima cella libera (null → NPE): stesso confine di ultimoTentativo; regola delle 3 tab assente.
 17:23 · FI2 · LAB06 Gioco.toString: spazio prima dell'a capo e manca il prefisso «Gioco: »; in situazione numero riga ancora tentativiEffettuati()+1 invece di i+1 (verificato qui con javac: 2/3 dopo le prime due correzioni, 3/3 con la terza attesa).
+17:26 · FI2 · LAB06 Gioco completo: GiocoTest 3/3 verdi. Restano MasterMind e MasterMindTest1–3. Classi fatte: Combinazione, Risposta, Gioco (15 test verdi su 34).
