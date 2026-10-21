@@ -3,8 +3,8 @@ package mastermind.model;
 public class Combinazione {
 	
 	
-	PioloDiGioco[] pioli;
-	int dim;
+	private PioloDiGioco[] pioli;
+	private int dim;
 
 	public Combinazione(int dim) {
 		super();
@@ -20,10 +20,13 @@ public class Combinazione {
 		return pioli.length;
 	}
 	
-	public String getPiolo(int i) {
-		return this.pioli[i].rgb();
+	public PioloDiGioco getPiolo(int i) {
+		return this.pioli[i];
 	}
 	
+	public void setPiolo(int i, PioloDiGioco colore) {
+		this.pioli[i] = colore;
+	}
 	
 	
 	
