@@ -10,3 +10,4 @@
 15:41 · FI2 · LAB06 Combinazione: costruttore, dim(), getPiolo → testInizialmenteVuota verde. Failure di getPiolo (String rgb invece di PioloDiGioco) diagnosticata da Lorenzo da solo.
 15:44 · FI2 · LAB06 Combinazione: setPiolo scritto da solo, testOK1/testOK2 verdi; testEquals rosso (equals non ancora scritto: vale quello di Object).
 15:49 · FI2 · LAB06 Combinazione: equals(Combinazione) scritto da solo (dim prima, poi ciclo con !=, return false al primo diverso); CombinazioneTest 6/6 verdi.
+16:00 · FI2 · LAB06 Combinazione completa: null-check in equals aggiunto dopo il caso proprio (passo 5), toString con StringJoiner (prima stampava invece di restituire: corretto). Verificato qui: VUOTO×4, ROSSO,GIALLO,VERDE,BLU, equals(null)=false.
