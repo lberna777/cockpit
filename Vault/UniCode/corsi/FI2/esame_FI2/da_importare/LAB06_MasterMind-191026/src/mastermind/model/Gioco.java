@@ -50,13 +50,13 @@ public class Gioco {
 		
 		numTentativi++;
 		
-		if(risposta.vittoria() == true) {
-			return Status.VITTORIA;
+		if(risposta.vittoria()) {
+			this.status = Status.VITTORIA;
 		} else if (this.tentativiRimasti() == 0) {
-			return Status.PERSO;
-		} else return Status.IN_CORSO;
+			this.status = Status.PERSO;
+		} else this.status = Status.IN_CORSO;
 		
-		
+		return this.status;
 	}
 	
 	public Combinazione ultimoTentativo() {
