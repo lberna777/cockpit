@@ -81,7 +81,17 @@ public class Gioco {
 		return risposte[i];
 	}
 	
-	
+	public String situazione() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.tentativiEffettuati() + 1);
+		sb.append(")");
+		sb.append(" " + this.tentativi[this.tentativiEffettuati()].toString());
+		sb.append("\t\t");
+		sb.append(this.risposte[this.tentativiEffettuati()].toString());
+		sb.append(System.lineSeparator());
+		
+		return sb.toString();
+	}
 	
 	
 	
