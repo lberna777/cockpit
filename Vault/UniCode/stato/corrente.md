@@ -2,10 +2,9 @@
 
 **Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-20
 
-- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
+- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
   Sezione in fondo.
-- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · 🔶 `LAB06` MasterMind **in corso** dal 19/10 (scheda `corsi/FI2/lezioni/guida_lab_LAB06_mastermind.md`, startkit in `esame_FI2/da_importare/LAB06_MasterMind-191026`, **importato in Eclipse il 19/10**). Ripresa 21/10: costruire in chat la procedura d'esame (obiettivi del 5/10), poi leggere sl. 17–18 e `CombinazioneTest`, caso a mano, scrivere `Combinazione`.
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · 🔶 `LAB06` MasterMind **in corso** dal 19/10 (scheda `corsi/FI2/lezioni/guida_lab_LAB06_mastermind.md`, startkit in `esame_FI2/da_importare/LAB06_MasterMind-191026`, **importato in Eclipse il 19/10**). Ripresa 21/10: costruire in chat la procedura d'esame (obiettivi del 5/10), poi leggere sl. 17–18 e `CombinazioneTest`, caso a mano, scrivere `Combinazione`.
 
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
@@ -131,15 +130,15 @@ la stessa radice — *da dove nasce* la cosa:
 
 ## ═══ CALC ═══
 
-**Aperto il 2026-10-06** per l'appello anticipato del **2 dicembre 2026**, segnalato da Lorenzo e
-non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del materiale
+**Aperto il 2026-10-06** per un appello anticipato del 2 dicembre che non c'era. `[2026-10-20]` Lorenzo
+è **iscritto all'appello del 22 dicembre 2026, ore 9:00**: è il primo appello di S1, non più anticipato. Edizione del materiale
 2024/25; mappa e stato dei moduli in `corsi/CALC/percorso.md`.
 
 **Prova d'esame**: un unico esercizio di progetto di un sistema DLX (memorie, porte in
 *handshake*, reti logiche, *interrupt handler*), invariato dal 2015. Indice delle 62 prove
 (46 con soluzione) in `corsi/CALC/prove/INDICE.md`.
 
-**Calendario (8 settimane)**:
+**Calendario (8 settimane)** `[superato 2026-10-20: l'appello è il 22/12, il checkpoint passa a ~10 nov; calendario da rifare con /pianifica]`:
 - sett. 1–3 (6–26 ott): `02`, `03`, `04`, `05`; `00` solo se la prova lo richiede;
 - sett. 4 (27 ott – 2 nov): `07`, `08`, `01`;
 - **checkpoint ~3 nov**: prova `2024-01-19` a freddo, cronometrata. Sotto la sufficienza si
