@@ -85,7 +85,7 @@ public class Gioco {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < this.tentativiEffettuati(); i++) {
 			
-		sb.append(this.tentativiEffettuati() + 1);
+		sb.append(i + 1);
 		sb.append(")");
 		sb.append(" " + this.tentativi[i].toString());
 		
@@ -99,9 +99,19 @@ public class Gioco {
 		return sb.toString();
 		
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("Situazione:" + System.lineSeparator());
+		sb.append(this.situazione());
+		sb.append("Gioco: " + this.status);
+		return sb.toString();
+
+	}
 	
-	
-	
+		
 	
 	
 	
