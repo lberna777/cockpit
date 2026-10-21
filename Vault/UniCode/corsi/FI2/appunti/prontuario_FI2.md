@@ -76,6 +76,15 @@ tags: [FI2, appunti]
 | scorrere i giorni fra due date (un giorno alla volta, con un `LocalDate` che avanza) | 3.13 | LAB05 (parte 2) |
 | calcolare una sosta su più giorni con tariffe diverse per giorno | 3.13 | LAB05 (parte 2) |
 | aggiungere giorni/minuti a una data (`plusDays`, `plusMinutes`) senza che il risultato si perda | 3.13 | LAB05 (parte 2) |
+| **affrontare una classe da zero all'esame: in che ordine lavorare** | **2** (procedura) | LAB06 |
+| capire se un test rosso è *failure* o *error*, e perché sono rossi tutti insieme | 2 | LAB06 |
+| array di oggetti che nasce pieno di un valore di default (`VUOTO`), non di `null` | 3.14 | LAB06 |
+| `toString` di un enum: il nome della costante, non il dato che porta (`rgb()`) | 3.14 | LAB06 |
+| concatenare con separatore: `StringJoiner` o `StringBuilder`? | 3.14 | LAB06 |
+| `equals` fra due oggetti dello stesso tipo, con il caso `null` | 3.14 | LAB06 |
+| contatore che è anche indice della prima cella libera; l'ultima piena è `n − 1` | 3.14 | LAB06 |
+| metodo che cambia lo stato e lo restituisce (`registraMossa`) | 3.14 | LAB06 |
+| riga di testo a colonne con tabulazioni e a capo (`situazione`) | 3.14 | LAB06 |
 
 ---
 
@@ -106,6 +115,10 @@ terminale. **Stessa causa, parole diverse.**
 | ⚠️ `The method Size(Frazione[]) is undefined for the type Frazione` (testo Eclipse per analogia con la riga sopra, non rilanciato) | `cannot find symbol` … `symbol: method Size(Frazione[])` · `location: class Frazione` (verificato con `javac`) | **maiuscole**: Java distingue `Size` da `size`; il metodo esiste, scritto minuscolo | `Frazione.size(...)` |
 | ⚠️ `The constructor Ticket(double, LocalTime, LocalTime) is undefined` | `incompatible types: double cannot be converted to LocalTime` | i parametri del costruttore sono in **ordine diverso** da quello che il test (o il chiamante) passa. Eclipse nomina i tipi **del tuo** costruttore | l'ordine lo detta il test: leggi `new Ticket(...)` in `TicketTest` e allinea la firma → 3.13 |
 | `The constructor Parcometro() is undefined` | `constructor Parcometro in class Parcometro cannot be applied to given types` | si chiama `new Parcometro()` ma la classe ha solo il costruttore con la `Tariffa` | passare l'argomento richiesto: `new Parcometro(tariffa)` |
+| ⚠️ `The constructor Gioco(int, int) is undefined` | `constructor Gioco in class Gioco cannot be applied to given types` | costruttore generato con *Source → Generate Constructor using Fields*: un parametro **per ogni campo**, mentre il test fa `new Gioco(10, 4)` | la firma la detta il test: tieni solo i parametri che arrivano da fuori, gli altri campi li inizializzi nel corpo → §2 |
+| ⚠️ `The method getPiolo(int) from the type Combinazione is not visible` | `getPiolo(int) is not public in Combinazione; cannot be accessed from outside package` | metodo senza `public`: i test stanno in **un altro package** (`mastermind.tests.model`) | `public` su costruttori e metodi; `private` solo sui campi |
+| ⚠️ `The method stato() is undefined for the type Gioco` | `cannot find symbol` … `symbol: method stato()` | nome diverso da quello del test (`status()` invece di `stato()`) | il nome lo detta il test (e il `Controller`): copialo da lì |
+| `Syntax error, insert ";" to complete BlockStatements` | `';' expected` | manca il `;` in fondo a un'istruzione (`this.numTentativi = 0`) | aggiungerlo sulla riga indicata |
 
 ## 1.2 Eccezioni a run-time
 
@@ -126,6 +139,9 @@ Compila tutto, esplode eseguendo — in console, in rosso.
 | `NumberFormatException: For input string: "…"` | `parseInt`/`parseDouble` su stringa non valida — **le virgolette nel messaggio mostrano la stringa esatta**: guardale per vedere spazi e virgole | controllare la stringa prima di convertirla [02x sl. 35] — vedi 3.5 |
 | ⚠️ `LinkageError durante il caricamento della classe principale X` · `java.lang.UnsupportedClassVersionError: X has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0` | al lancio, prima di eseguire qualsiasi riga: Eclipse ha compilato per una Java **più nuova** del JRE che esegue. Versione class file = Java + 44: 65 = Java 21, 69 = Java 25 | compliance del compilatore = versione del JRE → §2 |
 
+| ⚠️ `NullPointerException: Cannot invoke "mastermind.model.Combinazione.dim()" because "c2" is null` | `c1.equals(null)`: il metodo chiama un metodo sul parametro senza controllarlo. Nessun test dello startkit lo prova | prima riga di `equals`: `if (c2 == null) return false;` → 3.14 |
+| ⚠️ `NullPointerException` dentro `situazione` / `ultimoTentativo` | si legge `tentativi[numTentativi]`, che è la **prima cella libera** (`null`), non l'ultima piena | ultima piena = `numTentativi − 1`; nei cicli `i < numTentativi` → 3.14 |
+
 ## 1.3 Errori silenziosi
 
 Compila, gira, e il risultato è sbagliato. Nessun messaggio.
@@ -145,6 +161,12 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | ⚠️ somma di un array pieno che «perde» l'ultimo elemento (`{1/2, 1/3}` → `1/2`) | ciclo `i < fs.length - 1`: il `-1` salta l'ultima cella, **non** evita i `null` | `i < fs.length` (+ `&& fs[i] != null` se l'array è a metà) → 3.11 |
 | ⚠️ `0/36` invece del `0/6` atteso dal test | somma col prodotto in croce (`den·den`) invece che con l'`mcm`; e `minTerm` lascia lo zero com'è | sommare via `mcm` (`sumWithMcm` / la `sum` del docente) → 3.9 |
 | ⚠️ test verdi ma costo sbagliato dopo una franchigia (`H1f`, 90 minuti → `0,25 €` invece di `0,50 €`) | durata minima confrontata con la durata **totale** invece che con quella **dopo la franchigia**: i test dello startkit non hanno un caso che li distingua | confrontare la variabile calcolata dopo la sottrazione; provare a mano un caso in cui la franchigia porta **sotto** il minimo → 3.13 |
+| ⚠️ `AssertionFailedError: expected: <VUOTO> but was: <#808080>` | il metodo restituisce un'**altra cosa** dello stesso valore: qui `rgb()` (una `String`) invece del `PioloDiGioco` | il tipo restituito lo detta il test: `PioloDiGioco getPiolo(int i)` → 3.14 |
+| ⚠️ `testEquals` rosso, `testNotEquals…` verdi **senza aver scritto `equals`** | vale l'`equals` di `Object`, che confronta i **riferimenti**: due `new` sono sempre diversi | scrivere `equals` → 3.14. Un test verde non dimostra che il metodo esista |
+| ⚠️ `stato()` resta `IN_CORSO` anche dopo la mossa vincente | `return Status.VITTORIA;` restituisce il valore ma **non lo salva** nel campo | `this.status = …` in ogni ramo, poi `return this.status;` → 3.14 |
+| ⚠️ `toString` / `contains("Situazione:" + lineSeparator())` falso | uno **spazio** prima dell'a capo (`"Situazione: \n"`), oppure manca un prefisso (`"Gioco: "`) | copiare il formato carattere per carattere dalla slide o dal test |
+| ⚠️ un metodo che «risponde» stampa a video e restituisce altro | `System.out.println(sj)` dentro `toString` | **restituire** (`return sj.toString();`): stampa chi chiama |
+| ⚠️ il programma non finisce (ciclo infinito) | `while (tentativiEffettuati() < maxTentativi())`: nel corpo niente cambia la condizione | `for (int i = 0; i < n; i++)`: la variabile del ciclo cambia a ogni giro |
 
 ---
 
@@ -166,6 +188,26 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | Import di uno zip che fallisce | scompatta e usa *Existing Projects → Select **root directory*** + *Copy projects into workspace* | LAB04a, 01/10 |
 | Collaudo | **metodo per metodo**: commenta i blocchi di test non ancora pertinenti e scommentali man mano, per evitare «errori in cascata» [LAB02 sl. 23]. Un `assert` fallito ferma il `main`: quelli dopo non sono ancora stati controllati | LAB02, 30/09 |
 
+
+### Procedura d'esame — come affrontare una classe `[costruita con Lorenzo il 2026-10-21, LAB06]`
+
+All'esame **struttura e promesse sono date**: il diagramma UML e lo startkit danno classi, campi
+(spesso) e firme; la sezione **SEMANTICA** del testo dice cosa fa ogni metodo (vedi la prova del
+12/02/2025). Il tempo va speso dove non le dicono: **confini, casi limite, formati**.
+
+| # | Passo | Cosa fai | Dove guardi |
+|---|---|---|---|
+| 1 | **struttura** | copi classi, campi e firme | UML + startkit. Le firme le **confermano i test** (`new X(…)`, nomi esatti, tipi restituiti) |
+| 2 | **promesse** | una riga per metodo: cosa promette | SEMANTICA, con i test accanto. Guarda **quali metodi chiama ogni test**: se un test attraversa tutta la classe, resta rosso finché non c'è tutto |
+| 3 | **campi** | tutti, *prima* del codice: per ogni metodo, cosa deve ricordarsi l'oggetto? Ciò che si calcola non è un campo (`tentativiRimasti = max − fatti`) | startkit; aggiungi solo quelli che mancano |
+| 4 | **ordine** | campi → costruttore → **metodi che cambiano lo stato** → metodi che lo leggono. Chi cambia lo stato spiega da dove arrivano i valori `[regola di Lorenzo, 21/10]` | |
+| 5 | **caso a mano** | su un esempio piccolo: stato interno dopo 1 operazione, celle con indice, stringa attesa al carattere | slide, esempi del testo |
+| 6 | **codice a pezzi** | un metodo alla volta, poi il suo test (tasto destro sul metodo di test → *Run As → JUnit Test*) | |
+| 7 | **caso tuo** | un caso che il test non prova: `null`, 0 elementi, struttura piena | |
+| 8 | **se rosso** | *failure* = un'assert ha detto no: leggi `expected / but was`. *Error* = eccezione: leggi lo stack trace dal basso fino alla prima riga tua | §1 |
+
+⚠️ *Generate Constructor using Fields* mette un parametro per ogni campo: dopo averlo generato,
+controlla la firma su `new …` nei test (LAB05, LAB06).
 ---
 
 # 3 — Model
@@ -885,6 +927,92 @@ Verificato su tutti gli 8 casi di `ParcometroEvolutoTest` (incl. `mer 11:30→11
 ⚠️ Ticket, non compila dopo un quick fix: se scrivendo `ParcometroEvoluto` Eclipse propone «Change type of…» e accetti,
 può cambiare **la classe della parte 1** (`Ticket`: `LocalTime` → `LocalDateTime`) e `Parcometro` smette di compilare
 (`LocalTime cannot be converted to LocalDateTime`). Dopo ogni quick fix guarda quale file si è modificato.
+
+---
+
+## 3.14 Classi-contenitore su array, stato di gioco, stringhe a colonne (LAB06)
+
+Fatto in: `../esame_FI2/da_importare/LAB06_MasterMind-191026/src/mastermind/model/` (`Combinazione`, `Risposta`, `Gioco`). Fonte:
+`LAB-06-MasterMind.pdf` sl. 17–23, `06` sl. 48–50 (`StringJoiner`).
+
+**Array di oggetti con un valore di default** — `new PioloDiGioco[4]` contiene 4 `null`, non 4 `VUOTO`:
+```java
+public Combinazione(int dim) {
+    this.pioli = new PioloDiGioco[dim];      // dim celle: la DIMENSIONE è dim, non dim-1 (dim-1 è l'ultimo indice)
+    for (int i = 0; i < dim; i++) {          // i < dim: indici 0..dim-1, cioè tutte le celle
+        this.pioli[i] = PioloDiGioco.VUOTO;  // il valore dell'enum, non il numero 0 né null
+    }
+}
+public int dim() { return pioli.length; }    // la lunghezza la sa già l'array: nessun campo in più
+```
+
+**`toString` di un enum** — `PioloDiGioco.ROSSO.toString()` → `"ROSSO"` (il nome scritto nell'enum);
+`ROSSO.rgb()` → `"#FF0000"` (il dato tra parentesi nella dichiarazione, serve alla grafica).
+
+**`StringJoiner` o `StringBuilder`?**
+| Serve il separatore anche dopo l'ultimo? | Strumento | Esempio |
+|---|---|---|
+| no: `ROSSO,GIALLO,VERDE,BLU` | `StringJoiner` | `toString` di `Combinazione` |
+| sì: ogni riga finisce con l'a capo | `StringBuilder` | `situazione` di `Gioco` |
+```java
+public String toString() {                     // public: ridefinisce il toString di Object
+    StringJoiner sj = new StringJoiner(",");   // separatore SOLO fra gli elementi; import java.util.StringJoiner
+    for (int i = 0; i < this.dim(); i++) {
+        sj.add(this.pioli[i].toString());      // add vuole una String: il nome dell'enum
+    }
+    return sj.toString();                      // restituisce, non stampa
+}
+```
+
+**`equals` fra oggetti dello stesso tipo**
+```java
+public boolean equals(Combinazione c2) {       // overload (riceve Combinazione), come Frazione e come il docente
+    if (c2 == null) return false;               // con == si confronta con null senza chiamare niente su c2
+    if (this.dim() != c2.dim()) return false;   // prima la dimensione: il ciclo dopo non esce da c2
+    for (int i = 0; i < this.dim(); i++) {
+        if (this.pioli[i] != c2.pioli[i]) return false;  // != va bene sugli enum (una copia per valore); c2.pioli è
+    }                                                     // leggibile: private vale per la classe, non per l'oggetto
+    return true;                                // nessuna differenza trovata
+}
+```
+Stessa forma per «tutti uguali a X» (`vittoria()`: `false` al primo piolo non `NERO`, `true` dopo il ciclo).
+
+**Contatore = indice della prima cella libera** (`Gioco`, due array paralleli lunghi `maxTentativi`)
+```
+dopo 1 mossa:   tentativi = [ c | null | null | … ]    numTentativi = 1
+                prima libera = [numTentativi] = [1]     ultima piena = [numTentativi − 1] = [0]
+```
+```java
+public Status registraMossa(Combinazione tentativo, Risposta risposta) {
+    tentativi[numTentativi] = tentativo;       // nella prima cella libera…
+    risposte[numTentativi] = risposta;
+    numTentativi++;                             // …POI il contatore: se lo aumenti prima, la cella 0 resta vuota
+    if (risposta.vittoria()) {                  // prima la vittoria: all'ultimo tentativo vincente si vince
+        this.status = Status.VITTORIA;          // assegnare il CAMPO: stato() lo legge dopo
+    } else if (tentativiRimasti() == 0) {
+        this.status = Status.PERSO;
+    }                                           // altrimenti resta IN_CORSO
+    return this.status;
+}
+public Combinazione ultimoTentativo() {
+    if (numTentativi == 0) return null;          // 0 mosse: [-1] sarebbe ArrayIndexOutOfBounds
+    return tentativi[numTentativi - 1];          // ultima PIENA, non prima libera
+}
+```
+
+**Righe a colonne** (`situazione`, formato sl. 22: `n) combinazione<tab><tab>risposta<a capo>`)
+```java
+StringBuilder sb = new StringBuilder();
+for (int i = 0; i < numTentativi; i++) {         // una riga per mossa FATTA (non maxTentativi)
+    String comb = tentativi[i].toString();       // "ROSSO,GIALLO,VERDE,BLU" = 22 caratteri; "BLU,BLU,BLU,BLU" = 15
+    sb.append(i + 1).append(") ").append(comb);  // numero del giro (cella 0 → "1)"), non numTentativi + 1
+    sb.append(comb.length() < 20 ? "\t\t\t" : "\t\t");  // tab in più se corta: incolonna le risposte
+    sb.append(risposte[i].toString());
+    sb.append(System.lineSeparator());           // a capo anche dopo l'ultima riga: i test lo cercano
+}
+return sb.toString();
+```
+`toString` di `Gioco`: `"Situazione:" + lineSeparator()` + `situazione()` + `"Gioco: " + status` [sl. 23].
 
 ---
 
