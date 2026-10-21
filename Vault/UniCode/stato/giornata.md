@@ -1,39 +1,5 @@
-# Giornata 2026-10-20
+# Giornata 2026-10-21
 
 <!-- Claude appende qui, una riga per fatto: HH:MM · CODICE · fatto.
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
-11:51 · CALC · sessione aperta su 02 (lezione, Decisione 1: scomposizione 1032 MB della prova 2023-12-21).
-12:05 · CALC · 02: scomposizione di 1600 MB scritta 2^10+2^9+2^8 (=1792), terzo termine sbagliato e somma non verificata (pattern «far quadrare i numeri»).
-12:07 · CALC · 02: non capito perché 2^30 in binario è 1 seguito da 30 zeri (scambiato per «2»): ripreso dalla base 10 (10^3 = 1000).
-12:16 · CALC · 02: 2^30 = 40000000h ricavato da solo (padding 100→0100 ok); non capita la domanda «ultimo indirizzo del blocco» (fatica nota: muoversi nella memoria).
-12:31 · CALC · 02: 512 MB → esponente 9·3 = 27 (moltiplicato invece di sommare i 20 di M): 2^27 = 8000000h al posto di 2^29. Ricorre l'inciampo delle unità K/M.
-12:40 · CALC · 02: blocco 512 MB chiuso da solo (20000000h, 60000000h, 5FFFFFFFh). 64 MB scritto 2^6 (persa di nuovo la M, +20) → fine A0000000h−1, blocco da 1 GB.
-12:43 · CALC · 02: mappa EPROM della prova 2025-01-08 completata da Lorenzo (3 blocchi, inizio/taglia/fine), coincide con la soluzione ufficiale. Inciampi: unità M (2 volte), cifre perse (7 invece di 8).
-13:02 · CALC · 02: RAM 2 GB presa come 2000 MB (decimale) e scomposta; metodo dall'alto (FFFFFFFF − taglia + 1) trovato da solo, ma chiamato «fine» invece di «inizio».
-13:14 · CALC · 02: chip-select non capiti con la tabella abbreviata (solo prime cifre hex): chiesto tutto esplicito a 32 bit.
-13:17 · CALC · pausa di un'ora; /chiudi intermedio (stato, log, prontuario). Ripresa: firma EPROM 1 GB a 32 bit, poi EPROM 512 MB passo 1.
-13:18 · CALC · prontuario §0: inciampi del 20/10 (fine blocco, blocco in alto, k·2^n, 8 cifre, unità M, 2 GB = 2048 MB).
-13:18 · CALC · revisione errori: 1 nuovo (indirizzi a 7 cifre), 6 ricorrenze (trasv. 2, trasv. 6 ×2, unità, 2^n in binario, aritmetica hex).
-15:06 · CALC · ripresa dopo la pausa: firma EPROM 1 GB a 32 bit riletta, «mi torna». Avanti con EPROM 512 MB passo 1.
-15:09 · CALC · 02: firma EPROM 512 MB trovata da solo (BA31..BA29 = 010, 29 bit variabili = 2^29 verificato).
-15:15 · CALC · 02: proposto da Lorenzo l'ordine «prima tutte le firme, poi tutti i CS» (adottato). Firma EPROM 64 MB = 011000 (BA31..26) trovata da solo.
-15:18 · CALC · 02: firma RAM = BA31 = 1 trovata da solo. Tabella delle firme completa.
-15:37 · CALC · 02: mapping della porta capito dopo 3 spiegazioni fallite (dimezzamento, caselle): sbloccato dalla sua regola «prendi un indirizzo comodo nel buco e confronta la sua firma con le altre».
-15:43 · CALC · 02: CS_EPROM_512MB = BA31*·BA30·BA29* da solo, coincide con la soluzione ufficiale.
-15:48 · CALC · 02: CS_EPROM_64MB = BA31*·BA30·BA29·BA28* (fino a BA28, da solo) e repliche: 4 copie a 60/64/68/6C000000h trovate da solo.
-15:54 · CALC · 02: zona del CS 010 calcolata 40000000h–4FFFFFFFh (BA28 tenuto fisso a 0 per completare la cifra hex; è 5FFFFFFFh).
-15:55 · CALC · 02: corretto da solo (5FFFFFFFh) e osservazione sua: con 3 bit fissi la zona occupa più di una cifra hex.
-15:57 · CALC · 02: CS_RAM = BA31 e zona 80000000h–FFFFFFFFh da solo. Tutti i CS della prova 2025-01-08 ricavati da Lorenzo (punto 3–4 della lezione); manca Decisione 2 (banchi, BE).
-16:07 · CALC · 02: mutua esclusione dei 5 CS verificata (10 coppie; 512–64 su BA29, 64–porta su BA28). Prontuario §0: ordine dei CS, porta nel buco, zona del CS, repliche, mutua esclusione.
-16:09 · CALC · decisione di Lorenzo: Decisione 2 fino alle 17:30; il lab a freddo slitta (data da fissare al /chiudi).
-16:19 · CALC · 02: Decisione 2, 4 banchi da taglia/4 capito con l'esempio a 8 byte («più logico del previsto»); CS_INPUT/RESET_P spiegati; estratto della lezione corretto (mancavano i CS delle memorie con BEi).
-16:22 · CALC · 02: CS_EPROM_512MB_2 = BA31*·BA30·BA29*·BE2 da solo.
-16:23 · CALC · 02: banco/riga dall'esempio a 8 byte (BA1-BA0 banco, BA2 riga) e piedini RAM A28..A0 ← BA30..BA2, da solo.
-16:27 · CALC · 02: piedini dei banchi non capiti (64 MB: nessuna idea); Lorenzo stanco, si chiude. Chiede un artefatto che illustri la prova 2025-01-08 svolta, collegata alla soluzione intera.
-16:31 · CALC · artefatto «Prova DLX 8 gennaio 2025» pubblicato (10 passi ↔ soluzione intera); corretta la spiegazione di RESET_P (azzera il FFD P_PREMUTO, non le porte).
-16:32 · CALC · revisione errori (pomeriggio): 0 nuovi, 1 ricorrenza (trasv. 6: zona del CS 010 chiusa a 4FFFFFFFh).
-16:40 · CALC · giudizio di Lorenzo: chiari scomposizione, banchi, mappa, firme, CS, mutua esclusione; porta «più o meno» (non sa cosa fanno le porte); repliche faticose (chiede una formula); BE e legame banchi–CS a metà, CS_INPUT e RESET_P non chiari; piedini, bus dati e interfacciamento per nulla.
-16:40 · CALC · artefatto aggiornato: formula delle repliche, formazione di CS_INPUT, RESET_P pezzo per pezzo con pulsante dedicato.
-16:40 · PIANO · 21/10: FI2 LAB06 la mattina, CALC 02 il pomeriggio (piedini, bus dati, interfacciamento, Decisione 3); /lab CALC 02 → 22/10; lezione 03 → 23/10.
-16:42 · PIANO · 21/10 scritto nella Plancia: capelli 09:45–10:30, FI2 10:30–13:00 e 14:00–15:00, CALC 15:15–17:30; fi2-lab test verdi → 23/10, calc-lab02 → 22/10, lezione 03 → 23/10.
