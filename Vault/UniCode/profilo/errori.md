@@ -76,6 +76,18 @@ distinzione non è stata capita.
   (che ormai è il giorno dopo), mar 7:30→15:00 dà 9,75 invece di 3,25. Evidenza: trascrizione del
   2026-10-05 (risposte di Claude dopo «fatto tutto controlla» e «fatto, controlla»: «`da` non cambia mai», «hai tenuto il `plusDays(1)` di
   prima», «la riga dello stesso giorno ha usato `giorno`»); `confronto_LAB05.md` «Cosa porto via (parte 2)» 3.
+- [2026-10-21] FI2: LAB06 MasterMind, cinque coppie vicine fuse nella stessa sessione. `equals` detto
+  «confronta il COLORE di un piolo con quello di un altro» (il test confronta due `Combinazione`); `c`
+  descritta come «un array di oggetti PioloDiGioco» con le celle «vuoti come 0» (è un oggetto che
+  contiene un array, e `VUOTO` non è 0); `null` che Java trova nelle celle e `VUOTO` che il costruttore
+  ci mette («ma non avevi detto che ci va null e non VUOTO?», e nella v1 `this.pioli[i] = null`); in
+  `Gioco` campi e metodi non separati («registraMossa deve aggiornare tentativiRimasti e
+  tentativiEffettuati […] non so cosa contare come contatore»: sono metodi che leggono l'unico campo
+  `numTentativi`); in MasterMind «per calcolare i bianchi faccio numtotale di bianchi - neri» (il totale
+  conta neri e bianchi insieme), corretto alla segnalazione. Il ciclo di `situazione` fino a
+  `maxTentativi()` (capacità) invece che alle mosse fatte è la stessa fusione fisico/logico del LAB04b:
+  dettaglio sotto il pattern 6. Evidenza: trascrizione del 2026-10-21, 14:52, 15:04, 15:11, 16:43, 17:49;
+  `stato/giornata.md` 15:09, 16:30, 17:55.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
