@@ -14,3 +14,4 @@
 16:11 · FI2 · LAB06 Risposta scritta da solo con la procedura (tipi PioloRisposta, vittoria() a uscita anticipata come equals): RispostaTest 6/6 verdi.
 16:30 · FI2 · LAB06 Gioco: Lorenzo perso sul contatore (non vedeva che serve un campo); chiede di fissare TUTTI i campi prima del costruttore → nota per la procedura: passo 2 = elenco campi dal contratto, presentato come tabella metodo → dato che serve.
 16:32 · FI2 · procedura, regola di Lorenzo: ordine di lavoro = campi → costruttore → metodi che CAMBIANO lo stato (registraMossa) → metodi che lo leggono. Da scrivere nel prontuario §2 a /chiudi.
+16:54 · FI2 · LAB06 Gioco: registraMossa corretta (status assegnato al campo); ultimoTentativo/ultimaRisposta su [numTentativi] invece di [numTentativi-1] → di nuovo pattern 6 (prima cella libera vs ultima piena), caso 0 mosse non gestito.
