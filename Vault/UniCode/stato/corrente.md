@@ -1,10 +1,10 @@
 # Stato Corrente — Studio Attivo
 
-**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-20
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-21
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
   Sezione in fondo.
-- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · 🔶 `LAB06` MasterMind **in corso** dal 19/10 (scheda `corsi/FI2/lezioni/guida_lab_LAB06_mastermind.md`, startkit in `esame_FI2/da_importare/LAB06_MasterMind-191026`, **importato in Eclipse il 19/10**). Ripresa 21/10: costruire in chat la procedura d'esame (obiettivi del 5/10), poi leggere sl. 17–18 e `CombinazioneTest`, caso a mano, scrivere `Combinazione`.
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · 🔶 `LAB06` MasterMind **in corso** dal 19/10: il 21/10 `Combinazione`, `Risposta`, `Gioco` scritte da Lorenzo con la procedura d'esame (15 test verdi su 34, **guidato**); manca `MasterMind`. Ripresa 22/10: UML sl. 24 + semantica sl. 25–26, poi `occorrenze` (array indicizzato con `ordinal()`, lungo `PioloDiGioco.values().length`), neri, totale dei minimi, bianchi = totale − neri, `Risposta` con neri → bianchi → `VUOTO`; `sorteggiaCombinazione` `protected` (i test la ridefiniscono). Conti a mano delle sl. 31 e 33 già fatti e giusti.
 
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
