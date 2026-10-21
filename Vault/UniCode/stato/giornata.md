@@ -9,3 +9,4 @@
 15:33 · FI2 · LAB06 costruttore v1: parametro PioloDiGioco[] invece di int dim (probabile generazione di Eclipse), array mai creato, ciclo su campo this.dim mai assegnato (=0), celle a null invece di VUOTO, campi senza private. dim() giusto.
 15:41 · FI2 · LAB06 Combinazione: costruttore, dim(), getPiolo → testInizialmenteVuota verde. Failure di getPiolo (String rgb invece di PioloDiGioco) diagnosticata da Lorenzo da solo.
 15:44 · FI2 · LAB06 Combinazione: setPiolo scritto da solo, testOK1/testOK2 verdi; testEquals rosso (equals non ancora scritto: vale quello di Object).
+15:49 · FI2 · LAB06 Combinazione: equals(Combinazione) scritto da solo (dim prima, poi ciclo con !=, return false al primo diverso); CombinazioneTest 6/6 verdi.
