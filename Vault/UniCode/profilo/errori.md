@@ -242,6 +242,17 @@ indirizzi IP e sottoreti (`RETI`).
   l'osservazione che con 3 bit fissi la zona copre più di una cifra. Evidenza: trascrizione del
   2026-10-20 («da 40000000 a 4fffffff» → «1, quindi 0101 = 5, la zona finisce a 5FFFFFFF»);
   `stato/giornata.md` 15:54–15:55.
+- [2026-10-21] FI2: LAB06, estremi sbagliati in quattro punti della stessa sessione. Array del costruttore
+  di `Combinazione` «con dimensione dim-1» (taglia e ultimo indice fusi); `ultimoTentativo` e
+  `ultimaRisposta` su `tentativi[numTentativi]`, la prima cella libera invece dell'ultima piena, senza il
+  caso 0 mosse; `situazione` v1 di nuovo su `tentativi[tentativiEffettuati()]` (`null` → NPE), poi il
+  ciclo `while (tentativiEffettuati() < maxTentativi())` (estremo = capacità invece delle mosse fatte, e
+  niente che avanzi: ciclo infinito); infine il numero di riga `tentativiEffettuati() + 1` invece di
+  `i + 1`, rimasto anche dopo la versione corretta di Claude (con 2 mosse ogni riga riceve lo stesso
+  numero). Ogni volta il caso piccolo contato a mano l'ha fatto Claude. Evidenza: trascrizione del
+  2026-10-21, 15:09 («creare un array di oggetti PioloDiGioco con dimensione dim-1»), 16:51, 17:08,
+  17:12 («il ciclo cosi va bene?»), 17:23; commit `5515286`, `a2a9123`, `b41c5a0`, `79d81a5`;
+  `stato/giornata.md` 15:09, 16:54, 17:08, 17:23.
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
