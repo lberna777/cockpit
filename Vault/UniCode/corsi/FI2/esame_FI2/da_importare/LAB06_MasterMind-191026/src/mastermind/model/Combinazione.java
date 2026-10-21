@@ -28,6 +28,17 @@ public class Combinazione {
 		this.pioli[i] = colore;
 	}
 	
+	public boolean equals(Combinazione c2) {
+		if(this.dim() == c2.dim()) {
+			for(int i=0; i<this.dim(); i++) {
+				if (this.pioli[i] != c2.pioli[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
 	
 	
 	
