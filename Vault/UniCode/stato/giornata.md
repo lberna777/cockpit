@@ -3,7 +3,6 @@
 <!-- Claude appende qui, una riga per fatto: HH:MM · CODICE · fatto.
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
-<<<<<<< HEAD
 14:25 · FI2 · LAB06 ripreso: Lorenzo chiede il testo del problema prima della procedura (infarinatura sul dominio da sl. 2–6, 13).
 14:38 · FI2 · procedura d'esame avviata in chat su Combinazione (passo 1: testo e test → contratto).
 15:09 · FI2 · LAB06 passo 3: «array di dimensione dim-1» per il costruttore → taglia e ultimo indice fusi (pattern 6, confini). Prima: c presentata come «un array» invece che oggetto che contiene un array, equals «confronta i pioli» invece delle combinazioni (pattern 1).
@@ -15,5 +14,3 @@
 16:11 · FI2 · LAB06 Risposta scritta da solo con la procedura (tipi PioloRisposta, vittoria() a uscita anticipata come equals): RispostaTest 6/6 verdi.
 16:30 · FI2 · LAB06 Gioco: Lorenzo perso sul contatore (non vedeva che serve un campo); chiede di fissare TUTTI i campi prima del costruttore → nota per la procedura: passo 2 = elenco campi dal contratto, presentato come tabella metodo → dato che serve.
 16:32 · FI2 · procedura, regola di Lorenzo: ordine di lavoro = campi → costruttore → metodi che CAMBIANO lo stato (registraMossa) → metodi che lo leggono. Da scrivere nel prontuario §2 a /chiudi.
-=======
->>>>>>> origin/master
