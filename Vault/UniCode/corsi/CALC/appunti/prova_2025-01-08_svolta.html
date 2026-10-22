@@ -558,6 +558,108 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
   svg.addEventListener("click",function(e){var g=e.target.closest("[data-k]"); if(g) show(g)});
   svg.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){var g=e.target.closest("[data-k]"); if(g){e.preventDefault(); show(g)}}});
   show(svg.querySelector('[data-k="ram"][data-i="1"]'));
+
+  // Zoom: un blocco filo per filo
+  var Z=document.getElementById("zsvg"), zInfo=document.getElementById("zInfo"), zAddr=document.getElementById("zAddr");
+  var ZB={
+    ram:{nome:"RAM 2 GB",chip:"RAM",base:0x80000000,k:29,cs:[[31,1]],wr:true,taglia:"512 MB"},
+    e1g:{nome:"EPROM 1 GB",chip:"EPROM_1GB",base:0x00000000,k:28,cs:[[31,0],[30,0]],taglia:"256 MB"},
+    e512:{nome:"EPROM 512 MB",chip:"EPROM_512",base:0x40000000,k:27,cs:[[31,0],[30,1],[29,0]],taglia:"128 MB"},
+    e64:{nome:"EPROM 64 MB",chip:"EPROM_64",base:0x60000000,k:24,cs:[[31,0],[30,1],[29,1],[28,0]],taglia:"16 MB"}
+  };
+  var zCur="e64", P=23, X0=30;
+  var PINS=["MEMRD","MEMWR","BE3","BE2","BE1","BE0"]; for(var n=31;n>=0;n--) PINS.push("BA"+n);
+  function px(name){return X0+PINS.indexOf(name)*P+11}
+  function zel(tag,a,txt){return el(tag,a,Z,txt)}
+  function hex8(v){return (v>>>0).toString(16).toUpperCase().padStart(8,"0")}
+  function bitOf(v,n){return (v>>>n)&1}
+  function zdraw(){
+    var B=ZB[zCur], k=B.k, c=B.cs.length, a=parseInt(zAddr.value,16); if(isNaN(a)) a=B.base; a=a>>>0;
+    while(Z.firstChild) Z.removeChild(Z.firstChild);
+    var inBlk=B.cs.every(function(p){return bitOf(a,p[0])===p[1]});
+    var lowCS=32-c, firstPin=k+1, bank=a&3, row=(a>>>2)&((k>=31)?0x7fffffff:((1<<k)>>>0)-1);
+    // processore
+    zel("text",{x:20,y:12,"class":"h"},"DLX — i suoi piedini");
+    zel("rect",{x:20,y:18,width:885,height:60,rx:5,style:"fill:var(--panel);stroke:var(--ink)"});
+    PINS.forEach(function(p,i){
+      var x=X0+i*P+11, n=p.indexOf("BA")===0?+p.slice(2):null;
+      zel("text",{x:x+4,y:74,transform:"rotate(-90 "+(x+4)+" 74)",style:"font-size:10px"},p);
+      var v=null;
+      if(n!=null&&n>=2) v=bitOf(a,n);
+      if(p==="MEMRD") v=1; if(p==="MEMWR") v=0;
+      if(p.indexOf("BE")===0) v=(+p.slice(2)===bank)?1:0;
+      if(v!=null){zel("circle",{cx:x,cy:92,r:7,style:"stroke:var(--ink);fill:"+(v?"var(--hit)":"var(--panel)")}); zel("text",{x:x-3,y:96,style:"font-size:10px;fill:"+(v?"var(--hit-ink)":"var(--ink)")},String(v))}
+    });
+    var rowY=function(i){return 140+i*112};
+    // fili
+    PINS.forEach(function(p,i){
+      var x=X0+i*P+11, n=p.indexOf("BA")===0?+p.slice(2):null, y2, col="var(--muted)", w=1.4, dash="";
+      if(p==="MEMRD"){y2=rowY(3)+60}
+      else if(p==="MEMWR"){y2=B.wr?rowY(3)+78:112; if(!B.wr) dash="4 3"}
+      else if(p.indexOf("BE")===0){y2=rowY(+p.slice(2)); col="var(--ok)"}
+      else if(n>=lowCS){y2=rowY(3); col="var(--ok)"; w=2}
+      else if(n>=firstPin+1 && n<lowCS){y2=118}
+      else if(n>=2){y2=rowY(3)+12; col="var(--accent)"; w=1.6}
+      else {y2=112; dash="4 3"}
+      zel("path",{d:"M"+x+" 99 L"+x+" "+y2,style:"fill:none;stroke:"+col+";stroke-width:"+w+(dash?";stroke-dasharray:"+dash:"")});
+      if(n!=null&&n>=firstPin+1&&n<lowCS){zel("text",{x:x-5,y:131,style:"font-size:13px;fill:var(--warn)"},"✕")}
+    });
+    var cut=lowCS-1-(firstPin+1)+1;
+    if(cut>0) zel("text",{x:px("BA"+(lowCS-1))-10,y:148,"class":"s"},"non collegati → "+(1<<cut)+" repliche");
+    zel("text",{x:px("BA1")-12,y:126,"class":"s"},"→ BE");
+    if(!B.wr) zel("text",{x:px("MEMWR")-6,y:126,"class":"s"},"");
+    // righe: una per banco
+    for(var i=0;i<4;i++){
+      var y=rowY(i), on=inBlk&&bank===i;
+      // porta AND
+      var gx1=px("BE3")-10, gx2=px("BA"+lowCS)+10;
+      zel("rect",{x:gx1,y:y,width:gx2-gx1,height:34,rx:5,style:"fill:"+(on?"var(--hit)":"var(--firma)")+";stroke:var(--ok)"});
+      zel("text",{x:gx1+4,y:y+14,style:"font-size:10px;fill:"+(on?"var(--hit-ink)":"var(--firma-ink)")},"AND");
+      zel("text",{x:gx1+4,y:y+27,style:"font-size:10px;fill:"+(on?"var(--hit-ink)":"var(--firma-ink)")},"CS_"+i+(on?" = 1":""));
+      [px("BE"+i)].concat(B.cs.map(function(q){return px("BA"+q[0])})).forEach(function(x){zel("circle",{cx:x,cy:y,r:3,style:"fill:var(--ok)"})});
+      // chip
+      var cx1=px("BA"+firstPin)-12, cx2=px("BA2")+12, cy=y+8, ch=86;
+      zel("path",{d:"M"+gx2+" "+(y+22)+" L"+cx1+" "+(y+22),style:"fill:none;stroke:var(--ok);stroke-width:2"});
+      zel("path",{d:"M"+px("MEMRD")+" "+(y+60)+" L"+cx1+" "+(y+60),style:"fill:none;stroke:var(--muted);stroke-width:1.2"});
+      zel("circle",{cx:px("MEMRD"),cy:y+60,r:2.5,style:"fill:var(--muted)"});
+      if(B.wr){zel("path",{d:"M"+px("MEMWR")+" "+(y+78)+" L"+cx1+" "+(y+78),style:"fill:none;stroke:var(--muted);stroke-width:1.2"}); zel("circle",{cx:px("MEMWR"),cy:y+78,r:2.5,style:"fill:var(--muted)"})}
+      zel("rect",{x:cx1,y:cy,width:cx2-cx1,height:ch,rx:5,style:"fill:"+(on?"var(--hit)":"var(--accent-soft)")+";stroke:var(--ink);stroke-width:"+(on?2.5:1.2)});
+      var tf=on?"var(--hit-ink)":"var(--ink)";
+      zel("text",{x:cx1+4,y:y+26,style:"font-size:9px;fill:"+tf},"CS");
+      zel("text",{x:cx1+4,y:y+63,style:"font-size:9px;fill:"+tf},"RD");
+      if(B.wr) zel("text",{x:cx1+4,y:y+81,style:"font-size:9px;fill:"+tf},"WR");
+      for(var n=2;n<=firstPin;n++){var x=px("BA"+n); zel("circle",{cx:x,cy:cy,r:2.5,style:"fill:var(--accent)"}); zel("text",{x:x+3,y:cy+5,transform:"rotate(90 "+(x+3)+" "+(cy+5)+")",style:"font-size:8.5px;fill:"+tf},"A"+(n-2))}
+      zel("text",{x:cx1+30,y:y+62,"class":"h",style:"fill:"+tf},B.chip+"_"+i+" · "+B.taglia+" = 2^"+k+" righe (0 … "+(Math.pow(2,k)-1).toLocaleString("it-IT")+")");
+      zel("text",{x:cx1+30,y:y+78,style:"font-size:10.5px;fill:"+tf},on?("risponde: riga "+row.toLocaleString("it-IT")+" (in esadecimale "+row.toString(16).toUpperCase()+"h)"):"banco "+i+": byte con indirizzo ≡ "+i+" mod 4");
+      // dati
+      for(var d=0;d<8;d++){var yy=y+14+d*9; zel("path",{d:"M"+cx2+" "+yy+" L"+(cx2+50)+" "+yy,style:"fill:none;stroke:var(--warn);stroke-width:1.2"})}
+      zel("text",{x:cx2+2,y:y+11,style:"font-size:8.5px;fill:var(--warn)"},"D7…D0");
+      zel("rect",{x:cx2+50,y:y+8,width:60,height:76,rx:4,style:"fill:var(--var);stroke:var(--warn)"});
+      zel("text",{x:cx2+54,y:y+40,style:"font-size:10px"},"BD["+(8*i+7)+".."+(8*i)+"]");
+    }
+    // spiegazione
+    var bits=""; for(var n=31;n>=0;n--) bits+=bitOf(a,n);
+    function seg(h,l){return bits.slice(31-h,32-l)}
+    var html='<h3>'+hex8(a)+'h nel blocco '+B.nome+'</h3><dl>';
+    html+='<dt>Fili 31…'+lowCS+'</dt><dd><code>'+seg(31,lowCS)+'</code> → porte AND (CS): '+(inBlk?'<b class="ok">combaciano con il CS del blocco</b>':'<b style="color:var(--warn)">non combaciano: questo indirizzo non è di questo blocco, nessun chip si accende</b>')+'</dd>';
+    if(cut>0) html+='<dt>Fili '+(lowCS-1)+'…'+(firstPin+1)+'</dt><dd><code>'+seg(lowCS-1,firstPin+1)+'</code> → nessuna parte. Il chip non li vede: per lui '+hex8(a)+'h e l\'indirizzo con questi bit cambiati sono la stessa cella (repliche).</dd>';
+    html+='<dt>Fili '+firstPin+'…2</dt><dd><code>'+seg(firstPin,2)+'</code> → piedini <code>A'+(k-1)+'…A0</code>: è il numero della riga, '+row.toLocaleString("it-IT")+'. Il filo BA2 va su A0, BA3 su A1, … BA'+firstPin+' su A'+(k-1)+': <b>A['+(k-1)+'..0] ← BA['+firstPin+'..2]</b>.</dd>';
+    html+='<dt>Bit 1…0</dt><dd><code>'+seg(1,0)+'</code> = '+bank+' → banco '+bank+'. Il DLX non ha questi fili: accende BE'+bank+' (lettura di un byte).</dd>';
+    if(inBlk){var w=(a&~3)>>>0; html+='<dt>Stessa riga</dt><dd>La riga '+row.toLocaleString("it-IT")+' esiste in tutti e 4 i chip: '+[0,1,2,3].map(function(j){return '<code>'+hex8(w+j)+'h</code> (banco '+j+')'}).join(', ')+'. Insieme sono la word <code>'+hex8(w)+'h</code>, letta in un ciclo solo con BE3…BE0 = 1111.</dd>'}
+    html+='</dl>';
+    zInfo.innerHTML=html;
+    document.getElementById("zRep").hidden=(cut===0);
+    document.querySelectorAll("#zBlk button").forEach(function(b){b.style.background=b.dataset.b===zCur?"var(--accent)":"";b.style.color=b.dataset.b===zCur?"var(--panel)":""});
+  }
+  var zb=document.getElementById("zBlk");
+  zb.insertAdjacentHTML("beforeend",'<span>Blocco:</span>'+Object.keys(ZB).map(function(key){return '<button class="go" type="button" data-b="'+key+'">'+ZB[key].nome+'</button>'}).join(""));
+  zb.addEventListener("click",function(e){var b=e.target.closest("button[data-b]"); if(!b) return; zCur=b.dataset.b; zAddr.value=hex8(ZB[zCur].base+5); zdraw()});
+  document.getElementById("zoom").addEventListener("click",function(e){var b=e.target.closest("button[data-z]"); if(!b) return; var a=parseInt(zAddr.value,16)>>>0; var B=ZB[zCur];
+    if(b.dataset.z==="rep"){var c=B.cs.length, lo=B.k+2, hi=32-c; var span=Math.pow(2,hi)-Math.pow(2,lo); a=(a+Math.pow(2,lo))%Math.pow(2,32); if(((a>>>lo)&((1<<(hi-lo))-1))===0) a=(a-Math.pow(2,hi)+Math.pow(2,32))%Math.pow(2,32)}
+    else a=(a+(+b.dataset.z)+Math.pow(2,32))%Math.pow(2,32);
+    zAddr.value=hex8(a); zdraw()});
+  zAddr.addEventListener("input",zdraw);
+  zdraw();
   document.querySelectorAll(".ln").forEach(function(l){
     l.addEventListener("click",function(){
       clear(); l.classList.add("hit");
