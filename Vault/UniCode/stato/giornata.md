@@ -23,3 +23,6 @@
 17:21 · CALC · 02: piedini EPROM 512 MB A[26..0] ← BA[28..2] da solo con i tre passi (esponente, piedini, fili).
 17:23 · CALC · lezione 02 finita (Decisione 3 nella sostanza già fatta; RESET_P = comando → ·MEMWR, p. 47). Modulo 02 non ancora chiuso: /lab CALC 02 a freddo il 23/10, come in Plancia.
 17:28 · CALC · artefatto: aggiunte «Mappa della memoria» (linea degli indirizzi cliccabile → blocchi divisi in banchi e righe, bit sui piedini) e «Su carta» (foglio in 4 riquadri: dati, linea, tabella della risposta, controlli); prontuario §0b.
+17:37 · FI2 · giudizio di Lorenzo su LAB06: codice scritto quasi tutto da solo e bug trovato con le stampe, ma sintassi di classi e metodi non ancora a mente; si aspetta di seguire meglio il filo su un esercizio nuovo, con un po' di aiuto.
+17:37 · CALC · giudizio di Lorenzo: sicurezza 1/5 a fare da solo la tabella della risposta; la fatica è «dove mi sto muovendo, cosa cerco, cosa so» e la comprensione fisica di ciò che controlla (→ artefatto: dati/incognite, foglio su carta, mappa, filo per filo).
+17:37 · PIANO · 23/10 solo CALC: /lab CALC 02 a freddo sulla 2023-12-21 la mattina; altro solo se avanza tempo (decisione di Lorenzo).
