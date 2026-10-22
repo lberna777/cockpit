@@ -20,6 +20,7 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 | **plugin-creator** — plugin audio JUCE (area lavoro) | **Plugin · plugin-creator** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`. I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
 | **carguy** — autonoma | **CarGuy · carguy** | — |
 | **bibiciclo** — autonoma | senza gruppo | — |
+| **Fun** — progetti per divertimento, una repo autonoma per progetto (dal 2026-10-22) | **Fun · <repo>** | `barca-halloween` (gioco a penitenza per la festa di Halloween alla Barca: proiettore + telefoni, hub sul portatile) |
 | **home** — autonoma, **solo locale**, una per computer (la cartella home di ogni macchina, nessun remote) | **Debian · home**, **Mac · home**, **Windows · home** (chat locali del Code tab, non cloud) | — |
 
 - **home** è la repo solo locale di ogni computer: Debian dal 2026-10-21, Mac mini e portatile
@@ -31,6 +32,9 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
   `~/Sviluppo/...`) restano indipendenti.
 - **carguy** e **bibiciclo** sono progetti veri nati dai tentativi del sistema che ha preceduto
   Developing: restano autonomi, e Developing li usa come prova di competenza nel portfolio.
+- **Fun** non ha una repo padre: ogni progetto per divertimento ha la sua repo autonoma, con lo
+  stesso `.claude/` delle altre (hook, `/handoff`, subagenti) e nel `CLAUDE.md` il blocco «Famiglia»
+  che rimanda qui. Un progetto nuovo si aggiunge alla tupla `FUN` di `titolo_chat.py`.
 - **Due repo per il portfolio, non un doppione**: `lberna777.github.io` è il sito (GitHub Pages
   pubblica solo da una repo con quel nome), `lberna777` è il README mostrato sulla pagina del
   profilo GitHub (anche lui vuole una repo con il nome dell'utente). Si aggiornano insieme.
@@ -156,8 +160,8 @@ di scrivere, non ricopiarlo qui.
 ## Modelli: chi pensa e chi esegue (advisor pattern)
 
 Deciso da Lorenzo il 2026-10-20. Copia identica nei `CLAUDE.md` di cockpit, Developing,
-plugin-creator, carguy e bibiciclo; l'originale è in cockpit: se lo cambi, ricopialo nelle altre.
-I due subagenti stanno in `.claude/agents/`, identici in tutte e cinque le repo.
+plugin-creator, carguy, bibiciclo e barca-halloween; l'originale è in cockpit: se lo cambi,
+ricopialo nelle altre. I due subagenti stanno in `.claude/agents/`, identici in tutte e sei le repo.
 
 | Livello | Chi | Che cosa fa |
 | --- | --- | --- |
