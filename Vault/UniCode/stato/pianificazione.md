@@ -7,10 +7,10 @@
 
 settimana: 2026-10-19
 mese: 2026-10
-giorno: 2026-10-22
+giorno: 2026-10-23
 
 <!--
 settimana: il lunedì della settimana pianificata (AAAA-MM-GG)
 mese:      il mese pianificato (AAAA-MM)
-giorno:    l'ultimo giorno per cui sono state fissate le attività di studio (AAAA-MM-GG)
+giorno: 2026-10-23
 -->
