@@ -21,10 +21,17 @@ from pathlib import Path
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 
 HOME = Path.home()
-VAULT = HOME / "cockpit" / "Vault"
+# Il Vault è quello della copia di cockpit che contiene lo script (così da un
+# worktree si scrive nel worktree, da ~/cockpit nel Vault vero).
+COCKPIT = Path(__file__).resolve().parent.parent
+VAULT = COCKPIT / "Vault"
 RECAP_DIR = VAULT / "recap"
 ATTIVITA = VAULT / "attivita_oggi.md"
-IDEE = HOME / "Idee"
+# Struttura dal riordino del 2026-09-01: il codice sta in ~/Sviluppo/<categoria>/<repo>,
+# lo studio nel Vault di cockpit. Repo singole fuori da ~/Sviluppo elencate a parte.
+REPO_DIRS = [COCKPIT, HOME / "Developing", HOME / "lberna777", HOME / "lberna777.github.io"]
+REPO_BASES = [HOME / "Sviluppo" / c for c in ("app", "audio", "giochi", "tools", "appunti")]
+AUTOSAVE_RE = re.compile(r"salvataggio automatico")
 OLLAMA_MODEL = "llama3.2:3b"
 
 
@@ -36,21 +43,45 @@ def run(cmd: list[str], cwd: Path | None = None, timeout: int = 30) -> str:
         return ""
 
 
-def git_repos(base: Path) -> list[Path]:
-    return [p for p in base.iterdir() if p.is_dir() and (p / ".git").exists()]
+def warn(msg: str) -> None:
+    print(f"recap_generator: {msg}", file=sys.stderr)
+
+
+def git_repos() -> list[Path]:
+    """Repo da esplorare; una cartella mancante si salta con un avviso."""
+    repos: list[Path] = []
+    for d in REPO_DIRS:
+        if (d / ".git").exists():
+            repos.append(d)
+        else:
+            warn(f"salto {d}: non esiste o non è una repo git")
+    for base in REPO_BASES:
+        if not base.is_dir():
+            warn(f"salto {base}: cartella mancante")
+            continue
+        repos.extend(sorted(p for p in base.iterdir()
+                            if p.is_dir() and (p / ".git").exists()))
+    return repos
 
 
 def collect_git(day: date) -> list[str]:
-    """Commit del giorno su tutti i repo in ~/Sviluppo."""
+    """Commit del giorno su cockpit e sulle repo in ~/Sviluppo e dintorni."""
     since = day.isoformat()
     until = (day + timedelta(days=1)).isoformat()
     out: list[str] = []
-    for repo in git_repos(IDEE):
+    for repo in git_repos():
         log = run(["git", "log", f"--since={since} 00:00",
                    f"--until={until} 00:00", "--pretty=format:%h %s"], cwd=repo)
-        if log:
-            out.append(f"**{repo.name}**:")
-            out.extend(f"  - {line}" for line in log.splitlines())
+        if not log:
+            continue
+        lines = log.splitlines()
+        # I salvataggi automatici del cloud sono decine al giorno: uno solo riassuntivo.
+        auto = [l for l in lines if AUTOSAVE_RE.search(l)]
+        name = "cockpit" if repo == COCKPIT else repo.name
+        out.append(f"**{name}**:")
+        out.extend(f"  - {l}" for l in lines if not AUTOSAVE_RE.search(l))
+        if auto:
+            out.append(f"  - ({len(auto)} salvataggi automatici dal cloud)")
     return out
 
 
@@ -93,7 +124,7 @@ def ollama_summary(facts: str) -> str:
         "da questi fatti grezzi. Non inventare nulla, attieniti ai fatti.\n\n" + facts
     )
     try:
-        r = subprocess.run(["ollama", "run", OLLAMA_MODEL], input=prompt,
+        r = subprocess.run(["ollama", "run", "--nowordwrap", OLLAMA_MODEL], input=prompt,
                            capture_output=True, text=True, timeout=120)
         s = ANSI_RE.sub("", r.stdout).strip()
         return s if s else "_(sintesi non disponibile)_"
