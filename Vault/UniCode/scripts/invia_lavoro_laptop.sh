@@ -6,7 +6,8 @@
 # ricordarsi di fare commit: ci pensa questo script.
 #
 # Tocca solo corsi/*/esame_*/ (il codice svolto): niente stato/, log/ né altro, che restano al
-# consolidamento serale (giornata_laptop.sh). Se il pull non è un fast-forward, non fa nulla.
+# consolidamento serale (giornata_laptop.sh). Se il pull non riesce (conflitto, rete, un file
+# modificato in locale che il pull dovrebbe aggiornare), non invia niente e lo scrive nel journal.
 set -u
 UNICODE="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(git -C "$UNICODE" rev-parse --show-toplevel)"
@@ -20,8 +21,8 @@ CARTELLE=("$REL"/corsi/*/esame_*)
 # niente da inviare: esce senza toccare la rete
 [ -z "$(git status --porcelain -- "${CARTELLE[@]}")" ] && exit 0
 
-# merge, non solo fast-forward: un commit locale non inviato (es. il recap del laptop) divide i
-# rami, e con --ff-only lo script si fermava in silenzio (22/10). In conflitto: annulla ed esce.
+# merge, non solo fast-forward: se il laptop ha un commit locale non inviato i rami si dividono,
+# e con --ff-only lo script si fermava. In conflitto: annulla ed esce.
 if ! git pull --no-rebase --no-edit --quiet origin master; then
   git merge --abort 2>/dev/null
   echo "invia_lavoro: pull non riuscito (conflitto o rete), niente inviato" >&2
