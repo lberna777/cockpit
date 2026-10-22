@@ -16,3 +16,4 @@
 15:58 · PIANO · Lorenzo passa alla chat CALC per la lezione 02 (dal passo 8); /chiudi unico a fine giornata per FI2 e CALC.
 16:01 · CALC · sessione aperta su 02 (passo 8 dell'artefatto: piedini, bus dati, interfacciamento; poi Decisione 3).
 16:17 · CALC · 02: piedini — «persissimo», non inquadra a quale parte della soluzione serve; ripreso dallo scopo pratico (schema di interfacciamento p. 9).
+16:27 · CALC · 02: chiesto da Lorenzo uno schema fisico del sistema; aggiunto all'artefatto «Prova DLX 8 gennaio 2025» (chip, bus, decodifica, porte → dato del testo e riga della soluzione).
