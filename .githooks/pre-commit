@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Rifiuta un commit che aggiunge marcatori di conflitto (righe che iniziano con <<<<<<< o >>>>>>>).
+#
+# Perché esiste (2026-10-22): il 19, il 20 e il 21/10 l'autosave del cloud ha committato su master
+# merge lasciati a metà, con i marcatori dentro stato/giornata.md e log/2026-10.md.
+# Attivo con `git config core.hooksPath .githooks`: nel cloud lo imposta cloud_bootstrap.sh, sul
+# laptop va dato una volta a mano. Si salta, se serve davvero, con `git commit --no-verify`.
+# Escluso .obsidian/: il plugin obsidian-git contiene marcatori legittimi nel suo codice.
+
+TROVATI=""
+while IFS= read -r f; do
+  case "$f" in */.obsidian/*) continue ;; esac
+  git diff --cached -U0 --no-color -- "$f" | grep -qE '^\+(<<<<<<<|>>>>>>>)( |$)' && TROVATI="$TROVATI  $f
+"
+done < <(git diff --cached --name-only --diff-filter=AM)
+[ -z "$TROVATI" ] && exit 0
+echo "pre-commit: commit rifiutato, marcatori di conflitto in:" >&2
+printf '%s' "$TROVATI" >&2
+echo "Risolvi il conflitto (o togli i marcatori) e rifai il commit." >&2
+exit 1

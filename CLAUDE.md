@@ -90,9 +90,14 @@ Riordinata il 2026-09-01, rivista il 2026-09-14.
 >   `claude/*` di studio più recenti non ancora in master, consolidamento arretrato);
 > - **fine sessione**: `scripts/unicode_session_end.sh` scrive la traccia in `log/AAAA-MM.md`
 >   solo se la sessione ha toccato lo studio — le sessioni di codice non contano come giornate;
+>   sul laptop la committa subito (senza push, lo fanno i timer), perché un log sporco bloccava
+>   il `git pull` dei timer (2026-10-22). Il log del mese si unisce con `merge=union`
+>   (`.gitattributes`): due lati che accodano righe non vanno in conflitto;
 > - **cloud**: `scripts/cloud_autosave.sh` committa e invia il Vault dopo ogni modifica (`PostToolUse`) e a fine risposta (`Stop`),
 >   sul ramo di sessione **e su master** (solo fast-forward; se master è andato avanti lo
->   unisce prima, in conflitto si ferma e avvisa): ciò che Claude crea nel cloud arriva sul laptop
+>   unisce prima, in conflitto si ferma e avvisa; un'esecuzione alla volta, e con un merge in
+>   conflitto aperto o marcatori `<<<<<<<` nei file non committa niente e avvisa, dal
+>   2026-10-22): ciò che Claude crea nel cloud arriva sul laptop
 >   e in Obsidian con un `git pull` (richiesta di Lorenzo del 2026-10-01). Rischio da ricordare:
 >   un consolidamento serale del laptop non ancora inviato diverge su `log/giornate.md`,
 >   `stato/tracker.md`, `log/giornate_dettaglio/` — sul laptop, `git pull` prima di studiare;
@@ -101,7 +106,10 @@ Riordinata il 2026-09-01, rivista il 2026-09-14.
 > - **comandi**: `/lab`, `/chiudi`, `/lezione`… stanno in `.claude/commands` come rimandi agli
 >   originali di `Vault/UniCode/.claude/commands`; dopo aver aggiunto o rinominato un comando
 >   di UniCode, `python3 scripts/unicode_commands.py`;
-> - **fuso**: `TZ=Europe/Rome` in `settings.json`, perché il container cloud è in UTC.
+> - **fuso**: `TZ=Europe/Rome` in `settings.json`, perché il container cloud è in UTC;
+> - **pre-commit** `.githooks/pre-commit`: rifiuta i commit che aggiungono marcatori di conflitto.
+>   Attivo con `git config core.hooksPath .githooks` (nel cloud lo fa il bootstrap, sul laptop
+>   una volta a mano); `scripts/salute_hook.py` controlla master e l'attivazione.
 >
 > Nei comandi e negli appunti il percorso resta `~/UniCode` (nel cloud è un symlink creato
 > all'avvio). Il timer serale di consolidamento esiste solo sul laptop; nel cloud lo sostituisce

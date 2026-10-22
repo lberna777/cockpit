@@ -83,6 +83,24 @@ if [ -f "$GIORNATA" ] && [ "$RIGHE_OGGI" -eq 0 ]; then
   printf '%s · sessione aperta, nessun evento di merito registrato\n' "$(date +%H:%M)" >>"$GIORNATA"
 fi
 
+# --- commit della traccia, solo sul laptop -----------------------------------
+# Perché (2026-10-22): la traccia restava modificata in locale e il `git pull` dei timer
+# (invia_lavoro_laptop.sh, giornata_laptop.sh) si rifiutava di aggiornare log/AAAA-MM.md: dal
+# 21 al 22/10 il codice del LAB06 non è arrivato su GitHub. Si committano solo i due file scritti
+# qui, senza push (lo fanno i timer). Nel cloud ci pensa cloud_autosave.sh. Durante un merge
+# o con marcatori di conflitto non si committa niente.
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ] && git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+  GITDIR="$(git -C "$ROOT" rev-parse --absolute-git-dir)"
+  TRACCIA=("$LOGFILE")
+  [ -f "$GIORNATA" ] && TRACCIA+=("$GIORNATA")
+  if [ ! -f "$GITDIR/MERGE_HEAD" ] && \
+     ! grep -qE '^(<<<<<<<|>>>>>>>)( |$)' "${TRACCIA[@]}" 2>/dev/null; then
+    git -C "$ROOT" add -- "${TRACCIA[@]}" >/dev/null 2>&1 && \
+    git -C "$ROOT" commit -q -m "UniCode (laptop): traccia di sessione $STAMP $(date +%H:%M)" \
+      -- "${TRACCIA[@]}" >/dev/null 2>&1 || true
+  fi
+fi
+
 # --- briefing aggiornato per la prossima sessione ---------------------------
 [ -f "$ROOT/scripts/briefing.py" ] && \
   UNICODE_ROOT="$ROOT" python3 "$ROOT/scripts/briefing.py" >/dev/null 2>&1 || true
