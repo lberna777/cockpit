@@ -168,6 +168,15 @@ la stessa radice — *da dove nasce* la cosa:
   letta (sostanza già fatta: semplificata e repliche). Prodotto l'artefatto
   «Prova DLX 8 gennaio 2025» (https://claude.ai/artifact/5iHgc8vnP9dtjop3fQ8j3w, sorgente
   `corsi/CALC/appunti/prova_2025-01-08_svolta.html`): i 10 passi collegati alla soluzione intera.
+  **22/10 — lezione finita.** Piedini e bus dati non passavano a parole né con lo schema a
+  blocchi («persissimo», «voglio vedere i singoli piedini e fili»); capiti con la vista «filo per
+  filo» dell'artefatto: EPROM 64 MB `A[23..0] ← BA[25..2]` letto dal disegno, 512 MB
+  `A[26..0] ← BA[28..2]` da solo con i tre passi (esponente, piedini, fili); «ogni byte avanti
+  cambio banco» detto da lui. Decisione 3 nella sostanza già fatta; `RESET_P` = comando → `·MEMWR`
+  (dispensa p. 47). L'artefatto ora ha anche: dati/incognite, foglio «su carta» in 4 riquadri
+  (anche nel prontuario §0b), mappa della memoria cliccabile, vista filo per filo con indirizzo di
+  prova. **Giudizio di Lorenzo**: sicurezza **1/5** a fare da solo la tabella della risposta; la
+  fatica è sapere «dove mi sto muovendo, cosa cerco, cosa so» e capire fisicamente cosa controlla.
 - ✅ **02p** «Fondamenta per il mapping» — chiusa il 2026-10-09. — lezione creata l'8/10 su richiesta di Lorenzo, perché
   la 02 dava per scontati quadro fisico, notazione e binario/esadecimale
   (`corsi/CALC/lezioni/lezione_02p_fondamenta.md`). Studiate le sezioni 1–5 con domande in chat:
