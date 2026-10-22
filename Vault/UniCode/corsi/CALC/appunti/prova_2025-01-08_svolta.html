@@ -118,8 +118,15 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
 <header class="top">
   <span class="eyebrow">CALC · Calcolatori Elettronici T · lezione 02 · prova dell'8 gennaio 2025</span>
   <h1>Prova DLX dell'8 gennaio 2025, svolta passo per passo</h1>
-  <p class="lede">A sinistra lo svolgimento, nell'ordine in cui lo fai all'esame. A destra la soluzione ufficiale intera. Premi un pulsante <b>→</b> in un passo per accendere le righe della soluzione che quel passo produce; premi una riga della soluzione per tornare al passo che la spiega.</p>
+  <p class="lede">In alto il sistema com'è fatto fisicamente: premi un pezzo per vedere a quale dato del testo e a quale riga della risposta corrisponde. Sotto, a sinistra lo svolgimento nell'ordine in cui lo fai all'esame e a destra la soluzione ufficiale intera: un pulsante <b>→</b> accende le righe della soluzione, una riga della soluzione riporta al suo passo.</p>
 </header>
+
+<section class="map" id="mappa" aria-label="Il sistema fisico">
+  <h2>Il sistema fisico</h2>
+  <p class="hint">Ogni rettangolo è un chip vero sulla scheda; le linee sono fili. Colonne = banchi (uno per corsia del bus dati), righe = blocchi di memoria e porte. Tratteggiato = moduli 04–05.</p>
+  <div class="mapsvg"><svg id="sys" viewBox="0 0 1000 690" role="img" aria-label="Schema del sistema DLX: processore, bus, decodifica, banchi di memoria e porte"></svg></div>
+  <div class="info" id="mapInfo" aria-live="polite"></div>
+</section>
 
 <div class="grid">
 <main id="steps">
