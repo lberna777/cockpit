@@ -20,7 +20,13 @@ CARTELLE=("$REL"/corsi/*/esame_*)
 # niente da inviare: esce senza toccare la rete
 [ -z "$(git status --porcelain -- "${CARTELLE[@]}")" ] && exit 0
 
-git pull --ff-only --quiet origin master || { echo "invia_lavoro: pull non riuscito" >&2; exit 0; }
+# merge, non solo fast-forward: un commit locale non inviato (es. il recap del laptop) divide i
+# rami, e con --ff-only lo script si fermava in silenzio (22/10). In conflitto: annulla ed esce.
+if ! git pull --no-rebase --no-edit --quiet origin master; then
+  git merge --abort 2>/dev/null
+  echo "invia_lavoro: pull non riuscito (conflitto o rete), niente inviato" >&2
+  exit 0
+fi
 git add -A -- "${CARTELLE[@]}"
 git diff --cached --quiet && exit 0
 git commit --quiet -m "UniCode (laptop): lavoro in corso $(date '+%F %H:%M')"
