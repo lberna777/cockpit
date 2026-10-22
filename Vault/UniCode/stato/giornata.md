@@ -14,3 +14,5 @@
 15:51 · SISTEMA · invio automatico dal laptop fermo da ieri sera: pull bloccato da log/2026-10.md modificato in locale (traccia di fine sessione del laptop). Sbloccato a mano; script resi tolleranti ai rami divisi; riga di log del laptop riportata qui. Causa da sistemare nella chat Infrastruttura.
 15:53 · FI2 · handoff scritto: plans/handoffs/HANDOFF_FI2-LAB06_2026-10-22.md (sessione chiusa al 50% del contesto).
 15:58 · PIANO · Lorenzo passa alla chat CALC per la lezione 02 (dal passo 8); /chiudi unico a fine giornata per FI2 e CALC.
+16:01 · CALC · sessione aperta su 02 (passo 8 dell'artefatto: piedini, bus dati, interfacciamento; poi Decisione 3).
+16:02 · SISTEMA · automatismi corretti (chat Infrastruttura): autosave cloud non committa più merge in conflitto né marcatori, pre-commit contro i marcatori, traccia di fine sessione del laptop committata, log del mese con merge=union.
