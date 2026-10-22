@@ -81,6 +81,36 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
 .ln.c{color:var(--muted)}
 .ln.c.hit{color:var(--hit-ink)}
 .hint{font-size:13px;color:var(--muted);margin:0}
+/* sistema fisico */
+.map{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:16px;margin-bottom:24px;display:grid;gap:12px;min-width:0}
+.map h2{font-family:var(--f-display);font-weight:800;font-size:24px;margin:0}
+.map .mapsvg{overflow-x:auto;max-width:100%}
+.map svg{display:block;min-width:900px;width:100%;height:auto}
+.map svg text{fill:var(--ink);font-family:var(--f-mono);font-size:11px}
+.map svg text.s{fill:var(--muted);font-size:10px}
+.map svg text.h{font-family:var(--f-display);font-size:13px;font-weight:600}
+.map svg .wire{stroke:var(--muted);stroke-width:1.5;fill:none}
+.map svg .wire.addr{stroke:var(--accent)}
+.map svg .wire.data{stroke:var(--warn);stroke-width:5}
+.map svg .wire.lane{stroke:var(--warn);stroke-width:2;opacity:.55}
+.map svg .wire.cs{stroke:var(--ok);stroke-width:2}
+.map svg .wire.dash{stroke-dasharray:5 4}
+.map svg [data-k]{cursor:pointer}
+.map svg [data-k] rect{fill:var(--panel);stroke:var(--ink);stroke-width:1.3}
+.map svg [data-k].chip rect{fill:var(--accent-soft)}
+.map svg [data-k].gate rect{fill:var(--firma);stroke:var(--ok)}
+.map svg [data-k].later rect{stroke-dasharray:5 4;fill:var(--bg)}
+.map svg [data-k]:hover rect,.map svg [data-k]:focus-visible rect{stroke:var(--accent);stroke-width:2.5;outline:none}
+.map svg [data-k].sel rect{fill:var(--hit);stroke:var(--hit-ink);stroke-width:2.5}
+.map svg [data-k].sel text{fill:var(--hit-ink)}
+.map svg [data-k].sel .wire{stroke:var(--hit-ink)}
+.map svg [data-k]:focus{outline:none}
+.info{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;display:grid;gap:8px;background:var(--bg)}
+.info h3{font-family:var(--f-display);font-size:18px;margin:0}
+.info dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 14px;margin:0}
+.info dt{font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding-top:2px}
+.info dd{margin:0;max-width:80ch}
+@media (max-width:560px){.info dl{grid-template-columns:minmax(0,1fr)}.info dt{padding-top:6px}}
 @media (prefers-reduced-motion:no-preference){.ln,section.step{transition:background .2s, outline-color .2s}}
 </style>
 
