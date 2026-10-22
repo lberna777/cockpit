@@ -9,11 +9,30 @@
 #      se il pull non riesce (modifiche locali in conflitto, rete), NON consolida: lo farà il
 #      recupero alla prossima sessione, che giornata.py gestisce senza perdite;
 #   2. giornata.py;
-#   3. commit dei soli file del consolidamento e push su master.
+#   3. recap del giorno e indice del Vault (scripts/ di cockpit);
+#   4. commit dei soli file del consolidamento, dei recap e dell'indice, e push su master.
 set -u
 UNICODE="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(git -C "$UNICODE" rev-parse --show-toplevel)"
 cd "$REPO" || exit 1
+REL="${UNICODE#"$REPO"/}"
+
+# Traccia di fine sessione rimasta non committata (2026-10-22): bloccava il pull («Le tue modifiche
+# locali… sarebbero sovrascritte»). Se log/AAAA-MM.md o stato/giornata.md sono modificati, si
+# committano prima del pull; durante un merge o con marcatori di conflitto no.
+salva_traccia() {
+  local f traccia=()
+  for f in "$REL/log/$(date +%Y-%m).md" "$REL/stato/giornata.md"; do
+    [ -n "$(git status --porcelain -- "$f")" ] && traccia+=("$f")
+  done
+  [ ${#traccia[@]} -eq 0 ] && return 0
+  [ -f "$(git rev-parse --absolute-git-dir)/MERGE_HEAD" ] && return 0
+  grep -qE '^(<<<<<<<|>>>>>>>)( |$)' "${traccia[@]}" && {
+    echo "$1: marcatori di conflitto in ${traccia[*]}, traccia non committata" >&2; return 0; }
+  git add -- "${traccia[@]}" && \
+    git commit --quiet -m "UniCode (laptop): traccia di sessione $(date '+%F %H:%M')" -- "${traccia[@]}"
+}
+salva_traccia giornata_laptop
 
 if ! git pull --no-rebase --no-edit --quiet origin master; then
   git merge --abort 2>/dev/null
@@ -23,8 +42,13 @@ fi
 
 UNICODE_ROOT="$UNICODE" python3 "$UNICODE/scripts/giornata.py" "$@"
 
-REL="${UNICODE#"$REPO"/}"
-git add -- "$REL/stato" "$REL/log"
+# Memoria automatica di cockpit (2026-10-22): recap di oggi e dei giorni mancati, indice del
+# Vault. Prima i recap nascevano all'avvio di Claude e restavano non tracciati.
+python3 "$REPO/scripts/recap_generator.py" >/dev/null 2>&1 || echo "giornata_laptop: recap di oggi non riuscito" >&2
+python3 "$REPO/scripts/recap_generator.py" --backfill 7 >/dev/null 2>&1 || true
+python3 "$REPO/scripts/build_index.py" >/dev/null 2>&1 || echo "giornata_laptop: indice non rigenerato" >&2
+
+git add -- "$REL/stato" "$REL/log" "$REPO/Vault/recap" "$REPO/Vault/index.md"
 if ! git diff --cached --quiet; then
   git commit --quiet -m "UniCode (laptop): consolidamento serale $(date +%F)"
   git push --quiet origin HEAD:master \

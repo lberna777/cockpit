@@ -135,6 +135,23 @@ def controlla_master():
     return non_inviato
 
 
+def controlla_marcatori():
+    # 2026-10-22: il 19, 20 e 21/10 l'autosave ha portato su master marcatori di conflitto.
+    # .obsidian/ escluso: il plugin obsidian-git li contiene nel suo codice.
+    codice, righe = git("grep", "-n", "-E", "^(<<<<<<<|>>>>>>>)( |$)", "origin/master", "--",
+                        ".", ":(exclude)*/.obsidian/*")
+    if codice not in (0, 1):
+        esito("Marcatori di conflitto su master", "avviso", "git grep non riuscito")
+        return
+    file = sorted({r.split(":")[1] for r in righe.splitlines() if r})
+    esito("Marcatori di conflitto su master", "errore" if file else "ok",
+          ("in " + ", ".join(file)) if file else "nessuno")
+    # il pre-commit che li rifiuta va attivato in ogni clone (nel cloud lo fa cloud_bootstrap.sh)
+    _, percorso = git("config", "--get", "core.hooksPath")
+    esito("Pre-commit contro i marcatori", "ok" if percorso == ".githooks" else "avviso",
+          "attivo" if percorso == ".githooks" else "core.hooksPath non è .githooks in questo clone")
+
+
 def controlla_consolidamento():
     percorso = os.path.join(RADICE, "Vault", "UniCode", "log", "giornate.md")
     try:
@@ -159,6 +176,7 @@ def main():
     prova_hook("Hook del passaggio di consegne", ".claude/hooks/context_handoff.py",
                {"session_id": "prova-salute", "transcript_path": "", "stop_hook_active": False})
     non_inviato = controlla_master()
+    controlla_marcatori()
     controlla_consolidamento()
     print(json.dumps({"data": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
                       "controlli": controlli, "non_inviato": non_inviato}, ensure_ascii=False, indent=1))

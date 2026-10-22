@@ -35,6 +35,8 @@ avviso() { printf -- '- %s\n' "$1" >>"$AVVISI"; }
 cd "$COCKPIT" || exit 0
 git config user.name >/dev/null 2>&1 || git config user.name "Claude"
 git config user.email >/dev/null 2>&1 || git config user.email "noreply@anthropic.com"
+# pre-commit che rifiuta i marcatori di conflitto (2026-10-22): i hook di git non viaggiano col clone.
+git config core.hooksPath .githooks
 
 if timeout 15 git fetch -q origin 2>/dev/null; then
   HEAD_TS="$(git log -1 --format=%ct HEAD)"

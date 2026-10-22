@@ -1,0 +1,3 @@
+# Il log mensile delle sessioni è solo in aggiunta: due lati che accodano righe si uniscono
+# tenendole tutte, invece di andare in conflitto (laptop e cloud scrivono la stessa coda).
+Vault/UniCode/log/20[0-9][0-9]-[0-9][0-9].md merge=union

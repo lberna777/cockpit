@@ -143,6 +143,9 @@ di ogni altra cosa, si propone `/pianifica` a Lorenzo.
 
 `scripts/session_end.sh` registra in `log/AAAA-MM.md` la traccia meccanica della sessione — durata,
 file toccati, moduli citati — e rigenera `stato/briefing.md`. Non dipende da Lorenzo né da Claude.
+`[2026-10-22]` Sul laptop committa anche la traccia (log del mese e `stato/giornata.md`): lasciata
+modificata, bloccava il `git pull` di `invia_lavoro_laptop.sh` e `giornata_laptop.sh`, che ora la
+committano a loro volta prima del pull se la trovano sporca.
 
 ### 5.3 A fine giornata — cron serale, automatico
 
