@@ -11,8 +11,9 @@ Ora contiene solo:
     consolidamenti, al massimo MAX_COMMIT per repo.
 
 Idempotente: un giorno già scritto non si riscrive (salvo --force), un giorno senza fatti non
-produce file. Lo lancia il timer serale del laptop (giornata_laptop.sh), che poi lo committa:
-i recap nascono dalle repo del laptop, nel cloud resterebbero a metà.
+produce file. Lo lanciano il timer serale del laptop (giornata_laptop.sh, alle 23) e l'attività
+programmata «Memoria notturna» nel cloud (recap_cloud.sh, alle 23:50, anche a laptop spento):
+entrambi fanno pull prima e committano dopo, e chi arriva secondo trova il file e lo salta.
 
 Uso:
   recap_generator.py               # recap di OGGI
@@ -21,6 +22,7 @@ Uso:
   recap_generator.py --force ...   # riscrive anche se il file esiste
 """
 from __future__ import annotations
+import os
 import re
 import subprocess
 import sys
@@ -57,7 +59,14 @@ def run(cmd: list[str], cwd: Path | None = None, timeout: int = 30) -> str:
 
 
 def git_repos() -> list[Path]:
-    """Repo da esplorare; quelle che su questa macchina non ci sono si saltano in silenzio."""
+    """Repo da esplorare; quelle che su questa macchina non ci sono si saltano in silenzio.
+
+    RECAP_REPOS (percorsi separati da «:») sostituisce le cartelle del laptop: lo usa
+    recap_cloud.sh, che le clona da GitHub nella sessione notturna. cockpit c'è sempre."""
+    if os.environ.get("RECAP_REPOS"):
+        extra = [Path(d) for d in os.environ["RECAP_REPOS"].split(os.pathsep) if d]
+        return [COCKPIT] + [d for d in extra if d.resolve() != COCKPIT
+                            and ((d / "HEAD").exists() or (d / ".git").exists())]
     repos = [d for d in REPO_DIRS if (d / ".git").exists()]
     for base in REPO_BASES:
         if base.is_dir():
@@ -95,7 +104,7 @@ def collect_git(day: date) -> list[str]:
         utili = list(dict.fromkeys(l for l in log.splitlines() if l and not RUMORE_RE.search(l)))
         if not utili:
             continue
-        name = "cockpit" if repo == COCKPIT else repo.name
+        name = "cockpit" if repo == COCKPIT else repo.name.removesuffix(".git")
         out.append(f"- **{name}**: " + " · ".join(utili[:MAX_COMMIT])
                    + (f" · (+{len(utili) - MAX_COMMIT})" if len(utili) > MAX_COMMIT else ""))
     return out
