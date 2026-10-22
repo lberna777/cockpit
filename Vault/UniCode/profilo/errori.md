@@ -76,6 +76,18 @@ distinzione non è stata capita.
   (che ormai è il giorno dopo), mar 7:30→15:00 dà 9,75 invece di 3,25. Evidenza: trascrizione del
   2026-10-05 (risposte di Claude dopo «fatto tutto controlla» e «fatto, controlla»: «`da` non cambia mai», «hai tenuto il `plusDays(1)` di
   prima», «la riga dello stesso giorno ha usato `giorno`»); `confronto_LAB05.md` «Cosa porto via (parte 2)» 3.
+- [2026-10-21] FI2: LAB06 MasterMind, cinque coppie vicine fuse nella stessa sessione. `equals` detto
+  «confronta il COLORE di un piolo con quello di un altro» (il test confronta due `Combinazione`); `c`
+  descritta come «un array di oggetti PioloDiGioco» con le celle «vuoti come 0» (è un oggetto che
+  contiene un array, e `VUOTO` non è 0); `null` che Java trova nelle celle e `VUOTO` che il costruttore
+  ci mette («ma non avevi detto che ci va null e non VUOTO?», e nella v1 `this.pioli[i] = null`); in
+  `Gioco` campi e metodi non separati («registraMossa deve aggiornare tentativiRimasti e
+  tentativiEffettuati […] non so cosa contare come contatore»: sono metodi che leggono l'unico campo
+  `numTentativi`); in MasterMind «per calcolare i bianchi faccio numtotale di bianchi - neri» (il totale
+  conta neri e bianchi insieme), corretto alla segnalazione. Il ciclo di `situazione` fino a
+  `maxTentativi()` (capacità) invece che alle mosse fatte è la stessa fusione fisico/logico del LAB04b:
+  dettaglio sotto il pattern 6. Evidenza: trascrizione del 2026-10-21, 14:52, 15:04, 15:11, 16:43, 17:49;
+  `stato/giornata.md` 15:09, 16:30, 17:55.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -230,6 +242,17 @@ indirizzi IP e sottoreti (`RETI`).
   l'osservazione che con 3 bit fissi la zona copre più di una cifra. Evidenza: trascrizione del
   2026-10-20 («da 40000000 a 4fffffff» → «1, quindi 0101 = 5, la zona finisce a 5FFFFFFF»);
   `stato/giornata.md` 15:54–15:55.
+- [2026-10-21] FI2: LAB06, estremi sbagliati in quattro punti della stessa sessione. Array del costruttore
+  di `Combinazione` «con dimensione dim-1» (taglia e ultimo indice fusi); `ultimoTentativo` e
+  `ultimaRisposta` su `tentativi[numTentativi]`, la prima cella libera invece dell'ultima piena, senza il
+  caso 0 mosse; `situazione` v1 di nuovo su `tentativi[tentativiEffettuati()]` (`null` → NPE), poi il
+  ciclo `while (tentativiEffettuati() < maxTentativi())` (estremo = capacità invece delle mosse fatte, e
+  niente che avanzi: ciclo infinito); infine il numero di riga `tentativiEffettuati() + 1` invece di
+  `i + 1`, rimasto anche dopo la versione corretta di Claude (con 2 mosse ogni riga riceve lo stesso
+  numero). Ogni volta il caso piccolo contato a mano l'ha fatto Claude. Evidenza: trascrizione del
+  2026-10-21, 15:09 («creare un array di oggetti PioloDiGioco con dimensione dim-1»), 16:51, 17:08,
+  17:12 («il ciclo cosi va bene?»), 17:23; commit `5515286`, `a2a9123`, `b41c5a0`, `79d81a5`;
+  `stato/giornata.md` 15:09, 16:54, 17:08, 17:23.
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
@@ -515,6 +538,43 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   l'ha scritto Claude → correzione da provare: disegnare i passi con un caso numerico prima di scrivere (`/flusso`,
   prontuario §3.13). Ricorrenza della riga «processi interni alle funzioni» del 2026-10-05. Evidenza:
   trascrizione del 2026-10-05 (risposta a «Scrivilo tu, con il metodo del debug»; «ma che è sto minimo»).
+- [2026-10-21] LAB06: firme prese dai campi o a memoria invece che dal test. Costruttore
+  `Combinazione(PioloDiGioco[] pioli)` (il test fa `new Combinazione(4)`), senza `new` dell'array e con il
+  ciclo su `this.dim`, campo mai assegnato (vale 0) invece del parametro; `getPiolo` che restituisce
+  `String` (`.rgb()`); costruttore di `Gioco` con tutti e sei i campi come parametri (`Gioco(int
+  maxTentativi, int dim, int numTentativi, Combinazione[] tentativi, …)`) → causa: *Generate constructor
+  using fields* preso come punto di partenza, firma ricavata dai campi invece che dalla chiamata del test;
+  stessa famiglia di `Ticket` (2026-10-05) e dei costruttori del LAB04c (2026-10-02, parametro e campo
+  fusi) → correzione: la firma si copia dalla riga del test che chiama (`new Gioco(10,4)`); il costruttore
+  crea l'array dal parametro e ne riempie le celle. La failure di `getPiolo` l'ha diagnosticata da solo.
+  Evidenza: trascrizione del 2026-10-21, 15:33, 15:40, 16:38; commit `885deb5`, `0368ad9`;
+  `stato/giornata.md` 15:33, 15:41.
+- [2026-10-21] LAB06: stato restituito ma non salvato, stampa al posto del risultato. `registraMossa` v1
+  con `return Status.VITTORIA` / `PERSO` / `IN_CORSO` senza assegnare il campo `status` (dopo la vittoria
+  `stato()` resta `IN_CORSO`, e `GiocoTest` non lo mostra); `toString` di `Combinazione` chiuso con la
+  stampa dello `StringJoiner` («non capisco cosa devo mettere nel return statement se gia stampo li») →
+  causa: non separa ciò che il metodo consegna al chiamante da ciò che deve lasciare nell'oggetto (il
+  campo) o che spetta al chiamante (la stampa); ricorrenza della stampa dentro `equals` (2026-09-30) e del
+  campo non aggiornato in `put` (2026-10-02) → correzione: in ogni ramo `this.status = …`, poi `return
+  this.status`; un metodo che risponde restituisce, non stampa. Evidenza: trascrizione del 2026-10-21,
+  15:59, 16:51; commit `5515286` → `10d166a`; `stato/giornata.md` 16:00, 16:54.
+- [2026-10-21] Ricorrenza di «forma dell'output ricavata a memoria, non dal test» (2026-10-02, 2026-10-05):
+  `Gioco.toString` con `"Situazione: \n"` (spazio in più, `\n` invece di `lineSeparator()`) e lo stato
+  senza il prefisso `"Gioco: "` che il test cerca («a me sembra giusto ma sempre tutti i test blu»).
+  Evidenza: trascrizione del 2026-10-21, 17:23; `stato/giornata.md` 17:23.
+- [2026-10-21] Ottava ricorrenza della risposta a metà, nel codice: della tabella di Claude con le modifiche
+  a `situazione` ha applicato ciclo, indici delle celle e regola delle tab, non il numero di riga `i + 1`
+  («È l'unica riga della tabella di prima che non avevi cambiato»). Nella stessa sessione
+  `risposta.vittoria() == true` (ridondanza). Resta candidato
+  trasversale (nessun altro corso). Evidenza: trascrizione del 2026-10-21, 15:33, 17:23; commit
+  `b3b8a4a`; `model/Combinazione.java`, `model/Risposta.java`.
+- [2026-10-21] Ricorrenza di «processi interni alle funzioni» (2026-10-05): davanti a `situazione` «ma cosa
+  sono ste tab […] non ci capisco niente, cosa deve fare situazione, cosa deve stampare, quando lo deve
+  stampare»; in `Gioco` perso sul contatore finché Claude non ha fissato i campi. Giudizio a `/chiudi`:
+  «le funzioni piu complesse come situazione […] mi hanno portato in confusione nel capire la logica».
+  Lorenzo ne trae una regola di procedura: campi → costruttore → metodi che cambiano lo stato → metodi
+  che lo leggono. Evidenza: trascrizione del 2026-10-21, 16:30–16:32, 17:13, 18:01; `stato/giornata.md`
+  16:30, 16:32.
 
 ### CALC — Calcolatori Elettronici T
 - [2026-10-08] 02p §2: taglia convertita in bit senza l'unità. RAM da 32 KB → «5 piedini perché 32 =

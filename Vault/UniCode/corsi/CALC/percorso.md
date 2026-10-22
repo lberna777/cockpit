@@ -37,7 +37,10 @@ verificata — l'esame è scritto con domande, esercizi *e* progetto di un siste
 tutti con un unico esercizio di progetto di un sistema DLX. Indice e piano d'uso in
 `prove/INDICE.md`.
 
-## Calendario verso l'appello anticipato del 2 dicembre 2026 `[2026-10-06]`
+## Calendario verso l'appello anticipato del 2 dicembre 2026 `[2026-10-06]` `[superato 2026-10-20]`
+
+> L'appello è il **22 dicembre 2026, ore 9:00** (Lorenzo iscritto). Checkpoint ~10 nov; il
+> calendario qui sotto è da rifare con `/pianifica`.
 
 | Settimane | Contenuto |
 |---|---|

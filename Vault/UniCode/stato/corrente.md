@@ -1,11 +1,10 @@
 # Stato Corrente — Studio Attivo
 
-**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-20
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-22
 
-- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 per l'**appello anticipato
-  del 2 dicembre** (da verificare su AlmaEsami) · checkpoint ~3 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
+- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
   Sezione in fondo.
-- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · 🔶 `LAB06` MasterMind **in corso** dal 19/10 (scheda `corsi/FI2/lezioni/guida_lab_LAB06_mastermind.md`, startkit in `esame_FI2/da_importare/LAB06_MasterMind-191026`, **importato in Eclipse il 19/10**). Ripresa 21/10: costruire in chat la procedura d'esame (obiettivi del 5/10), poi leggere sl. 17–18 e `CombinazioneTest`, caso a mano, scrivere `Combinazione`.
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · ✅ `LAB06` MasterMind **chiuso il 22/10** (34/34 verdi, **guidato**: da rifare a freddo); `calcolaRisposta` pensata da Lorenzo, bug dei minimi trovato da lui con stampe vs tabella. Codice e confronto (12 punti) in `esame_FI2/svolti/LAB06_MasterMind/`. Prossima voce: `LAB07` MyCalendar (`/lab FI2 LAB07`).
 
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
@@ -55,6 +54,7 @@ più tempo di esecuzione e meno di lettura. È l'esame che non può slittare.
   celle `null`, quello del docente no (verificato).
 - ✅ **LAB04c** «ADT FractionCollection» — chiuso il 2026-10-02 con i test verdi (eseguiti con `javac`/`java -ea`), **svolto con guida**: da rifare a freddo. Codice e confronto in `corsi/FI2/esame_FI2/svolti/LAB04c_FractionCollection/`. Scritti da solo campi, costanti, tre costruttori, `sum`/`mul` (con la scelta `IllegalArgumentException` se le `size` differiscono); corretti dopo controllo `size()` (non ricalcolarlo dai `null`), `get` (`||`), `put` (assegnare il nuovo array, `*` e non `+`, inserimento fattorizzato, caso capacità 0 risolto da lui), `remove` (tre scarti di uno), `toString` (mai usato `StringBuilder`; ultimo elemento fuori dal ciclo → eccezione sulla vuota). Fisico/logico: riconosciuto da solo all'inizio, ricaduto in `size()` e `toString`. Verifica a voce saltata. Resta nel codice svolto il formato `[ 1/3 ]` con spazi (docente: `[1/3]`), vedi il confronto.
 - ✅ **LAB05** «TicketSosta» — chiuso il 2026-10-05 con i test verdi di entrambe le parti (`TicketTest`, `ParcometroTest`, `TicketEvolutoTest`, `ParcometroEvolutoTest`), **svolto con guida**: da rifare a freddo. Codice e confronto (punti 1–16) in `corsi/FI2/esame_FI2/svolti/LAB05_TicketSosta/`. Parte 1: `calcolaCosto` in 4 passi suo; inciampi sull'ordine dei parametri, sul confronto del minimo (a test verdi). Parte 2: `TicketEvoluto`, ciclo sui giorni, tariffa per giorno, franchigia, `toString` suoi dopo correzioni; il **blocco del minimo** nel ramo «stesso giorno» l'ha scritto Claude. Inciampi: immutabilità di `plusDays`, tariffa dal giorno sbagliato, `tariffa.toString()` su array, quick fix di Eclipse che ha cambiato `Ticket` della parte 1. Debolezze note, non nei test: minimo solo sul ramo «stesso giorno» (il docente lo applica all'intera sosta), franchigia a cavallo di mezzanotte (comune al docente). Moduli `10`, `11`, `S02` entrati in voce 🔶. Verifica a voce saltata.
+- ✅ **LAB06** «MasterMind» — chiuso il 2026-10-22 con 34/34 test verdi (`Combinazione`, `Risposta`, `Gioco`, `MasterMind`), **svolto con guida**: da rifare a freddo. Codice e confronto (12 punti) in `corsi/FI2/esame_FI2/svolti/LAB06_MasterMind/`. Prima voce fatta con la **procedura d'esame** (prontuario §2), costruita il 21/10. Suoi: `setPiolo`, `equals` (con `null` dopo il caso proprio), `Risposta` intera, `registraMossa` (stato salvato dopo correzione), l'algoritmo di `calcolaRisposta` (calcolato a mano sulle sl. 31 e 33, poi tradotto) e il bug dei minimi trovato con le stampe. Inciampi: estremi (`dim − 1`, cella libera vs ultima piena, ciclo fino a `maxTentativi`, `nextInt(5)`), posizioni e colori fusi nel ciclo dei minimi, `situazione` e i formati (tab, spazi, `Gioco: `). Teoria entrata in voce: `09` (enum, `ordinal`, `values`), `12` (package per funzionalità), `StringJoiner`, `Random`, `protected` e classe anonima nei test.
   **Osservazione di Lorenzo (2026-10-05)**: assimilati classi, chiamate, tipi; fatica sui *processi logici dentro le funzioni* e sulle spiegazioni che «danno indicazioni in un posto che non conosce». Ha funzionato: tabella a mano su un caso dei test, `/flusso`, `println` per cercare i bug.
 - 🔶 **07** «Array» e **08** «Package e namespace»: entrati in LAB04a (array di oggetti, *for
   each*, `length`; package e `import`); si completano con LAB04b/c ed `ES-MATRICI`.
@@ -71,11 +71,8 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 (`CLAUDE.md` §2 e §8, `/lab` template FI2). Prontuario riorganizzato per parte del compito; kit
 d'esame in `corsi/FI2/esame_FI2/`.
 
-0. **Obiettivi della prossima sessione (decisi da Lorenzo il 2026-10-05, a fine LAB05)**:
-   - **imparare a testare il codice che scrive**: scegliere lui i casi (dal testo e dai casi limite), calcolarli a mano, scrivere/lanciare i test, non fidarsi del solo test verde (pattern 2);
-   - **imparare a debuggare con stampe ad hoc** (e col debugger di Eclipse): confrontare tabella a mano e stampe, la prima riga che diverge è il bug;
-   - **studiare una procedura per affrontare questi esercizi**, un workflow pronto per l'esame: leggere il testo e i test → caso numerico a mano → passi/`/flusso` → codice a pezzi → test dei casi propri → stampe se rosso → confronto. Da costruire insieme all'inizio della prossima sessione e poi scrivere nel prontuario (§2) come procedura d'esame.
-1. **Prossima voce**: `LAB06` «MasterMind» (`/lab FI2 LAB06`), oppure `ES-PHONEPLAN` che il percorso dà «dopo LAB05» (`LocalTime`/`LocalDateTime`, stesso terreno). Prima, a scelta: pendenze minori di LAB05 — getter `getInizioSosta`/`getFineSosta`, `i < tariffa.length` nel `toString`, `import ticketsosta.Ticket` inutilizzato; cartelle `*.zip_expanded` nel workspace Eclipse (la `Soluzione` contiene la soluzione del docente).
+0. **Procedura d'esame**: costruita il 21/10 e scritta nel prontuario §2 (obiettivo del 5/10 ✅). Restano da allenare: test propri scelti da lui (passo 7) e debug con stampe (passo 8).
+1. **Punto di ripresa**: `LAB07` «MyCalendar» (`/lab FI2 LAB07`): slide + recap + commento + startkit; teoria 10, 12, S02 (`LocalDateTime`, `Duration`, MVC). Con la procedura del prontuario §2, partendo dall'UML.
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
@@ -131,15 +128,15 @@ la stessa radice — *da dove nasce* la cosa:
 
 ## ═══ CALC ═══
 
-**Aperto il 2026-10-06** per l'appello anticipato del **2 dicembre 2026**, segnalato da Lorenzo e
-non ancora verificato su AlmaEsami (data e requisiti di accesso). Edizione del materiale
+**Aperto il 2026-10-06** per un appello anticipato del 2 dicembre che non c'era. `[2026-10-20]` Lorenzo
+è **iscritto all'appello del 22 dicembre 2026, ore 9:00**: è il primo appello di S1, non più anticipato. Edizione del materiale
 2024/25; mappa e stato dei moduli in `corsi/CALC/percorso.md`.
 
 **Prova d'esame**: un unico esercizio di progetto di un sistema DLX (memorie, porte in
 *handshake*, reti logiche, *interrupt handler*), invariato dal 2015. Indice delle 62 prove
 (46 con soluzione) in `corsi/CALC/prove/INDICE.md`.
 
-**Calendario (8 settimane)**:
+**Calendario (8 settimane)** `[superato 2026-10-20: l'appello è il 22/12, il checkpoint passa a ~10 nov; calendario da rifare con /pianifica]`:
 - sett. 1–3 (6–26 ott): `02`, `03`, `04`, `05`; `00` solo se la prova lo richiede;
 - sett. 4 (27 ott – 2 nov): `07`, `08`, `01`;
 - **checkpoint ~3 nov**: prova `2024-01-19` a freddo, cronometrata. Sotto la sufficienza si
