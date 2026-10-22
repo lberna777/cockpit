@@ -26,3 +26,4 @@
 17:37 · FI2 · giudizio di Lorenzo su LAB06: codice scritto quasi tutto da solo e bug trovato con le stampe, ma sintassi di classi e metodi non ancora a mente; si aspetta di seguire meglio il filo su un esercizio nuovo, con un po' di aiuto.
 17:37 · CALC · giudizio di Lorenzo: sicurezza 1/5 a fare da solo la tabella della risposta; la fatica è «dove mi sto muovendo, cosa cerco, cosa so» e la comprensione fisica di ciò che controlla (→ artefatto: dati/incognite, foglio su carta, mappa, filo per filo).
 17:37 · PIANO · 23/10 solo CALC: /lab CALC 02 a freddo sulla 2023-12-21 la mattina; altro solo se avanza tempo (decisione di Lorenzo).
+17:38 · PIANO · 23/10 nella Plancia: lab CALC 02 a freddo 09:45–11:30, confronto 11:45–13:00, /chiudi 14:00; pianificazione.md: corretto il commento di «giorno:» sovrascritto da un sed del 20/10.
