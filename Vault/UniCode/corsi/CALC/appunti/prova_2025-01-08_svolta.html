@@ -121,6 +121,16 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
   <p class="lede">In alto il sistema com'è fatto fisicamente: premi un pezzo per vedere a quale dato del testo e a quale riga della risposta corrisponde. Sotto, a sinistra lo svolgimento nell'ordine in cui lo fai all'esame e a destra la soluzione ufficiale intera: un pulsante <b>→</b> accende le righe della soluzione, una riga della soluzione riporta al suo passo.</p>
 </header>
 
+<section class="map" id="zoom" aria-label="Un blocco filo per filo">
+  <h2>Un blocco, filo per filo</h2>
+  <p class="hint">In alto i piedini del DLX, uno per filo. Ogni filo scende dritto: i <b style="color:var(--ok)">verdi</b> vanno alle porte AND che fanno i CS, i <b style="color:var(--accent)">blu</b> ai piedini <code>A</code> dei chip, i grigi con ✕ non vanno da nessuna parte (repliche), BA1 e BA0 non esistono (al loro posto i BE). Scrivi un indirizzo: i fili mostrano il suo valore e si accende il chip che risponde.</p>
+  <div class="links" id="zBlk"></div>
+  <div class="links"><label for="zAddr" class="m">Indirizzo</label><input id="zAddr" class="m" value="60000005" size="10" style="font:600 14px var(--f-mono);padding:5px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--panel);color:var(--ink)"><span class="m">h</span>
+    <button class="go" type="button" data-z="1">+1 byte</button><button class="go" type="button" data-z="4">+1 riga (+4)</button><button class="go" type="button" data-z="-4">−1 riga</button><button class="go" type="button" id="zRep" data-z="rep">replica →</button></div>
+  <div class="mapsvg"><svg id="zsvg" viewBox="0 0 1000 600" role="img" aria-label="Un blocco di memoria disegnato filo per filo"></svg></div>
+  <div class="info" id="zInfo" aria-live="polite"></div>
+</section>
+
 <section class="map" id="mappa" aria-label="Il sistema fisico">
   <h2>Il sistema fisico</h2>
   <p class="hint">Ogni rettangolo è un chip vero sulla scheda; le linee sono fili. Colonne = banchi (uno per corsia del bus dati), righe = blocchi di memoria e porte. Tratteggiato = moduli 04–05.</p>
