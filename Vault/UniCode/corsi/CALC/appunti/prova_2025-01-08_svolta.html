@@ -653,7 +653,7 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
       zel("text",{x:gx1+4,y:y+27,style:"font-size:10px;fill:"+(on?"var(--hit-ink)":"var(--firma-ink)")},"CS_"+i+(on?" = 1":""));
       [px("BE"+i)].concat(B.cs.map(function(q){return px("BA"+q[0])})).forEach(function(x){zel("circle",{cx:x,cy:y,r:3,style:"fill:var(--ok)"})});
       // chip
-      var cx1=px("BA"+firstPin)-28, cx2=px("BA2")+12, cy=y+8, ch=86;
+      var cx1=Math.max(px("BA"+firstPin)-28,gx2+8), cx2=px("BA2")+12, cy=y+8, ch=86;
       zel("path",{d:"M"+gx2+" "+(y+22)+" L"+cx1+" "+(y+22),style:"fill:none;stroke:var(--ok);stroke-width:2"});
       zel("path",{d:"M"+px("MEMRD")+" "+(y+60)+" L"+cx1+" "+(y+60),style:"fill:none;stroke:var(--muted);stroke-width:1.2"});
       zel("circle",{cx:px("MEMRD"),cy:y+60,r:2.5,style:"fill:var(--muted)"});
