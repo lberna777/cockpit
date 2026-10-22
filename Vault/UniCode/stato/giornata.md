@@ -3,8 +3,6 @@
 <!-- Claude appende qui, una riga per fatto: HH:MM · CODICE · fatto.
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
-<<<<<<< HEAD
-=======
 12:14 · FI2 · LAB06 ripreso su MasterMind (inizio alle 12:14, blocco delle 10:15 slittato).
 12:38 · FI2 · LAB06 sorteggio: «0..5 + 1» giusto a parole, ma values().length creduto 6 (è 7) e nextInt(5) per «0..5» (nextInt esclude n) → pattern 6 ancora sugli estremi.
 12:44 · FI2 · LAB06 sorteggiaCombinazione v2: values()[i] invece di values()[n] (indice del ciclo al posto del numero sorteggiato: escono sempre VUOTO,ROSSO,GIALLO,VERDE); this.segreta (campo) invece del parametro; Random creato a ogni giro.
@@ -16,4 +14,3 @@
 15:51 · SISTEMA · invio automatico dal laptop fermo da ieri sera: pull bloccato da log/2026-10.md modificato in locale (traccia di fine sessione del laptop). Sbloccato a mano; script resi tolleranti ai rami divisi; riga di log del laptop riportata qui. Causa da sistemare nella chat Infrastruttura.
 15:53 · FI2 · handoff scritto: plans/handoffs/HANDOFF_FI2-LAB06_2026-10-22.md (sessione chiusa al 50% del contesto).
 15:58 · PIANO · Lorenzo passa alla chat CALC per la lezione 02 (dal passo 8); /chiudi unico a fine giornata per FI2 e CALC.
->>>>>>> origin/master
