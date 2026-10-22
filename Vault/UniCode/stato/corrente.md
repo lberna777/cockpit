@@ -1,10 +1,10 @@
 # Stato Corrente — Studio Attivo
 
-**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-21
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-22
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
   Sezione in fondo.
-- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · 🔶 `LAB06` MasterMind **in corso** dal 19/10: il 21/10 `Combinazione`, `Risposta`, `Gioco` scritte da Lorenzo con la procedura d'esame (15 test verdi su 34, **guidato**); manca `MasterMind`. Ripresa 22/10: UML sl. 24 + semantica sl. 25–26, poi `occorrenze` (array indicizzato con `ordinal()`, lungo `PioloDiGioco.values().length`), neri, totale dei minimi, bianchi = totale − neri, `Risposta` con neri → bianchi → `VUOTO`; `sorteggiaCombinazione` `protected` (i test la ridefiniscono). Conti a mano delle sl. 31 e 33 già fatti e giusti.
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · ✅ `LAB06` MasterMind **chiuso il 22/10** (34/34 verdi, **guidato**: da rifare a freddo); `calcolaRisposta` pensata da Lorenzo, bug dei minimi trovato da lui con stampe vs tabella. Codice e confronto (12 punti) in `esame_FI2/svolti/LAB06_MasterMind/`. Prossima voce: `LAB07` MyCalendar (`/lab FI2 LAB07`).
 
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
@@ -71,7 +71,7 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 d'esame in `corsi/FI2/esame_FI2/`.
 
 0. **Procedura d'esame**: costruita il 21/10 e scritta nel prontuario §2 (obiettivo del 5/10 ✅). Restano da allenare: test propri scelti da lui (passo 7) e debug con stampe (passo 8).
-1. **Punto di ripresa (22/10)**: `MasterMind` del LAB06 — UML sl. 24 + semantica sl. 25–26 (struttura e promesse), poi `occorrenze(Combinazione)` → `calcolaRisposta` (neri, minimi, bianchi = totale − neri; nella `Risposta` prima i neri, poi i bianchi, poi `VUOTO`) → `combinazioneSegreta` → `sorteggiaCombinazione` (`protected`, `Random`, colori 1…6: estremi da `values().length`, la sl. 26 scrive «1..7»). I test `MasterMindTest1`–`3` la ridefiniscono con una classe anonima: 5 righe su quella quando ci arriva. Poi i 34 verdi, copia in `svolti/LAB06_MasterMind/`, `confronto_LAB06.md`.
+1. **Punto di ripresa**: `LAB07` «MyCalendar» (`/lab FI2 LAB07`): slide + recap + commento + startkit; teoria 10, 12, S02 (`LocalDateTime`, `Duration`, MVC). Con la procedura del prontuario §2, partendo dall'UML.
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
