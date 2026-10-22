@@ -585,6 +585,17 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   Lorenzo ne trae una regola di procedura: campi → costruttore → metodi che cambiano lo stato → metodi
   che lo leggono. Evidenza: trascrizione del 2026-10-21, 16:30–16:32, 17:13, 18:01; `stato/giornata.md`
   16:30, 16:32.
+- [2026-10-22] Ricorrenza di «parametro e campo fusi» (LAB04c 2026-10-02; LAB06 2026-10-21, ciclo su
+  `this.dim`): `sorteggiaCombinazione` v2 scritta su `this.segreta` (campo) invece che sulla combinazione
+  ricevuta come parametro; nella stessa versione un `new Random()` a ogni giro del ciclo invece di uno
+  solo fuori. Corretto con guida; a fine sessione `this` resta «da consolidare». Evidenza:
+  `stato/giornata.md` 12:44; handoff `HANDOFF_FI2-LAB06_2026-10-22.md`; `confronto_LAB06.md` §12.
+- [2026-10-22] LAB06 `calcolaRisposta` v1: riempimento della `Risposta` con condizioni su `neri`/`bianchi`
+  che nel ciclo non cambiano, per cui con `neri > 0` ogni piolo diventava `NERO` → causa: il ciclo deve
+  riempire fasce consecutive (prima i neri, poi i bianchi), ma la condizione non dipende da ciò che il
+  ciclo ha già fatto → correzione: o un contatore che si consuma (`neri--`, la sua versione finale) o, come
+  il docente, due cicli con estremi `[0, neri)` e `[neri, totali)`. Corretto da solo. Evidenza:
+  `stato/giornata.md` 15:26, 15:41; `confronto_LAB06.md` §10.
 
 ### CALC — Calcolatori Elettronici T
 - [2026-10-08] 02p §2: taglia convertita in bit senza l'unità. RAM da 32 KB → «5 piedini perché 32 =
