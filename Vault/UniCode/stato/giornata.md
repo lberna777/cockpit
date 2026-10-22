@@ -15,3 +15,4 @@
 15:53 · FI2 · handoff scritto: plans/handoffs/HANDOFF_FI2-LAB06_2026-10-22.md (sessione chiusa al 50% del contesto).
 15:58 · PIANO · Lorenzo passa alla chat CALC per la lezione 02 (dal passo 8); /chiudi unico a fine giornata per FI2 e CALC.
 16:01 · CALC · sessione aperta su 02 (passo 8 dell'artefatto: piedini, bus dati, interfacciamento; poi Decisione 3).
+16:17 · CALC · 02: piedini — «persissimo», non inquadra a quale parte della soluzione serve; ripreso dallo scopo pratico (schema di interfacciamento p. 9).
