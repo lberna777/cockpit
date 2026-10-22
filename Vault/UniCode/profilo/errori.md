@@ -259,6 +259,10 @@ indirizzi IP e sottoreti (`RETI`).
   2026-10-21, 15:09 («creare un array di oggetti PioloDiGioco con dimensione dim-1»), 16:51, 17:08,
   17:12 («il ciclo cosi va bene?»), 17:23; commit `5515286`, `a2a9123`, `b41c5a0`, `79d81a5`;
   `stato/giornata.md` 15:09, 16:54, 17:08, 17:23.
+- [2026-10-22] FI2: LAB06 sorteggio, regola «0..5 + 1» giusta a parole ma estremi sbagliati nel codice:
+  `PioloDiGioco.values().length` creduto 6 (è 7, `VUOTO` incluso) e `nextInt(5)` per ottenere 0..5
+  (`nextInt(n)` esclude `n`: serve `nextInt(6)`, cioè `values().length - 1`). Evidenza:
+  `stato/giornata.md` 12:38; handoff `HANDOFF_FI2-LAB06_2026-10-22.md`, «Ancora poco chiaro».
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
