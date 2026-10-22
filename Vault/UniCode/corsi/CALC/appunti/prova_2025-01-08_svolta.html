@@ -448,18 +448,106 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
     box.insertAdjacentHTML("beforeend",t);
   });
 
-  // Collegamenti passo ↔ soluzione
+  // Collegamenti passo ↔ soluzione (delegati: valgono anche per i pulsanti creati dalla mappa)
   var wide=window.matchMedia("(min-width:1060px)");
   function clear(){document.querySelectorAll(".hit").forEach(function(e){e.classList.remove("hit")})}
   function linesOf(id){var el=document.getElementById(id); if(!el) return []; return el.dataset.group? Array.prototype.slice.call(el.querySelectorAll(".ln")) : [el]}
-  document.querySelectorAll("button.go").forEach(function(btn){
-    btn.addEventListener("click",function(){
-      clear(); var first=null;
-      btn.dataset.sol.split(" ").forEach(function(id){linesOf(id).forEach(function(l){l.classList.add("hit"); if(!first) first=l})});
-      btn.closest("section.step").classList.add("hit");
-      if(first) first.scrollIntoView({block:wide.matches?"nearest":"center",behavior:"smooth"});
-    });
+  document.addEventListener("click",function(ev){
+    var btn=ev.target.closest("button.go"); if(!btn) return;
+    clear(); var first=null;
+    if(btn.dataset.sol) btn.dataset.sol.split(" ").forEach(function(id){linesOf(id).forEach(function(l){l.classList.add("hit"); if(!first) first=l})});
+    var st=btn.closest("section.step"); if(st) st.classList.add("hit");
+    if(btn.dataset.step){var s=document.getElementById(btn.dataset.step); if(s){s.classList.add("hit"); s.scrollIntoView({block:"start",behavior:"smooth"}); return}}
+    if(first) first.scrollIntoView({block:wide.matches?"nearest":"center",behavior:"smooth"});
   });
+
+  // Mappa del sistema fisico
+  var NS="http://www.w3.org/2000/svg", svg=document.getElementById("sys");
+  function el(tag,attrs,parent,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;(parent||svg).appendChild(e);return e}
+  function line(x1,y1,x2,y2,cls,parent){return el("path",{d:"M"+x1+" "+y1+" L"+x2+" "+y2,"class":"wire "+(cls||"")},parent)}
+  function box(k,i,x,y,w,h,cls,lines){
+    var g=el("g",{"data-k":k,"data-i":i==null?"":i,tabindex:"0",role:"button","class":cls||""});
+    el("rect",{x:x,y:y,width:w,height:h,rx:5},g);
+    lines.forEach(function(t,n){el("text",{x:x+8,y:y+16+n*14,"class":n===0?"h":(n>1?"s":"")},g,t)});
+    return g;
+  }
+  var COL=[385,535,685,835], CW=130, laneX=function(b){return COL[3-b]+CW/2};
+  var LANE=["BD[7..0]","BD[15..8]","BD[23..16]","BD[31..24]"];
+  // fili di testa
+  line(170,34,190,34,"addr"); line(190,34,190,628,"addr");
+  el("text",{x:196,y:30},null,"BA[31..2]");
+  line(170,56,285,56); line(285,56,285,150);
+  el("text",{x:196,y:52,"class":"s"},null,"BE3..BE0");
+  line(170,78,970,78); el("text",{x:700,y:74,"class":"s"},null,"MEMRD · MEMWR → RD/WR dei chip");
+  line(170,100,970,100,"data"); el("text",{x:300,y:96,"class":"s"},null,"BD[31..0] — bus dati");
+  for(var b=0;b<4;b++){var x=laneX(b); line(x,100,x,560,"lane"); el("text",{x:COL[3-b]+8,y:122},null,"banco "+b+" · BE"+b); el("text",{x:COL[3-b]+8,y:136,"class":"s"},null,LANE[b])}
+  line(285,150,285,520);
+  // processore
+  box("dlx",null,20,20,150,86,"",["DLX","processore","BA, BE, MEMRD/WR, BD"]);
+  // blocchi
+  var BL=[
+    {k:"ram",nome:"RAM 2 GB",range:"80000000h–FFFFFFFFh",cs:"BA31",banco:"512 MB",pin:"A[28..0]←BA[30..2]",y:150,chip:"RAM"},
+    {k:"e1g",nome:"EPROM 1 GB",range:"00000000h–3FFFFFFFh",cs:"BA31*·BA30*",banco:"256 MB",pin:"A[27..0]←BA[29..2]",y:240,chip:"EPROM_1GB"},
+    {k:"e512",nome:"EPROM 512 MB",range:"40000000h–5FFFFFFFh",cs:"BA31*·BA30·BA29*",banco:"128 MB",pin:"A[26..0]←BA[28..2]",y:330,chip:"EPROM_512"},
+    {k:"e64",nome:"EPROM 64 MB",range:"60000000h–63FFFFFFh",cs:"BA31*·BA30·BA29·BA28*",banco:"16 MB",pin:"A[23..0]←BA[25..2]",y:420,chip:"EPROM_64"}
+  ];
+  BL.forEach(function(r){
+    el("text",{x:20,y:r.y+18,"class":"h"},null,r.nome); el("text",{x:20,y:r.y+33,"class":"s"},null,r.range);
+    line(285,r.y+25,215,r.y+25);
+    box("cs-"+r.k,null,215,r.y,140,50,"gate",["CS "+r.nome.split(" ")[0]+(r.k==="ram"?"":" "+r.nome.split(" ")[1]+" "+r.nome.split(" ")[2]),r.cs,"· BEi → 4 CS"]);
+    line(355,r.y+25,COL[0],r.y+25,"cs");
+    line(190,r.y+62,960,r.y+62,"addr dash");
+    for(var b=3;b>=0;b--){
+      var x=COL[3-b]; line(x+CW/2,r.y+50,x+CW/2,r.y+62,"addr");
+      box(r.k,b,x,r.y,CW,50,"chip",[r.chip+"_"+b,r.banco+" · "+(r.k==="ram"?"RD WR":"RD"),r.pin]);
+    }
+  });
+  // porte
+  var yp=510;
+  el("text",{x:20,y:yp+18,"class":"h"},null,"Porte (70000000h)"); el("text",{x:20,y:yp+33,"class":"s"},null,"zona 7xxxxxxxh");
+  line(285,yp+25,215,yp+25);
+  box("cs-in",null,215,yp,140,50,"gate",["CS_INPUT","BA31*·BA30·BA29·BA28","· BE0·BE1"]);
+  line(355,yp+25,COL[0],yp+25,"cs");
+  box("resetp",null,COL[1],yp,CW,50,"later",["RESET_P","comando, BE2·MEMWR","70000002h"]);
+  box("inB",null,COL[2],yp,CW,50,"chip",["INPUT_B","8 bit · RD","nessun piedino A"]);
+  box("inA",null,COL[3],yp,CW,50,"chip",["INPUT_A","8 bit · RD","nessun piedino A"]);
+  el("text",{x:COL[0]+8,y:yp+30,"class":"s"},null,"(banco 3 libero)");
+  // modulo 05 e interrupt
+  box("pbtn",null,COL[1],600,CW+150,56,"later",["Pulsante P + 2 FFD","P_PREMUTO, SWITCH_BUS","scambia A e B sulle corsie"]);
+  box("out",null,COL[3],600,CW,56,"later",["OUTPUT","porta in output","riceve DATA_A"]);
+  line(laneX(0),560,laneX(0),600,"lane dash");
+  box("int",null,20,600,150,56,"later",["INT_DLX","INT_A · INT_B","→ handler"]);
+  line(12,628,20,628,"dash"); line(12,628,12,63,"dash"); line(12,63,20,63,"dash");
+
+  var INFO={
+    dlx:{t:"Processore DLX",fis:"La CPU. Emette gli indirizzi su BA31..BA2 (BA1 e BA0 non esistono: al loro posto i 4 byte enable BE3..BE0), i comandi MEMRD/MEMWR, e scambia 32 bit per ciclo sul bus dati BD[31..0]. Riceve l'interrupt INT.",dato:"«Progettare un sistema, basato su un processore DLX…»",risp:"Nessuna riga sua: ogni altro pezzo si collega a lui.",sol:"",step:"p7"},
+    ba:{},
+    ram:{t:"RAM_{i} — banco {i} della RAM",fis:"Un chip da 512 MB = 2^29 byte, parallelismo 8 bit. Contiene gli indirizzi della RAM con resto {i} diviso 4 (80000000h+{i}, +4, +8…).",dato:"«2 GB di RAM mappata agli indirizzi alti» → 2 GB / 4 banchi = 512 MB.",risp:"CS ← CS_RAM_{i} = BA31·BE{i} · RD ← MEMRD · WR ← MEMWR · A[28..0] ← BA[30..2] (2^29 righe → 29 piedini, da BA2) · D[7..0] ↔ "+"{lane}.",sol:"s-ram s-cs-ram s-if-ram",step:"p8"},
+    e1g:{t:"EPROM_1GB_{i} — banco {i}",fis:"Un chip da 256 MB = 2^28 byte, sola lettura (niente WR).",dato:"«1600 MB di EPROM agli indirizzi bassi» → 1024 MB è il primo pezzo della scomposizione → 4 banchi da 256 MB.",risp:"CS ← CS_EPROM_1GB_{i} = BA31*·BA30*·BE{i} · RD ← MEMRD · A[27..0] ← BA[29..2] · D[7..0] ↔ {lane}.",sol:"s-e1g s-cs-e1g s-if-e1g",step:"p8"},
+    e512:{t:"EPROM_512_{i} — banco {i}",fis:"Un chip da 128 MB = 2^27 byte, sola lettura.",dato:"Secondo pezzo dei 1600 MB: 512 MB → 4 banchi da 128 MB.",risp:"CS ← CS_EPROM_512MB_{i} = BA31*·BA30·BA29*·BE{i} · RD ← MEMRD · A[26..0] ← BA[28..2] · D[7..0] ↔ {lane}.",sol:"s-e512 s-cs-e512 s-if-e512",step:"p8"},
+    e64:{t:"EPROM_64_{i} — banco {i}",fis:"Un chip da 16 MB = 2^24 byte, sola lettura. BA27 e BA26 non arrivano né al CS né ai piedini: per questo il blocco compare 4 volte in 6xxxxxxxh.",dato:"Ultimo pezzo dei 1600 MB: 64 MB → 4 banchi da 16 MB.",risp:"CS ← CS_EPROM_64MB_{i} = BA31*·BA30·BA29·BA28*·BE{i} · RD ← MEMRD · A[23..0] ← BA[25..2] · D[7..0] ↔ {lane}.",sol:"s-e64 s-cs-e64 s-if-e64",step:"p8"},
+    "cs-ram":{t:"Decodifica della RAM",fis:"Una rete AND: guarda BA31 e un BE, e accende il CS di un banco. Sono 4 AND, una per banco.",dato:"«agli indirizzi alti» → la metà con BA31 = 1.",risp:"CS_RAM_i = BA31·BEi (4 righe).",sol:"s-cs-ram",step:"p5"},
+    "cs-e1g":{t:"Decodifica della EPROM 1 GB",fis:"4 AND sui bit BA31, BA30 e un BE.",dato:"Primo blocco della scomposizione, a 00000000h.",risp:"CS_EPROM_1GB_i = BA31*·BA30*·BEi.",sol:"s-cs-e1g",step:"p5"},
+    "cs-e512":{t:"Decodifica della EPROM 512 MB",fis:"4 AND sui bit BA31..BA29 e un BE.",dato:"Secondo blocco, a 40000000h.",risp:"CS_EPROM_512MB_i = BA31*·BA30·BA29*·BEi.",sol:"s-cs-e512",step:"p5"},
+    "cs-e64":{t:"Decodifica della EPROM 64 MB",fis:"4 AND sui bit BA31..BA28 e un BE. Semplificata: BA27 e BA26 mancano, quindi 4 repliche (lecite: 64000000h–6FFFFFFFh è libero).",dato:"Terzo blocco, a 60000000h.",risp:"CS_EPROM_64MB_i = BA31*·BA30·BA29·BA28*·BEi.",sol:"s-cs-e64",step:"p5"},
+    "cs-in":{t:"Decodifica delle porte in input",fis:"Una AND: zona 7xxxxxxxh e banchi 0 e 1 insieme. Un solo CS per entrambe le porte, perché si leggono sempre insieme.",dato:"«esclusivamente trasferimenti a 16 bit» → half-word bassa → BE0·BE1.",risp:"CS_INPUT = BA31*·BA30·BA29·BA28·BE0·BE1 · indirizzo 70000000/1h.",sol:"s-in-addr s-cs-input",step:"p7"},
+    inA:{t:"INPUT_A — porta in input A",fis:"Un registro da 1 byte: nessun piedino di indirizzo (c'è una cella sola). Ha CS, RD e 8 piedini dati.",dato:"«due porte in input… INPUT_A fornisce gli 8 bit meno significativi» → normalmente sulla corsia BD[7..0], banco 0, indirizzo 70000000h.",risp:"CS ← CS_INPUT · RD ← MEMRD · dati su BD[7..0] se SWITCH_BUS = 0, su BD[15..8] se SWITCH_BUS = 1.",sol:"s-in-addr s-cs-input s-p4 s-p7",step:"p9"},
+    inB:{t:"INPUT_B — porta in input B",fis:"Come INPUT_A: registro da 1 byte, nessun piedino di indirizzo.",dato:"Seconda porta della lettura a 16 bit → corsia BD[15..8], banco 1, indirizzo 70000001h.",risp:"CS ← CS_INPUT · RD ← MEMRD · dati su BD[15..8] se SWITCH_BUS = 0, su BD[7..0] se SWITCH_BUS = 1.",sol:"s-in-addr s-cs-input s-p4 s-p7",step:"p9"},
+    resetp:{t:"RESET_P — comando, non chip",fis:"Non è un chip sul bus: è un filo che vale 1 quando il programma scrive un byte a 70000002h (banco 2). Va al reset asincrono del flip-flop P_PREMUTO.",dato:"Serve al pulsante P: dopo che una pressione è stata usata, va dimenticata.",risp:"RESET_P = BA31*·BA30·BA29·BA28·BE2·MEMWR · indirizzo 70000002h · usato dall'istruzione SB R0,0x0002(R20) dell'handler.",sol:"s-resp-addr s-resetp s-p6",step:"p9"},
+    pbtn:{t:"Pulsante P e i due flip-flop",fis:"P_PREMUTO ricorda la pressione di P; SWITCH_BUS la congela sul fronte di MEMRD della lettura a 16 bit e comanda quale porta va su quale corsia.",dato:"«un pulsante P che, se premuto, indica che il dato letto da INPUT_A dovrà essere considerato il byte più significativo» — da gestire «attraverso opportune reti logiche».",risp:"FFD P_PREMUTO (D = 1, clock = P, A_RES = RESET + RESET_P·SWITCH_BUS) · FFD SWITCH_BUS · commutazione di DATA_A/DATA_B su BD[7..0]/BD[15..8]. Moduli 00 e 05.",sol:"s-p6 s-p7",step:"p9"},
+    out:{t:"OUTPUT — porta in output",fis:"Scrive all'esterno il byte di INPUT_A nello stesso ciclo in cui viene letto: il suo WR è MEMRD.",dato:"«una porta in output… dovrà essere inviato all'esterno il dato letto da INPUT_A contemporaneamente alla lettura».",risp:"CS ← CS_INPUT·OUTPUT_PORT_READY · WR ← MEMRD · D ← DATA_A · OUTPUT_PORT_READY da un FFD. Modulo 05.",sol:"s-p5",step:"p9"},
+    int:{t:"Interrupt al DLX",fis:"Il filo INT del processore. Vale 1 quando entrambe le porte in input hanno un dato pronto: allora il DLX esegue l'handler.",dato:"Le porte usano «il protocollo di handshake»: avvisano quando hanno un dato.",risp:"INT_DLX = INT_INPUT_A·INT_INPUT_B · handler: LHU da 70000000h, SB a 70000002h, SH a 80000004h, RFE.",sol:"s-int s-code",step:"p10"}
+  };
+  var info=document.getElementById("mapInfo");
+  function show(g){
+    svg.querySelectorAll(".sel").forEach(function(e){e.classList.remove("sel")}); g.classList.add("sel");
+    var k=g.dataset.k, i=g.dataset.i, d=INFO[k]; if(!d) return;
+    function f(s){return s.replace(/\{i\}/g,i).replace(/\{lane\}/g,i!==""?LANE[+i]:"")}
+    info.innerHTML='<h3>'+f(d.t)+'</h3><dl><dt>Cos\'è</dt><dd>'+f(d.fis)+'</dd><dt>Dato del testo</dt><dd>'+f(d.dato)+'</dd><dt>Nella risposta</dt><dd><code>'+f(d.risp)+'</code></dd></dl><div class="links">'+(d.sol?'<button class="go" data-sol="'+d.sol+'">→ righe della soluzione</button>':'')+'<button class="go" data-step="'+d.step+'">→ passo '+d.step.slice(1)+'</button></div>';
+  }
+  svg.addEventListener("click",function(e){var g=e.target.closest("[data-k]"); if(g) show(g)});
+  svg.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){var g=e.target.closest("[data-k]"); if(g){e.preventDefault(); show(g)}}});
+  show(svg.querySelector('[data-k="ram"][data-i="1"]'));
   document.querySelectorAll(".ln").forEach(function(l){
     l.addEventListener("click",function(){
       clear(); l.classList.add("hit");
