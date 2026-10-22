@@ -88,6 +88,12 @@ distinzione non è stata capita.
   `maxTentativi()` (capacità) invece che alle mosse fatte è la stessa fusione fisico/logico del LAB04b:
   dettaglio sotto il pattern 6. Evidenza: trascrizione del 2026-10-21, 14:52, 15:04, 15:11, 16:43, 17:49;
   `stato/giornata.md` 15:09, 16:30, 17:55.
+- [2026-10-22] FI2: LAB06 MasterMind, due spazi di indici fusi. In `sorteggiaCombinazione` v2
+  `values()[i]` invece di `values()[n]`: l'indice del ciclo (posizione) al posto del numero sorteggiato
+  (colore), per cui uscivano sempre `VUOTO, ROSSO, GIALLO, VERDE`; in `calcolaRisposta` v1 il ciclo dei
+  minimi limitato da `tentativo.dim()` (4 posizioni) invece che dai 7 colori. Il secondo l'ha trovato da
+  solo con stampe contro tabella a mano: «sto scorrendo i vettori dei colori, non di una risposta».
+  Evidenza: `stato/giornata.md` 12:44, 15:26, 15:41; `confronto_LAB06.md` §9.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
