@@ -790,12 +790,12 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
   }
   function grid(B,base){
     var rows=[0,1,2,"…",Math.pow(2,B.k)-1], h='<div class="tbl"><table class="bk"><tr><th>riga<small>= valore sui piedini A</small></th>';
-    for(var i=3;i>=0;i--) h+='<th>'+B.chip+'_'+i+'<small>banco '+i+' · BE'+i+' · BD['+(8*i+7)+'..'+(8*i)+']</small><small>CS = '+B.csTxt+'·BE'+i+'</small></th>';
+    for(var i=0;i<4;i++) h+='<th>chip '+B.chip+'_'+i+'<small>banco '+i+' · BE'+i+' · BD['+(8*i+7)+'..'+(8*i)+']</small><small>CS = '+B.csTxt+'·BE'+i+'</small></th>';
     h+='</tr>';
     rows.forEach(function(r){
       if(r==="…"){h+='<tr><td class="r">…</td><td colspan="4" class="r">… '+(Math.pow(2,B.k)-4).toLocaleString("it-IT")+' righe in mezzo …</td></tr>';return}
       h+='<tr><td class="r">'+r.toLocaleString("it-IT")+'</td>';
-      for(var i=3;i>=0;i--){var ad=(base+4*r+i)>>>0; h+='<td class="c" data-ad="'+hex8(ad)+'" title="apri filo per filo">'+hex8(ad)+'h</td>'}
+      for(var i=0;i<4;i++){var ad=(base+4*r+i)>>>0; h+='<td class="c" data-ad="'+hex8(ad)+'" title="apri filo per filo">'+hex8(ad)+'h</td>'}
       h+='</tr>';
     });
     return h+'</table></div>';
@@ -809,7 +809,7 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
       h+='<h3>'+B.nome+' · '+hex8(zz.da)+'h – '+hex8(zz.a-1)+'h</h3>';
       h+='<p>Il blocco è fatto di <b>4 chip da '+B.taglia+'</b> (2^'+B.k+' righe ciascuno), uno per banco. Ogni indirizzo del blocco è <b>una cella di un solo chip</b>: il <b>banco</b> lo dicono gli ultimi 2 bit (→ BE), la <b>riga</b> dentro il chip i bit da BA2 a BA'+(B.k+1)+' (→ piedini A). Quindi sì: cambiando indirizzo tocchi ogni volta una cella diversa, e 4 byte di fila sono la <b>stessa riga di 4 chip diversi</b>, letti insieme in un ciclo. È per questo che i piedini partono da BA2.</p>';
       h+='<p class="eyebrow">Come si spezza l\'indirizzo sui 32 piedini del DLX</p>'+bar(B,"mem");
-      h+='<p class="eyebrow">I 4 chip e le loro righe (premi una cella per vederla filo per filo)</p>'+grid(B,zz.da);
+      h+='<p class="eyebrow">Dentro i 4 chip: chi contiene quale indirizzo</p><p>Leggi la tabella come un foglio a quadretti. <b>Ogni colonna è un chip</b>: sono le 4 scatole impilate in «Un blocco, filo per filo» (banco 0 in alto là, a sinistra qui). <b>Ogni riga è una cella dentro i chip</b>: il numero di riga è quello che arriva sui piedini <code>A</code>. <b>Ogni casella</b> dice quale indirizzo del DLX finisce in quella cella. Esempio: <code>'+hex8(zz.da+5)+'h</code> sta nella colonna del chip 1, riga 1. Nella vista filo per filo, con quell\'indirizzo si accende il chip _1 e c\'è scritto «risponde: riga 1». Leggendo una riga da sinistra a destra trovi 4 indirizzi di fila: la CPU li legge insieme in un ciclo, uno da ogni chip.</p><p class="hint">Premi una casella: la vista filo per filo si apre con quell\'indirizzo.</p>'+grid(B,zz.da);
       h+='<p class="hint">Nella risposta: <code>'+B.chip+' '+hex8(zz.da)+'h:'+hex8(zz.a-1)+'h, 4 banchi da '+B.taglia+'</code> · <code>CS_..._i = '+B.csTxt+'·BEi</code> · <code>A['+(B.k-1)+'..0] ← BA['+(B.k+1)+'..2]</code> · banco i su <code>BD[8i+7..8i]</code> · RD ← MEMRD'+(B.wr?' · WR ← MEMWR':'')+'.</p>';
     } else if(z==="rep"){
       h+='<h3>64000000h – 6FFFFFFFh: nessun chip in più</h3><p>Qui non c\'è niente di montato. Ma il CS dell\'EPROM da 64 MB guarda solo BA31…BA28 = <code>0110</code>, cioè <b>tutta la cifra iniziale 6</b>: per questi indirizzi si accende lo stesso. BA27 e BA26 non arrivano da nessuna parte, quindi il chip non li vede e risponde con la stessa cella.</p>';
