@@ -208,14 +208,14 @@ dell'artefatto; legame banchi–CS–BE a metà, `CS_INPUT` e `RESET_P` non chia
 passi 7 e 9); **piedini, bus dati e interfacciamento per nulla**. Mancano, rispetto alla soluzione:
 passi 8 (piedini, bus dati, schemi pp. 9–12), 9 (porte, pulsante, reti) e 10 (handler).
 
-**Prossimo passo esatto** `[2026-10-20, sera; pomeriggio del 21/10]`: prima 5 minuti sui box
-nuovi dei passi 7 e 9 (`CS_INPUT`, `RESET_P`), poi riprendere la Decisione 2 dai **piedini**, con
-il passo 8 dell'artefatto «Prova DLX 8 gennaio 2025» aperto: rifare l'esempio a 8 byte
-(BA1–0 = banco, BA2 = riga), poi far ricavare a Lorenzo `A[23..0] ← BA[25..2]` per il banco
-da 16 MB e chiedergli quali bit restano fuori da CS e piedini (BA27, BA26 → le 4 repliche).
-Poi leggere la Decisione 3 (10 minuti, la sostanza è fatta) e chiudere la lezione. Poi
-`/lab CALC 02` sulla prova `2023-12-21` a freddo (chiude il 02; il 1032 MB non va guidato
-prima). A fine 02p: `/appunti CALC 02p` dalla traccia.
+**Prossimo passo esatto** `[2026-10-22, per il 23/10]`: `/lab CALC 02` sulla prova
+`2023-12-21` (1032 MB di EPROM in basso, 2 GB di RAM in alto), solo consegne a) e b) per le
+memorie, **a freddo** e con il foglio in 4 riquadri (prontuario §0b): ① dati, ② linea degli
+indirizzi a mano, ③ tabella della risposta colonna per colonna, ④ controlli. Lorenzo si aspetta
+di aver bisogno di un po' d'aiuto: per §7.2 il lab chiude il 02 solo se svolto a freddo; se serve
+aiuto, dargli solo la **domanda del riquadro** («cosa sai? cosa cerchi in questa colonna?»),
+mai il valore, e annotare dove. Poi confronto con la soluzione ufficiale. Il 1032 MB non è mai
+stato guidato. Dopo: `/lezione CALC 03` (24/10). A fine 02p: `/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
 scheda non compaiono nei testi pubblicati; libro di testo non reperito.
