@@ -8,3 +8,4 @@
 12:44 · FI2 · LAB06 sorteggiaCombinazione v2: values()[i] invece di values()[n] (indice del ciclo al posto del numero sorteggiato: escono sempre VUOTO,ROSSO,GIALLO,VERDE); this.segreta (campo) invece del parametro; Random creato a ogni giro.
 13:02 · FI2 · LAB06 MasterMind: costruttore, combinazioneSegreta, sorteggiaCombinazione (testSorteggioIniziale verde ×5), occorrenze scritti da Lorenzo; calcolaRisposta impostata a passi, da scrivere dopo pranzo (ripresa: passo 1, conteggio dei neri).
 15:01 · FI2 · LAB06 ripreso dopo pranzo su calcolaRisposta (passo 1: neri).
+15:26 · FI2 · LAB06 calcolaRisposta v1 scritta da Lorenzo: neri giusti; ciclo dei minimi fino a tentativo.dim() (4) invece dei 7 colori; riempimento con condizioni su neri/bianchi che non cambiano (tutto NERO se neri>0). Lorenzo chiede di trovare il perché da solo → guida col passo 8 (stampe vs tabella a mano).
