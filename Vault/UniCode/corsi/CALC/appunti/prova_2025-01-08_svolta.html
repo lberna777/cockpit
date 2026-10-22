@@ -430,7 +430,7 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
     {nome:"RAM 2 GB",ini:"80000000",fin:"FFFFFFFF",esp:31}
   ];
   function bin(h){return h.split("").map(function(c){return parseInt(c,16).toString(2).padStart(4,"0")}).join("")}
-  var box=document.getElementById("bitTables");
+  var btBox=document.getElementById("bitTables");
   blocchi.forEach(function(b){
     var a=bin(b.ini), z=bin(b.fin), n=0; while(n<32 && a[n]===z[n]) n++;
     var t='<div class="tbl"><table class="bits"><caption><b>'+b.nome+'</b> · <span class="m">'+b.ini+'h</span> – <span class="m">'+b.fin+'h</span> · firma <span class="m">BA31'+(n>1?'..BA'+(32-n):'')+' = '+a.slice(0,n).split("").join(" ")+'</span> · cambiano '+(32-n)+' bit = 2^'+b.esp+' '+(32-n===b.esp?'<span class="ok">✓</span>':'✗')+'</caption>';
@@ -445,7 +445,7 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
     t+='<tr class="eq"><td class="l">uguali?</td>';
     for(var i=0;i<32;i++){t+='<td class="'+(i%4===0&&i>0?'g':'')+'">'+(i<n?'=':'≠')+'</td>'}
     t+='</tr></table></div>';
-    box.insertAdjacentHTML("beforeend",t);
+    btBox.insertAdjacentHTML("beforeend",t);
   });
 
   // Collegamenti passo ↔ soluzione (delegati: valgono anche per i pulsanti creati dalla mappa)
