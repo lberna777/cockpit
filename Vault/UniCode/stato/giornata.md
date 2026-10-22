@@ -9,3 +9,4 @@
 13:02 · FI2 · LAB06 MasterMind: costruttore, combinazioneSegreta, sorteggiaCombinazione (testSorteggioIniziale verde ×5), occorrenze scritti da Lorenzo; calcolaRisposta impostata a passi, da scrivere dopo pranzo (ripresa: passo 1, conteggio dei neri).
 15:01 · FI2 · LAB06 ripreso dopo pranzo su calcolaRisposta (passo 1: neri).
 15:26 · FI2 · LAB06 calcolaRisposta v1 scritta da Lorenzo: neri giusti; ciclo dei minimi fino a tentativo.dim() (4) invece dei 7 colori; riempimento con condizioni su neri/bianchi che non cambiano (tutto NERO se neri>0). Lorenzo chiede di trovare il perché da solo → guida col passo 8 (stampe vs tabella a mano).
+15:41 · FI2 · LAB06 calcolaRisposta: bug dei minimi trovato da Lorenzo con stampe vs tabella a mano (passo 8): ciclo sui colori limitato da tentativo.dim() → «sto scorrendo i vettori dei colori, non di una risposta». Posizioni e colori fusi (pattern 1); riempimento della risposta già corretto da solo.
