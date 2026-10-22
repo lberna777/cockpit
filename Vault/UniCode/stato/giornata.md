@@ -22,3 +22,4 @@
 17:19 · CALC · 02: piedini capiti con la vista filo per filo: EPROM 64 MB A[23..0] ← BA[25..2]; «ogni byte avanti cambio banco» detto da lui.
 17:21 · CALC · 02: piedini EPROM 512 MB A[26..0] ← BA[28..2] da solo con i tre passi (esponente, piedini, fili).
 17:23 · CALC · lezione 02 finita (Decisione 3 nella sostanza già fatta; RESET_P = comando → ·MEMWR, p. 47). Modulo 02 non ancora chiuso: /lab CALC 02 a freddo il 23/10, come in Plancia.
+17:28 · CALC · artefatto: aggiunte «Mappa della memoria» (linea degli indirizzi cliccabile → blocchi divisi in banchi e righe, bit sui piedini) e «Su carta» (foglio in 4 riquadri: dati, linea, tabella della risposta, controlli); prontuario §0b.
