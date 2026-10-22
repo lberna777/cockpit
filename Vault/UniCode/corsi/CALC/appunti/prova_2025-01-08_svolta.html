@@ -494,8 +494,8 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
   BL.forEach(function(r){
     el("text",{x:20,y:r.y+18,"class":"h"},null,r.nome); el("text",{x:20,y:r.y+33,"class":"s"},null,r.range);
     line(285,r.y+25,215,r.y+25);
-    box("cs-"+r.k,null,215,r.y,140,50,"gate",["CS "+r.nome.split(" ")[0]+(r.k==="ram"?"":" "+r.nome.split(" ")[1]+" "+r.nome.split(" ")[2]),r.cs,"· BEi → 4 CS"]);
-    line(355,r.y+25,COL[0],r.y+25,"cs");
+    box("cs-"+r.k,null,200,r.y,165,50,"gate",["CS "+r.nome.split(" ")[0]+(r.k==="ram"?"":" "+r.nome.split(" ")[1]+" "+r.nome.split(" ")[2]),r.cs,"· BEi → 4 CS"]);
+    line(365,r.y+25,COL[0],r.y+25,"cs");
     line(190,r.y+62,960,r.y+62,"addr dash");
     for(var b=3;b>=0;b--){
       var x=COL[3-b]; line(x+CW/2,r.y+50,x+CW/2,r.y+62,"addr");
@@ -506,8 +506,8 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
   var yp=510;
   el("text",{x:20,y:yp+18,"class":"h"},null,"Porte (70000000h)"); el("text",{x:20,y:yp+33,"class":"s"},null,"zona 7xxxxxxxh");
   line(285,yp+25,215,yp+25);
-  box("cs-in",null,215,yp,140,50,"gate",["CS_INPUT","BA31*·BA30·BA29·BA28","· BE0·BE1"]);
-  line(355,yp+25,COL[0],yp+25,"cs");
+  box("cs-in",null,200,yp,165,50,"gate",["CS_INPUT","BA31*·BA30·BA29·BA28","· BE0·BE1"]);
+  line(365,yp+25,COL[0],yp+25,"cs");
   box("resetp",null,COL[1],yp,CW,50,"later",["RESET_P","comando, BE2·MEMWR","70000002h"]);
   box("inB",null,COL[2],yp,CW,50,"chip",["INPUT_B","8 bit · RD","nessun piedino A"]);
   box("inA",null,COL[3],yp,CW,50,"chip",["INPUT_A","8 bit · RD","nessun piedino A"]);
