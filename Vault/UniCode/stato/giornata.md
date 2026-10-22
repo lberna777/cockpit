@@ -27,3 +27,4 @@
 17:37 · CALC · giudizio di Lorenzo: sicurezza 1/5 a fare da solo la tabella della risposta; la fatica è «dove mi sto muovendo, cosa cerco, cosa so» e la comprensione fisica di ciò che controlla (→ artefatto: dati/incognite, foglio su carta, mappa, filo per filo).
 17:37 · PIANO · 23/10 solo CALC: /lab CALC 02 a freddo sulla 2023-12-21 la mattina; altro solo se avanza tempo (decisione di Lorenzo).
 17:38 · PIANO · 23/10 nella Plancia: lab CALC 02 a freddo 09:45–11:30, confronto 11:45–13:00, /chiudi 14:00; pianificazione.md: corretto il commento di «giorno:» sovrascritto da un sed del 20/10.
+17:39 · FI2 · revisione errori: 1 nuovo (riempimento della Risposta su condizioni che non cambiano), 3 ricorrenze (trasv. 1 ×2 posizioni/colori, trasv. 6 values().length e nextInt, parametro/campo fusi). CALC: 0.
