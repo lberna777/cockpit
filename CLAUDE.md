@@ -59,13 +59,17 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 
 La memoria vive in `~/cockpit/Vault` ed è **iniettata automaticamente** a ogni avvio dal
 SessionStart hook (`scripts/memory_inject.sh`) — non devi fare nulla per "caricarla", è già
-in contesto. L'hook inietta un artefatto compatto: l'indice del vault + gli ultimi recap.
+in contesto. L'hook inietta pochi KB: dove cercare, le note curate di `Vault/claude/` e gli
+ultimi tre recap (rifatta piccola il 2026-10-22, decisione di Lorenzo; prima erano ~28 KB).
 
 - **Ricerca nel vault**: usa `rg` (ripgrep) dentro `~/cockpit/Vault`. È il motore di ricerca
   della memoria (deciso dal bake-off G3: `Vault/claude/graphify_bakeoff.md`).
-- **Indice**: `Vault/index.md` (rigenerabile con `python3 scripts/build_index.py`).
-- **Recap giornalieri**: `Vault/recap/YYYY-MM-DD.md` (generati da `scripts/recap_generator.py`,
-  consolidati da `scripts/consolidate_recaps.py`).
+- **Indice**: `Vault/index.md`, non iniettato: si apre se serve. Lo rigenera `scripts/build_index.py`
+  dal timer serale del laptop.
+- **Recap giornalieri**: `Vault/recap/YYYY-MM-DD.md`, solo fatti contati (eventi di studio per corso,
+  moduli chiusi, commit che dicono qualcosa per repo), niente sintesi generate. Li scrive
+  `scripts/recap_generator.py` dal timer serale del laptop (`giornata_laptop.sh`), che li committa;
+  nel cloud non si generano, perché lì mancano le altre repo.
 - **Note curate per Claude**: `Vault/claude/`.
 - **Studio universitario**: `Vault/UniCode` (la cartella reale; `~/UniCode` è il symlink).
 
@@ -143,8 +147,8 @@ di scrivere, non ricopiarlo qui.
   affida l'archiviazione della vecchia. Hook e comando sono identici in tutte le repo padri.
 - **Skill custom**: `lorenzo-skills` (audio-dsp-debug, game-scope-guard, studia, unicode-output-gate,
   unicode-session-close, unicode-link-note).
-- **Recap del giorno**: annota le attività in `Vault/attivita_oggi.md` durante la giornata;
-  il recap le raccoglie e poi archivia il file.
+- **Cosa è successo nella giornata**: lo studio va in `Vault/UniCode/stato/giornata.md`, tutto il
+  resto nel diario della Plancia. `Vault/attivita_oggi.md` non esiste più (dal 2026-10-22).
 
 ## Modelli: chi pensa e chi esegue (advisor pattern)
 

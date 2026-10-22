@@ -1,9 +1,6 @@
-# Vault Index — 2026-10-21
+# Vault Index — 2026-10-22
 
-> Indice compatto generato da `build_index.py`. 227 note. Per il contenuto, apri la nota indicata.
-
-## (root)  (1)
-- [[attivita_oggi.md|attivita_oggi.md]] — Attività — 2026-06-24
+> Indice compatto generato da `build_index.py`. 207 note. Per il contenuto, apri la nota indicata.
 
 ## UniCode  (2)
 - [[UniCode/CLAUDE.md|CLAUDE.md]] — CLAUDE.md — Studio Universitario Lorenzo
@@ -224,7 +221,7 @@
 - [[UniCode/log/sessioni_pre-2026-08.md|sessioni_pre-2026-08.md]] — Log Sessioni — Studio Attivo
 - [[UniCode/log/tracker_pre-2026-08.md|tracker_pre-2026-08.md]] — Tracker Ripasso — Spaced Repetition
 
-## UniCode/log/giornate_dettaglio  (22)
+## UniCode/log/giornate_dettaglio  (23)
 - [[UniCode/log/giornate_dettaglio/2026-09-02.md|2026-09-02.md]] — Giornata 2026-09-02
 - [[UniCode/log/giornate_dettaglio/2026-09-14.md|2026-09-14.md]] — Giornata 2026-09-14
 - [[UniCode/log/giornate_dettaglio/2026-09-15.md|2026-09-15.md]] — Giornata 2026-09-15
@@ -247,6 +244,7 @@
 - [[UniCode/log/giornate_dettaglio/2026-10-16.md|2026-10-16.md]] — Giornata 2026-10-16
 - [[UniCode/log/giornate_dettaglio/2026-10-19.md|2026-10-19.md]] — Giornata 2026-10-19
 - [[UniCode/log/giornate_dettaglio/2026-10-20.md|2026-10-20.md]] — Giornata 2026-10-20
+- [[UniCode/log/giornate_dettaglio/2026-10-21.md|2026-10-21.md]] — Giornata 2026-10-21
 
 ## UniCode/piano  (1)
 - [[UniCode/piano/piano_laurea.md|piano_laurea.md]] — Piano di laurea — Ingegneria Informatica T
@@ -254,7 +252,8 @@
 ## UniCode/plans  (1)
 - [[UniCode/plans/riallineamento_comandi.md|riallineamento_comandi.md]] — Riallineamento dei dodici comandi — inventario di lettura
 
-## UniCode/plans/handoffs  (6)
+## UniCode/plans/handoffs  (7)
+- [[UniCode/plans/handoffs/HANDOFF_FI2-LAB06_2026-10-22.md|HANDOFF_FI2-LAB06_2026-10-22.md]] — Handoff — FI2 LAB06 MasterMind (chiuso) · 2026-10-22
 - [[UniCode/plans/handoffs/HANDOFF_auto-precompact_2026-06-22_143738.md|HANDOFF_auto-precompact_2026-06-22_143738.md]] — Auto-Handoff (Pre-Compaction Safety Net)
 - [[UniCode/plans/handoffs/HANDOFF_auto-precompact_2026-06-23_153826.md|HANDOFF_auto-precompact_2026-06-23_153826.md]] — Auto-Handoff (Pre-Compaction Safety Net)
 - [[UniCode/plans/handoffs/HANDOFF_diritto-d12-d13_2026-06-04.md|HANDOFF_diritto-d12-d13_2026-06-04.md]] — D12 Autoverifica completata · D13 Lezione + Appunti Grezzi pronti
@@ -266,9 +265,11 @@
 - [[UniCode/profilo/errori.md|errori.md]] — Errori ricorrenti
 - [[UniCode/profilo/studente.md|studente.md]] — Profilo di studio — Lorenzo
 
-## UniCode/stato  (4)
+## UniCode/stato  (6)
+- [[UniCode/stato/briefing.md|briefing.md]] — Briefing — 2026-10-22
+- [[UniCode/stato/cloud_avvisi.md|cloud_avvisi.md]] — - `origin/claude/consolidamento-2026-10-20` ha lavoro di studio non in master e 
 - [[UniCode/stato/corrente.md|corrente.md]] — Stato Corrente — Studio Attivo
-- [[UniCode/stato/giornata.md|giornata.md]] — Giornata 2026-10-21
+- [[UniCode/stato/giornata.md|giornata.md]] — Giornata 2026-10-22
 - [[UniCode/stato/pianificazione.md|pianificazione.md]] — Pianificazione
 - [[UniCode/stato/tracker.md|tracker.md]] — Tracker ripasso
 
@@ -278,36 +279,13 @@
 - [[claude/come_lavorare.md|come_lavorare.md]] — Come lavorare — gruppi di chat, repo e cloud
 - [[claude/graphify_bakeoff.md|graphify_bakeoff.md]] — GATE G3 — graphify vs rg (esito)
 
-## recap  (33)
+## recap  (10)
 - [[recap/2026-06-17.md|2026-06-17.md]] — Recap 2026-06-17
 - [[recap/2026-06-18.md|2026-06-18.md]] — Recap 2026-06-18
-- [[recap/2026-06-19.md|2026-06-19.md]] — Recap 2026-06-19
-- [[recap/2026-06-20.md|2026-06-20.md]] — Recap 2026-06-20
 - [[recap/2026-06-22.md|2026-06-22.md]] — Recap 2026-06-22
-- [[recap/2026-06-23.md|2026-06-23.md]] — Recap 2026-06-23
-- [[recap/2026-06-24.md|2026-06-24.md]] — Recap 2026-06-24
-- [[recap/2026-06-26.md|2026-06-26.md]] — Recap 2026-06-26
-- [[recap/2026-06-29.md|2026-06-29.md]] — Recap 2026-06-29
-- [[recap/2026-06-30.md|2026-06-30.md]] — Recap 2026-06-30
-- [[recap/2026-07-01.md|2026-07-01.md]] — Recap 2026-07-01
-- [[recap/2026-07-02.md|2026-07-02.md]] — Recap 2026-07-02
-- [[recap/2026-07-05.md|2026-07-05.md]] — Recap 2026-07-05
-- [[recap/2026-07-06.md|2026-07-06.md]] — Recap 2026-07-06
-- [[recap/2026-07-07.md|2026-07-07.md]] — Recap 2026-07-07
-- [[recap/2026-07-08.md|2026-07-08.md]] — Recap 2026-07-08
-- [[recap/2026-07-09.md|2026-07-09.md]] — Recap 2026-07-09
-- [[recap/2026-07-10.md|2026-07-10.md]] — Recap 2026-07-10
-- [[recap/2026-07-12.md|2026-07-12.md]] — Recap 2026-07-12
-- [[recap/2026-07-13.md|2026-07-13.md]] — Recap 2026-07-13
-- [[recap/2026-07-14.md|2026-07-14.md]] — Recap 2026-07-14
-- [[recap/2026-07-15.md|2026-07-15.md]] — Recap 2026-07-15
-- [[recap/2026-07-16.md|2026-07-16.md]] — Recap 2026-07-16
-- [[recap/2026-07-17.md|2026-07-17.md]] — Recap 2026-07-17
 - [[recap/2026-07-18.md|2026-07-18.md]] — Recap 2026-07-18
-- [[recap/2026-07-22.md|2026-07-22.md]] — Recap 2026-07-22
 - [[recap/2026-07-24.md|2026-07-24.md]] — Recap 2026-07-24
 - [[recap/2026-07-25.md|2026-07-25.md]] — Recap 2026-07-25
-- [[recap/2026-07-31.md|2026-07-31.md]] — Recap 2026-07-31
 - [[recap/2026-08-01.md|2026-08-01.md]] — Recap 2026-08-01
 - [[recap/2026-10-16.md|2026-10-16.md]] — Recap 2026-10-16
 - [[recap/2026-10-19.md|2026-10-19.md]] — Recap 2026-10-19
