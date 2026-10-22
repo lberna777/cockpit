@@ -121,6 +121,41 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
   <p class="lede">In alto il sistema com'è fatto fisicamente: premi un pezzo per vedere a quale dato del testo e a quale riga della risposta corrisponde. Sotto, a sinistra lo svolgimento nell'ordine in cui lo fai all'esame e a destra la soluzione ufficiale intera: un pulsante <b>→</b> accende le righe della soluzione, una riga della soluzione riporta al suo passo.</p>
 </header>
 
+<section class="map" id="dati" aria-label="Cosa sai e cosa devi trovare">
+  <h2>Cosa sai, cosa devi trovare</h2>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px">
+    <div style="min-width:0">
+      <p class="eyebrow">Lo sai già (testo + regole fisse del DLX)</p>
+      <div class="tbl"><table class="t">
+        <tr><th>Dato</th><th>Da dove</th></tr>
+        <tr><td>1600 MB di EPROM, in basso</td><td>testo</td></tr>
+        <tr><td>2 GB di RAM, in alto</td><td>testo</td></tr>
+        <tr><td>2 porte in input da 8 bit, lette insieme (16 bit); 1 porta in output; pulsante P</td><td>testo</td></tr>
+        <tr><td>dato finale a <code>80000004h</code>; R20–R25 liberi</td><td>testo</td></tr>
+        <tr><td>indirizzi a 32 bit: <code>00000000h–FFFFFFFFh</code></td><td>DLX, sempre</td></tr>
+        <tr><td>bus dati a 32 bit, chip a 8 bit → <b>4 banchi</b>, BA1–BA0 sostituiti da <code>BE3–BE0</code></td><td>DLX, sempre</td></tr>
+        <tr><td>EPROM: solo RD · RAM: RD e WR</td><td>sempre</td></tr>
+      </table></div>
+    </div>
+    <div style="min-width:0">
+      <p class="eyebrow">Devi trovare (la risposta)</p>
+      <div class="tbl"><table class="t">
+        <tr><th>Incognita</th><th>Come, in una riga</th><th>Passo</th></tr>
+        <tr><td>blocchi</td><td>scomponi in potenze di 2: 1024 + 512 + 64</td><td>1</td></tr>
+        <tr><td>range di ogni blocco</td><td>dal più grande in su; fine = inizio + taglia − 1</td><td>2</td></tr>
+        <tr><td>indirizzo delle porte</td><td>tondo, nel buco libero → <code>70000000h</code></td><td>4</td></tr>
+        <tr><td>CS di ogni blocco</td><td>bit della firma che lo separano dagli altri</td><td>3, 5</td></tr>
+        <tr><td>taglia di un banco</td><td>blocco / 4</td><td>7</td></tr>
+        <tr><td>CS di ogni banco</td><td>CS del blocco · <code>BEi</code></td><td>7</td></tr>
+        <tr><td><b>piedini di indirizzo</b></td><td>banco da 2^k → <code>A[k−1..0] ← BA[k+1..2]</code></td><td>8</td></tr>
+        <tr><td>piedini dati</td><td>banco i → <code>BD[8i+7..8i]</code></td><td>8</td></tr>
+        <tr><td>porte, pulsante, handler</td><td>moduli 04–05</td><td>9, 10</td></tr>
+      </table></div>
+    </div>
+  </div>
+  <p class="hint">Delle incognite, solo le prime quattro chiedono ragionamento; le altre sono formule fisse applicate ai numeri trovati.</p>
+</section>
+
 <section class="map" id="zoom" aria-label="Un blocco filo per filo">
   <h2>Un blocco, filo per filo</h2>
   <p class="hint">In alto i piedini del DLX, uno per filo. Ogni filo scende dritto: i <b style="color:var(--ok)">verdi</b> vanno alle porte AND che fanno i CS, i <b style="color:var(--accent)">blu</b> ai piedini <code>A</code> dei chip, i grigi con ✕ non vanno da nessuna parte (repliche), BA1 e BA0 non esistono (al loro posto i BE). Scrivi un indirizzo: i fili mostrano il suo valore e si accende il chip che risponde.</p>
