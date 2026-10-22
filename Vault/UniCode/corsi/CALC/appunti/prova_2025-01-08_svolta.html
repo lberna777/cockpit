@@ -762,7 +762,7 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
     {z:"ram",da:0x80000000,a:G,nome:"RAM 2 GB",col:"var(--firma)"}
   ];
   var mx=function(v){return 40+v/G*920};
-  function mel(tag,a,p,txt){return el(tag,a,p||M,txt)}
+  function mel(tag,a,x,y){var par=(x&&x.nodeType)?x:((y&&y.nodeType)?y:M), t=(x&&x.nodeType)?y:x; return el(tag,a,par,t==null?null:t)}
   for(var h=0;h<=16;h++){var x=mx(h*0x10000000); mel("path",{d:"M"+x+" 22 L"+x+" 86",style:"stroke:var(--rule);stroke-width:1"}); if(h<16) mel("text",{x:x+(920/32)-6,y:18,"class":"s"},h.toString(16).toUpperCase()+"…")}
   ZONE.forEach(function(zz){
     var g=mel("g",{"data-z":zz.z,tabindex:"0",role:"button"});
