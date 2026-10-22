@@ -18,3 +18,4 @@
 16:02 · SISTEMA · automatismi corretti (chat Infrastruttura): autosave cloud non committa più merge in conflitto né marcatori, pre-commit contro i marcatori, traccia di fine sessione del laptop committata, log del mese con merge=union.
 16:17 · CALC · 02: piedini — «persissimo», non inquadra a quale parte della soluzione serve; ripreso dallo scopo pratico (schema di interfacciamento p. 9).
 16:27 · CALC · 02: chiesto da Lorenzo uno schema fisico del sistema; aggiunto all'artefatto «Prova DLX 8 gennaio 2025» (chip, bus, decodifica, porte → dato del testo e riga della soluzione).
+17:15 · CALC · 02: lo schema a blocchi non basta («voglio vedere i singoli piedini e fili»); aggiunte all'artefatto la tabella dati/incognite e la vista «filo per filo» (piedini DLX → AND/CS e A[..] dei 4 chip, indirizzo di prova interattivo).

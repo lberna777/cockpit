@@ -660,7 +660,7 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
       if(B.wr){zel("path",{d:"M"+px("MEMWR")+" "+(y+78)+" L"+cx1+" "+(y+78),style:"fill:none;stroke:var(--muted);stroke-width:1.2"}); zel("circle",{cx:px("MEMWR"),cy:y+78,r:2.5,style:"fill:var(--muted)"})}
       zel("rect",{x:cx1,y:cy,width:cx2-cx1,height:ch,rx:5,style:"fill:"+(on?"var(--hit)":"var(--accent-soft)")+";stroke:var(--ink);stroke-width:"+(on?2.5:1.2)});
       var tf=on?"var(--hit-ink)":"var(--ink)";
-      zel("text",{x:cx1+4,y:y+26,style:"font-size:9px;fill:"+tf},"CS");
+      zel("text",{x:cx1+4,y:y+44,style:"font-size:9px;fill:"+tf},"CS");
       zel("text",{x:cx1+4,y:y+63,style:"font-size:9px;fill:"+tf},"RD");
       if(B.wr) zel("text",{x:cx1+4,y:y+81,style:"font-size:9px;fill:"+tf},"WR");
       for(var n=2;n<=firstPin;n++){var x=px("BA"+n); zel("circle",{cx:x,cy:cy,r:2.5,style:"fill:var(--accent)"}); zel("text",{x:x+3,y:cy+5,transform:"rotate(90 "+(x+3)+" "+(cy+5)+")",style:"font-size:8.5px;fill:"+tf},"A"+(n-2))}
