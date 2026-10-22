@@ -175,6 +175,35 @@ table.bk td.r{color:var(--muted);text-align:left;white-space:nowrap}
   <p class="hint">Delle incognite, solo le prime quattro chiedono ragionamento; le altre sono formule fisse applicate ai numeri trovati.</p>
 </section>
 
+<section class="map" id="carta" aria-label="Su carta">
+  <h2>Su carta: come impostare il foglio</h2>
+  <p class="hint">Quattro riquadri, sempre nello stesso ordine. Il primo e il secondo sono i dati; il terzo è la risposta da riempire colonna per colonna; il quarto sono i controlli. Qui sotto riempiti per la prova dell'8/01/2025.</p>
+  <div class="tbl"><pre class="code">① DATI (dal testo, 1 minuto)
+   EPROM 1600 MB in basso · RAM 2 GB in alto · porte: IN_A, IN_B (8+8 = 16 bit), OUT, pulsante P
+   DLX fisso: 32 bit indirizzo · bus dati 32 → 4 banchi · BA1,BA0 → BE3..BE0 · EPROM solo RD
+
+② LINEA DEGLI INDIRIZZI (disegnata a mano, 16 tacche = prima cifra hex)
+   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+   |=== EPROM 1 GB ===|== 512 ==|64|..|PRT|============ RAM 2 GB ============|
+   0000…            3FFF… 4000… 5FFF… 6000… 63FF… 7000…  8000…           FFFF…
+                                    └ buco 6400…7FFF: qui le porte (tondo: 7000…)
+
+③ TABELLA DELLA RISPOSTA (una riga per blocco, si riempie da sinistra a destra)
+   blocco  | taglia | inizio–fine   | firma     | CS blocco        | banco    | A ← BA          | WR?
+   EPROM1G | 2^30   | 0000…–3FFF…   | 00        | BA31*·BA30*      | 256MB=2^28 | A[27..0]←BA[29..2] | no
+   EPROM512| 2^29   | 4000…–5FFF…   | 010       | BA31*·BA30·BA29* | 128MB=2^27 | A[26..0]←BA[28..2] | no
+   EPROM64 | 2^26   | 6000…–63FF…   | 011000    | …·BA28* (4 bit)  | 16MB=2^24  | A[23..0]←BA[25..2] | no
+   porte   | 2 byte | 7000 0000/1   | 0111 (scelta) | BA31*·BA30·BA29·BA28 | —   | nessuno           | —
+   RAM     | 2^31   | 8000…–FFFF…   | 1         | BA31             | 512MB=2^29 | A[28..0]←BA[30..2] | sì
+   poi, per ogni blocco: 4 righe CS_…_i = CS blocco · BEi  ·  banco i su BD[8i+7..8i]
+
+④ CONTROLLI (30 secondi)
+   □ ogni taglia sommata torna (1024+512+64 = 1600)   □ indirizzi a 8 cifre
+   □ bit che cambiano = esponente della taglia         □ ogni coppia di CS ha un bit opposto
+   □ repliche solo in zone libere (64 MB → 6xxx…: ok)</pre></div>
+  <p class="hint">Le colonne di ③ sono le incognite della tabella sopra, nell'ordine in cui si ricavano: ognuna usa solo le colonne alla sua sinistra.</p>
+</section>
+
 <section class="map" id="spazio" aria-label="Mappa della memoria">
   <h2>Mappa della memoria</h2>
   <p class="hint">Lo spazio del DLX, da <code>00000000h</code> a <code>FFFFFFFFh</code>, in scala: ogni tacca è una cifra esadecimale iniziale (256 MB). Premi una zona per aprire chi la occupa, diviso nei suoi banchi, e come l'indirizzo si spezza sui piedini.</p>
