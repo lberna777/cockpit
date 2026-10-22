@@ -2,7 +2,7 @@
 
 **Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-22
 
-- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
+- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02`: lezione finita il 22/10 (prova 2025-01-08 svolta: mappa, CS, banchi, piedini); si chiude con `/lab CALC 02` a freddo il **23/10** (prova 2023-12-21). ⚠️ Calendario indietro: 03–05 ancora da aprire.
   Sezione in fondo.
 - `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · ✅ `LAB06` MasterMind **chiuso il 22/10** (34/34 verdi, **guidato**: da rifare a freddo); `calcolaRisposta` pensata da Lorenzo, bug dei minimi trovato da lui con stampe vs tabella. Codice e confronto (12 punti) in `esame_FI2/svolti/LAB06_MasterMind/`. Prossima voce: `LAB07` MyCalendar (`/lab FI2 LAB07`).
 
