@@ -156,6 +156,13 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
   <p class="hint">Delle incognite, solo le prime quattro chiedono ragionamento; le altre sono formule fisse applicate ai numeri trovati.</p>
 </section>
 
+<section class="map" id="spazio" aria-label="Mappa della memoria">
+  <h2>Mappa della memoria</h2>
+  <p class="hint">Lo spazio del DLX, da <code>00000000h</code> a <code>FFFFFFFFh</code>, in scala: ogni tacca è una cifra esadecimale iniziale (256 MB). Premi una zona per aprire chi la occupa, diviso nei suoi banchi, e come l'indirizzo si spezza sui piedini.</p>
+  <div class="mapsvg"><svg id="msvg" viewBox="0 0 1000 120" role="img" aria-label="Spazio di indirizzamento diviso tra i dispositivi"></svg></div>
+  <div class="info" id="mInfo" aria-live="polite"></div>
+</section>
+
 <section class="map" id="zoom" aria-label="Un blocco filo per filo">
   <h2>Un blocco, filo per filo</h2>
   <p class="hint">In alto i piedini del DLX, uno per filo. Ogni filo scende dritto: i <b style="color:var(--ok)">verdi</b> vanno alle porte AND che fanno i CS, i <b style="color:var(--accent)">blu</b> ai piedini <code>A</code> dei chip, i grigi con ✕ non vanno da nessuna parte (repliche), BA1 e BA0 non esistono (al loro posto i BE). Scrivi un indirizzo: i fili mostrano il suo valore e si accende il chip che risponde.</p>
