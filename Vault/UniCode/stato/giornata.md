@@ -21,3 +21,4 @@
 17:15 · CALC · 02: lo schema a blocchi non basta («voglio vedere i singoli piedini e fili»); aggiunte all'artefatto la tabella dati/incognite e la vista «filo per filo» (piedini DLX → AND/CS e A[..] dei 4 chip, indirizzo di prova interattivo).
 17:19 · CALC · 02: piedini capiti con la vista filo per filo: EPROM 64 MB A[23..0] ← BA[25..2]; «ogni byte avanti cambio banco» detto da lui.
 17:21 · CALC · 02: piedini EPROM 512 MB A[26..0] ← BA[28..2] da solo con i tre passi (esponente, piedini, fili).
+17:23 · CALC · lezione 02 finita (Decisione 3 nella sostanza già fatta; RESET_P = comando → ·MEMWR, p. 47). Modulo 02 non ancora chiuso: /lab CALC 02 a freddo il 23/10, come in Plancia.
