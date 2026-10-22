@@ -1,6 +1,6 @@
-# Vault Index — 2026-10-08
+# Vault Index — 2026-10-21
 
-> Indice compatto generato da `build_index.py`. 210 note. Per il contenuto, apri la nota indicata.
+> Indice compatto generato da `build_index.py`. 227 note. Per il contenuto, apri la nota indicata.
 
 ## (root)  (1)
 - [[attivita_oggi.md|attivita_oggi.md]] — Attività — 2026-06-24
@@ -12,7 +12,7 @@
 ## UniCode/.backups  (1)
 - [[UniCode/.backups/2026-05-22T14-21-48-681Z__master_map_studio.md|2026-05-22T14-21-48-681Z__master_map_studio.md]] — Master Map — Studio Attivo Universitario
 
-## UniCode/.claude/commands  (13)
+## UniCode/.claude/commands  (14)
 - [[UniCode/.claude/commands/appunti.md|appunti.md]] — Il parametro passato è: "$ARGUMENTS"
 - [[UniCode/.claude/commands/chiudi.md|chiudi.md]] — > **Questo comando è facoltativo.** La traccia meccanica della sessione la scriv
 - [[UniCode/.claude/commands/flusso.md|flusso.md]] — Il parametro passato è: "$ARGUMENTS"
@@ -20,6 +20,7 @@
 - [[UniCode/.claude/commands/lacune.md|lacune.md]] — **Carica il contesto — in parallelo**
 - [[UniCode/.claude/commands/lezione.md|lezione.md]] — Il parametro passato è: "$ARGUMENTS"
 - [[UniCode/.claude/commands/pdf-batch.md|pdf-batch.md]] — Il parametro passato è: "$ARGUMENTS"
+- [[UniCode/.claude/commands/pianifica.md|pianifica.md]] — > Regola di Lorenzo del 2026-10-08: **lo studio non resta mai senza data** e vie
 - [[UniCode/.claude/commands/piano.md|piano.md]] — Il briefing è già in contesto: **non rileggere i file di stato che contiene**. L
 - [[UniCode/.claude/commands/ripassa.md|ripassa.md]] — Il parametro passato è: "$ARGUMENTS"
 - [[UniCode/.claude/commands/sessione.md|sessione.md]] — Il parametro passato è: "$ARGUMENTS"
@@ -163,11 +164,16 @@
 - [[UniCode/corsi/CALC/fonti.md|fonti.md]] — CALC — Calcolatori Elettronici T · fonti
 - [[UniCode/corsi/CALC/percorso.md|percorso.md]] — CALC — Calcolatori Elettronici T · percorso
 
-## UniCode/corsi/CALC/appunti  (1)
+## UniCode/corsi/CALC/appunti  (2)
+- [[UniCode/corsi/CALC/appunti/cheatsheet_conversioni_CALC.md|cheatsheet_conversioni_CALC.md]] — Cheatsheet — conversioni per il mapping (CALC)
 - [[UniCode/corsi/CALC/appunti/prontuario_CALC.md|prontuario_CALC.md]] — Prontuario d'esame — CALC
 
-## UniCode/corsi/CALC/lezioni  (1)
+## UniCode/corsi/CALC/grezzi  (1)
+- [[UniCode/corsi/CALC/grezzi/traccia_02p_2026-10-08.md|traccia_02p_2026-10-08.md]] — Traccia di sessione — CALC 02p, 2026-10-08
+
+## UniCode/corsi/CALC/lezioni  (2)
 - [[UniCode/corsi/CALC/lezioni/lezione_02_mapping_decodifica.md|lezione_02_mapping_decodifica.md]] — Lezione — CALC 02: Mapping e decodifica delle memorie
+- [[UniCode/corsi/CALC/lezioni/lezione_02p_fondamenta.md|lezione_02p_fondamenta.md]] — Lezione — CALC 02p: Fondamenta per il mapping (macchina, chip, numeri)
 
 ## UniCode/corsi/CALC/prove  (1)
 - [[UniCode/corsi/CALC/prove/INDICE.md|INDICE.md]] — CALC — indice delle prove d'esame
@@ -190,7 +196,7 @@
 ## UniCode/corsi/FI2/grezzi  (1)
 - [[UniCode/corsi/FI2/grezzi/grezzi_FI2_01.md|grezzi_FI2_01.md]] — \
 
-## UniCode/corsi/FI2/lezioni  (9)
+## UniCode/corsi/FI2/lezioni  (10)
 - [[UniCode/corsi/FI2/lezioni/guida_lab_02x_tipi_base.md|guida_lab_02x_tipi_base.md]] — Guida Lab — FI2 02x: Tipi base & dintorni (Esercitazione autonoma)
 - [[UniCode/corsi/FI2/lezioni/guida_lab_LAB02_frazione.md|guida_lab_LAB02_frazione.md]] — Scheda — FI2 LAB02: ADT Frazione, prima parte
 - [[UniCode/corsi/FI2/lezioni/guida_lab_LAB03_frazione.md|guida_lab_LAB03_frazione.md]] — Scheda — FI2 LAB03: ADT Frazione, seconda parte
@@ -198,6 +204,7 @@
 - [[UniCode/corsi/FI2/lezioni/guida_lab_LAB04b_doubleface.md|guida_lab_LAB04b_doubleface.md]] — Scheda — FI2 LAB04b: Frazione «double face»
 - [[UniCode/corsi/FI2/lezioni/guida_lab_LAB04c_fractioncollection.md|guida_lab_LAB04c_fractioncollection.md]] — Scheda — FI2 LAB04c: ADT `FractionCollection`
 - [[UniCode/corsi/FI2/lezioni/guida_lab_LAB05_ticketsosta.md|guida_lab_LAB05_ticketsosta.md]] — Scheda — FI2 LAB05: TicketSosta
+- [[UniCode/corsi/FI2/lezioni/guida_lab_LAB06_mastermind.md|guida_lab_LAB06_mastermind.md]] — Scheda — FI2 LAB06: MasterMind
 - [[UniCode/corsi/FI2/lezioni/lezione_01_linguaggi_infrastrutture.md|lezione_01_linguaggi_infrastrutture.md]] — Lezione — FI2 01: Dai linguaggi alle infrastrutture software
 - [[UniCode/corsi/FI2/lezioni/lezione_02_linguaggi_piattaforme.md|lezione_02_linguaggi_piattaforme.md]] — Lezione — FI2 02: Linguaggio e piattaforma
 
@@ -217,7 +224,7 @@
 - [[UniCode/log/sessioni_pre-2026-08.md|sessioni_pre-2026-08.md]] — Log Sessioni — Studio Attivo
 - [[UniCode/log/tracker_pre-2026-08.md|tracker_pre-2026-08.md]] — Tracker Ripasso — Spaced Repetition
 
-## UniCode/log/giornate_dettaglio  (14)
+## UniCode/log/giornate_dettaglio  (22)
 - [[UniCode/log/giornate_dettaglio/2026-09-02.md|2026-09-02.md]] — Giornata 2026-09-02
 - [[UniCode/log/giornate_dettaglio/2026-09-14.md|2026-09-14.md]] — Giornata 2026-09-14
 - [[UniCode/log/giornate_dettaglio/2026-09-15.md|2026-09-15.md]] — Giornata 2026-09-15
@@ -232,6 +239,14 @@
 - [[UniCode/log/giornate_dettaglio/2026-10-02.md|2026-10-02.md]] — Giornata 2026-10-02
 - [[UniCode/log/giornate_dettaglio/2026-10-05.md|2026-10-05.md]] — Giornata 2026-10-05
 - [[UniCode/log/giornate_dettaglio/2026-10-06.md|2026-10-06.md]] — Giornata 2026-10-06
+- [[UniCode/log/giornate_dettaglio/2026-10-08.md|2026-10-08.md]] — Giornata 2026-10-08
+- [[UniCode/log/giornate_dettaglio/2026-10-09.md|2026-10-09.md]] — Giornata 2026-10-09
+- [[UniCode/log/giornate_dettaglio/2026-10-10.md|2026-10-10.md]] — Giornata 2026-10-10
+- [[UniCode/log/giornate_dettaglio/2026-10-12.md|2026-10-12.md]] — Giornata 2026-10-12
+- [[UniCode/log/giornate_dettaglio/2026-10-13.md|2026-10-13.md]] — Giornata 2026-10-13
+- [[UniCode/log/giornate_dettaglio/2026-10-16.md|2026-10-16.md]] — Giornata 2026-10-16
+- [[UniCode/log/giornate_dettaglio/2026-10-19.md|2026-10-19.md]] — Giornata 2026-10-19
+- [[UniCode/log/giornate_dettaglio/2026-10-20.md|2026-10-20.md]] — Giornata 2026-10-20
 
 ## UniCode/piano  (1)
 - [[UniCode/piano/piano_laurea.md|piano_laurea.md]] — Piano di laurea — Ingegneria Informatica T
@@ -251,18 +266,19 @@
 - [[UniCode/profilo/errori.md|errori.md]] — Errori ricorrenti
 - [[UniCode/profilo/studente.md|studente.md]] — Profilo di studio — Lorenzo
 
-## UniCode/stato  (5)
-- [[UniCode/stato/briefing.md|briefing.md]] — Briefing — 2026-10-08
-- [[UniCode/stato/cloud_avvisi.md|cloud_avvisi.md]] — - `origin/claude/upbeat-lovelace-h2s7ak` ha lavoro di studio non in master e va 
+## UniCode/stato  (4)
 - [[UniCode/stato/corrente.md|corrente.md]] — Stato Corrente — Studio Attivo
-- [[UniCode/stato/giornata.md|giornata.md]] — Giornata 2026-10-08
+- [[UniCode/stato/giornata.md|giornata.md]] — Giornata 2026-10-21
+- [[UniCode/stato/pianificazione.md|pianificazione.md]] — Pianificazione
 - [[UniCode/stato/tracker.md|tracker.md]] — Tracker ripasso
 
-## claude  (2)
+## claude  (4)
 - [[claude/README.md|README.md]] — claude/ — file curati per Claude
+- [[claude/chat_manager.md|chat_manager.md]] — Chat del manager
+- [[claude/come_lavorare.md|come_lavorare.md]] — Come lavorare — gruppi di chat, repo e cloud
 - [[claude/graphify_bakeoff.md|graphify_bakeoff.md]] — GATE G3 — graphify vs rg (esito)
 
-## recap  (30)
+## recap  (33)
 - [[recap/2026-06-17.md|2026-06-17.md]] — Recap 2026-06-17
 - [[recap/2026-06-18.md|2026-06-18.md]] — Recap 2026-06-18
 - [[recap/2026-06-19.md|2026-06-19.md]] — Recap 2026-06-19
@@ -293,3 +309,6 @@
 - [[recap/2026-07-25.md|2026-07-25.md]] — Recap 2026-07-25
 - [[recap/2026-07-31.md|2026-07-31.md]] — Recap 2026-07-31
 - [[recap/2026-08-01.md|2026-08-01.md]] — Recap 2026-08-01
+- [[recap/2026-10-16.md|2026-10-16.md]] — Recap 2026-10-16
+- [[recap/2026-10-19.md|2026-10-19.md]] — Recap 2026-10-19
+- [[recap/2026-10-20.md|2026-10-20.md]] — Recap 2026-10-20

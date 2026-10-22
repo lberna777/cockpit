@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from datetime import date
 
-VAULT = Path.home() / "cockpit" / "Vault"
+VAULT = Path(__file__).resolve().parent.parent / "Vault"  # cockpit che contiene lo script
 INDEX = VAULT / "index.md"
 
 # cartelle/segmenti da escludere ovunque nel path
