@@ -6,3 +6,4 @@
 14:23 · CALC · guida-lab 02 generata (scheda compito: prova 2023-12-21, memorie, a freddo, 60 min). Lab avviato.
 14:33 · CALC · lab 02 iniziato da Lorenzo con la scheda e l'artefatto della prova 8/01/2025 aperto (non a freddo: segnalato).
 14:35 · CALC · decisione di Lorenzo: lab 02 sulla 2023-12-21 come esercizio guidato (artefatto 8/01 aperto); la chiusura del 02 si sposta a una prova a freddo (proposta: 2024-01-19, quella del checkpoint).
+15:20 · CALC · lab 02: scomposizione 1032 = 2^30 + 2^23 e blocco 1 GB (00000000h–3FFFFFFFh) da solo; 2^23 = 800000h (ricordate le 8 cifre). Handoff al 50% del contesto: plans/handoffs/HANDOFF_CALC-lab02_2026-10-23.md.
