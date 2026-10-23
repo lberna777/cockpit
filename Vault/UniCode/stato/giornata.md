@@ -11,3 +11,4 @@
 15:31 · CALC · lab 02: blocco EPROM 8 MB 40000000h–407FFFFFh calcolato da solo ✓.
 15:44 · CALC · lab 02: RAM 2 GB = 2^31 = 80000000h da solo; bloccato sul +1 in esadecimale (7FFFFFFFh + 1, riporto F+1=10).
 15:47 · CALC · lab 02: RAM 80000000h–FFFFFFFFh da solo (+1 esadecimale fatto dopo la regola del riporto) ✓.
+15:52 · CALC · lab 02: mappa completa da solo, buco 40800000h–7FFFFFFFh ✓. Si passa alle firme.
