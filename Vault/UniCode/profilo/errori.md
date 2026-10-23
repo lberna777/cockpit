@@ -715,6 +715,28 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   DLX si scrive su 8 cifre, con gli zeri a sinistra (`04000000h`), prima di sommarlo o sottrarlo; 7
   cifre = errore. Corretto alla segnalazione. Evidenza: trascrizione del 2026-10-20 («512mb sono 8000000
   in esa», «mi viene 4000000h», «6400000h - 1»); `stato/giornata.md` 12:43 («cifre perse»).
+- [2026-10-23] Lab 02: taglia dell'enunciato contestata a memoria → «il secondo blocco è da 16mb non 8,
+  sicuro di avere le info giuste?» (1032 − 1024 = 8 MB = 2^23) → causa non accertata (ipotesi di Claude:
+  2^23 preso per 16 M, che è 2^24); il dubbio è stato posto senza rifare la sottrazione sul testo →
+  correzione: davanti a un dubbio su un dato, ricontrollare il testo e rifare il conto prima di
+  contestarlo; potenze da tenere: 2^20 = 1 M, 2^21 = 2 M, 2^22 = 4 M, 2^23 = 8 M. Accettato subito («sisi
+  hai ragione»). Evidenza: trascrizione del 2026-10-23; `stato/giornata.md` 15:26.
+- [2026-10-23] Lab 02: valore dei bit di firma non ricavato dall'indirizzo esadecimale. Sapeva dire fin
+  dove arriva la firma (8 MB → BA31..BA23) ma non quanto vale ciascun bit («so capire fin dove arriva la
+  firma intera e basta»; «che numero esadecimale converto in bit?»); prima ancora, il passo della firma
+  non ricordato («non mi ricordo questo passo»), benché fatto nella lezione 02 del 20–22/10 → causa: non
+  lega ogni cifra hex ai suoi 4 BA a posizione fissa (1ª cifra = BA31..BA28, 2ª = BA27..BA24, …), quindi
+  non sa dove leggere un bit dato → correzione: convertire in binario le cifre dell'indirizzo d'inizio che
+  contengono la firma, etichettare i bit BA31… sopra, leggere i bit di firma; controllo sulla fine. Dopo
+  l'esempio passo per passo, firme di 8 MB e RAM giuste da solo. Evidenza: trascrizione del 2026-10-23;
+  `stato/giornata.md` 15:57, 16:10, 16:34.
+- [2026-10-23] Lab 02: regola del CS per banco non capita → «non ho capito la regola», «non ho capito
+  come dovrei calcolare il cs del singolo banco» davanti a `CS_…_i = CS · BEi` → causa: banco e blocco non
+  separati, e il BE non è visto come la scelta del byte dentro la parola (BA1, BA0 sostituiti da
+  BE0–BE3); stesso legame «banchi–BE–CS a metà» dell'handoff → correzione: CS del banco = CS del blocco
+  (già noto) **e** BEi; cassettiera a 4 colonne, `LW` accende 4 banchi, `LB` uno. Dopo l'esempio del
+  banco 0 ha scritto da solo gli altri tre. Evidenza: trascrizione del 2026-10-23; `stato/giornata.md`
+  17:46, 17:49; handoff `HANDOFF_CALC-lab02_2026-10-23.md`, «Ancora poco chiaro».
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
