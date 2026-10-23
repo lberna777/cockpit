@@ -9,3 +9,4 @@
 15:20 · CALC · lab 02: scomposizione 1032 = 2^30 + 2^23 e blocco 1 GB (00000000h–3FFFFFFFh) da solo; 2^23 = 800000h (ricordate le 8 cifre). Handoff al 50% del contesto: plans/handoffs/HANDOFF_CALC-lab02_2026-10-23.md.
 15:26 · CALC · lab 02: dubbio di Lorenzo «il secondo blocco è da 16 MB»; ricontrollato sul testo: 1032 − 1024 = 8 MB (2^23, non 2^24).
 15:31 · CALC · lab 02: blocco EPROM 8 MB 40000000h–407FFFFFh calcolato da solo ✓.
+15:44 · CALC · lab 02: RAM 2 GB = 2^31 = 80000000h da solo; bloccato sul +1 in esadecimale (7FFFFFFFh + 1, riporto F+1=10).
