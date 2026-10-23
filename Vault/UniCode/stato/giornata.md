@@ -16,3 +16,4 @@
 16:07 · CALC · lab 02: firma EPROM 1 GB (BA31=0, BA30=0) e bit di firma dell'8 MB (BA31..BA23) da solo dopo l'esempio ✓.
 16:10 · CALC · lab 02: Lorenzo dichiara di non saper ricavare il VALORE dei bit di firma (sa trovare fin dove arriva): ripresa con conversione esadecimale→binario cifra per cifra e bit etichettati BA31..BA20.
 16:34 · CALC · lab 02: firma EPROM 8 MB da solo dopo l'esempio passo per passo (BA30=1, gli altri 8 a 0), controllata su inizio e fine ✓.
+16:39 · CALC · lab 02: firma RAM (BA31=1, CS_RAM = BA31) da solo ✓. Tutte le firme complete; si passa alla semplificazione.
