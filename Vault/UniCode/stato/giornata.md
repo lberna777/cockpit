@@ -15,3 +15,4 @@
 15:57 · CALC · lab 02: Lorenzo non ricorda come si ricava la firma di un blocco; ripresa con analogia decimale + esempio inventato da 256 MB (10000000h–1FFFFFFFh).
 16:07 · CALC · lab 02: firma EPROM 1 GB (BA31=0, BA30=0) e bit di firma dell'8 MB (BA31..BA23) da solo dopo l'esempio ✓.
 16:10 · CALC · lab 02: Lorenzo dichiara di non saper ricavare il VALORE dei bit di firma (sa trovare fin dove arriva): ripresa con conversione esadecimale→binario cifra per cifra e bit etichettati BA31..BA20.
+16:34 · CALC · lab 02: firma EPROM 8 MB da solo dopo l'esempio passo per passo (BA30=1, gli altri 8 a 0), controllata su inizio e fine ✓.
