@@ -25,3 +25,4 @@
 17:34 · CALC · lab 02: confronto 4/5/6 in binario da solo: differenze su BA28 (INPUT_0) e BA29 (INPUT_1) ✓.
 17:42 · CALC · lab 02: tutti i CS semplificati da solo, porte comprese (INPUT_1 semplificata a /BA31·BA30·BA29); zone disgiunte ✓. Si passa ai banchi.
 17:45 · CALC · lab 02: banchi da solo (256 MB, 2 MB, 512 MB) ✓. Lorenzo ha chiesto un voto se l'esame fosse domani: risposto «non passeresti», circa un terzo dell'esercizio, guidato.
+17:46 · CALC · lab 02: Lorenzo dichiara di non aver capito la regola CS banco = CS · BEi e BD[8i+7..8i]; ripresa con analogia dei 4 cassetti + esempio LB/LW.
