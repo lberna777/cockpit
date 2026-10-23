@@ -23,3 +23,4 @@
 17:19 · CALC · lab 02: porte scelte da Lorenzo nel buco: INPUT_0 a 50000000h, INPUT_1 a 60000000h ✓.
 17:32 · CALC · lab 02: Lorenzo collega da solo CS semplificato → repliche nel buco → ritagliare gli indirizzi delle porte ✓ (concetto di semplificazione sbloccato).
 17:34 · CALC · lab 02: confronto 4/5/6 in binario da solo: differenze su BA28 (INPUT_0) e BA29 (INPUT_1) ✓.
+17:42 · CALC · lab 02: tutti i CS semplificati da solo, porte comprese (INPUT_1 semplificata a /BA31·BA30·BA29); zone disgiunte ✓. Si passa ai banchi.
