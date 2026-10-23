@@ -63,8 +63,8 @@ stato esercitato in sessione. Procedure complete con esempi: [[cheatsheet_conver
 | **Perché un CS semplificato «invade»** | il CS è una AND sui suoi fili: non sa quanto è grande il chip, si accende su ogni indirizzo che ha quei bit → repliche | `/BA31·BA30` si accende anche su `50000000h` |
 | **CS di un banco** | niente da calcolare: CS del blocco **· BEi** | `CS_EPROM1GB_0 = BA31*·BA30*·BE0` |
 | **Piedini** | k piedini (banco 2^k), fili **da BA2**: `A[k−1..0] ← BA[k+1..2]` (ultimo BA = piedini + 1); controprova: piedini + CS + BA1–0 = tutti i fili | 2 MB: `A[20..0] ← BA[22..2]` (non `BA[21..2]`: 20 fili per 21 piedini) |
-| **RD/WR** | va scritto nelle connessioni: EPROM solo `MEMRD`, RAM `MEMRD` e `MEMWR` | soluzione 2023-12-21 pp. 5–7 |
-| **Due porte mutuamente esclusive** | la soluzione le mette **allo stesso indirizzo** (`CS_INPUT·ACTIVE_0` / `·ACTIVE_0*`): moduli 04–05 | soluzione 2023-12-21 p. 2 |
+| **RD/WR** | va scritto nelle connessioni: EPROM solo `MEMRD`, RAM `MEMRD` e `MEMWR` | soluzione 2023-12-21, interfacciamento |
+| **Due porte mutuamente esclusive** | la soluzione le mette **allo stesso indirizzo** (`CS_INPUT·ACTIVE_0` / `·ACTIVE_0*`): moduli 04–05 | soluzione 2023-12-21, porte |
 
 **Dai range ai CS** *(esercizio 10, pomeriggio del 2026-10-09: procedura fatta in sessione)*
 
