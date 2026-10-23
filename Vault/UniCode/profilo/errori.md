@@ -270,6 +270,12 @@ indirizzi IP e sottoreti (`RETI`).
   `PioloDiGioco.values().length` creduto 6 (è 7, `VUOTO` incluso) e `nextInt(5)` per ottenere 0..5
   (`nextInt(n)` esclude `n`: serve `nextInt(6)`, cioè `values().length - 1`). Evidenza:
   `stato/giornata.md` 12:38; handoff `HANDOFF_FI2-LAB06_2026-10-22.md`, «Ancora poco chiaro».
+- [2026-10-23] CALC: lab 02, due estremi nella stessa sessione. RAM in cima: `FFFFFFFFh − 80000000h =
+  7FFFFFFFh` chiamato «primo libero», mentre è l'ultimo indirizzo sotto la RAM (stessa inversione
+  inizio/fine del 2026-10-20, «la vera fine del blocco»). Piedini dell'8 MB scritti `A[20..0] ← BA[21..2]`:
+  21 piedini contro 20 fili, limite alto sbagliato di uno; corretto a `BA[22..2]` alla segnalazione
+  (Lorenzo: refuso). Evidenza: trascrizione del 2026-10-23 («da ffffffffh con primo libero 7fffffffh»;
+  «2^21 quindi A[20..0] ← BA[21..2]» → «22...2 ho sbagliato a scrivere»); `stato/giornata.md` 15:44, 18:00–18:01.
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
