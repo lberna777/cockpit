@@ -223,7 +223,13 @@ dell'artefatto; legame banchi–CS–BE a metà, `CS_INPUT` e `RESET_P` non chia
 passi 7 e 9); **piedini, bus dati e interfacciamento per nulla**. Mancano, rispetto alla soluzione:
 passi 8 (piedini, bus dati, schemi pp. 9–12), 9 (porte, pulsante, reti) e 10 (handler).
 
-**Prossimo passo esatto** `[2026-10-22, per il 23/10]`: `/lab CALC 02` sulla prova
+**Prossimo passo esatto** `[2026-10-23]`: `/lezione CALC 03` «Linguaggio macchina» (24/10),
+aprendo con 10 minuti sui piedini in senso fisico (cosa sono, cosa succede filo per filo quando il
+DLX legge un indirizzo: vista «filo per filo» dell'artefatto dell'8/01). La chiusura a freddo del
+02 va sulla prova `2024-01-19` (memorie), oppure si fonde nel checkpoint del ~10 nov, che usa la
+stessa prova: decidere con `/pianifica settimana` lunedì 26/10.
+
+**Prossimo passo** `[superato 2026-10-23: lab fatto, guidato]` `[2026-10-22, per il 23/10]`: `/lab CALC 02` sulla prova
 `2023-12-21` (1032 MB di EPROM in basso, 2 GB di RAM in alto), solo consegne a) e b) per le
 memorie, **a freddo** e con il foglio in 4 riquadri (prontuario §0b): ① dati, ② linea degli
 indirizzi a mano, ③ tabella della risposta colonna per colonna, ④ controlli. Lorenzo si aspetta
