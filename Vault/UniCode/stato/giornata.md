@@ -26,3 +26,4 @@
 17:42 · CALC · lab 02: tutti i CS semplificati da solo, porte comprese (INPUT_1 semplificata a /BA31·BA30·BA29); zone disgiunte ✓. Si passa ai banchi.
 17:45 · CALC · lab 02: banchi da solo (256 MB, 2 MB, 512 MB) ✓. Lorenzo ha chiesto un voto se l'esame fosse domani: risposto «non passeresti», circa un terzo dell'esercizio, guidato.
 17:46 · CALC · lab 02: Lorenzo dichiara di non aver capito la regola CS banco = CS · BEi e BD[8i+7..8i]; ripresa con analogia dei 4 cassetti + esempio LB/LW.
+17:49 · CALC · lab 02: CS per banco (CS blocco · BEi) capito dopo l'esempio del banco 0 ✓. Si passa ai piedini.
