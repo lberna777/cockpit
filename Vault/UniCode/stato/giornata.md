@@ -36,3 +36,4 @@
 18:07 · CALC · giudizio di Lorenzo: sicurezza 3/5 sulla tabella delle memorie (era 1/5 il 22/10); scelta degli spazi 5/5; piedini sa farli nell'esercizio ma non gli è chiaro cosa siano nel pratico e come funzionino, da rifare per assodarli. Modulo 02 resta aperto (lab guidato).
 18:09 · CALC · prontuario §0: inciampi del 23/10 (+1 hex, valore dei bit di firma, prima le porte poi semplifichi, CS banco, piedini, RD/WR, porte allo stesso indirizzo).
 18:10 · CALC · revisione errori: 3 nuovi, 5 ricorrenze (pattern 2, pattern 6 ×2, aritmetica hex, piedini); candidato trasversale: consegna incompleta (RD/WR), da decidere con Lorenzo.
+18:15 · PIANO · weekend 24–25/10 niente studio fissato, deciso da Lorenzo (se ha tempo si organizza sul momento); /lezione CALC 03 spostata a lunedì 26/10 nella Plancia.
