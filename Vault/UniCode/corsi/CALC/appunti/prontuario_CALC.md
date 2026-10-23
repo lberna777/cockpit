@@ -53,6 +53,19 @@ stato esercitato in sessione. Procedure complete con esempi: [[cheatsheet_conver
 - prestito: la prima cifra ≠ 0 scende di 1, gli zeri a destra diventano F; riporto: si porta
   **1** a sinistra, non 16.
 
+**Inciampi del 2026-10-23** (prova `2023-12-21`, memorie, guidata):
+
+| Regola | Come | Esempio fatto |
+|---|---|---|
+| **+1 in esadecimale** | come in decimale, ma trabocca la **F**: F + 1 = 0 con riporto, che scorre su tutte le F | `7FFFFFFFh + 1 = 80000000h` |
+| **Valore dei bit di firma** | prendi l'**inizio** del blocco, converti in binario le sole cifre che contengono la firma (1ª cifra = BA31..BA28, 2ª = BA27..BA24, 3ª = BA23..BA20), leggi i bit sotto i nomi; controprova sulla fine | 8 MB a `40000000h`: `0100 0000 0` → `/BA31·BA30·/BA29·…·/BA23` |
+| **Prima le porte, poi semplifichi** | scegli un indirizzo tondo nel buco per ogni porta; il CS da semplificare tiene i bit in cui **lui** e **la porta** differiscono | 8 MB `4…` vs INPUT_0 `5…` (BA28) e INPUT_1 `6…` (BA29) → `/BA31·BA30·/BA29·/BA28` |
+| **Perché un CS semplificato «invade»** | il CS è una AND sui suoi fili: non sa quanto è grande il chip, si accende su ogni indirizzo che ha quei bit → repliche | `/BA31·BA30` si accende anche su `50000000h` |
+| **CS di un banco** | niente da calcolare: CS del blocco **· BEi** | `CS_EPROM1GB_0 = BA31*·BA30*·BE0` |
+| **Piedini** | k piedini (banco 2^k), fili **da BA2**: `A[k−1..0] ← BA[k+1..2]` (ultimo BA = piedini + 1); controprova: piedini + CS + BA1–0 = tutti i fili | 2 MB: `A[20..0] ← BA[22..2]` (non `BA[21..2]`: 20 fili per 21 piedini) |
+| **RD/WR** | va scritto nelle connessioni: EPROM solo `MEMRD`, RAM `MEMRD` e `MEMWR` | soluzione 2023-12-21 pp. 5–7 |
+| **Due porte mutuamente esclusive** | la soluzione le mette **allo stesso indirizzo** (`CS_INPUT·ACTIVE_0` / `·ACTIVE_0*`): moduli 04–05 | soluzione 2023-12-21 p. 2 |
+
 **Dai range ai CS** *(esercizio 10, pomeriggio del 2026-10-09: procedura fatta in sessione)*
 
 | Passo | Come | Esempio (esercizio 10) |
