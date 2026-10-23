@@ -10,3 +10,4 @@
 15:26 · CALC · lab 02: dubbio di Lorenzo «il secondo blocco è da 16 MB»; ricontrollato sul testo: 1032 − 1024 = 8 MB (2^23, non 2^24).
 15:31 · CALC · lab 02: blocco EPROM 8 MB 40000000h–407FFFFFh calcolato da solo ✓.
 15:44 · CALC · lab 02: RAM 2 GB = 2^31 = 80000000h da solo; bloccato sul +1 in esadecimale (7FFFFFFFh + 1, riporto F+1=10).
+15:47 · CALC · lab 02: RAM 80000000h–FFFFFFFFh da solo (+1 esadecimale fatto dopo la regola del riporto) ✓.
