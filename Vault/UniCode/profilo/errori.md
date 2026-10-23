@@ -671,6 +671,12 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   esponente della taglia, un solo numero visto da tre lati. Recuperato al primo richiamo. Evidenza:
   trascrizione del 2026-10-09 pomeriggio («fino ad A11 uguali ma non so rispondere alle altre due»,
   «damn non mi ricordo…»); `stato/giornata.md` 15:41.
+  Ricorrenza [2026-10-23], lab 02 (prova 2023-12-21): numero di piedini giusto (banco da 256 MB → 28),
+  ma «non so quali BA ci arrivano»: la regola `A[k−1..0] ← BA[k+1..2]` della lezione 02 non recuperata;
+  ritrovata con l'esempio del banco da 4 byte, poi applicata da sola a RAM ed EPROM 8 MB (qui con il
+  limite alto sbagliato di uno, pattern 6). A `/chiudi`: i piedini li sa fare nell'esercizio, ma non gli
+  è chiaro cosa siano nel pratico. Evidenza: trascrizione del 2026-10-23 («2^28, quindi 28 piedini, ma
+  non so quali BA ci arrivano»); `stato/giornata.md` 17:55, 18:07.
 - [2026-10-09] 02p Prova tu 3 e 5: dalla taglia non sa arrivare alla posizione nella memoria. Su 2K da
   `2800h`: «2K = 2^11, ma non so riconoscere a quali bit corrispondono in 2800h»; su 1 GB da `00000000h`:
   «so solo che 1GB = 2^30, come faccio a sapere dove finisce?» → causa: il blocco da 2^n non è visto
