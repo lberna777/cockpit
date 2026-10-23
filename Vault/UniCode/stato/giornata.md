@@ -31,3 +31,4 @@
 17:59 · CALC · lab 02: piedini EPROM 1 GB A[27..0] ← BA[29..2] da solo dopo l'esempio ✓.
 18:00 · CALC · lab 02: piedini 8 MB scritti A[20..0] ← BA[21..2] ✗ (fili contati 20 per 21 piedini; atteso BA[22..2]): errore di ±1 sul limite alto.
 18:01 · CALC · lab 02: piedini 8 MB corretti a BA[22..2] (Lorenzo: refuso) ✓.
+18:03 · CALC · lab 02: piedini RAM A[28..0] ← BA[30..2] da solo ✓. Tabella memorie completa; si apre la soluzione per il confronto.
