@@ -1,6 +1,6 @@
 # Stato Corrente — Studio Attivo
 
-**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-22
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-23
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02`: lezione finita il 22/10; lab sulla prova 2023-12-21 (memorie) **svolto guidato il 23/10**, confronto con la soluzione senza errori di sostanza, sicurezza 3/5: il 02 si chiude a freddo su un'altra prova. ⚠️ Calendario indietro: 03–05 ancora da aprire.
   Sezione in fondo.
