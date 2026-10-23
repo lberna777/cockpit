@@ -24,3 +24,4 @@
 17:32 · CALC · lab 02: Lorenzo collega da solo CS semplificato → repliche nel buco → ritagliare gli indirizzi delle porte ✓ (concetto di semplificazione sbloccato).
 17:34 · CALC · lab 02: confronto 4/5/6 in binario da solo: differenze su BA28 (INPUT_0) e BA29 (INPUT_1) ✓.
 17:42 · CALC · lab 02: tutti i CS semplificati da solo, porte comprese (INPUT_1 semplificata a /BA31·BA30·BA29); zone disgiunte ✓. Si passa ai banchi.
+17:45 · CALC · lab 02: banchi da solo (256 MB, 2 MB, 512 MB) ✓. Lorenzo ha chiesto un voto se l'esame fosse domani: risposto «non passeresti», circa un terzo dell'esercizio, guidato.
