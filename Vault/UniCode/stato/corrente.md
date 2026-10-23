@@ -177,6 +177,21 @@ la stessa radice — *da dove nasce* la cosa:
   (anche nel prontuario §0b), mappa della memoria cliccabile, vista filo per filo con indirizzo di
   prova. **Giudizio di Lorenzo**: sicurezza **1/5** a fare da solo la tabella della risposta; la
   fatica è sapere «dove mi sto muovendo, cosa cerco, cosa so» e capire fisicamente cosa controlla.
+  **23/10 — lab sulla prova `2023-12-21` (memorie), guidato.** Per decisione di Lorenzo con
+  l'artefatto dell'8/01 aperto: non chiude il 02 (§7.2). Fatti da lui: 1032 = 2^30 + 2^23, mappa
+  completa (EPROM `00000000h–3FFFFFFFh`, `40000000h–407FFFFFh`, buco `40800000h–7FFFFFFFh`, RAM
+  `80000000h–FFFFFFFFh`), firme, porte messe da lui a `50000000h`/`60000000h`, tutti i CS
+  semplificati (porte comprese), banchi, piedini. Aiuti: +1 esadecimale col riporto; **valore dei
+  bit di firma** (sapeva fin dove arriva la firma, non leggerne i valori: sbloccato con la
+  conversione cifra per cifra sotto BA31..BA20 e l'esempio passo per passo sull'1 GB);
+  semplificazione con le porte (CS dell'8 MB a `/BA31·BA30` sopra tutto il buco; capito con «il CS
+  vede solo i suoi fili → repliche», poi «prima scelgo le porte, poi confronto i bit»); CS per
+  banco (`·BEi` capito con la cassettiera e LB/LW); piedini (regola «da BA2, ultimo = piedini + 1»).
+  Confronto con la soluzione: tutto coincide; CS 8 MB con un bit in più (`/BA28`) per la sua scelta
+  delle porte, giusto; mancava RD/WR (EPROM MEMRD, RAM MEMRD+MEMWR). La soluzione mette le due porte
+  su **un unico** `CS_INPUT` (mutua esclusione via `ACTIVE_0`): moduli 04–05. **Giudizio di
+  Lorenzo**: sicurezza **3/5** sulla tabella (era 1/5), scelta degli spazi 5/5; piedini fatti
+  nell'esercizio ma «non mi è chiaro cosa siano nel pratico e come funzionino»: da rifare.
 - ✅ **02p** «Fondamenta per il mapping» — chiusa il 2026-10-09. — lezione creata l'8/10 su richiesta di Lorenzo, perché
   la 02 dava per scontati quadro fisico, notazione e binario/esadecimale
   (`corsi/CALC/lezioni/lezione_02p_fondamenta.md`). Studiate le sezioni 1–5 con domande in chat:
