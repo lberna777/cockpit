@@ -19,3 +19,4 @@
 16:39 · CALC · lab 02: firma RAM (BA31=1, CS_RAM = BA31) da solo ✓. Tutte le firme complete; si passa alla semplificazione.
 16:43 · CALC · lab 02: semplificazione: 1 GB /BA31·/BA30 ✓; 8 MB a /BA31·BA30 ✗ (copre tutto il buco, non lascia posto alle porte); RAM scritta BA30 invece di BA31 (svista?).
 16:44 · CALC · lab 02: decisione di Lorenzo: semplificare il CS dell'8 MB; porte da inserire come zona occupata nel buco. Spiegato il metodo «rimetti un bit → metà zona libera» su esempio inventato.
+17:17 · CALC · lab 02: Lorenzo non ha capito il metodo «rimetti un bit»; si riparte dal suo ragionamento: prima si scelgono gli indirizzi delle porte nel buco, poi si semplifica il CS dell'8 MB.
