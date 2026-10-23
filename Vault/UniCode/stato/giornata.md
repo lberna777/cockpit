@@ -27,3 +27,4 @@
 17:45 · CALC · lab 02: banchi da solo (256 MB, 2 MB, 512 MB) ✓. Lorenzo ha chiesto un voto se l'esame fosse domani: risposto «non passeresti», circa un terzo dell'esercizio, guidato.
 17:46 · CALC · lab 02: Lorenzo dichiara di non aver capito la regola CS banco = CS · BEi e BD[8i+7..8i]; ripresa con analogia dei 4 cassetti + esempio LB/LW.
 17:49 · CALC · lab 02: CS per banco (CS blocco · BEi) capito dopo l'esempio del banco 0 ✓. Si passa ai piedini.
+17:55 · CALC · lab 02: piedini banco 1 GB: 28 da solo, non sa quali BA arrivano (regola A[k-1..0] ← BA[k+1..2] non ricordata).
