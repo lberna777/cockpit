@@ -145,6 +145,13 @@ ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazion
   1792); il terzo termine giusto (64) è arrivato solo dopo la tabella di Claude con il totale. Evidenza:
   trascrizione del 2026-10-20 («quindi 2^10 + 2^9 + 2^8» → «ho sbagliato potenza, volevo dire 64»);
   `stato/giornata.md` 12:05.
+- [2026-10-23] CALC: lab 02 (prova 2023-12-21), CS dell'EPROM 8 MB semplificato a `/BA31·BA30`, che si
+  accende su tutto il buco `40800000h–7FFFFFFFh`, senza usare il dato delle due porte INPUT_0/INPUT_1
+  che nel testo stanno proprio lì; Claude aveva appena dato la regola «può coprire il buco, purché lì non
+  ci siano le porte». Il dubbio sulle porte l'ha sollevato lui un minuto dopo, a proposta già consegnata.
+  Nella stessa risposta il CS della RAM scritto `BA30`, tre minuti dopo averlo dato giusto (`BA31`).
+  Evidenza: trascrizione del 2026-10-23 («per gli 8mb, BA31* x BA30 e per i 2gb di ram, BA30» → «ma
+  abbiamo tenuto le porte fuori dalla simulazione fino a mo. ora devo considerarle?»); `stato/giornata.md` 16:43.
 
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
