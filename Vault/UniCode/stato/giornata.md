@@ -28,3 +28,4 @@
 17:46 · CALC · lab 02: Lorenzo dichiara di non aver capito la regola CS banco = CS · BEi e BD[8i+7..8i]; ripresa con analogia dei 4 cassetti + esempio LB/LW.
 17:49 · CALC · lab 02: CS per banco (CS blocco · BEi) capito dopo l'esempio del banco 0 ✓. Si passa ai piedini.
 17:55 · CALC · lab 02: piedini banco 1 GB: 28 da solo, non sa quali BA arrivano (regola A[k-1..0] ← BA[k+1..2] non ricordata).
+17:59 · CALC · lab 02: piedini EPROM 1 GB A[27..0] ← BA[29..2] da solo dopo l'esempio ✓.
