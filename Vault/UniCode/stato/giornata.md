@@ -21,3 +21,4 @@
 16:44 · CALC · lab 02: decisione di Lorenzo: semplificare il CS dell'8 MB; porte da inserire come zona occupata nel buco. Spiegato il metodo «rimetti un bit → metà zona libera» su esempio inventato.
 17:17 · CALC · lab 02: Lorenzo non ha capito il metodo «rimetti un bit»; si riparte dal suo ragionamento: prima si scelgono gli indirizzi delle porte nel buco, poi si semplifica il CS dell'8 MB.
 17:19 · CALC · lab 02: porte scelte da Lorenzo nel buco: INPUT_0 a 50000000h, INPUT_1 a 60000000h ✓.
+17:32 · CALC · lab 02: Lorenzo collega da solo CS semplificato → repliche nel buco → ritagliare gli indirizzi delle porte ✓ (concetto di semplificazione sbloccato).
