@@ -33,3 +33,4 @@
 18:01 · CALC · lab 02: piedini 8 MB corretti a BA[22..2] (Lorenzo: refuso) ✓.
 18:03 · CALC · lab 02: piedini RAM A[28..0] ← BA[30..2] da solo ✓. Tabella memorie completa; si apre la soluzione per il confronto.
 18:03 · CALC · lab 02 (prova 2023-12-21, memorie) svolto GUIDATO, non chiude il 02: confronto con la soluzione ufficiale senza errori di sostanza su range, banchi, CS, piedini, bus. Differenza: CS 8 MB con un bit in più (/BA28) perché INPUT_0 messa a 50000000h; la soluzione mette le due porte su un unico CS_INPUT a 60000000h (mutua esclusione via ACTIVE_0, moduli 04–05). Mancava RD/WR (EPROM MEMRD; RAM MEMRD+MEMWR).
+18:07 · CALC · giudizio di Lorenzo: sicurezza 3/5 sulla tabella delle memorie (era 1/5 il 22/10); scelta degli spazi 5/5; piedini sa farli nell'esercizio ma non gli è chiaro cosa siano nel pratico e come funzionino, da rifare per assodarli. Modulo 02 resta aperto (lab guidato).
