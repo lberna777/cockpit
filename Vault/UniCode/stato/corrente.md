@@ -2,7 +2,7 @@
 
 **Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-22
 
-- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02` dal 20/10: mappa della prova 2025-01-08 fatta, **CS a metà** (firma a 32 bit, EPROM 512 MB passo 1), poi Decisioni 2–3 e `/lab CALC 02`. ⚠️ Calendario indietro: entro il 26/10 andavano chiusi 02–05.
+- `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02`: lezione finita il 22/10 (prova 2025-01-08 svolta: mappa, CS, banchi, piedini); si chiude con `/lab CALC 02` a freddo il **23/10** (prova 2023-12-21). ⚠️ Calendario indietro: 03–05 ancora da aprire.
   Sezione in fondo.
 - `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · ✅ `LAB06` MasterMind **chiuso il 22/10** (34/34 verdi, **guidato**: da rifare a freddo); `calcolaRisposta` pensata da Lorenzo, bug dei minimi trovato da lui con stampe vs tabella. Codice e confronto (12 punti) in `esame_FI2/svolti/LAB06_MasterMind/`. Prossima voce: `LAB07` MyCalendar (`/lab FI2 LAB07`).
 
@@ -168,6 +168,15 @@ la stessa radice — *da dove nasce* la cosa:
   letta (sostanza già fatta: semplificata e repliche). Prodotto l'artefatto
   «Prova DLX 8 gennaio 2025» (https://claude.ai/artifact/5iHgc8vnP9dtjop3fQ8j3w, sorgente
   `corsi/CALC/appunti/prova_2025-01-08_svolta.html`): i 10 passi collegati alla soluzione intera.
+  **22/10 — lezione finita.** Piedini e bus dati non passavano a parole né con lo schema a
+  blocchi («persissimo», «voglio vedere i singoli piedini e fili»); capiti con la vista «filo per
+  filo» dell'artefatto: EPROM 64 MB `A[23..0] ← BA[25..2]` letto dal disegno, 512 MB
+  `A[26..0] ← BA[28..2]` da solo con i tre passi (esponente, piedini, fili); «ogni byte avanti
+  cambio banco» detto da lui. Decisione 3 nella sostanza già fatta; `RESET_P` = comando → `·MEMWR`
+  (dispensa p. 47). L'artefatto ora ha anche: dati/incognite, foglio «su carta» in 4 riquadri
+  (anche nel prontuario §0b), mappa della memoria cliccabile, vista filo per filo con indirizzo di
+  prova. **Giudizio di Lorenzo**: sicurezza **1/5** a fare da solo la tabella della risposta; la
+  fatica è sapere «dove mi sto muovendo, cosa cerco, cosa so» e capire fisicamente cosa controlla.
 - ✅ **02p** «Fondamenta per il mapping» — chiusa il 2026-10-09. — lezione creata l'8/10 su richiesta di Lorenzo, perché
   la 02 dava per scontati quadro fisico, notazione e binario/esadecimale
   (`corsi/CALC/lezioni/lezione_02p_fondamenta.md`). Studiate le sezioni 1–5 con domande in chat:
@@ -199,14 +208,14 @@ dell'artefatto; legame banchi–CS–BE a metà, `CS_INPUT` e `RESET_P` non chia
 passi 7 e 9); **piedini, bus dati e interfacciamento per nulla**. Mancano, rispetto alla soluzione:
 passi 8 (piedini, bus dati, schemi pp. 9–12), 9 (porte, pulsante, reti) e 10 (handler).
 
-**Prossimo passo esatto** `[2026-10-20, sera; pomeriggio del 21/10]`: prima 5 minuti sui box
-nuovi dei passi 7 e 9 (`CS_INPUT`, `RESET_P`), poi riprendere la Decisione 2 dai **piedini**, con
-il passo 8 dell'artefatto «Prova DLX 8 gennaio 2025» aperto: rifare l'esempio a 8 byte
-(BA1–0 = banco, BA2 = riga), poi far ricavare a Lorenzo `A[23..0] ← BA[25..2]` per il banco
-da 16 MB e chiedergli quali bit restano fuori da CS e piedini (BA27, BA26 → le 4 repliche).
-Poi leggere la Decisione 3 (10 minuti, la sostanza è fatta) e chiudere la lezione. Poi
-`/lab CALC 02` sulla prova `2023-12-21` a freddo (chiude il 02; il 1032 MB non va guidato
-prima). A fine 02p: `/appunti CALC 02p` dalla traccia.
+**Prossimo passo esatto** `[2026-10-22, per il 23/10]`: `/lab CALC 02` sulla prova
+`2023-12-21` (1032 MB di EPROM in basso, 2 GB di RAM in alto), solo consegne a) e b) per le
+memorie, **a freddo** e con il foglio in 4 riquadri (prontuario §0b): ① dati, ② linea degli
+indirizzi a mano, ③ tabella della risposta colonna per colonna, ④ controlli. Lorenzo si aspetta
+di aver bisogno di un po' d'aiuto: per §7.2 il lab chiude il 02 solo se svolto a freddo; se serve
+aiuto, dargli solo la **domanda del riquadro** («cosa sai? cosa cerchi in questa colonna?»),
+mai il valore, e annotare dove. Poi confronto con la soluzione ufficiale. Il 1032 MB non è mai
+stato guidato. Dopo: `/lezione CALC 03` (24/10). A fine 02p: `/appunti CALC 02p` dalla traccia.
 
 **Punti aperti**: modulo `06` assente dalle dispense; le «domande di carattere generale» della
 scheda non compaiono nei testi pubblicati; libro di testo non reperito.

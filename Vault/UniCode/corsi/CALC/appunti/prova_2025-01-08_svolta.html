@@ -81,6 +81,55 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
 .ln.c{color:var(--muted)}
 .ln.c.hit{color:var(--hit-ink)}
 .hint{font-size:13px;color:var(--muted);margin:0}
+/* sistema fisico */
+.map{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:16px;margin-bottom:24px;display:grid;gap:12px;min-width:0}
+.map h2{font-family:var(--f-display);font-weight:800;font-size:24px;margin:0}
+.map .mapsvg{overflow-x:auto;max-width:100%}
+.map svg{display:block;min-width:900px;width:100%;height:auto}
+.map svg text{fill:var(--ink);font-family:var(--f-mono);font-size:11px}
+.map svg text.s{fill:var(--muted);font-size:10px}
+.map svg text.h{font-family:var(--f-display);font-size:13px;font-weight:600}
+.map svg .wire{stroke:var(--muted);stroke-width:1.5;fill:none}
+.map svg .wire.addr{stroke:var(--accent)}
+.map svg .wire.data{stroke:var(--warn);stroke-width:5}
+.map svg .wire.lane{stroke:var(--warn);stroke-width:2;opacity:.55}
+.map svg .wire.cs{stroke:var(--ok);stroke-width:2}
+.map svg .wire.dash{stroke-dasharray:5 4}
+.map svg [data-k]{cursor:pointer}
+.map svg [data-k] rect{fill:var(--panel);stroke:var(--ink);stroke-width:1.3}
+.map svg [data-k].chip rect{fill:var(--accent-soft)}
+.map svg [data-k].gate rect{fill:var(--firma);stroke:var(--ok)}
+.map svg [data-k].later rect{stroke-dasharray:5 4;fill:var(--bg)}
+.map svg [data-k]:hover rect,.map svg [data-k]:focus-visible rect{stroke:var(--accent);stroke-width:2.5;outline:none}
+.map svg [data-k].sel rect{fill:var(--hit);stroke:var(--hit-ink);stroke-width:2.5}
+.map svg [data-k].sel text{fill:var(--hit-ink)}
+.map svg [data-k].sel .wire{stroke:var(--hit-ink)}
+.map svg [data-k]:focus{outline:none}
+.info{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;display:grid;gap:8px;background:var(--bg)}
+.info h3{font-family:var(--f-display);font-size:18px;margin:0}
+.info dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 14px;margin:0}
+.info dt{font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding-top:2px}
+.info dd{margin:0;max-width:80ch}
+@media (max-width:560px){.info dl{grid-template-columns:minmax(0,1fr)}.info dt{padding-top:6px}}
+#msvg [data-z]{cursor:pointer}
+#msvg [data-z] rect{stroke:var(--panel);stroke-width:1.5}
+#msvg [data-z]:hover rect,#msvg [data-z]:focus-visible rect{stroke:var(--ink);stroke-width:2}
+#msvg [data-z].sel rect{stroke:var(--hit-ink);stroke-width:3}
+#msvg [data-z]:focus{outline:none}
+.bitbar{display:flex;gap:2px;overflow-x:auto;padding-bottom:4px}
+.bitbar .b{flex:0 0 auto;width:26px;text-align:center;font-family:var(--f-mono);font-size:10px;border-radius:3px;padding:3px 0;line-height:1.3}
+.bitbar .b i{display:block;font-style:normal;font-weight:700;font-size:12px}
+.b.cs{background:var(--firma);color:var(--firma-ink)}
+.b.no{background:var(--bit0);color:var(--muted)}
+.b.row{background:var(--accent-soft);color:var(--accent)}
+.b.be{background:var(--var);color:var(--ink)}
+table.bk{border-collapse:collapse;font-family:var(--f-mono);font-size:12px}
+table.bk th,table.bk td{border:1px solid var(--rule);padding:5px 8px;text-align:center;vertical-align:top}
+table.bk th{font-weight:600;background:var(--bg)}
+table.bk th small{display:block;font-weight:400;color:var(--muted)}
+table.bk td.c{cursor:pointer;background:var(--accent-soft)}
+table.bk td.c:hover{outline:2px solid var(--accent)}
+table.bk td.r{color:var(--muted);text-align:left;white-space:nowrap}
 @media (prefers-reduced-motion:no-preference){.ln,section.step{transition:background .2s, outline-color .2s}}
 </style>
 
@@ -88,8 +137,96 @@ aside.sol .src{font-size:13px;color:var(--muted);margin:0 0 12px}
 <header class="top">
   <span class="eyebrow">CALC · Calcolatori Elettronici T · lezione 02 · prova dell'8 gennaio 2025</span>
   <h1>Prova DLX dell'8 gennaio 2025, svolta passo per passo</h1>
-  <p class="lede">A sinistra lo svolgimento, nell'ordine in cui lo fai all'esame. A destra la soluzione ufficiale intera. Premi un pulsante <b>→</b> in un passo per accendere le righe della soluzione che quel passo produce; premi una riga della soluzione per tornare al passo che la spiega.</p>
+  <p class="lede">In alto il sistema com'è fatto fisicamente: premi un pezzo per vedere a quale dato del testo e a quale riga della risposta corrisponde. Sotto, a sinistra lo svolgimento nell'ordine in cui lo fai all'esame e a destra la soluzione ufficiale intera: un pulsante <b>→</b> accende le righe della soluzione, una riga della soluzione riporta al suo passo.</p>
 </header>
+
+<section class="map" id="dati" aria-label="Cosa sai e cosa devi trovare">
+  <h2>Cosa sai, cosa devi trovare</h2>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px">
+    <div style="min-width:0">
+      <p class="eyebrow">Lo sai già (testo + regole fisse del DLX)</p>
+      <div class="tbl"><table class="t">
+        <tr><th>Dato</th><th>Da dove</th></tr>
+        <tr><td>1600 MB di EPROM, in basso</td><td>testo</td></tr>
+        <tr><td>2 GB di RAM, in alto</td><td>testo</td></tr>
+        <tr><td>2 porte in input da 8 bit, lette insieme (16 bit); 1 porta in output; pulsante P</td><td>testo</td></tr>
+        <tr><td>dato finale a <code>80000004h</code>; R20–R25 liberi</td><td>testo</td></tr>
+        <tr><td>indirizzi a 32 bit: <code>00000000h–FFFFFFFFh</code></td><td>DLX, sempre</td></tr>
+        <tr><td>bus dati a 32 bit, chip a 8 bit → <b>4 banchi</b>, BA1–BA0 sostituiti da <code>BE3–BE0</code></td><td>DLX, sempre</td></tr>
+        <tr><td>EPROM: solo RD · RAM: RD e WR</td><td>sempre</td></tr>
+      </table></div>
+    </div>
+    <div style="min-width:0">
+      <p class="eyebrow">Devi trovare (la risposta)</p>
+      <div class="tbl"><table class="t">
+        <tr><th>Incognita</th><th>Come, in una riga</th><th>Passo</th></tr>
+        <tr><td>blocchi</td><td>scomponi in potenze di 2: 1024 + 512 + 64</td><td>1</td></tr>
+        <tr><td>range di ogni blocco</td><td>dal più grande in su; fine = inizio + taglia − 1</td><td>2</td></tr>
+        <tr><td>indirizzo delle porte</td><td>tondo, nel buco libero → <code>70000000h</code></td><td>4</td></tr>
+        <tr><td>CS di ogni blocco</td><td>bit della firma che lo separano dagli altri</td><td>3, 5</td></tr>
+        <tr><td>taglia di un banco</td><td>blocco / 4</td><td>7</td></tr>
+        <tr><td>CS di ogni banco</td><td>CS del blocco · <code>BEi</code></td><td>7</td></tr>
+        <tr><td><b>piedini di indirizzo</b></td><td>banco da 2^k → <code>A[k−1..0] ← BA[k+1..2]</code></td><td>8</td></tr>
+        <tr><td>piedini dati</td><td>banco i → <code>BD[8i+7..8i]</code></td><td>8</td></tr>
+        <tr><td>porte, pulsante, handler</td><td>moduli 04–05</td><td>9, 10</td></tr>
+      </table></div>
+    </div>
+  </div>
+  <p class="hint">Delle incognite, solo le prime quattro chiedono ragionamento; le altre sono formule fisse applicate ai numeri trovati.</p>
+</section>
+
+<section class="map" id="carta" aria-label="Su carta">
+  <h2>Su carta: come impostare il foglio</h2>
+  <p class="hint">Quattro riquadri, sempre nello stesso ordine. Il primo e il secondo sono i dati; il terzo è la risposta da riempire colonna per colonna; il quarto sono i controlli. Qui sotto riempiti per la prova dell'8/01/2025.</p>
+  <div class="tbl"><pre class="code">① DATI (dal testo, 1 minuto)
+   EPROM 1600 MB in basso · RAM 2 GB in alto · porte: IN_A, IN_B (8+8 = 16 bit), OUT, pulsante P
+   DLX fisso: 32 bit indirizzo · bus dati 32 → 4 banchi · BA1,BA0 → BE3..BE0 · EPROM solo RD
+
+② LINEA DEGLI INDIRIZZI (disegnata a mano, 16 tacche = prima cifra hex)
+   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+   |=== EPROM 1 GB ===|== 512 ==|64|..|PRT|============ RAM 2 GB ============|
+   0000…            3FFF… 4000… 5FFF… 6000… 63FF… 7000…  8000…           FFFF…
+                                    └ buco 6400…7FFF: qui le porte (tondo: 7000…)
+
+③ TABELLA DELLA RISPOSTA (una riga per blocco, si riempie da sinistra a destra)
+   blocco  | taglia | inizio–fine   | firma     | CS blocco        | banco    | A ← BA          | WR?
+   EPROM1G | 2^30   | 0000…–3FFF…   | 00        | BA31*·BA30*      | 256MB=2^28 | A[27..0]←BA[29..2] | no
+   EPROM512| 2^29   | 4000…–5FFF…   | 010       | BA31*·BA30·BA29* | 128MB=2^27 | A[26..0]←BA[28..2] | no
+   EPROM64 | 2^26   | 6000…–63FF…   | 011000    | …·BA28* (4 bit)  | 16MB=2^24  | A[23..0]←BA[25..2] | no
+   porte   | 2 byte | 7000 0000/1   | 0111 (scelta) | BA31*·BA30·BA29·BA28 | —   | nessuno           | —
+   RAM     | 2^31   | 8000…–FFFF…   | 1         | BA31             | 512MB=2^29 | A[28..0]←BA[30..2] | sì
+   poi, per ogni blocco: 4 righe CS_…_i = CS blocco · BEi  ·  banco i su BD[8i+7..8i]
+
+④ CONTROLLI (30 secondi)
+   □ ogni taglia sommata torna (1024+512+64 = 1600)   □ indirizzi a 8 cifre
+   □ bit che cambiano = esponente della taglia         □ ogni coppia di CS ha un bit opposto
+   □ repliche solo in zone libere (64 MB → 6xxx…: ok)</pre></div>
+  <p class="hint">Le colonne di ③ sono le incognite della tabella sopra, nell'ordine in cui si ricavano: ognuna usa solo le colonne alla sua sinistra.</p>
+</section>
+
+<section class="map" id="spazio" aria-label="Mappa della memoria">
+  <h2>Mappa della memoria</h2>
+  <p class="hint">Lo spazio del DLX, da <code>00000000h</code> a <code>FFFFFFFFh</code>, in scala: ogni tacca è una cifra esadecimale iniziale (256 MB). Premi una zona per aprire chi la occupa, diviso nei suoi banchi, e come l'indirizzo si spezza sui piedini.</p>
+  <div class="mapsvg"><svg id="msvg" viewBox="0 0 1000 120" role="img" aria-label="Spazio di indirizzamento diviso tra i dispositivi"></svg></div>
+  <div class="info" id="mInfo" aria-live="polite"></div>
+</section>
+
+<section class="map" id="zoom" aria-label="Un blocco filo per filo">
+  <h2>Un blocco, filo per filo</h2>
+  <p class="hint">In alto i piedini del DLX, uno per filo. Ogni filo scende dritto: i <b style="color:var(--ok)">verdi</b> vanno alle porte AND che fanno i CS, i <b style="color:var(--accent)">blu</b> ai piedini <code>A</code> dei chip, i grigi con ✕ non vanno da nessuna parte (repliche), BA1 e BA0 non esistono (al loro posto i BE). Scrivi un indirizzo: i fili mostrano il suo valore e si accende il chip che risponde.</p>
+  <div class="links" id="zBlk"></div>
+  <div class="links"><label for="zAddr" class="m">Indirizzo</label><input id="zAddr" class="m" value="60000005" size="10" style="font:600 14px var(--f-mono);padding:5px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--panel);color:var(--ink)"><span class="m">h</span>
+    <button class="go" type="button" data-z="1">+1 byte</button><button class="go" type="button" data-z="4">+1 riga (+4)</button><button class="go" type="button" data-z="-4">−1 riga</button><button class="go" type="button" id="zRep" data-z="rep">replica →</button></div>
+  <div class="mapsvg"><svg id="zsvg" viewBox="0 0 1000 600" role="img" aria-label="Un blocco di memoria disegnato filo per filo"></svg></div>
+  <div class="info" id="zInfo" aria-live="polite"></div>
+</section>
+
+<section class="map" id="mappa" aria-label="Il sistema fisico">
+  <h2>Il sistema fisico</h2>
+  <p class="hint">Ogni rettangolo è un chip vero sulla scheda; le linee sono fili. Colonne = banchi (uno per corsia del bus dati), righe = blocchi di memoria e porte. Tratteggiato = moduli 04–05.</p>
+  <div class="mapsvg"><svg id="sys" viewBox="0 0 1000 690" role="img" aria-label="Schema del sistema DLX: processore, bus, decodifica, banchi di memoria e porte"></svg></div>
+  <div class="info" id="mapInfo" aria-live="polite"></div>
+</section>
 
 <div class="grid">
 <main id="steps">
@@ -393,7 +530,7 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
     {nome:"RAM 2 GB",ini:"80000000",fin:"FFFFFFFF",esp:31}
   ];
   function bin(h){return h.split("").map(function(c){return parseInt(c,16).toString(2).padStart(4,"0")}).join("")}
-  var box=document.getElementById("bitTables");
+  var btBox=document.getElementById("bitTables");
   blocchi.forEach(function(b){
     var a=bin(b.ini), z=bin(b.fin), n=0; while(n<32 && a[n]===z[n]) n++;
     var t='<div class="tbl"><table class="bits"><caption><b>'+b.nome+'</b> · <span class="m">'+b.ini+'h</span> – <span class="m">'+b.fin+'h</span> · firma <span class="m">BA31'+(n>1?'..BA'+(32-n):'')+' = '+a.slice(0,n).split("").join(" ")+'</span> · cambiano '+(32-n)+' bit = 2^'+b.esp+' '+(32-n===b.esp?'<span class="ok">✓</span>':'✗')+'</caption>';
@@ -408,21 +545,289 @@ DATA_B → BD[7..0]   se CS_INPUT·MEMRD·SWITCH_BUS</button>
     t+='<tr class="eq"><td class="l">uguali?</td>';
     for(var i=0;i<32;i++){t+='<td class="'+(i%4===0&&i>0?'g':'')+'">'+(i<n?'=':'≠')+'</td>'}
     t+='</tr></table></div>';
-    box.insertAdjacentHTML("beforeend",t);
+    btBox.insertAdjacentHTML("beforeend",t);
   });
 
-  // Collegamenti passo ↔ soluzione
+  // Collegamenti passo ↔ soluzione (delegati: valgono anche per i pulsanti creati dalla mappa)
   var wide=window.matchMedia("(min-width:1060px)");
   function clear(){document.querySelectorAll(".hit").forEach(function(e){e.classList.remove("hit")})}
   function linesOf(id){var el=document.getElementById(id); if(!el) return []; return el.dataset.group? Array.prototype.slice.call(el.querySelectorAll(".ln")) : [el]}
-  document.querySelectorAll("button.go").forEach(function(btn){
-    btn.addEventListener("click",function(){
-      clear(); var first=null;
-      btn.dataset.sol.split(" ").forEach(function(id){linesOf(id).forEach(function(l){l.classList.add("hit"); if(!first) first=l})});
-      btn.closest("section.step").classList.add("hit");
-      if(first) first.scrollIntoView({block:wide.matches?"nearest":"center",behavior:"smooth"});
-    });
+  document.addEventListener("click",function(ev){
+    var btn=ev.target.closest("button.go"); if(!btn) return;
+    clear(); var first=null;
+    if(btn.dataset.sol) btn.dataset.sol.split(" ").forEach(function(id){linesOf(id).forEach(function(l){l.classList.add("hit"); if(!first) first=l})});
+    var st=btn.closest("section.step"); if(st) st.classList.add("hit");
+    if(btn.dataset.step){var s=document.getElementById(btn.dataset.step); if(s){s.classList.add("hit"); s.scrollIntoView({block:"start",behavior:"smooth"}); return}}
+    if(first) first.scrollIntoView({block:wide.matches?"nearest":"center",behavior:"smooth"});
   });
+
+  // Mappa del sistema fisico
+  var NS="http://www.w3.org/2000/svg", svg=document.getElementById("sys");
+  function el(tag,attrs,parent,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;(parent||svg).appendChild(e);return e}
+  function line(x1,y1,x2,y2,cls,parent){return el("path",{d:"M"+x1+" "+y1+" L"+x2+" "+y2,"class":"wire "+(cls||"")},parent)}
+  function box(k,i,x,y,w,h,cls,lines){
+    var g=el("g",{"data-k":k,"data-i":i==null?"":i,tabindex:"0",role:"button","class":cls||""});
+    el("rect",{x:x,y:y,width:w,height:h,rx:5},g);
+    lines.forEach(function(t,n){el("text",{x:x+8,y:y+16+n*14,"class":n===0?"h":(n>1?"s":"")},g,t)});
+    return g;
+  }
+  var COL=[385,535,685,835], CW=130, laneX=function(b){return COL[3-b]+CW/2};
+  var LANE=["BD[7..0]","BD[15..8]","BD[23..16]","BD[31..24]"];
+  // fili di testa
+  line(170,34,190,34,"addr"); line(190,34,190,628,"addr");
+  el("text",{x:196,y:30},null,"BA[31..2]");
+  line(170,56,285,56); line(285,56,285,150);
+  el("text",{x:196,y:52,"class":"s"},null,"BE3..BE0");
+  line(170,78,970,78); el("text",{x:700,y:74,"class":"s"},null,"MEMRD · MEMWR → RD/WR dei chip");
+  line(170,100,970,100,"data"); el("text",{x:300,y:96,"class":"s"},null,"BD[31..0] — bus dati");
+  for(var b=0;b<4;b++){var x=laneX(b); line(x,100,x,560,"lane"); el("text",{x:COL[3-b]+8,y:122},null,"banco "+b+" · BE"+b); el("text",{x:COL[3-b]+8,y:136,"class":"s"},null,LANE[b])}
+  line(285,150,285,520);
+  // processore
+  box("dlx",null,20,20,150,86,"",["DLX","processore","BA, BE, MEMRD/WR, BD"]);
+  // blocchi
+  var BL=[
+    {k:"ram",nome:"RAM 2 GB",range:"80000000h–FFFFFFFFh",cs:"BA31",banco:"512 MB",pin:"A[28..0]←BA[30..2]",y:150,chip:"RAM"},
+    {k:"e1g",nome:"EPROM 1 GB",range:"00000000h–3FFFFFFFh",cs:"BA31*·BA30*",banco:"256 MB",pin:"A[27..0]←BA[29..2]",y:240,chip:"EPROM_1GB"},
+    {k:"e512",nome:"EPROM 512 MB",range:"40000000h–5FFFFFFFh",cs:"BA31*·BA30·BA29*",banco:"128 MB",pin:"A[26..0]←BA[28..2]",y:330,chip:"EPROM_512"},
+    {k:"e64",nome:"EPROM 64 MB",range:"60000000h–63FFFFFFh",cs:"BA31*·BA30·BA29·BA28*",banco:"16 MB",pin:"A[23..0]←BA[25..2]",y:420,chip:"EPROM_64"}
+  ];
+  BL.forEach(function(r){
+    el("text",{x:20,y:r.y+18,"class":"h"},null,r.nome); el("text",{x:20,y:r.y+33,"class":"s"},null,r.range);
+    line(285,r.y+25,215,r.y+25);
+    box("cs-"+r.k,null,200,r.y,165,50,"gate",["CS "+r.nome.split(" ")[0]+(r.k==="ram"?"":" "+r.nome.split(" ")[1]+" "+r.nome.split(" ")[2]),r.cs,"· BEi → 4 CS"]);
+    line(365,r.y+25,COL[0],r.y+25,"cs");
+    line(190,r.y+62,960,r.y+62,"addr dash");
+    for(var b=3;b>=0;b--){
+      var x=COL[3-b]; line(x+CW/2,r.y+50,x+CW/2,r.y+62,"addr");
+      box(r.k,b,x,r.y,CW,50,"chip",[r.chip+"_"+b,r.banco+" · "+(r.k==="ram"?"RD WR":"RD"),r.pin]);
+    }
+  });
+  // porte
+  var yp=510;
+  el("text",{x:20,y:yp+18,"class":"h"},null,"Porte (70000000h)"); el("text",{x:20,y:yp+33,"class":"s"},null,"zona 7xxxxxxxh");
+  line(285,yp+25,215,yp+25);
+  box("cs-in",null,200,yp,165,50,"gate",["CS_INPUT","BA31*·BA30·BA29·BA28","· BE0·BE1"]);
+  line(365,yp+25,COL[0],yp+25,"cs");
+  box("resetp",null,COL[1],yp,CW,50,"later",["RESET_P","comando, BE2·MEMWR","70000002h"]);
+  box("inB",null,COL[2],yp,CW,50,"chip",["INPUT_B","8 bit · RD","nessun piedino A"]);
+  box("inA",null,COL[3],yp,CW,50,"chip",["INPUT_A","8 bit · RD","nessun piedino A"]);
+  el("text",{x:COL[0]+8,y:yp+30,"class":"s"},null,"(banco 3 libero)");
+  // modulo 05 e interrupt
+  box("pbtn",null,COL[1],600,CW+150,56,"later",["Pulsante P + 2 FFD","P_PREMUTO, SWITCH_BUS","scambia A e B sulle corsie"]);
+  box("out",null,COL[3],600,CW,56,"later",["OUTPUT","porta in output","riceve DATA_A"]);
+  line(laneX(0),560,laneX(0),600,"lane dash");
+  box("int",null,20,600,150,56,"later",["INT_DLX","INT_A · INT_B","→ handler"]);
+  line(12,628,20,628,"dash"); line(12,628,12,63,"dash"); line(12,63,20,63,"dash");
+
+  var INFO={
+    dlx:{t:"Processore DLX",fis:"La CPU. Emette gli indirizzi su BA31..BA2 (BA1 e BA0 non esistono: al loro posto i 4 byte enable BE3..BE0), i comandi MEMRD/MEMWR, e scambia 32 bit per ciclo sul bus dati BD[31..0]. Riceve l'interrupt INT.",dato:"«Progettare un sistema, basato su un processore DLX…»",risp:"Nessuna riga sua: ogni altro pezzo si collega a lui.",sol:"",step:"p7"},
+    ba:{},
+    ram:{t:"RAM_{i} — banco {i} della RAM",fis:"Un chip da 512 MB = 2^29 byte, parallelismo 8 bit. Contiene gli indirizzi della RAM con resto {i} diviso 4 (80000000h+{i}, +4, +8…).",dato:"«2 GB di RAM mappata agli indirizzi alti» → 2 GB / 4 banchi = 512 MB.",risp:"CS ← CS_RAM_{i} = BA31·BE{i} · RD ← MEMRD · WR ← MEMWR · A[28..0] ← BA[30..2] (2^29 righe → 29 piedini, da BA2) · D[7..0] ↔ "+"{lane}.",sol:"s-ram s-cs-ram s-if-ram",step:"p8"},
+    e1g:{t:"EPROM_1GB_{i} — banco {i}",fis:"Un chip da 256 MB = 2^28 byte, sola lettura (niente WR).",dato:"«1600 MB di EPROM agli indirizzi bassi» → 1024 MB è il primo pezzo della scomposizione → 4 banchi da 256 MB.",risp:"CS ← CS_EPROM_1GB_{i} = BA31*·BA30*·BE{i} · RD ← MEMRD · A[27..0] ← BA[29..2] · D[7..0] ↔ {lane}.",sol:"s-e1g s-cs-e1g s-if-e1g",step:"p8"},
+    e512:{t:"EPROM_512_{i} — banco {i}",fis:"Un chip da 128 MB = 2^27 byte, sola lettura.",dato:"Secondo pezzo dei 1600 MB: 512 MB → 4 banchi da 128 MB.",risp:"CS ← CS_EPROM_512MB_{i} = BA31*·BA30·BA29*·BE{i} · RD ← MEMRD · A[26..0] ← BA[28..2] · D[7..0] ↔ {lane}.",sol:"s-e512 s-cs-e512 s-if-e512",step:"p8"},
+    e64:{t:"EPROM_64_{i} — banco {i}",fis:"Un chip da 16 MB = 2^24 byte, sola lettura. BA27 e BA26 non arrivano né al CS né ai piedini: per questo il blocco compare 4 volte in 6xxxxxxxh.",dato:"Ultimo pezzo dei 1600 MB: 64 MB → 4 banchi da 16 MB.",risp:"CS ← CS_EPROM_64MB_{i} = BA31*·BA30·BA29·BA28*·BE{i} · RD ← MEMRD · A[23..0] ← BA[25..2] · D[7..0] ↔ {lane}.",sol:"s-e64 s-cs-e64 s-if-e64",step:"p8"},
+    "cs-ram":{t:"Decodifica della RAM",fis:"Una rete AND: guarda BA31 e un BE, e accende il CS di un banco. Sono 4 AND, una per banco.",dato:"«agli indirizzi alti» → la metà con BA31 = 1.",risp:"CS_RAM_i = BA31·BEi (4 righe).",sol:"s-cs-ram",step:"p5"},
+    "cs-e1g":{t:"Decodifica della EPROM 1 GB",fis:"4 AND sui bit BA31, BA30 e un BE.",dato:"Primo blocco della scomposizione, a 00000000h.",risp:"CS_EPROM_1GB_i = BA31*·BA30*·BEi.",sol:"s-cs-e1g",step:"p5"},
+    "cs-e512":{t:"Decodifica della EPROM 512 MB",fis:"4 AND sui bit BA31..BA29 e un BE.",dato:"Secondo blocco, a 40000000h.",risp:"CS_EPROM_512MB_i = BA31*·BA30·BA29*·BEi.",sol:"s-cs-e512",step:"p5"},
+    "cs-e64":{t:"Decodifica della EPROM 64 MB",fis:"4 AND sui bit BA31..BA28 e un BE. Semplificata: BA27 e BA26 mancano, quindi 4 repliche (lecite: 64000000h–6FFFFFFFh è libero).",dato:"Terzo blocco, a 60000000h.",risp:"CS_EPROM_64MB_i = BA31*·BA30·BA29·BA28*·BEi.",sol:"s-cs-e64",step:"p5"},
+    "cs-in":{t:"Decodifica delle porte in input",fis:"Una AND: zona 7xxxxxxxh e banchi 0 e 1 insieme. Un solo CS per entrambe le porte, perché si leggono sempre insieme.",dato:"«esclusivamente trasferimenti a 16 bit» → half-word bassa → BE0·BE1.",risp:"CS_INPUT = BA31*·BA30·BA29·BA28·BE0·BE1 · indirizzo 70000000/1h.",sol:"s-in-addr s-cs-input",step:"p7"},
+    inA:{t:"INPUT_A — porta in input A",fis:"Un registro da 1 byte: nessun piedino di indirizzo (c'è una cella sola). Ha CS, RD e 8 piedini dati.",dato:"«due porte in input… INPUT_A fornisce gli 8 bit meno significativi» → normalmente sulla corsia BD[7..0], banco 0, indirizzo 70000000h.",risp:"CS ← CS_INPUT · RD ← MEMRD · dati su BD[7..0] se SWITCH_BUS = 0, su BD[15..8] se SWITCH_BUS = 1.",sol:"s-in-addr s-cs-input s-p4 s-p7",step:"p9"},
+    inB:{t:"INPUT_B — porta in input B",fis:"Come INPUT_A: registro da 1 byte, nessun piedino di indirizzo.",dato:"Seconda porta della lettura a 16 bit → corsia BD[15..8], banco 1, indirizzo 70000001h.",risp:"CS ← CS_INPUT · RD ← MEMRD · dati su BD[15..8] se SWITCH_BUS = 0, su BD[7..0] se SWITCH_BUS = 1.",sol:"s-in-addr s-cs-input s-p4 s-p7",step:"p9"},
+    resetp:{t:"RESET_P — comando, non chip",fis:"Non è un chip sul bus: è un filo che vale 1 quando il programma scrive un byte a 70000002h (banco 2). Va al reset asincrono del flip-flop P_PREMUTO.",dato:"Serve al pulsante P: dopo che una pressione è stata usata, va dimenticata.",risp:"RESET_P = BA31*·BA30·BA29·BA28·BE2·MEMWR · indirizzo 70000002h · usato dall'istruzione SB R0,0x0002(R20) dell'handler.",sol:"s-resp-addr s-resetp s-p6",step:"p9"},
+    pbtn:{t:"Pulsante P e i due flip-flop",fis:"P_PREMUTO ricorda la pressione di P; SWITCH_BUS la congela sul fronte di MEMRD della lettura a 16 bit e comanda quale porta va su quale corsia.",dato:"«un pulsante P che, se premuto, indica che il dato letto da INPUT_A dovrà essere considerato il byte più significativo» — da gestire «attraverso opportune reti logiche».",risp:"FFD P_PREMUTO (D = 1, clock = P, A_RES = RESET + RESET_P·SWITCH_BUS) · FFD SWITCH_BUS · commutazione di DATA_A/DATA_B su BD[7..0]/BD[15..8]. Moduli 00 e 05.",sol:"s-p6 s-p7",step:"p9"},
+    out:{t:"OUTPUT — porta in output",fis:"Scrive all'esterno il byte di INPUT_A nello stesso ciclo in cui viene letto: il suo WR è MEMRD.",dato:"«una porta in output… dovrà essere inviato all'esterno il dato letto da INPUT_A contemporaneamente alla lettura».",risp:"CS ← CS_INPUT·OUTPUT_PORT_READY · WR ← MEMRD · D ← DATA_A · OUTPUT_PORT_READY da un FFD. Modulo 05.",sol:"s-p5",step:"p9"},
+    int:{t:"Interrupt al DLX",fis:"Il filo INT del processore. Vale 1 quando entrambe le porte in input hanno un dato pronto: allora il DLX esegue l'handler.",dato:"Le porte usano «il protocollo di handshake»: avvisano quando hanno un dato.",risp:"INT_DLX = INT_INPUT_A·INT_INPUT_B · handler: LHU da 70000000h, SB a 70000002h, SH a 80000004h, RFE.",sol:"s-int s-code",step:"p10"}
+  };
+  var info=document.getElementById("mapInfo");
+  function show(g){
+    svg.querySelectorAll(".sel").forEach(function(e){e.classList.remove("sel")}); g.classList.add("sel");
+    var k=g.dataset.k, i=g.dataset.i, d=INFO[k]; if(!d) return;
+    function f(s){return s.replace(/\{i\}/g,i).replace(/\{lane\}/g,i!==""?LANE[+i]:"")}
+    info.innerHTML='<h3>'+f(d.t)+'</h3><dl><dt>Cos\'è</dt><dd>'+f(d.fis)+'</dd><dt>Dato del testo</dt><dd>'+f(d.dato)+'</dd><dt>Nella risposta</dt><dd><code>'+f(d.risp)+'</code></dd></dl><div class="links">'+(d.sol?'<button class="go" data-sol="'+d.sol+'">→ righe della soluzione</button>':'')+'<button class="go" data-step="'+d.step+'">→ passo '+d.step.slice(1)+'</button></div>';
+  }
+  svg.addEventListener("click",function(e){var g=e.target.closest("[data-k]"); if(g) show(g)});
+  svg.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){var g=e.target.closest("[data-k]"); if(g){e.preventDefault(); show(g)}}});
+  show(svg.querySelector('[data-k="ram"][data-i="1"]'));
+
+  // Zoom: un blocco filo per filo
+  var Z=document.getElementById("zsvg"), zInfo=document.getElementById("zInfo"), zAddr=document.getElementById("zAddr");
+  var ZB={
+    ram:{nome:"RAM 2 GB",chip:"RAM",base:0x80000000,k:29,cs:[[31,1]],wr:true,taglia:"512 MB"},
+    e1g:{nome:"EPROM 1 GB",chip:"EPROM_1GB",base:0x00000000,k:28,cs:[[31,0],[30,0]],taglia:"256 MB"},
+    e512:{nome:"EPROM 512 MB",chip:"EPROM_512",base:0x40000000,k:27,cs:[[31,0],[30,1],[29,0]],taglia:"128 MB"},
+    e64:{nome:"EPROM 64 MB",chip:"EPROM_64",base:0x60000000,k:24,cs:[[31,0],[30,1],[29,1],[28,0]],taglia:"16 MB"}
+  };
+  var zCur="e64", P=23, X0=30;
+  var PINS=["MEMRD","MEMWR","BE3","BE2","BE1","BE0"]; for(var n=31;n>=0;n--) PINS.push("BA"+n);
+  function px(name){return X0+PINS.indexOf(name)*P+11}
+  function zel(tag,a,txt){return el(tag,a,Z,txt)}
+  function hex8(v){return (v>>>0).toString(16).toUpperCase().padStart(8,"0")}
+  function bitOf(v,n){return (v>>>n)&1}
+  function zdraw(){
+    var B=ZB[zCur], k=B.k, c=B.cs.length, a=parseInt(zAddr.value,16); if(isNaN(a)) a=B.base; a=a>>>0;
+    while(Z.firstChild) Z.removeChild(Z.firstChild);
+    var inBlk=B.cs.every(function(p){return bitOf(a,p[0])===p[1]});
+    var lowCS=32-c, firstPin=k+1, bank=a&3, row=(a>>>2)&((k>=31)?0x7fffffff:((1<<k)>>>0)-1);
+    // processore
+    zel("text",{x:20,y:12,"class":"h"},"DLX — i suoi piedini");
+    zel("rect",{x:20,y:18,width:885,height:60,rx:5,style:"fill:var(--panel);stroke:var(--ink)"});
+    PINS.forEach(function(p,i){
+      var x=X0+i*P+11, n=p.indexOf("BA")===0?+p.slice(2):null;
+      zel("text",{x:x+4,y:74,transform:"rotate(-90 "+(x+4)+" 74)",style:"font-size:10px"},p);
+      var v=null;
+      if(n!=null&&n>=2) v=bitOf(a,n);
+      if(p==="MEMRD") v=1; if(p==="MEMWR") v=0;
+      if(p.indexOf("BE")===0) v=(+p.slice(2)===bank)?1:0;
+      if(v!=null){zel("circle",{cx:x,cy:92,r:7,style:"stroke:var(--ink);fill:"+(v?"var(--hit)":"var(--panel)")}); zel("text",{x:x-3,y:96,style:"font-size:10px;fill:"+(v?"var(--hit-ink)":"var(--ink)")},String(v))}
+    });
+    var rowY=function(i){return 140+i*112};
+    // fili
+    PINS.forEach(function(p,i){
+      var x=X0+i*P+11, n=p.indexOf("BA")===0?+p.slice(2):null, y2, col="var(--muted)", w=1.4, dash="";
+      if(p==="MEMRD"){y2=rowY(3)+60}
+      else if(p==="MEMWR"){y2=B.wr?rowY(3)+78:112; if(!B.wr) dash="4 3"}
+      else if(p.indexOf("BE")===0){y2=rowY(+p.slice(2)); col="var(--ok)"}
+      else if(n>=lowCS){y2=rowY(3); col="var(--ok)"; w=2}
+      else if(n>=firstPin+1 && n<lowCS){y2=118}
+      else if(n>=2){y2=rowY(3)+12; col="var(--accent)"; w=1.6}
+      else {y2=112; dash="4 3"}
+      zel("path",{d:"M"+x+" 99 L"+x+" "+y2,style:"fill:none;stroke:"+col+";stroke-width:"+w+(dash?";stroke-dasharray:"+dash:"")});
+      if(n!=null&&n>=firstPin+1&&n<lowCS){zel("text",{x:x-5,y:131,style:"font-size:13px;fill:var(--warn)"},"✕")}
+    });
+    var cut=lowCS-1-(firstPin+1)+1;
+    if(cut>0) zel("text",{x:px("BA"+(firstPin+1))+12,y:130,"class":"s"},"non collegati → "+(1<<cut)+" repliche");
+    zel("text",{x:px("BA1")-12,y:126,"class":"s"},"→ BE");
+    if(!B.wr) zel("text",{x:px("MEMWR")-6,y:126,"class":"s"},"");
+    // righe: una per banco
+    for(var i=0;i<4;i++){
+      var y=rowY(i), on=inBlk&&bank===i;
+      // porta AND
+      var gx1=px("BE3")-10, gx2=px("BA"+lowCS)+10;
+      zel("rect",{x:gx1,y:y,width:gx2-gx1,height:34,rx:5,style:"fill:"+(on?"var(--hit)":"var(--firma)")+";stroke:var(--ok)"});
+      zel("text",{x:gx1+4,y:y+14,style:"font-size:10px;fill:"+(on?"var(--hit-ink)":"var(--firma-ink)")},"AND");
+      zel("text",{x:gx1+4,y:y+27,style:"font-size:10px;fill:"+(on?"var(--hit-ink)":"var(--firma-ink)")},"CS_"+i+(on?" = 1":""));
+      [px("BE"+i)].concat(B.cs.map(function(q){return px("BA"+q[0])})).forEach(function(x){zel("circle",{cx:x,cy:y,r:3,style:"fill:var(--ok)"})});
+      // chip
+      var cx1=Math.max(px("BA"+firstPin)-28,gx2+8), cx2=px("BA2")+12, cy=y+8, ch=86;
+      zel("path",{d:"M"+gx2+" "+(y+22)+" L"+cx1+" "+(y+22),style:"fill:none;stroke:var(--ok);stroke-width:2"});
+      zel("path",{d:"M"+px("MEMRD")+" "+(y+60)+" L"+cx1+" "+(y+60),style:"fill:none;stroke:var(--muted);stroke-width:1.2"});
+      zel("circle",{cx:px("MEMRD"),cy:y+60,r:2.5,style:"fill:var(--muted)"});
+      if(B.wr){zel("path",{d:"M"+px("MEMWR")+" "+(y+78)+" L"+cx1+" "+(y+78),style:"fill:none;stroke:var(--muted);stroke-width:1.2"}); zel("circle",{cx:px("MEMWR"),cy:y+78,r:2.5,style:"fill:var(--muted)"})}
+      zel("rect",{x:cx1,y:cy,width:cx2-cx1,height:ch,rx:5,style:"fill:"+(on?"var(--hit)":"var(--accent-soft)")+";stroke:var(--ink);stroke-width:"+(on?2.5:1.2)});
+      var tf=on?"var(--hit-ink)":"var(--ink)";
+      zel("text",{x:cx1+4,y:y+44,style:"font-size:9px;fill:"+tf},"CS");
+      zel("text",{x:cx1+4,y:y+63,style:"font-size:9px;fill:"+tf},"RD");
+      if(B.wr) zel("text",{x:cx1+4,y:y+81,style:"font-size:9px;fill:"+tf},"WR");
+      for(var n=2;n<=firstPin;n++){var x=px("BA"+n); zel("circle",{cx:x,cy:cy,r:2.5,style:"fill:var(--accent)"}); zel("text",{x:x+3,y:cy+5,transform:"rotate(90 "+(x+3)+" "+(cy+5)+")",style:"font-size:8.5px;fill:"+tf},"A"+(n-2))}
+      zel("text",{x:cx1+30,y:y+62,"class":"h",style:"fill:"+tf},B.chip+"_"+i+" · "+B.taglia+" = 2^"+k+" righe (0 … "+(Math.pow(2,k)-1).toLocaleString("it-IT")+")");
+      zel("text",{x:cx1+30,y:y+78,style:"font-size:10.5px;fill:"+tf},on?("risponde: riga "+row.toLocaleString("it-IT")+" (in esadecimale "+row.toString(16).toUpperCase()+"h)"):"banco "+i+": byte con indirizzo ≡ "+i+" mod 4");
+      // dati
+      for(var d=0;d<8;d++){var yy=y+14+d*9; zel("path",{d:"M"+cx2+" "+yy+" L"+(cx2+50)+" "+yy,style:"fill:none;stroke:var(--warn);stroke-width:1.2"})}
+      zel("text",{x:cx2+2,y:y+11,style:"font-size:8.5px;fill:var(--warn)"},"D7…D0");
+      zel("rect",{x:cx2+50,y:y+8,width:60,height:76,rx:4,style:"fill:var(--var);stroke:var(--warn)"});
+      zel("text",{x:cx2+54,y:y+40,style:"font-size:10px"},"BD["+(8*i+7)+".."+(8*i)+"]");
+    }
+    // spiegazione
+    var bits=""; for(var n=31;n>=0;n--) bits+=bitOf(a,n);
+    function seg(h,l){return bits.slice(31-h,32-l)}
+    var html='<h3>'+hex8(a)+'h nel blocco '+B.nome+'</h3><dl>';
+    html+='<dt>Fili 31…'+lowCS+'</dt><dd><code>'+seg(31,lowCS)+'</code> → porte AND (CS): '+(inBlk?'<b class="ok">combaciano con il CS del blocco</b>':'<b style="color:var(--warn)">non combaciano: questo indirizzo non è di questo blocco, nessun chip si accende</b>')+'</dd>';
+    if(cut>0) html+='<dt>Fili '+(lowCS-1)+'…'+(firstPin+1)+'</dt><dd><code>'+seg(lowCS-1,firstPin+1)+'</code> → nessuna parte. Il chip non li vede: per lui '+hex8(a)+'h e l\'indirizzo con questi bit cambiati sono la stessa cella (repliche).</dd>';
+    html+='<dt>Fili '+firstPin+'…2</dt><dd><code>'+seg(firstPin,2)+'</code> → piedini <code>A'+(k-1)+'…A0</code>: è il numero della riga, '+row.toLocaleString("it-IT")+'. Il filo BA2 va su A0, BA3 su A1, … BA'+firstPin+' su A'+(k-1)+': <b>A['+(k-1)+'..0] ← BA['+firstPin+'..2]</b>.</dd>';
+    html+='<dt>Bit 1…0</dt><dd><code>'+seg(1,0)+'</code> = '+bank+' → banco '+bank+'. Il DLX non ha questi fili: accende BE'+bank+' (lettura di un byte).</dd>';
+    if(inBlk){var w=(a&~3)>>>0; html+='<dt>Stessa riga</dt><dd>La riga '+row.toLocaleString("it-IT")+' esiste in tutti e 4 i chip: '+[0,1,2,3].map(function(j){return '<code>'+hex8(w+j)+'h</code> (banco '+j+')'}).join(', ')+'. Insieme sono la word <code>'+hex8(w)+'h</code>, letta in un ciclo solo con BE3…BE0 = 1111.</dd>'}
+    html+='</dl>';
+    zInfo.innerHTML=html;
+    document.getElementById("zRep").hidden=(cut===0);
+    document.querySelectorAll("#zBlk button").forEach(function(b){b.style.background=b.dataset.b===zCur?"var(--accent)":"";b.style.color=b.dataset.b===zCur?"var(--panel)":""});
+  }
+  var zb=document.getElementById("zBlk");
+  zb.insertAdjacentHTML("beforeend",'<span>Blocco:</span>'+Object.keys(ZB).map(function(key){return '<button class="go" type="button" data-b="'+key+'">'+ZB[key].nome+'</button>'}).join(""));
+  zb.addEventListener("click",function(e){var b=e.target.closest("button[data-b]"); if(!b) return; zCur=b.dataset.b; zAddr.value=hex8(ZB[zCur].base+5); zdraw()});
+  document.getElementById("zoom").addEventListener("click",function(e){var b=e.target.closest("button[data-z]"); if(!b) return; var a=parseInt(zAddr.value,16)>>>0; var B=ZB[zCur];
+    if(b.dataset.z==="rep"){var c=B.cs.length, lo=B.k+2, hi=32-c; var span=Math.pow(2,hi)-Math.pow(2,lo); a=(a+Math.pow(2,lo))%Math.pow(2,32); if(((a>>>lo)&((1<<(hi-lo))-1))===0) a=(a-Math.pow(2,hi)+Math.pow(2,32))%Math.pow(2,32)}
+    else a=(a+(+b.dataset.z)+Math.pow(2,32))%Math.pow(2,32);
+    zAddr.value=hex8(a); zdraw()});
+  zAddr.addEventListener("input",zdraw);
+  zdraw();
+
+  // Mappa della memoria: linea degli indirizzi e sottoschemi
+  var M=document.getElementById("msvg"), mInfo=document.getElementById("mInfo"), G=Math.pow(2,32);
+  var ZONE=[
+    {z:"e1g",da:0x00000000,a:0x40000000,nome:"EPROM 1 GB",col:"var(--accent-soft)"},
+    {z:"e512",da:0x40000000,a:0x60000000,nome:"EPROM 512 MB",col:"var(--accent-soft)"},
+    {z:"e64",da:0x60000000,a:0x64000000,nome:"64 MB",col:"var(--accent-soft)"},
+    {z:"rep",da:0x64000000,a:0x70000000,nome:"repl.",col:"var(--bit0)"},
+    {z:"porte",da:0x70000000,a:0x80000000,nome:"porte",col:"var(--var)"},
+    {z:"ram",da:0x80000000,a:G,nome:"RAM 2 GB",col:"var(--firma)"}
+  ];
+  var mx=function(v){return 40+v/G*920};
+  function mel(tag,a,x,y){var par=(x&&x.nodeType)?x:((y&&y.nodeType)?y:M), t=(x&&x.nodeType)?y:x; return el(tag,a,par,t==null?null:t)}
+  for(var h=0;h<=16;h++){var x=mx(h*0x10000000); mel("path",{d:"M"+x+" 22 L"+x+" 86",style:"stroke:var(--rule);stroke-width:1"}); if(h<16) mel("text",{x:x+(920/32)-6,y:18,"class":"s"},h.toString(16).toUpperCase()+"…")}
+  ZONE.forEach(function(zz){
+    var g=mel("g",{"data-z":zz.z,tabindex:"0",role:"button"});
+    mel("rect",{x:mx(zz.da),y:28,width:mx(zz.a)-mx(zz.da),height:52,style:"fill:"+zz.col},g);
+    var w=mx(zz.a)-mx(zz.da);
+    if(w>40) mel("text",{x:mx(zz.da)+5,y:50,"class":"h",style:"font-size:"+(w>100?13:10.5)+"px"},zz.nome,g);
+    else mel("text",{x:mx(zz.da)+2,y:74,style:"font-size:9px"},"64",g);
+  });
+  [[0,"00000000h"],[0x40000000,"40000000h"],[0x60000000,"60000000h"],[0x70000000,"70000000h"],[0x80000000,"80000000h"]].forEach(function(t){mel("text",{x:mx(t[0])+2,y:100,"class":"s",style:"font-size:9.5px"},t[1])});
+  mel("text",{x:mx(G)-62,y:100,"class":"s",style:"font-size:9.5px"},"FFFFFFFFh");
+  mel("text",{x:mx(0x64000000)-4,y:114,"class":"s",style:"font-size:9.5px"},"↑ 64000000h: fine EPROM 64 MB, poi zona libera (repliche)");
+
+  function bar(B,kind){
+    // B: {cs:[[n,v]], k}, kind: "mem" | "porta"
+    var csLow=32-B.cs.length, rowHi=kind==="porta"?1:B.k+1, h='<div class="bitbar">';
+    for(var n=31;n>=0;n--){
+      var cls,lab;
+      if(n>=csLow){cls="cs"; var v=B.cs.filter(function(p){return p[0]===n})[0][1]; lab=(v?"BA"+n:"BA"+n+"*")}
+      else if(n>=2&&n<=rowHi){cls="row"; lab="A"+(n-2)}
+      else if(n>=2){cls="no"; lab="✕"}
+      else {cls="be"; lab="BE"}
+      h+='<span class="b '+cls+'" title="BA'+n+'"><i>'+n+'</i>'+lab+'</span>';
+    }
+    return h+'</div><p class="hint"><span class="b cs" style="display:inline-block;width:auto;padding:0 6px;border-radius:3px">verde</span> → porte AND, cioè il CS · <span class="b row" style="display:inline-block;width:auto;padding:0 6px;border-radius:3px">blu</span> → piedino A del chip (la riga) · <span class="b no" style="display:inline-block;width:auto;padding:0 6px;border-radius:3px">✕</span> non collegato · <span class="b be" style="display:inline-block;width:auto;padding:0 6px;border-radius:3px">BE</span> → BA1, BA0 non esistono: il DLX accende BE3…BE0, cioè sceglie il banco</p>';
+  }
+  function grid(B,base){
+    var rows=[0,1,2,"…",Math.pow(2,B.k)-1], h='<div class="tbl"><table class="bk"><tr><th>riga<small>= valore sui piedini A</small></th>';
+    for(var i=0;i<4;i++) h+='<th>chip '+B.chip+'_'+i+'<small>banco '+i+' · BE'+i+' · BD['+(8*i+7)+'..'+(8*i)+']</small><small>CS = '+B.csTxt+'·BE'+i+'</small></th>';
+    h+='</tr>';
+    rows.forEach(function(r){
+      if(r==="…"){h+='<tr><td class="r">…</td><td colspan="4" class="r">… '+(Math.pow(2,B.k)-4).toLocaleString("it-IT")+' righe in mezzo …</td></tr>';return}
+      h+='<tr><td class="r">'+r.toLocaleString("it-IT")+'</td>';
+      for(var i=0;i<4;i++){var ad=(base+4*r+i)>>>0; h+='<td class="c" data-ad="'+hex8(ad)+'" title="apri filo per filo">'+hex8(ad)+'h</td>'}
+      h+='</tr>';
+    });
+    return h+'</table></div>';
+  }
+  var CST={ram:"BA31",e1g:"BA31*·BA30*",e512:"BA31*·BA30·BA29*",e64:"BA31*·BA30·BA29·BA28*"};
+  function mshow(z){
+    M.querySelectorAll(".sel").forEach(function(e){e.classList.remove("sel")}); var g=M.querySelector('[data-z="'+z+'"]'); if(g) g.classList.add("sel");
+    var h="";
+    if(ZB[z]){
+      var B=Object.assign({},ZB[z],{csTxt:CST[z]}), zz=ZONE.filter(function(q){return q.z===z})[0];
+      h+='<h3>'+B.nome+' · '+hex8(zz.da)+'h – '+hex8(zz.a-1)+'h</h3>';
+      h+='<p>Il blocco è fatto di <b>4 chip da '+B.taglia+'</b> (2^'+B.k+' righe ciascuno), uno per banco. Ogni indirizzo del blocco è <b>una cella di un solo chip</b>: il <b>banco</b> lo dicono gli ultimi 2 bit (→ BE), la <b>riga</b> dentro il chip i bit da BA2 a BA'+(B.k+1)+' (→ piedini A). Quindi sì: cambiando indirizzo tocchi ogni volta una cella diversa, e 4 byte di fila sono la <b>stessa riga di 4 chip diversi</b>, letti insieme in un ciclo. È per questo che i piedini partono da BA2.</p>';
+      h+='<p class="eyebrow">Come si spezza l\'indirizzo sui 32 piedini del DLX</p>'+bar(B,"mem");
+      h+='<p class="eyebrow">Dentro i 4 chip: chi contiene quale indirizzo</p><p>Leggi la tabella come un foglio a quadretti. <b>Ogni colonna è un chip</b>: sono le 4 scatole impilate in «Un blocco, filo per filo» (banco 0 in alto là, a sinistra qui). <b>Ogni riga è una cella dentro i chip</b>: il numero di riga è quello che arriva sui piedini <code>A</code>. <b>Ogni casella</b> dice quale indirizzo del DLX finisce in quella cella. Esempio: <code>'+hex8(zz.da+5)+'h</code> sta nella colonna del chip 1, riga 1. Nella vista filo per filo, con quell\'indirizzo si accende il chip _1 e c\'è scritto «risponde: riga 1». Leggendo una riga da sinistra a destra trovi 4 indirizzi di fila: la CPU li legge insieme in un ciclo, uno da ogni chip.</p><p class="hint">Premi una casella: la vista filo per filo si apre con quell\'indirizzo.</p>'+grid(B,zz.da);
+      h+='<p class="hint">Nella risposta: <code>'+B.chip+' '+hex8(zz.da)+'h:'+hex8(zz.a-1)+'h, 4 banchi da '+B.taglia+'</code> · <code>CS_..._i = '+B.csTxt+'·BEi</code> · <code>A['+(B.k-1)+'..0] ← BA['+(B.k+1)+'..2]</code> · banco i su <code>BD[8i+7..8i]</code> · RD ← MEMRD'+(B.wr?' · WR ← MEMWR':'')+'.</p>';
+    } else if(z==="rep"){
+      h+='<h3>64000000h – 6FFFFFFFh: nessun chip in più</h3><p>Qui non c\'è niente di montato. Ma il CS dell\'EPROM da 64 MB guarda solo BA31…BA28 = <code>0110</code>, cioè <b>tutta la cifra iniziale 6</b>: per questi indirizzi si accende lo stesso. BA27 e BA26 non arrivano da nessuna parte, quindi il chip non li vede e risponde con la stessa cella.</p>';
+      h+='<div class="tbl"><table class="bk"><tr><th>indirizzo</th><th>BA27 BA26</th><th>chip e riga che rispondono</th></tr>'+[0x60000005,0x64000005,0x68000005,0x6C000005].map(function(a,j){return '<tr><td class="c" data-ad="'+hex8(a)+'">'+hex8(a)+'h</td><td>'+((j>>1)&1)+' '+(j&1)+'</td><td>EPROM_64_1, riga 1 '+(j?'(replica)':'(originale)')+'</td></tr>'}).join("")+'</table></div>';
+      h+='<p class="eyebrow">Come si spezza l\'indirizzo</p>'+bar({cs:ZB.e64.cs,k:24},"mem")+'<p class="hint">È lecito perché qui non c\'è nessun altro dispositivo: è la «criticità» da controllare (passo 5).</p>';
+    } else if(z==="porte"){
+      h+='<h3>70000000h – 7FFFFFFFh: le porte</h3><p>Una porta è un registro da <b>1 byte</b>: una cella sola, quindi <b>nessun piedino A</b>. Le due porte in input stanno sui banchi 0 e 1 e si leggono insieme (16 bit). Il banco 2 non ha un chip: il byte <code>70000002h</code> è il comando RESET_P (in scrittura). Tutto il resto della zona sono repliche.</p>';
+      h+='<div class="tbl"><table class="bk"><tr><th>banco 3<small>BE3 · BD[31..24]</small></th><th>banco 2<small>BE2 · BD[23..16]</small></th><th>banco 1<small>BE1 · BD[15..8]</small></th><th>banco 0<small>BE0 · BD[7..0]</small></th></tr><tr><td>70000003h<br><small>libero</small></td><td>70000002h<br><small>RESET_P = …·BE2·MEMWR (comando)</small></td><td>70000001h<br><small>INPUT_B · CS_INPUT</small></td><td>70000000h<br><small>INPUT_A · CS_INPUT</small></td></tr></table></div>';
+      h+='<p class="eyebrow">Come si spezza l\'indirizzo</p>'+bar({cs:[[31,0],[30,1],[29,1],[28,1]],k:0},"porta");
+      h+='<p class="hint">Nella risposta: <code>CS_INPUT = BA31*·BA30·BA29·BA28·BE0·BE1</code> · <code>RESET_P = BA31*·BA30·BA29·BA28·BE2·MEMWR</code>. Come funzionano le porte: moduli 04–05.</p>';
+    }
+    mInfo.innerHTML=h;
+  }
+  M.addEventListener("click",function(e){var g=e.target.closest("[data-z]"); if(g) mshow(g.dataset.z)});
+  M.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){var g=e.target.closest("[data-z]"); if(g){e.preventDefault(); mshow(g.dataset.z)}}});
+  mInfo.addEventListener("click",function(e){var td=e.target.closest("[data-ad]"); if(!td) return; var a=parseInt(td.dataset.ad,16)>>>0;
+    var key=a>=0x80000000?"ram":a>=0x60000000?"e64":a>=0x40000000?"e512":"e1g"; zCur=key; zAddr.value=td.dataset.ad; zdraw(); document.getElementById("zoom").scrollIntoView({block:"start",behavior:"smooth"})});
+  mshow("e64");
   document.querySelectorAll(".ln").forEach(function(l){
     l.addEventListener("click",function(){
       clear(); l.classList.add("hit");

@@ -67,6 +67,18 @@ Inciampi: `2000h` scritto con 14 bit e `7` → `1001` (è 9) — scrivere sempre
 pesi 8-4-2-1; `CS_RAM_1` ridotto ad `A13*` confrontando solo le RAM (domanda di Claude mal posta, notata da
 Lorenzo) — controllare il CS contro **tutti** gli altri chip.
 
+## 0b. Il foglio d'esame in quattro riquadri *(2026-10-22)*
+
+1. **Dati** dal testo + fissi del DLX (32 bit, 4 banchi, BA1–0 → BE, EPROM solo RD).
+2. **Linea degli indirizzi** a mano: 16 tacche = prima cifra hex; blocchi, buco, porte.
+3. **Tabella della risposta**, una riga per blocco, colonne da sinistra a destra:
+   `blocco | taglia 2^n | inizio–fine | firma | CS blocco | banco 2^k | A[k−1..0] ← BA[k+1..2] | WR?`;
+   poi 4 righe `CS_…_i = CS · BEi` e banco i su `BD[8i+7..8i]`.
+4. **Controlli**: somme, 8 cifre, bit che cambiano = esponente, CS a coppie, repliche in zone libere.
+
+Esempio riempito: artefatto «Prova DLX 8 gennaio 2025», sezione «Su carta»
+(https://claude.ai/artifact/5iHgc8vnP9dtjop3fQ8j3w).
+
 ## 1. Procedura d'esame
 
 La sequenza di decisioni dal testo all'elaborato, consegne a), b), c). Un passo per riga, al suo

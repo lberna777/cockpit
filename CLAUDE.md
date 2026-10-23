@@ -20,14 +20,21 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 | **plugin-creator** — plugin audio JUCE (area lavoro) | **Plugin · plugin-creator** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`. I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
 | **carguy** — autonoma | **CarGuy · carguy** | — |
 | **bibiciclo** — autonoma | senza gruppo | — |
-| **home** — autonoma, **solo locale** (la cartella `~` del PC Debian, nessun remote) | **Debian · home** (chat locali del Code tab, non cloud) | — |
+| **Fun** — progetti per divertimento, una repo autonoma per progetto (dal 2026-10-22) | **Fun · <repo>** | `barca-halloween` (gioco a penitenza per la festa di Halloween alla Barca: proiettore + telefoni, hub sul portatile) |
+| **home** — autonoma, **solo locale**, una per computer (la cartella home di ogni macchina, nessun remote) | **Debian · home**, **Mac · home**, **Windows · home** (chat locali del Code tab, non cloud) | — |
 
-- **home** (dal 2026-10-21) è la prima repo solo locale: traccia per lista bianca dotfile,
-  configurazione di Claude Code e auto-memoria della home (`~/CLAUDE.md`, `~/.gitignore`). Non ha
-  remote, quindi le chat cloud non la aprono: la vedono attraverso questa mappa e `repo/home` nella
-  Plancia. Le repo sotto `~` (cockpit, `~/Sviluppo/...`) restano indipendenti.
+- **home** è la repo solo locale di ogni computer: Debian dal 2026-10-21, Mac mini e portatile
+  Windows dal 2026-10-22, ciascuna con la sua chat di macchina (`/debian`, `/mac`, `/windows`).
+  Traccia per lista bianca dotfile, configurazione di Claude Code e auto-memoria della home
+  (`CLAUDE.md` e `.gitignore` nella cartella home). Non ha remote, quindi le chat cloud non la
+  aprono: la vedono attraverso questa mappa e nella Plancia come `repo/home` (Debian),
+  `repo/home-mac` e `repo/home-windows`. Le repo sotto la home con un remote proprio (cockpit,
+  `~/Sviluppo/...`) restano indipendenti.
 - **carguy** e **bibiciclo** sono progetti veri nati dai tentativi del sistema che ha preceduto
   Developing: restano autonomi, e Developing li usa come prova di competenza nel portfolio.
+- **Fun** non ha una repo padre: ogni progetto per divertimento ha la sua repo autonoma, con lo
+  stesso `.claude/` delle altre (hook, `/handoff`, subagenti) e nel `CLAUDE.md` il blocco «Famiglia»
+  che rimanda qui. Un progetto nuovo si aggiunge alla tupla `FUN` di `titolo_chat.py`.
 - **Due repo per il portfolio, non un doppione**: `lberna777.github.io` è il sito (GitHub Pages
   pubblica solo da una repo con quel nome), `lberna777` è il README mostrato sulla pagina del
   profilo GitHub (anche lui vuole una repo con il nome dell'utente). Si aggiornano insieme.
@@ -59,13 +66,17 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 
 La memoria vive in `~/cockpit/Vault` ed è **iniettata automaticamente** a ogni avvio dal
 SessionStart hook (`scripts/memory_inject.sh`) — non devi fare nulla per "caricarla", è già
-in contesto. L'hook inietta un artefatto compatto: l'indice del vault + gli ultimi recap.
+in contesto. L'hook inietta pochi KB: dove cercare, le note curate di `Vault/claude/` e gli
+ultimi tre recap (rifatta piccola il 2026-10-22, decisione di Lorenzo; prima erano ~28 KB).
 
 - **Ricerca nel vault**: usa `rg` (ripgrep) dentro `~/cockpit/Vault`. È il motore di ricerca
   della memoria (deciso dal bake-off G3: `Vault/claude/graphify_bakeoff.md`).
-- **Indice**: `Vault/index.md` (rigenerabile con `python3 scripts/build_index.py`).
-- **Recap giornalieri**: `Vault/recap/YYYY-MM-DD.md` (generati da `scripts/recap_generator.py`,
-  consolidati da `scripts/consolidate_recaps.py`).
+- **Indice**: `Vault/index.md`, non iniettato: si apre se serve. Lo rigenera `scripts/build_index.py`
+  dal timer serale del laptop.
+- **Recap giornalieri**: `Vault/recap/YYYY-MM-DD.md`, solo fatti contati (eventi di studio per corso,
+  moduli chiusi, commit che dicono qualcosa per repo), niente sintesi generate. Li scrive
+  `scripts/recap_generator.py` dal timer serale del laptop (`giornata_laptop.sh`), che li committa;
+  nel cloud non si generano, perché lì mancano le altre repo.
 - **Note curate per Claude**: `Vault/claude/`.
 - **Studio universitario**: `Vault/UniCode` (la cartella reale; `~/UniCode` è il symlink).
 
@@ -143,14 +154,14 @@ di scrivere, non ricopiarlo qui.
   affida l'archiviazione della vecchia. Hook e comando sono identici in tutte le repo padri.
 - **Skill custom**: `lorenzo-skills` (audio-dsp-debug, game-scope-guard, studia, unicode-output-gate,
   unicode-session-close, unicode-link-note).
-- **Recap del giorno**: annota le attività in `Vault/attivita_oggi.md` durante la giornata;
-  il recap le raccoglie e poi archivia il file.
+- **Cosa è successo nella giornata**: lo studio va in `Vault/UniCode/stato/giornata.md`, tutto il
+  resto nel diario della Plancia. `Vault/attivita_oggi.md` non esiste più (dal 2026-10-22).
 
 ## Modelli: chi pensa e chi esegue (advisor pattern)
 
 Deciso da Lorenzo il 2026-10-20. Copia identica nei `CLAUDE.md` di cockpit, Developing,
-plugin-creator, carguy e bibiciclo; l'originale è in cockpit: se lo cambi, ricopialo nelle altre.
-I due subagenti stanno in `.claude/agents/`, identici in tutte e cinque le repo.
+plugin-creator, carguy, bibiciclo e barca-halloween; l'originale è in cockpit: se lo cambi,
+ricopialo nelle altre. I due subagenti stanno in `.claude/agents/`, identici in tutte e sei le repo.
 
 | Livello | Chi | Che cosa fa |
 | --- | --- | --- |

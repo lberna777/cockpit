@@ -88,6 +88,12 @@ distinzione non è stata capita.
   `maxTentativi()` (capacità) invece che alle mosse fatte è la stessa fusione fisico/logico del LAB04b:
   dettaglio sotto il pattern 6. Evidenza: trascrizione del 2026-10-21, 14:52, 15:04, 15:11, 16:43, 17:49;
   `stato/giornata.md` 15:09, 16:30, 17:55.
+- [2026-10-22] FI2: LAB06 MasterMind, due spazi di indici fusi. In `sorteggiaCombinazione` v2
+  `values()[i]` invece di `values()[n]`: l'indice del ciclo (posizione) al posto del numero sorteggiato
+  (colore), per cui uscivano sempre `VUOTO, ROSSO, GIALLO, VERDE`; in `calcolaRisposta` v1 il ciclo dei
+  minimi limitato da `tentativo.dim()` (4 posizioni) invece che dai 7 colori. Il secondo l'ha trovato da
+  solo con stampe contro tabella a mano: «sto scorrendo i vettori dei colori, non di una risposta».
+  Evidenza: `stato/giornata.md` 12:44, 15:26, 15:41; `confronto_LAB06.md` §9.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -253,6 +259,10 @@ indirizzi IP e sottoreti (`RETI`).
   2026-10-21, 15:09 («creare un array di oggetti PioloDiGioco con dimensione dim-1»), 16:51, 17:08,
   17:12 («il ciclo cosi va bene?»), 17:23; commit `5515286`, `a2a9123`, `b41c5a0`, `79d81a5`;
   `stato/giornata.md` 15:09, 16:54, 17:08, 17:23.
+- [2026-10-22] FI2: LAB06 sorteggio, regola «0..5 + 1» giusta a parole ma estremi sbagliati nel codice:
+  `PioloDiGioco.values().length` creduto 6 (è 7, `VUOTO` incluso) e `nextInt(5)` per ottenere 0..5
+  (`nextInt(n)` esclude `n`: serve `nextInt(6)`, cioè `values().length - 1`). Evidenza:
+  `stato/giornata.md` 12:38; handoff `HANDOFF_FI2-LAB06_2026-10-22.md`, «Ancora poco chiaro».
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
@@ -575,6 +585,17 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   Lorenzo ne trae una regola di procedura: campi → costruttore → metodi che cambiano lo stato → metodi
   che lo leggono. Evidenza: trascrizione del 2026-10-21, 16:30–16:32, 17:13, 18:01; `stato/giornata.md`
   16:30, 16:32.
+- [2026-10-22] Ricorrenza di «parametro e campo fusi» (LAB04c 2026-10-02; LAB06 2026-10-21, ciclo su
+  `this.dim`): `sorteggiaCombinazione` v2 scritta su `this.segreta` (campo) invece che sulla combinazione
+  ricevuta come parametro; nella stessa versione un `new Random()` a ogni giro del ciclo invece di uno
+  solo fuori. Corretto con guida; a fine sessione `this` resta «da consolidare». Evidenza:
+  `stato/giornata.md` 12:44; handoff `HANDOFF_FI2-LAB06_2026-10-22.md`; `confronto_LAB06.md` §12.
+- [2026-10-22] LAB06 `calcolaRisposta` v1: riempimento della `Risposta` con condizioni su `neri`/`bianchi`
+  che nel ciclo non cambiano, per cui con `neri > 0` ogni piolo diventava `NERO` → causa: il ciclo deve
+  riempire fasce consecutive (prima i neri, poi i bianchi), ma la condizione non dipende da ciò che il
+  ciclo ha già fatto → correzione: o un contatore che si consuma (`neri--`, la sua versione finale) o, come
+  il docente, due cicli con estremi `[0, neri)` e `[neri, totali)`. Corretto da solo. Evidenza:
+  `stato/giornata.md` 15:26, 15:41; `confronto_LAB06.md` §10.
 
 ### CALC — Calcolatori Elettronici T
 - [2026-10-08] 02p §2: taglia convertita in bit senza l'unità. RAM da 32 KB → «5 piedini perché 32 =

@@ -16,14 +16,15 @@ Il nome di ogni gruppo dice cosa si fa e quale repo **padre** selezionare (nomi 
 | **Portfolio · Developing** | `Developing` | `/portfolio` | Brand, sito (`lberna777.github.io`) e profilo GitHub, aggiunti con `add_repo` |
 | **Plugin · plugin-creator** | `plugin-creator` | il nome del plugin | Una chat per plugin |
 | **CarGuy · carguy** | `carguy` | — | Solo l'app |
+| **Fun · <repo>** | la repo del progetto (`barca-halloween`) | — | Progetti per divertimento, una repo ciascuno |
 | senza gruppo | nessuna, o `bibiciclo` | — | Domande veloci |
 
 Regola: **una chat, un lavoro**. Cambio di argomento → chat nuova.
 
 **Titolo ed etichetta automatici**: al primo messaggio di ogni sessione cloud l'hook
-`.claude/hooks/titolo_chat.py` (identico nelle cinque repo padri, originale in cockpit) ricava il
+`.claude/hooks/titolo_chat.py` (identico in tutte le repo con `.claude/`, originale in cockpit) ricava il
 gruppo dalla repo e dal comando d'apertura, e Claude imposta il titolo «<Gruppo> — <argomento>» e
-l'etichetta (`studio`, `sistema`, `progetti`, `portfolio`, `plugin`, `carguy`, `bibiciclo`). In
+l'etichetta (`studio`, `sistema`, `progetti`, `portfolio`, `plugin`, `carguy`, `bibiciclo`, `fun`). In
 cockpit apre una chat **Studio** un comando di studio (`/sessione`, `/lab`, `/lezione`, `/appunti`,
 `/ripassa`, `/simula`, `/flusso`, `/stato`, `/lacune`, `/piano`, `/pianifica`, `/chiudi`,
 `/verifica`), qualunque altro inizio una chat **Sistema**; in Developing `/portfolio` apre
