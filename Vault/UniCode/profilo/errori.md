@@ -705,6 +705,9 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   quindi alla fine ho 7 piu 16» → stessa confusione del 9/10 fra il valore della colonna (16) e ciò che
   passa a sinistra (1) → correzione: F + 1 = `10h`, si scrive 0 e si riporta **1**. Evidenza:
   trascrizione del 2026-10-20 (citazioni sopra; richiesta «fammi vedere come si conta da 0 a 16 in esa»).
+  Ricorrenza [2026-10-23], lab 02: stesso `7FFFFFFFh + 1` per l'inizio della RAM, «a cui devo sommare 1
+  ma non mi ricordo come si fa», tre giorni dopo; fatto da solo (`80000000h`) dopo la tabella del
+  riporto decimale/esadecimale. Evidenza: trascrizione del 2026-10-23; `stato/giornata.md` 15:44, 15:47.
 - [2026-10-20] Lezione 02: indirizzi DLX scritti con 7 cifre esadecimali invece di 8. `8000000h` per
   512 MB, `4000000h` per 64 MB, e nella somma `60000000h + 04000000h` il risultato «6400000h - 1»: la
   cifra persa cambia il valore (`6400000h` ≠ `64000000h`) → causa: non usa la larghezza fissa del bus
