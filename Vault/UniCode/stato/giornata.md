@@ -13,3 +13,4 @@
 15:47 · CALC · lab 02: RAM 80000000h–FFFFFFFFh da solo (+1 esadecimale fatto dopo la regola del riporto) ✓.
 15:52 · CALC · lab 02: mappa completa da solo, buco 40800000h–7FFFFFFFh ✓. Si passa alle firme.
 15:57 · CALC · lab 02: Lorenzo non ricorda come si ricava la firma di un blocco; ripresa con analogia decimale + esempio inventato da 256 MB (10000000h–1FFFFFFFh).
+16:07 · CALC · lab 02: firma EPROM 1 GB (BA31=0, BA30=0) e bit di firma dell'8 MB (BA31..BA23) da solo dopo l'esempio ✓.
