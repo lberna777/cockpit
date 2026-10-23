@@ -20,7 +20,7 @@ COCKPIT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$COCKPIT" || exit 1
 UNICODE="$COCKPIT/Vault/UniCode"
 # Repo non archiviate con commit da riportare (mappa del CLAUDE.md di cockpit).
-REPO=(Developing plugin-creator carguy bibiciclo lberna777.github.io lberna777 claudereset
+REPO=(Developing plugin-creator carguy bibiciclo barca-halloween lberna777.github.io lberna777 claudereset
       Boot_Debian diritto-quiz-app StereoCompressor NEMO-StereoCompressor FreakFM acidmoog-synth)
 CLONI="$(mktemp -d)"
 trap 'rm -rf "$CLONI"' EXIT

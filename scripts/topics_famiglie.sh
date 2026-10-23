@@ -20,6 +20,7 @@ topic plugin-creator    padre famiglia-plugin
 # Autonome
 topic carguy            autonoma
 topic bibiciclo         autonoma
+topic barca-halloween   autonoma fun
 
 # Figlie attive
 topic lberna777.github.io famiglia-developing
