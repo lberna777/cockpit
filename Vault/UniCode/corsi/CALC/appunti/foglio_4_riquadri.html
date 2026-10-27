@@ -1,0 +1,212 @@
+<title>Foglio in quattro riquadri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&family=Caveat:wght@500;700&display=swap">
+<style>
+/* Layout: un foglio a quadretti; ① e ② affiancati, ③ a tutta larghezza, ④ sotto. Si legge come il foglio d'esame, dall'alto. */
+:root {
+  --paper: #fbfcfd;
+  --grid: #e3e9f1;
+  --ink: #1d2733;
+  --muted: #5f6b7a;
+  --pen: #1f4fa3;
+  --line: #9fb0c4;
+  --hole: #f1e7c9;
+  --hole-ink: #6b5310;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --hand: "Caveat", "Comic Sans MS", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #151a21; --grid: #222a35; --ink: #e2e8f0; --muted: #98a3b3;
+    --pen: #8db4ff; --line: #4a5a6e; --hole: #3a3220; --hole-ink: #e8d18f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #151a21; --grid: #222a35; --ink: #e2e8f0; --muted: #98a3b3;
+  --pen: #8db4ff; --line: #4a5a6e; --hole: #3a3220; --hole-ink: #e8d18f; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--ink);
+  font: 15px/1.5 var(--sans);
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.sheet { max-width: 1100px; margin: 0 auto; display: grid; gap: 18px; grid-template-columns: 1fr 1fr; }
+header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; }
+h1 { font: 700 2.1rem/1.1 var(--hand); color: var(--pen); margin: 0; text-wrap: balance; }
+.meta { color: var(--muted); font-size: .9rem; max-width: 60ch; }
+section {
+  border: 1.5px solid var(--line); border-radius: 4px; background: color-mix(in srgb, var(--paper) 88%, transparent);
+  padding: 14px 16px 16px; min-width: 0; display: flex; flex-direction: column; gap: 10px;
+}
+section.wide { grid-column: 1 / -1; }
+h2 { margin: 0; font: 600 1rem/1.3 var(--sans); display: flex; gap: 10px; align-items: baseline; }
+h2 .n { font: 700 1.6rem/1 var(--hand); color: var(--pen); }
+.ask { font: 500 1.15rem/1.25 var(--hand); color: var(--pen); }
+.hint { color: var(--muted); font-size: .85rem; }
+.blank { display: inline-block; min-width: 7ch; border-bottom: 1.5px dashed var(--line); }
+ul.fields { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ul.fields li { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.lbl { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); min-width: 9.5rem; }
+code, .m { font-family: var(--mono); font-size: .88em; }
+.fixed { border-top: 1px dashed var(--line); padding-top: 8px; }
+.scroll { overflow-x: auto; }
+svg text { fill: var(--ink); font-family: var(--mono); }
+svg .mut { fill: var(--muted); }
+table { border-collapse: collapse; width: 100%; min-width: 860px; font-size: .86rem; }
+th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
+th { font-weight: 600; }
+th .ask { display: block; font-size: 1rem; font-weight: 500; margin-top: 2px; }
+td.row { font-weight: 600; white-space: nowrap; }
+td.e { height: 2.3em; }
+tr.hole td { background: var(--hole); color: var(--hole-ink); }
+.banks { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+.bank { border: 1px dashed var(--line); padding: 6px 8px; font-family: var(--mono); font-size: .85rem; }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 6px 18px; }
+.checks label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.checks input { margin-top: 4px; accent-color: var(--pen); width: 16px; height: 16px; flex: none; }
+.checks input:focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
+footer { grid-column: 1 / -1; color: var(--muted); font-size: .85rem; }
+@media (max-width: 760px) { .sheet { grid-template-columns: 1fr; } }
+</style>
+
+<main class="sheet">
+  <header>
+    <h1>Foglio d'esame · mapping delle memorie</h1>
+    <p class="meta">Il foglio da disegnare <b>prima</b> di avviare il cronometro. Le scritte blu sono le
+      domande di ogni riquadro e colonna: le stesse che ti faccio io se ti blocchi. Durante la prova
+      questa pagina resta chiusa.</p>
+  </header>
+
+  <!-- ① DATI -->
+  <section aria-labelledby="q1">
+    <h2 id="q1"><span class="n">①</span> Dati</h2>
+    <p class="ask">Cosa mi dà il testo? Cosa so già del DLX?</p>
+    <ul class="fields">
+      <li><span class="lbl">EPROM (in basso)</span><span class="blank">&nbsp;</span> MB</li>
+      <li><span class="lbl">scomposizione</span><span class="m">= 2^<span class="blank" style="min-width:3ch">&nbsp;</span> + 2^<span class="blank" style="min-width:3ch">&nbsp;</span></span><span class="hint">ricontrolla la somma</span></li>
+      <li><span class="lbl">RAM (in alto)</span><span class="blank">&nbsp;</span> GB <span class="m">= 2^<span class="blank" style="min-width:3ch">&nbsp;</span></span></li>
+      <li><span class="lbl">porte</span><span class="blank" style="min-width:16ch">&nbsp;</span><span class="hint">quante, in/out, a 8 bit</span></li>
+      <li><span class="lbl">indirizzi imposti</span><span class="blank" style="min-width:16ch">&nbsp;</span><span class="hint">quelli scritti nel testo</span></li>
+    </ul>
+    <ul class="fields fixed">
+      <li><span class="lbl">fissi del DLX</span><span>indirizzi a 32 bit, 8 cifre esadecimali</span></li>
+      <li><span class="lbl"></span><span>bus dati a 32 bit → <b>4 banchi</b> da 8 bit</span></li>
+      <li><span class="lbl"></span><span><code>BA1–BA0</code> non escono: diventano <code>BE0–BE3</code></span></li>
+      <li><span class="lbl"></span><span>EPROM solo <code>MEMRD</code> · RAM <code>MEMRD</code> e <code>MEMWR</code></span></li>
+      <li><span class="lbl">unità</span><span><code>K = 2^10</code> · <code>M = 2^20</code> · <code>G = 2^30</code></span></li>
+    </ul>
+  </section>
+
+  <!-- ② LINEA DEGLI INDIRIZZI -->
+  <section aria-labelledby="q2">
+    <h2 id="q2"><span class="n">②</span> Linea degli indirizzi</h2>
+    <p class="ask">Dove sono? Dove finisce ogni blocco? Dov'è il buco?</p>
+    <div class="scroll">
+      <svg viewBox="0 0 470 182" width="100%" style="min-width:420px" role="img" aria-label="Linea con sedici tacche, una per ogni prima cifra esadecimale da 0 a F">
+        <line x1="20" y1="70" x2="452" y2="70" stroke="var(--ink)" stroke-width="1.5"/>
+        <g id="ticks"></g>
+        <rect x="20" y="36" width="432" height="26" fill="none" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="236" y="54" text-anchor="middle" font-size="11" class="mut">disegna qui i blocchi, il buco e le porte</text>
+        <text x="20" y="166" font-size="10" class="mut">00000000h</text>
+        <text x="452" y="166" font-size="10" text-anchor="end" class="mut">FFFFFFFFh</text>
+        <text x="236" y="178" font-size="10" text-anchor="middle" class="mut">una tacca = 1ª cifra esadecimale = 2^28 B = 256 MB</text>
+      </svg>
+    </div>
+    <p class="hint">Sotto ogni tacca scrivi la cifra in binario: sono <code>BA31 BA30 BA29 BA28</code>, e ti servono per le firme.
+      Fine di un blocco = inizio + taglia − 1. Sempre 8 cifre.</p>
+  </section>
+
+  <!-- ③ TABELLA DELLA RISPOSTA -->
+  <section class="wide" aria-labelledby="q3">
+    <h2 id="q3"><span class="n">③</span> Tabella della risposta</h2>
+    <p class="ask">Una riga per blocco, colonne da sinistra a destra: ogni colonna usa quella prima.</p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Blocco</th>
+            <th>Taglia<span class="ask">2^n?</span></th>
+            <th>Inizio – fine<span class="ask">da dove a dove?</span></th>
+            <th>Firma<span class="ask">quali bit restano fermi, e quanto valgono?</span></th>
+            <th>CS del blocco<span class="ask">quali bit mi bastano senza toccare nessun altro?</span></th>
+            <th>Banco<span class="ask">taglia / 4 = 2^k?</span></th>
+            <th>Piedini<span class="ask">A[k−1..0] ← BA[k+1..2]</span></th>
+            <th>RD / WR<span class="ask">si scrive?</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="row">EPROM, blocco più grande</td><td class="e"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="row">EPROM, blocco dopo</td><td class="e"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr class="hole"><td class="row">buco · porte</td><td class="e" colspan="2">indirizzi tondi delle porte:</td><td></td><td></td><td colspan="3">zona occupata: le porte si progettano con le lezioni 04–05</td></tr>
+          <tr><td class="row">RAM</td><td class="e"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="ask">Poi, per ogni blocco, le 4 righe dei banchi:</p>
+    <div class="banks">
+      <div class="bank">CS_…_0 = CS · BE0<br>→ BD[7..0]</div>
+      <div class="bank">CS_…_1 = CS · BE1<br>→ BD[15..8]</div>
+      <div class="bank">CS_…_2 = CS · BE2<br>→ BD[23..16]</div>
+      <div class="bank">CS_…_3 = CS · BE3<br>→ BD[31..24]</div>
+    </div>
+    <p class="hint">Notazione del docente: <code>BA31*·BA30·BE0</code> (negazione con <code>*</code> dopo il segnale), nomi
+      <code>CS_EPROM_1GB_0</code>, range <code>40000000h:407FFFFFh</code>.</p>
+  </section>
+
+  <!-- ④ CONTROLLI -->
+  <section class="wide" aria-labelledby="q4">
+    <h2 id="q4"><span class="n">④</span> Controlli</h2>
+    <p class="ask">Prima di consegnare: i numeri tornano tutti?</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" id="c1">la scomposizione dà davvero la taglia del testo</label></li>
+      <li><label><input type="checkbox" id="c2">ogni indirizzo ha 8 cifre</label></li>
+      <li><label><input type="checkbox" id="c3">fine − inizio + 1 = taglia, per ogni blocco</label></li>
+      <li><label><input type="checkbox" id="c4">i bit che girano sono tanti quanto l'esponente della taglia</label></li>
+      <li><label><input type="checkbox" id="c5">la firma è uguale sull'inizio e sulla fine del blocco</label></li>
+      <li><label><input type="checkbox" id="c6">ogni coppia di CS ha un bit affermato in uno e negato nell'altro (porte comprese)</label></li>
+      <li><label><input type="checkbox" id="c7">le repliche cadono solo in zone libere, mai su una porta</label></li>
+      <li><label><input type="checkbox" id="c8">piedini: i fili dei due lati sono lo stesso numero</label></li>
+      <li><label><input type="checkbox" id="c9">piedini + firma completa + <code>BA1–0</code> = 32 fili</label></li>
+      <li><label><input type="checkbox" id="c10">RD e WR scritti per ogni blocco</label></li>
+    </ul>
+  </section>
+
+  <footer>Esempio già riempito: la sezione «Su carta» dell'artefatto «Prova DLX 8 gennaio 2025». Fonte del foglio: prontuario CALC §0b.</footer>
+</main>
+
+<script>
+(function () {
+  var g = document.getElementById('ticks');
+  var ns = 'http://www.w3.org/2000/svg';
+  var x0 = 20, w = 432 / 16;
+  for (var i = 0; i <= 16; i++) {
+    var x = x0 + i * w;
+    var t = document.createElementNS(ns, 'line');
+    t.setAttribute('x1', x); t.setAttribute('x2', x);
+    t.setAttribute('y1', 64); t.setAttribute('y2', 76);
+    t.setAttribute('stroke', 'var(--ink)'); t.setAttribute('stroke-width', '1.2');
+    g.appendChild(t);
+    if (i < 16) {
+      var cx = x + w / 2;
+      var d = document.createElementNS(ns, 'text');
+      d.setAttribute('x', cx); d.setAttribute('y', 94); d.setAttribute('text-anchor', 'middle');
+      d.setAttribute('font-size', '12'); d.textContent = i.toString(16).toUpperCase();
+      g.appendChild(d);
+      var b = document.createElementNS(ns, 'rect');
+      b.setAttribute('x', cx - 11); b.setAttribute('y', 102); b.setAttribute('width', 22); b.setAttribute('height', 40);
+      b.setAttribute('fill', 'none'); b.setAttribute('stroke', 'var(--line)'); b.setAttribute('stroke-dasharray', '2 3');
+      g.appendChild(b);
+    }
+  }
+})();
+</script>
