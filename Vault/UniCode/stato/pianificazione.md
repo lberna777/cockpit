@@ -5,12 +5,12 @@
 > nella stessa esecuzione in cui le attività vengono scritte nella Plancia.
 > Regola di Lorenzo del 2026-10-08: lo studio non resta mai senza data.
 
-settimana: 2026-10-19
+settimana: 2026-10-26
 mese: 2026-10
-giorno: 2026-10-25
+giorno: 2026-11-01
 
 <!--
-settimana: il lunedì della settimana pianificata (AAAA-MM-GG)
+settimana: 2026-10-26
 mese:      il mese pianificato (AAAA-MM)
-giorno:    l'ultimo giorno per cui sono state fissate le attività di studio (AAAA-MM-GG)
+giorno: 2026-11-01
 -->
