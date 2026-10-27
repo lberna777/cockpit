@@ -1,6 +1,6 @@
-# Vault Index — 2026-10-22
+# Vault Index — 2026-10-23
 
-> Indice compatto generato da `build_index.py`. 207 note. Per il contenuto, apri la nota indicata.
+> Indice compatto generato da `build_index.py`. 225 note. Per il contenuto, apri la nota indicata.
 
 ## UniCode  (2)
 - [[UniCode/CLAUDE.md|CLAUDE.md]] — CLAUDE.md — Studio Universitario Lorenzo
@@ -94,10 +94,24 @@
 ## UniCode/ARCHIVIO/ESAME DIRITTO/07 - Glossario  (1)
 - [[UniCode/ARCHIVIO/ESAME DIRITTO/07 - Glossario/glossario_diritto.md|glossario_diritto.md]] — Glossario — Diritto dell'Informatica T
 
-## UniCode/ARCHIVIO/pre-riordino_2026-09  (7)
+## UniCode/ARCHIVIO/Unibo_Diritto_Informatico  (9)
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/01 - Concetti giuridici di base.md|01 - Concetti giuridici di base.md]] — Concetti giuridici di base
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/02 - Ricerca & Analisi delle fonti.md|02 - Ricerca & Analisi delle fonti.md]] — Diritto dell'Informatica — Ricerca e Analisi delle Fonti del Diritto
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/03 - Diritto d'autore, tutela software e Proprietà industriale.md|03 - Diritto d'autore, tutela software e Proprietà industriale.md]] — Diritto d'autore, tutela giuridica del software e Proprietà industriale
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/04 - Tutela giuridica delle banche di dati e dei siti web.md|04 - Tutela giuridica delle banche di dati e dei siti web.md]] — Tutela giuridica delle banche di dati e dei siti web
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/05 - Contratti a oggetto informatico.md|05 - Contratti a oggetto informatico.md]] — Contratti a oggetto informatico
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/05b - Analisi di contratto di sviluppo software.md|05b - Analisi di contratto di sviluppo software.md]] — Analisi di contratto di sviluppo software
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/06 - La proprietà industriale.md|06 - La proprietà industriale.md]] — La proprietà industriale (brevetti, marchi, nomi a dominio)
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/README.md|README.md]] — Diritto dell'informatica T - A.A. 2025/2026
+- [[UniCode/ARCHIVIO/Unibo_Diritto_Informatico/appunti_definitivo.md|appunti_definitivo.md]] — <!-- FILE: 01 - Concetti giuridici di base.md -->
+
+## UniCode/ARCHIVIO/pre-riordino_2026-09  (10)
+- [[UniCode/ARCHIVIO/pre-riordino_2026-09/ESAMI SCELTI.md|ESAMI SCELTI.md]] — Esami Scelti — Sessione Giugno/Luglio 2026
+- [[UniCode/ARCHIVIO/pre-riordino_2026-09/ESAMI.md|ESAMI.md]] — |                                                                               
 - [[UniCode/ARCHIVIO/pre-riordino_2026-09/concept_maps.md|concept_maps.md]] — Mappe Concettuali — Lab Amm. di Sistemi T
 - [[UniCode/ARCHIVIO/pre-riordino_2026-09/glossario_diritto.md|glossario_diritto.md]] — Glossario — Diritto dell'Informatica T
 - [[UniCode/ARCHIVIO/pre-riordino_2026-09/glossario_sysadm.md|glossario_sysadm.md]] — Glossario — Lab Amministrazione di Sistemi T
+- [[UniCode/ARCHIVIO/pre-riordino_2026-09/master_map_studio.md|master_map_studio.md]] — Master Map — Studio Attivo Universitario
 - [[UniCode/ARCHIVIO/pre-riordino_2026-09/metodo_studio_esami_pratici.md|metodo_studio_esami_pratici.md]] — Metodo di Studio — Esami Pratici (Sicurezza + Amministrazione di Sistemi)
 - [[UniCode/ARCHIVIO/pre-riordino_2026-09/stato_percorso.md|stato_percorso.md]] — Percorso Modulare — Dettaglio Materiali e Concetti
 - [[UniCode/ARCHIVIO/pre-riordino_2026-09/template_appunti_grezzi.md|template_appunti_grezzi.md]] — Template — Appunti Grezzi
@@ -168,7 +182,8 @@
 ## UniCode/corsi/CALC/grezzi  (1)
 - [[UniCode/corsi/CALC/grezzi/traccia_02p_2026-10-08.md|traccia_02p_2026-10-08.md]] — Traccia di sessione — CALC 02p, 2026-10-08
 
-## UniCode/corsi/CALC/lezioni  (2)
+## UniCode/corsi/CALC/lezioni  (3)
+- [[UniCode/corsi/CALC/lezioni/guida_lab_02_prova_2023-12-21.md|guida_lab_02_prova_2023-12-21.md]] — Scheda — CALC 02: prova del 21/12/2023, parte memorie
 - [[UniCode/corsi/CALC/lezioni/lezione_02_mapping_decodifica.md|lezione_02_mapping_decodifica.md]] — Lezione — CALC 02: Mapping e decodifica delle memorie
 - [[UniCode/corsi/CALC/lezioni/lezione_02p_fondamenta.md|lezione_02p_fondamenta.md]] — Lezione — CALC 02p: Fondamenta per il mapping (macchina, chip, numeri)
 
@@ -221,7 +236,7 @@
 - [[UniCode/log/sessioni_pre-2026-08.md|sessioni_pre-2026-08.md]] — Log Sessioni — Studio Attivo
 - [[UniCode/log/tracker_pre-2026-08.md|tracker_pre-2026-08.md]] — Tracker Ripasso — Spaced Repetition
 
-## UniCode/log/giornate_dettaglio  (23)
+## UniCode/log/giornate_dettaglio  (25)
 - [[UniCode/log/giornate_dettaglio/2026-09-02.md|2026-09-02.md]] — Giornata 2026-09-02
 - [[UniCode/log/giornate_dettaglio/2026-09-14.md|2026-09-14.md]] — Giornata 2026-09-14
 - [[UniCode/log/giornate_dettaglio/2026-09-15.md|2026-09-15.md]] — Giornata 2026-09-15
@@ -245,6 +260,8 @@
 - [[UniCode/log/giornate_dettaglio/2026-10-19.md|2026-10-19.md]] — Giornata 2026-10-19
 - [[UniCode/log/giornate_dettaglio/2026-10-20.md|2026-10-20.md]] — Giornata 2026-10-20
 - [[UniCode/log/giornate_dettaglio/2026-10-21.md|2026-10-21.md]] — Giornata 2026-10-21
+- [[UniCode/log/giornate_dettaglio/2026-10-22.md|2026-10-22.md]] — Giornata 2026-10-22
+- [[UniCode/log/giornate_dettaglio/2026-10-23.md|2026-10-23.md]] — Giornata 2026-10-23
 
 ## UniCode/piano  (1)
 - [[UniCode/piano/piano_laurea.md|piano_laurea.md]] — Piano di laurea — Ingegneria Informatica T
@@ -252,7 +269,8 @@
 ## UniCode/plans  (1)
 - [[UniCode/plans/riallineamento_comandi.md|riallineamento_comandi.md]] — Riallineamento dei dodici comandi — inventario di lettura
 
-## UniCode/plans/handoffs  (7)
+## UniCode/plans/handoffs  (8)
+- [[UniCode/plans/handoffs/HANDOFF_CALC-lab02_2026-10-23.md|HANDOFF_CALC-lab02_2026-10-23.md]] — Handoff — CALC lab 02 (prova 2023-12-21), 23/10/2026
 - [[UniCode/plans/handoffs/HANDOFF_FI2-LAB06_2026-10-22.md|HANDOFF_FI2-LAB06_2026-10-22.md]] — Handoff — FI2 LAB06 MasterMind (chiuso) · 2026-10-22
 - [[UniCode/plans/handoffs/HANDOFF_auto-precompact_2026-06-22_143738.md|HANDOFF_auto-precompact_2026-06-22_143738.md]] — Auto-Handoff (Pre-Compaction Safety Net)
 - [[UniCode/plans/handoffs/HANDOFF_auto-precompact_2026-06-23_153826.md|HANDOFF_auto-precompact_2026-06-23_153826.md]] — Auto-Handoff (Pre-Compaction Safety Net)
@@ -265,11 +283,10 @@
 - [[UniCode/profilo/errori.md|errori.md]] — Errori ricorrenti
 - [[UniCode/profilo/studente.md|studente.md]] — Profilo di studio — Lorenzo
 
-## UniCode/stato  (6)
-- [[UniCode/stato/briefing.md|briefing.md]] — Briefing — 2026-10-22
-- [[UniCode/stato/cloud_avvisi.md|cloud_avvisi.md]] — - `origin/claude/consolidamento-2026-10-20` ha lavoro di studio non in master e 
+## UniCode/stato  (5)
+- [[UniCode/stato/briefing.md|briefing.md]] — Briefing — 2026-10-23
 - [[UniCode/stato/corrente.md|corrente.md]] — Stato Corrente — Studio Attivo
-- [[UniCode/stato/giornata.md|giornata.md]] — Giornata 2026-10-22
+- [[UniCode/stato/giornata.md|giornata.md]] — Giornata 2026-10-24
 - [[UniCode/stato/pianificazione.md|pianificazione.md]] — Pianificazione
 - [[UniCode/stato/tracker.md|tracker.md]] — Tracker ripasso
 
@@ -279,7 +296,7 @@
 - [[claude/come_lavorare.md|come_lavorare.md]] — Come lavorare — gruppi di chat, repo e cloud
 - [[claude/graphify_bakeoff.md|graphify_bakeoff.md]] — GATE G3 — graphify vs rg (esito)
 
-## recap  (10)
+## recap  (13)
 - [[recap/2026-06-17.md|2026-06-17.md]] — Recap 2026-06-17
 - [[recap/2026-06-18.md|2026-06-18.md]] — Recap 2026-06-18
 - [[recap/2026-06-22.md|2026-06-22.md]] — Recap 2026-06-22
@@ -290,3 +307,6 @@
 - [[recap/2026-10-16.md|2026-10-16.md]] — Recap 2026-10-16
 - [[recap/2026-10-19.md|2026-10-19.md]] — Recap 2026-10-19
 - [[recap/2026-10-20.md|2026-10-20.md]] — Recap 2026-10-20
+- [[recap/2026-10-21.md|2026-10-21.md]] — Recap 2026-10-21
+- [[recap/2026-10-22.md|2026-10-22.md]] — Recap 2026-10-22
+- [[recap/2026-10-23.md|2026-10-23.md]] — Recap 2026-10-23
