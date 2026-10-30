@@ -21,6 +21,13 @@ Il nome di ogni gruppo dice cosa si fa e quale repo **padre** selezionare (nomi 
 
 Regola: **una chat, un lavoro**. Cambio di argomento → chat nuova.
 
+**La chat nuova la apre Lorenzo, non Claude** `[2026-10-30]`. Una sessione creata da Claude con
+`create_session` nasce **figlia** della chat da cui parte: non si sposta da sola in un altro gruppo,
+si porta dietro la madre. Successo con `barca-halloween` e con FI2 LAB07 (nata sotto «Piano
+giornata»). Quando serve una chat in un altro gruppo, Claude dice a Lorenzo **quale gruppo e quale
+primo messaggio** (es. Studio · cockpit, `/lab FI2 LAB07`) e non la crea. Unica eccezione:
+`/handoff`, che sostituisce la chat stessa nello stesso gruppo.
+
 **Titolo ed etichetta automatici**: al primo messaggio di ogni sessione cloud l'hook
 `.claude/hooks/titolo_chat.py` (identico in tutte le repo con `.claude/`, originale in cockpit) ricava il
 gruppo dalla repo e dal comando d'apertura, e Claude imposta il titolo «<Gruppo> — <argomento>» e
