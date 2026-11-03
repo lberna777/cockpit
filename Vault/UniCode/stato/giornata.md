@@ -7,3 +7,4 @@
 12:51 · FI2 · LAB07 Appointment: setDuration corretto da Lorenzo dopo la spiegazione (setter di proprietà calcolata = scrive il campo da cui la proprietà dipende).
 12:57 · FI2 · LAB07 AppointmentTest 5/6 verdi (manca equals: testEqualsAppointment in failure). Pausa pranzo.
 14:15 · FI2 · LAB07 AppointmentTest 6/6 verdi, ma equals confronta description con == (passa solo per stringhe letterali internate): pattern 2, verde ≠ corretto. Da correggere con equals.
+14:19 · FI2 · LAB07 equals corretto da Lorenzo (description.equals, return diretto), hashCode rimosso.
