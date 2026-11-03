@@ -14,3 +14,4 @@
 16:04 · FI2 · LAB07 AppointmentCollection 3/3 verdi (remove corretto su [size-1]). Lorenzo dichiara: non chiaro lavorare con gli array, soprattutto contenitori annidati ed espansione/restrizione (registrato in profilo/errori.md, pattern 6). Si passa a MyCalendar.
 16:49 · FI2 · LAB07 MyCalendar: costruttore, add, getAllAppointments, remove (indexOf + -1 → false) scritti. Restano getDay/Month/WeekAppointments, getAppointmentsIn, isOverlapped.
 17:12 · FI2 · LAB07 isOverlapped e getAppointmentsIn corretti (dopo ||→&&: confondeva «sovrapposto» con «contenuto», sbloccato con la tabella dei sei casi).
+17:31 · FI2 · CHIUSO FI2 LAB07 — 14/14 verdi, guidato. Restano ritocchi (private, copia in getAllAppointments), copia in svolti/ e confronto.

@@ -1,10 +1,10 @@
 # Stato Corrente — Studio Attivo
 
-**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-10-23
+**Esami attivi**: `FI2` e `CALC` | **Aggiornato**: 2026-11-03
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02`: lezione finita il 22/10; lab sulla prova 2023-12-21 (memorie) **svolto guidato il 23/10**, confronto con la soluzione senza errori di sostanza, sicurezza 3/5: il 02 si chiude a freddo su un'altra prova. ⚠️ Calendario indietro: 03–05 ancora da aprire.
   Sezione in fondo.
-- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · ✅ `LAB06` MasterMind **chiuso il 22/10** (34/34 verdi, **guidato**: da rifare a freddo); `calcolaRisposta` pensata da Lorenzo, bug dei minimi trovato da lui con stampe vs tabella. Codice e confronto (12 punti) in `esame_FI2/svolti/LAB06_MasterMind/`. 🔶 `LAB07` MyCalendar **in corso** dal 30/10: scheda `lezioni/guida_lab_LAB07_mycalendar.md`, startkit in `esame_FI2/da_importare/LAB07_MyCalendar-301026`; si parte da `Appointment`.
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · ✅ `LAB06` MasterMind **chiuso il 22/10** (34/34 verdi, **guidato**: da rifare a freddo); `calcolaRisposta` pensata da Lorenzo, bug dei minimi trovato da lui con stampe vs tabella. Codice e confronto (12 punti) in `esame_FI2/svolti/LAB06_MasterMind/`. ✅ `LAB07` MyCalendar **chiuso il 3/11** (14/14 verdi, **guidato**: da rifare a freddo). Punti deboli emersi: limiti in `remove` (`size` vs `length`, pattern 6, stessi errori del LAB04c), setter di proprietà calcolata, `||`/`&&` in `isOverlapped`. Restano due ritocchi non coperti dai test (`private` su `isOverlapped`/`getAppointmentsIn`, copia in `getAllAppointments`), la copia in `esame_FI2/svolti/LAB07_MyCalendar/` e il confronto con la soluzione.
 
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
