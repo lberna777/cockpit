@@ -22,8 +22,16 @@ public class MyCalendar {
 	
 	public boolean remove (Appointment app) {
 		
-		allAppointments.remove(allAppointments.indexOf(app));
+		int index = allAppointments.indexOf(app);
+		if (index == -1) {
+			return false;
+		} else {
+			allAppointments.remove(index);
+			return true;
+		}
 	}
+	
+	
 
 	
 }
