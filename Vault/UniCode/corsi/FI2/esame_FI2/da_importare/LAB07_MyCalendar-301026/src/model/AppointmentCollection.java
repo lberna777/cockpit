@@ -50,10 +50,10 @@ public class AppointmentCollection {
 	}
 	
 	public void remove (int index) {
-		for(int i = index; i < this.innerContainer.length; i++) {
+		for(int i = index; i < this.size-1; i++) {
 			this.innerContainer[i] = this.innerContainer[i+1];
 		}
-		this.innerContainer[innerContainer.length] = null;
+		this.innerContainer[size-1] = null;
 		size--;
 	}
 	
