@@ -67,6 +67,13 @@ public class MyCalendar {
 	}
 	
 	
+	public AppointmentCollection getWeekAppointments(LocalDate date) {
+		int giorniDaTogliere = date.getDayOfWeek().getValue() - 1;
+		LocalDateTime start = date.minusDays(giorniDaTogliere).atStartOfDay();
+		LocalDateTime finish = start.plusWeeks(1);
+		return getAppointmentsIn(start, finish);
+	}
+	
 	
 
 	
