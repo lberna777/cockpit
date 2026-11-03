@@ -13,3 +13,4 @@
 16:00 · FI2 · LAB07 remove: tre tentativi con limiti sbagliati, size e length usati come intercambiabili (pattern 1, distinzione collassata: posti occupati vs posti esistenti). Dato il codice corretto con traccia.
 16:04 · FI2 · LAB07 AppointmentCollection 3/3 verdi (remove corretto su [size-1]). Lorenzo dichiara: non chiaro lavorare con gli array, soprattutto contenitori annidati ed espansione/restrizione (registrato in profilo/errori.md, pattern 6). Si passa a MyCalendar.
 16:49 · FI2 · LAB07 MyCalendar: costruttore, add, getAllAppointments, remove (indexOf + -1 → false) scritti. Restano getDay/Month/WeekAppointments, getAppointmentsIn, isOverlapped.
+17:12 · FI2 · LAB07 isOverlapped e getAppointmentsIn corretti (dopo ||→&&: confondeva «sovrapposto» con «contenuto», sbloccato con la tabella dei sei casi).
