@@ -17,3 +17,4 @@
 17:31 · FI2 · CHIUSO FI2 LAB07 — 14/14 verdi, guidato. Restano ritocchi (private, copia in getAllAppointments), copia in svolti/ e confronto.
 17:38 · FI2 · /chiudi: Lorenzo conferma LAB07 completo; poco chiari array (espansione/restrizione, contenitori annidati), setter di proprietà calcolata e seguire da solo il workflow di una classe dall'inizio alla fine. Sicurezza 3/5. Nessun problema tecnico.
 17:38 · FI2 · LAB07 copiato in esame_FI2/svolti/LAB07_MyCalendar/ (14/14 verificati anche in cloud con javac + JUnit); confronto_LAB07.md scritto (13 punti).
+17:40 · FI2 · prontuario: §3.15 LAB07 (proprietà calcolata, equals/toString, this() vs new, indexOf −1, copia della collezione, isOverlapped, intervalli giorno/mese/settimana, famiglie di java.time); 4 righe in §1.1, 3 in §1.2, 6 in §1.3; 9 voci nell'indice.

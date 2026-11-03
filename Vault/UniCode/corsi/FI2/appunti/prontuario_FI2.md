@@ -85,6 +85,15 @@ tags: [FI2, appunti]
 | contatore che è anche indice della prima cella libera; l'ultima piena è `n − 1` | 3.14 | LAB06 |
 | metodo che cambia lo stato e lo restituisce (`registraMossa`) | 3.14 | LAB06 |
 | riga di testo a colonne con tabulazioni e a capo (`situazione`) | 3.14 | LAB06 |
+| proprietà **calcolata** (non è un campo): getter che calcola, setter che riscrive il campo da cui dipende | 3.15 | LAB07 |
+| `equals` con la firma dell'UML (`equals(Appointment)`, non `Object`), confronto di stringhe e date | 3.15 · 1.3 | LAB07 |
+| formattare data **e** ora (`07/10/26, 10:15`); stampare una `Duration` | 3.15 | LAB07 |
+| costruttore vuoto che chiama l'altro: `this(...)` e non `new` | 3.15 · 1.2 | LAB07 |
+| `indexOf` che restituisce −1 se l'elemento non c'è; `remove(oggetto)` passando dall'indice | 3.15 | LAB07 |
+| capire se due intervalli di tempo si sovrappongono (`isOverlapped`) | 3.15 | LAB07 |
+| intervallo `[inizio, fine)` di un giorno, di un mese, di una settimana (lunedì) | 3.15 | LAB07 |
+| restituire una **copia** di una collezione, non quella interna | 3.15 | LAB07 |
+| metodi di `java.time`: `of`, `plus…`, `with…`, `at…`, `get…`, `is…`, `between` | 3.15 | LAB07 |
 
 ---
 
@@ -119,6 +128,10 @@ terminale. **Stessa causa, parole diverse.**
 | ⚠️ `The method getPiolo(int) from the type Combinazione is not visible` | `getPiolo(int) is not public in Combinazione; cannot be accessed from outside package` | metodo senza `public`: i test stanno in **un altro package** (`mastermind.tests.model`) | `public` su costruttori e metodi; `private` solo sui campi |
 | ⚠️ `The method stato() is undefined for the type Gioco` | `cannot find symbol` … `symbol: method stato()` | nome diverso da quello del test (`status()` invece di `stato()`) | il nome lo detta il test (e il `Controller`): copialo da lì |
 | `Syntax error, insert ";" to complete BlockStatements` | `';' expected` | manca il `;` in fondo a un'istruzione (`this.numTentativi = 0`) | aggiungerlo sulla riga indicata |
+| ⚠️ `The method AppointmentCollection() is undefined for the type MyCalendar` (testo Eclipse per analogia, non rilanciato) | `cannot find symbol` … `symbol: method AppointmentCollection()` · `location: class MyCalendar` (verificato con `javac`) | manca **`new`**: senza, Java legge la riga come la chiamata a un *metodo* con quel nome | `this.allAppointments = new AppointmentCollection();` → 3.15 |
+| ⚠️ `AppointmentCollection cannot be resolved to a type` in `MyCalendar` | `cannot find symbol` … `symbol: class AppointmentCollection` | classe di un altro package (`model`) senza `import`, oppure import tolto da *Ctrl+Shift+O* mentre il nome era scritto male | `import model.AppointmentCollection;` sotto `package control;` |
+| ⚠️ errore su `System.out.println(...)` scritto nel corpo della classe (Eclipse: *Syntax error on token*…, per analogia) | `<identifier> expected` (verificato con `javac`) | istruzione **fuori da un metodo**: nel corpo della classe stanno solo campi, costruttori e metodi. Il campo `Appointment app = new …;` invece compila | mettere le istruzioni dentro `public static void main(String[] args) { … }` → 3.7 |
+| ⚠️ il test non compila su `app.getDuration()` | `method getDuration in class Appointment cannot be applied to given types;` · `required: Duration` · `found: no arguments` (verificato con `javac`) | getter scritto `void getDuration(Duration d)`: firma diversa dall'UML (`getDuration(): Duration`) | nessun parametro, tipo di ritorno `Duration`, `return …` → 3.15 |
 
 ## 1.2 Eccezioni a run-time
 
@@ -141,6 +154,9 @@ Compila tutto, esplode eseguendo — in console, in rosso.
 
 | ⚠️ `NullPointerException: Cannot invoke "mastermind.model.Combinazione.dim()" because "c2" is null` | `c1.equals(null)`: il metodo chiama un metodo sul parametro senza controllarlo. Nessun test dello startkit lo prova | prima riga di `equals`: `if (c2 == null) return false;` → 3.14 |
 | ⚠️ `NullPointerException` dentro `situazione` / `ultimoTentativo` | si legge `tentativi[numTentativi]`, che è la **prima cella libera** (`null`), non l'ultima piena | ultima piena = `numTentativi − 1`; nei cicli `i < numTentativi` → 3.14 |
+| ⚠️ `StackOverflowError` … `at AppointmentCollection.<init>` ripetuto | nel costruttore `new AppointmentCollection(…)`: crea **un altro** oggetto, il cui costruttore ne crea un altro… all'infinito (verificato) | per far costruire **questo** oggetto all'altro costruttore: `this(DEFAULT_PHYSICAL_SIZE);` come prima riga → 3.15 |
+| ⚠️ `ArrayIndexOutOfBoundsException: Index 10 out of bounds for length 10` … `at AppointmentCollection.remove` | `innerContainer[innerContainer.length] = null` (sempre fuori), o `[size]` con l'array pieno | il doppione da svuotare è in `[size - 1]` → 3.12 |
+| ⚠️ `ArrayIndexOutOfBoundsException: Index -1 out of bounds…` dentro `remove` | `MyCalendar.remove` ha passato a `remove(int)` il `-1` di `indexOf` senza controllarlo | salvare l'indice, `if (index == -1) return false;` → 3.15 |
 
 ## 1.3 Errori silenziosi
 
@@ -167,6 +183,12 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | ⚠️ `toString` / `contains("Situazione:" + lineSeparator())` falso | uno **spazio** prima dell'a capo (`"Situazione: \n"`), oppure manca un prefisso (`"Gioco: "`) | copiare il formato carattere per carattere dalla slide o dal test |
 | ⚠️ un metodo che «risponde» stampa a video e restituisce altro | `System.out.println(sj)` dentro `toString` | **restituire** (`return sj.toString();`): stampa chi chiama |
 | ⚠️ il programma non finisce (ciclo infinito) | `while (tentativiEffettuati() < maxTentativi())`: nel corpo niente cambia la condizione | `for (int i = 0; i < n; i++)`: la variabile del ciclo cambia a ogni giro |
+| ⚠️ test di `equals` verde, ma due appuntamenti identici risultano diversi se la descrizione arriva da tastiera | `app.description == this.description`: `==` sugli oggetti confronta i **riferimenti**. Passa i test solo perché Java riusa le stringhe letterali (`"Natale"`) (verificato: `"Natale" == new StringBuilder("Nat").append("ale").toString()` → `false`) | `description.equals(app.getDescription())` → 3.15 |
+| ⚠️ il setter «non fa niente»: `getTo()` invariato dopo `setDuration` | il setter assegna al **parametro** (`duration = …`): i parametri arrivano per copia, il campo non cambia | scrivere il campo: `this.to = from.plus(duration);` → 3.15 |
+| ⚠️ `getDayAppointments` restituisce quasi tutti gli appuntamenti | `||` nella sovrapposizione: ogni condizione da sola lascia passare tutto il passato o tutto il futuro | `&&`: `end.isAfter(refStart) && start.isBefore(refEnd)` → 3.15 |
+| ⚠️ `MyCalendar.remove` di un appuntamento assente cancella il **primo** | `indexOf` restituisce `0` se non trova: 0 è un indice valido | `return -1;` (slide 25 del LAB07) → 3.15 |
+| ⚠️ `main` che non stampa niente, e *Run As* non propone *Java Application* | firma `public static void main()` senza `String[] args`: non è il punto di partenza (lo diventa solo con le *preview* di Java 21) | `public static void main(String[] args)` → 3.7 |
+| ⚠️ la collezione cresce di 2 posti invece di raddoppiare, e si riempie subito | `length + DEFAULT_GROWTH_FACTOR` invece di `*` | `innerContainer.length * DEFAULT_GROWTH_FACTOR` → 3.12 |
 
 ---
 
@@ -1013,6 +1035,174 @@ for (int i = 0; i < numTentativi; i++) {         // una riga per mossa FATTA (no
 return sb.toString();
 ```
 `toString` di `Gioco`: `"Situazione:" + lineSeparator()` + `situazione()` + `"Gioco: " + status` [sl. 23].
+
+## 3.15 Proprietà calcolata, collezione con `indexOf`, intervalli di tempo (LAB07)
+
+Fatto in: `esame_FI2/svolti/LAB07_MyCalendar/` · confronto in `confronto_LAB07.md` (13 punti).
+UML: `Appointment` sl. 24, `AppointmentCollection` sl. 26, `MyCalendar` sl. 33.
+
+### Proprietà calcolata: `duration` non è un campo
+
+UML con 3 campi (`description`, `from`, `to`) e 4 coppie get/set: la quarta, `duration`, si
+**calcola** da `from` e `to` [LAB07 sl. 23]. Tenerla in un campo vorrebbe dire due copie della
+stessa informazione, che prima o poi non si accordano.
+
+```java
+public Duration getDuration() {
+    return Duration.between(from, to);      // fine meno inizio; con gli argomenti invertiti: PT-3H-30M
+}
+
+public void setDuration(Duration duration) {
+    to = from.plus(duration);               // from resta fermo, si RISCRIVE il campo da cui la durata dipende
+}
+
+public Appointment(String description, LocalDateTime from, Duration duration) {
+    setDescription(description);
+    setFrom(from);                          // PRIMA from: setDuration lo usa
+    setDuration(duration);                  // riusa il setter, la regola sta in un posto solo
+}
+```
+
+- Il setter di una proprietà calcolata **scrive il campo da cui dipende**: dopo
+  `setDuration(20 min)`, `getDuration()` restituisce 20 perché `to` si è spostato.
+- `plus` non modifica `from` (immutabile): **restituisce** il risultato, che va assegnato.
+
+### `equals` e `toString` di `Appointment`
+
+```java
+public boolean equals(Appointment app) {    // firma dell'UML: parametro Appointment, NON Object (quindi niente @Override)
+    return from.equals(app.getFrom())       // oggetti: equals, mai ==
+        && to.equals(app.getTo())
+        && description.equals(app.getDescription());
+}
+
+@Override                                   // questo sì sovrascrive Object.toString: Eclipse segnala i refusi nel nome
+public String toString() {
+    DateTimeFormatter fmt = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);  // un formatter, usato due volte
+    return "Impegno: " + description + " con inizio " + from.format(fmt) + " e fine " + to.format(fmt);
+}
+```
+
+| Cosa | Codice | Esce (verificato) |
+|---|---|---|
+| data e ora corte, in italiano | `from.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY))` | `07/10/26, 10:15` |
+| solo l'ora | `ofLocalizedTime(FormatStyle.SHORT)` | `10:15` (vedi 3.13) |
+| una `Duration` stampata così com'è | `Duration.between(f, t)` | `PT3H30M` |
+| una `Duration` in minuti | `.toMinutes()` | `210` (totale, troncato) |
+
+Nessun test controlla `toString`: per vederlo, un `main` di prova **da cancellare prima di
+consegnare** (non è nell'UML).
+
+### Collezione: costruttore vuoto, `indexOf`, copia
+
+Struttura identica a 3.12 (`add` = `put`). In più:
+
+```java
+public AppointmentCollection() {
+    this(DEFAULT_PHYSICAL_SIZE);            // = AppointmentCollection(10): costruisce QUESTO oggetto
+}                                           // new AppointmentCollection(…) qui → StackOverflowError (1.2)
+
+public int indexOf(Appointment appointment) {
+    for (int i = 0; i < size; i++) {        // fino a size: oltre ci sono null, e null.equals → NPE
+        if (innerContainer[i].equals(appointment)) {   // equals di Appointment [sl. 25]
+            return i;
+        }
+    }
+    return -1;                              // assente: -1, mai 0 (0 è un indice valido)
+}
+```
+
+| Scrivi | Cos'è |
+|---|---|
+| `this.campo` | un campo di questo oggetto |
+| `this(…)` | un altro costruttore della stessa classe; solo come **prima riga** di un costruttore |
+| `new Classe(…)` | un oggetto **nuovo e diverso** |
+
+`size` = posti **occupati**, `length` = posti **esistenti**. Negli spostamenti e nelle ricerche conta
+`size`; l'ultimo elemento è `[size - 1]`; `length` serve solo a sapere se l'array è pieno.
+
+### Controller: `remove(oggetto)` e copia della collezione
+
+```java
+public boolean remove(Appointment app) {
+    int position = allAppointments.indexOf(app);   // il ciclo di ricerca sta nella collezione, non qui
+    if (position >= 0) {
+        allAppointments.remove(position);
+        return true;                               // tolto
+    }
+    return false;                                  // non c'era
+}
+
+public AppointmentCollection getAllAppointments() {           // «restituisce una COPIA» [sl. 29]
+    AppointmentCollection copia = new AppointmentCollection(allAppointments.size());
+    for (int i = 0; i < allAppointments.size(); i++) {
+        copia.add(allAppointments.get(i));        // stessi Appointment, collezione diversa
+    }
+    return copia;                                 // chi la riceve non può togliere nulla al calendario
+}
+```
+
+### Sovrapposizione di intervalli `[inizio, fine)`
+
+Non si sovrappongono solo se l'appuntamento finisce prima che la ricerca cominci (`end ≤ refStart`)
+**oppure** comincia dopo che è finita (`start ≥ refEnd`). Negando (De Morgan: `!(A || B) = !A && !B`):
+
+```java
+private boolean isOverlapped(LocalDateTime start, LocalDateTime end,       // l'appuntamento
+                             LocalDateTime refStart, LocalDateTime refEnd) { // l'intervallo di ricerca
+    return start.isBefore(refEnd) && end.isAfter(refStart);   // estremi INCROCIATI, confronto stretto
+}
+```
+
+| Caso (ricerca = 10 marzo) | `end > refStart` | `start < refEnd` | preso? |
+|---|---|---|---|
+| inizia prima, finisce dentro | sì | sì | sì |
+| tutto dentro | sì | sì | sì |
+| inizia dentro, finisce dopo | sì | sì | sì |
+| lunedì → mercoledì, cercato martedì | sì | sì | sì |
+| tutto prima, o finisce alle 00:00 del 10 | **no** | sì | no |
+| tutto dopo, o inizia alle 00:00 dell'11 | sì | **no** | no |
+
+⚠️ «sovrapposto» non è «contenuto»: `start ≥ refStart && end ≤ refEnd` perderebbe le prime e
+l'ultima riga «sì» [sl. 30, 38].
+
+### Intervalli di giorno, mese, settimana
+
+L'estremo destro è **escluso**: la fine è la mezzanotte dopo, e non serve sapere quanti giorni ha il
+mese [sl. 32, 35, 36].
+
+```java
+// giorno: 10/03/2019 → [2019-03-10T00:00, 2019-03-11T00:00)
+LocalDateTime start = date.atStartOfDay();                    // = LocalDateTime.of(date, LocalTime.of(0, 0))
+LocalDateTime end   = start.plusDays(1);
+
+// mese: un giorno QUALSIASI del mese, 10/03/2012 → [2012-03-01T00:00, 2012-04-01T00:00)
+LocalDateTime start = date.withDayOfMonth(1).atStartOfDay();  // stesso mese, giorno 1
+LocalDateTime end   = start.plusMonths(1);
+
+// settimana: mercoledì 01/04/2015 → [2015-03-30T00:00, 2015-04-06T00:00)
+long daLunedi = date.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue();  // lun=1 … dom=7: mer → 2
+LocalDateTime start = date.minusDays(daLunedi).atStartOfDay();
+LocalDateTime end   = start.plusWeeks(1);
+```
+
+Valori dei commenti verificati eseguendo. Controllo sugli estremi della settimana: lunedì → 0 giorni,
+domenica → 6.
+
+### `java.time` — le famiglie di metodi
+
+Tutti **restituiscono un oggetto nuovo** e non modificano quello su cui li chiami [10: «creazione
+tramite of\*, elaborazione tramite plus\*, minus\*, with\*»].
+
+| Famiglia | Fa | Esempi | Su |
+|---|---|---|---|
+| `of…` | crea da numeri | `LocalDateTime.of(2026, 11, 3, 15, 30)` · `Duration.ofMinutes(90)` | tutti |
+| `plus…` / `minus…` | sposta | `plusDays(1)` · `plusWeeks(1)` · `plusMonths(1)` · `minusDays(2)` · `plus(duration)` | `LocalDate`, `LocalDateTime` |
+| `with…` | sostituisce un pezzo | `withDayOfMonth(1)` · `withMonth(3)` · `withHour(0)` | `LocalDate`, `LocalDateTime` |
+| `at…` | `LocalDate` → `LocalDateTime` | `atStartOfDay()` · `atTime(15, 30)` | `LocalDate` |
+| `get…` | legge un pezzo | `getDayOfWeek()` (`WEDNESDAY`, `.getValue()` = 3) · `getDayOfMonth()` | tutti |
+| `is…` | confronta | `isBefore` · `isAfter` · `isEqual` | `LocalDate`, `LocalDateTime` |
+| `between` / `to…` | misura | `Duration.between(a, b)` · `toMinutes()` · `toHours()` | `Duration` |
 
 ---
 
