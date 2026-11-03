@@ -20,13 +20,15 @@ public class AppointmentCollection {
 	
 	public void add(Appointment appointment) {
 		if (innerContainer.length == size) {
-			AppointmentCollection app = new AppointmentCollection(this.innerContainer.length + this.DEFAULT_GROWTH_FACTOR);
+			AppointmentCollection app = new AppointmentCollection(this.innerContainer.length * this.DEFAULT_GROWTH_FACTOR);
 			for(int i = 0; i < size; i++) {
-				app[i] = appointment[i];
+				app.innerContainer[i] = this.innerContainer[i];
 			}
-		}else {
-			this.innerContainer[size] = appointment;
+			this.innerContainer = app.innerContainer;
 		}
+			this.innerContainer[size] = appointment;
+			size++;
+		
 	}
 	
 	
@@ -34,6 +36,14 @@ public class AppointmentCollection {
 	
 	
 	
-	
-	
 }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
