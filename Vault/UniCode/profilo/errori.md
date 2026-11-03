@@ -628,6 +628,77 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   ciclo ha già fatto → correzione: o un contatore che si consuma (`neri--`, la sua versione finale) o, come
   il docente, due cicli con estremi `[0, neri)` e `[neri, totali)`. Corretto da solo. Evidenza:
   `stato/giornata.md` 15:26, 15:41; `confronto_LAB06.md` §10.
+- [2026-11-03] LAB07 `Appointment`: getter e setter della proprietà calcolata `duration` (non è un campo) scritti
+  assegnando al parametro. `getDuration` v1 `void` con un parametro e dentro `duration = Duration.between(from, to);`,
+  cioè il risultato «consegnato» scrivendolo nel parametro; `setDuration` v1 `duration = duration.between(to, from);`:
+  ricalcola la durata che riceve già, la riscrive nel parametro (`to` non cambia) e ha pure gli estremi invertiti →
+  causa: i parametri arrivano per copia, quindi assegnare a un parametro non cambia né il chiamante né l'oggetto;
+  getter (consegna con `return`) e setter (scrive un campo con `this.campo = …`) non distinti dal ruolo del parametro;
+  stessa famiglia di «stato restituito ma non salvato» (2026-10-21) e di «parametro e campo fusi» (LAB04c, LAB06) →
+  correzione: `return Duration.between(from, to);`; il setter di una proprietà calcolata scrive il campo da cui la
+  proprietà dipende, `this.to = from.plus(duration);`. Corretti alla seconda spiegazione; Lorenzo: «forse non ho
+  chiaro cosa deve fare il setter», e a `/chiudi` il setter resta «poco chiaro». Evidenza: trascrizione del
+  2026-11-03, 12:46 («ho usato un metodo void, non so se va bene»), 12:49, 12:50; `stato/giornata.md` 12:50, 12:51.
+- [2026-11-03] LAB07 `equals`: `app.description == this.description` sulle stringhe → causa: `==` su oggetti confronta
+  i riferimenti (stesso oggetto), non il contenuto; i test erano verdi solo perché Java riusa i letterali `"Natale"`,
+  e il codice è arrivato con «tutto verde» → correzione: `description.equals(app.description)`; mai `==` su `String`.
+  Corretto subito. Evidenza: trascrizione del 2026-11-03, 14:15 («tutto verde»); `stato/giornata.md` 14:15;
+  `confronto_LAB07.md` §2.
+- [2026-11-03] Ricorrenza delle ridondanze (2026-09-30, 2026-10-01; `put` del LAB04c): in `equals` di nuovo
+  `if (cond) { return true; } return false;` al posto di `return cond;`, la stessa forma del LAB02; in `add` v2
+  inserimento e `size++` ripetuti identici nei due rami, come nel `put` del LAB04c (si fattorizzano dopo l'`if`); in
+  `getAppointmentsIn` `allAppointments.get(i)` chiamato tre volte; `this.DEFAULT_GROWTH_FACTOR` su una costante
+  `static`. Le prime due corrette alla segnalazione. Evidenza: trascrizione del 2026-11-03, 14:15, 15:47;
+  `confronto_LAB07.md` §5, §10.
+- [2026-11-03] Ricorrenza di «costruttori che non portano l'oggetto in stato valido» (LAB04c, 2026-10-02), con la
+  `FractionCollection` indicata come modello: costruttore `(int dim)` con `this.size = dim;` (capacità messa nella
+  dimensione logica, pattern 1) e `new AppointmentCollection(this.size);` (crea un altro oggetto e lo butta, e richiama
+  se stesso all'infinito: `StackOverflowError`); costruttore `()` con `new AppointmentCollection(DEFAULT_PHYSICAL_SIZE)`
+  invece di `this(...)`, tre minuti dopo aver scritto lui stesso «uso this(DEFAULT_PHYSICAL_SIZE)»; in nessuno dei due
+  `innerContainer` viene creato (resta `null`). In `MyCalendar` poi l'errore speculare: `this.allAppointments =
+  AppointmentCollection();` senza `new` → causa: `new` (nasce un oggetto nuovo) e `this(...)` (questo oggetto lo
+  costruisce l'altro costruttore) non distinti, e il costruttore pensato ancora come il posto dove salvare il parametro
+  → correzione: `(int capacity)` fa `innerContainer = new Appointment[capacity]; size = 0;`, `()` fa solo
+  `this(DEFAULT_PHYSICAL_SIZE)`; `new` ogni volta che serve un oggetto che ancora non esiste. Lorenzo: «non c'ho capito
+  un cazzo da dove spunta un altro costruttore […] ho completamente perso il filo»; recuperato con la rispiegazione da
+  capo. Evidenza: trascrizione del 2026-11-03, 15:26–15:31, 16:27; `stato/giornata.md` 15:27.
+- [2026-11-03] Nona ricorrenza della risposta a metà, nel codice: `add` v1 con l'inserimento solo nell'`else` (con
+  l'array pieno lo ingrandisce e l'appuntamento si perde) e senza `size++`, benché il suo piano a parole fosse giusto
+  («se no aumento […] e riempo il primo posto libero») e Claude, cinque minuti prima, avesse scritto «Non dimenticare la
+  seconda metà: subito dopo incrementa `size`»: della correzione in due parti (inserisci in `[size]`, poi `size++`) ha
+  applicato la prima. Il `+` al posto di `*` nello stesso metodo è sotto il pattern 5. Resta candidato trasversale
+  (nessun altro corso). Evidenza: trascrizione del 2026-11-03, 15:34, 15:39, 15:44.
+- [2026-11-03] LAB07 `indexOf`: `return 0` per «non trovato» (con il commento «lancio un exeption?») → causa: 0 è un
+  indice valido, il primo posto, e `MyCalendar.remove` avrebbe cancellato il primo appuntamento; la convenzione è nella
+  slide 25 («-1 se assente») e non è stata letta prima di scrivere, stessa famiglia di «forma ricavata a memoria, non dal
+  test» (2026-10-05, 2026-10-21) → correzione: `return -1`, che non è mai un indice. Poi in `MyCalendar.remove` v1
+  `allAppointments.remove(allAppointments.indexOf(app))` senza controllare il `-1` («non so come gestire il return,
+  specialmente nel caso in cui indexOf dia -1»). Evidenza: trascrizione del 2026-11-03, 15:52, 16:39.
+- [2026-11-03] Ricorrenza di «firme prese dai campi o a memoria invece che dal test» (LAB06 2026-10-21; `getSize` del
+  LAB04c 2026-10-02): costruttore `MyCalendar(AppointmentCollection allAppointments)` (UML e test vogliono
+  `MyCalendar()`, e il parametro non è usato); `addAppointment` invece di `add` (il test non compila); campi di
+  `AppointmentCollection` senza `private` e `getAppointmentsIn`/`isOverlapped` `public`, benché l'UML abbia `-`; nomi
+  storpiati (`DEFAULTH_GROWTH_FACTOR`, `allAppointment`) → correzione: nomi, parametri e visibilità si copiano dall'UML
+  e dalla riga del test. Evidenza: trascrizione del 2026-11-03, 15:24, 16:27, 16:31, 17:12.
+- [2026-11-03] LAB07 `getAppointmentsIn`: `||` al posto di `&&` nella sovrapposizione. I due casi di non sovrapposizione
+  li aveva trovati giusti da solo, confini compresi (l'appuntamento finisce prima che la ricerca cominci; comincia dopo
+  che è finita), ma negando «A oppure B» ha tenuto l'«oppure» → causa: legge di De Morgan non applicata, non (A o B) =
+  non A **e** non B; con `||` passa quasi tutto (un appuntamento del 1° gennaio entra nel 10 marzo) → correzione:
+  `finish.isAfter(refStart) && start.isBefore(refEnd)`. Dopo «ok chiaro ora il &&» ha reincollato la versione con `||`.
+  Il dubbio su `&&` («non prendo solo gli eventi che iniziano e finiscono in mezzo?») è sotto il pattern 1; nel LAB04c
+  l'operatore era sbagliato nel verso opposto (`&&` per `||`, pattern 5). Evidenza: trascrizione del 2026-11-03, 16:52,
+  17:00 («L'errore è `||` al posto di `&&`»), 17:05; `stato/giornata.md` 17:12.
+- [2026-11-03] LAB07, prova del `toString`: abitudini del C sul `main`. Prima `System.out.println(app);` nel corpo della
+  classe, fuori da ogni metodo; poi `public static void main()` senza `String[] args`, console vuota («ma che è sto
+  sting args, non l ho mai visto nelle lezioni») → causa: modello del C, un solo `main` in un file a parte («io ragiono
+  come in C dove c'era il file main»); in Java il punto d'ingresso è un metodo con la firma esatta, in una classe
+  qualsiasi, e le istruzioni stanno solo dentro i metodi → correzione: `public static void main(String[] args)` (slide
+  02z), ogni istruzione dentro un metodo. Evidenza: trascrizione del 2026-11-03, 15:00, 15:04, 15:12, 15:13.
+- [2026-11-03] Ricorrenza di «processi interni alle funzioni» (2026-10-05, 2026-10-21), ora sulla classe intera: a
+  `/chiudi` poco chiara «la capacità di seguire il workflow dall'inizio alla fine di una classe in autonomia»,
+  sicurezza 3; nella sessione perso il filo sui due costruttori (riga sopra). La procedura del 2026-10-21 (campi →
+  costruttore → metodi che cambiano lo stato → metodi che lo leggono) non è ancora autonoma. Evidenza: risposta a
+  `/chiudi` del 2026-11-03; trascrizione, 15:27; `stato/giornata.md` 15:27, 17:38.
 
 ### CALC — Calcolatori Elettronici T
 - [2026-10-08] 02p §2: taglia convertita in bit senza l'unità. RAM da 32 KB → «5 piedini perché 32 =
