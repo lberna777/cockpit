@@ -42,7 +42,19 @@ public class AppointmentCollection {
 				return i;
 			}
 		}
-		return 0;
+		return -1; 
+	}
+	
+	public int size() {
+		return this.size;
+	}
+	
+	public void remove (int index) {
+		for(int i = index; i < this.innerContainer.length; i++) {
+			this.innerContainer[i] = this.innerContainer[i+1];
+		}
+		this.innerContainer[innerContainer.length] = null;
+		size--;
 	}
 	
 	
