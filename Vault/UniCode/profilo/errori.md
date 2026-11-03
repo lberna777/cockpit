@@ -94,6 +94,13 @@ distinzione non è stata capita.
   minimi limitato da `tentativo.dim()` (4 posizioni) invece che dai 7 colori. Il secondo l'ha trovato da
   solo con stampe contro tabella a mano: «sto scorrendo i vettori dei colori, non di una risposta».
   Evidenza: `stato/giornata.md` 12:44, 15:26, 15:41; `confronto_LAB06.md` §9.
+- [2026-11-03] FI2: LAB07, due fusioni. Nel costruttore `(int dim)` di `AppointmentCollection` `this.size = dim`:
+  capacità (posti esistenti) e dimensione logica (posti occupati) di nuovo fuse, come nel costruttore del LAB04c
+  (2026-10-02); dettaglio sotto `FI2`. In `getAppointmentsIn` «sovrapposto» e «contenuto» fusi: davanti alla
+  condizione giusta con `&&`, «con && non prendo solo gli eventi che iniziano e finiscono in mezzo a questa
+  finestra? e quelli che iniziano prima e finiscono nell intervallo non li prendo?» (letta come «tutto dentro»,
+  mentre ogni estremo dell'appuntamento si confronta con l'estremo opposto della ricerca); sbloccato dalla tabella
+  dei sei casi. Evidenza: trascrizione del 2026-11-03, 15:29, 17:02; `stato/giornata.md` 17:12.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
