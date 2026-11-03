@@ -156,8 +156,9 @@ public void remove(int index) {
 }
 ```
 
-Nel mio codice `get(15)` su una collezione da 3 restituisce un `null` per caso (le celle oltre `size`
-sono vuote), e `get(-1)` lancia `ArrayIndexOutOfBoundsException`. `remove(-1)` farebbe lo stesso. Il
+Nel mio codice, su una collezione con 3 elementi e capacità 10, `get(5)` restituisce un `null` per
+caso (le celle oltre `size` sono vuote), mentre `get(15)` e `get(-1)` lanciano
+`ArrayIndexOutOfBoundsException`. `remove(-1)` farebbe lo stesso. Il
 controllo `index < 0 || index >= size` è il confine giusto: gli indici validi vanno da `0` a
 `size - 1`.
 
