@@ -6,4 +6,11 @@ import model.Appointment;          // servirà subito anche questa, per add e re
 public class MyCalendar {
 
 	private AppointmentCollection allAppointments;
+
+	public MyCalendar(AppointmentCollection allAppointments) {
+		super();
+		this.allAppointments = AppointmentCollection();
+	}
+	
+	
 }
