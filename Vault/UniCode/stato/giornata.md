@@ -10,3 +10,4 @@
 14:19 · FI2 · LAB07 equals corretto da Lorenzo (description.equals, return diretto), hashCode rimosso.
 15:19 · FI2 · LAB07 Appointment finito (6/6 verdi, toString provato con main). Si passa ad AppointmentCollection.
 15:27 · FI2 · LAB07 AppointmentCollection: Lorenzo ha perso il filo sui due costruttori (perché due, cosa fa this(...)); rispiegato da capo con esempio.
+16:00 · FI2 · LAB07 remove: tre tentativi con limiti sbagliati, size e length usati come intercambiabili (pattern 1, distinzione collassata: posti occupati vs posti esistenti). Dato il codice corretto con traccia.
