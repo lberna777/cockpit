@@ -15,3 +15,5 @@
 16:49 · FI2 · LAB07 MyCalendar: costruttore, add, getAllAppointments, remove (indexOf + -1 → false) scritti. Restano getDay/Month/WeekAppointments, getAppointmentsIn, isOverlapped.
 17:12 · FI2 · LAB07 isOverlapped e getAppointmentsIn corretti (dopo ||→&&: confondeva «sovrapposto» con «contenuto», sbloccato con la tabella dei sei casi).
 17:31 · FI2 · CHIUSO FI2 LAB07 — 14/14 verdi, guidato. Restano ritocchi (private, copia in getAllAppointments), copia in svolti/ e confronto.
+17:38 · FI2 · /chiudi: Lorenzo conferma LAB07 completo; poco chiari array (espansione/restrizione, contenitori annidati), setter di proprietà calcolata e seguire da solo il workflow di una classe dall'inizio alla fine. Sicurezza 3/5. Nessun problema tecnico.
+17:38 · FI2 · LAB07 copiato in esame_FI2/svolti/LAB07_MyCalendar/ (14/14 verificati anche in cloud con javac + JUnit); confronto_LAB07.md scritto (13 punti).
