@@ -7,10 +7,18 @@ public class MyCalendar {
 
 	private AppointmentCollection allAppointments;
 
-	public MyCalendar(AppointmentCollection allAppointments) {
+	public MyCalendar() {
 		super();
-		this.allAppointments = AppointmentCollection();
+		this.allAppointments = new AppointmentCollection();
 	}
 	
+	public void add(Appointment app) {
+		allAppointments.add(app);
+	}
+	
+	public AppointmentCollection getAllAppointments() {
+		return allAppointments;
+	}
+
 	
 }
