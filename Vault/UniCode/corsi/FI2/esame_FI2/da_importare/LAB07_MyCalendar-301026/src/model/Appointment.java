@@ -2,6 +2,9 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Appointment {
@@ -62,6 +65,13 @@ public class Appointment {
 		return (app.description.equals(this.description) && app.from.isEqual(this.from) && app.to.isEqual(this.to));
 			
 	}
+
+	@Override
+	public String toString() {
+		return "Appointment [description=" + description + ", from=" + from.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY)) 
+		+ ", to=" + to.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY)) + ", duration=" + getDuration() + "]";
+	}
+	
 	
 	
 	
