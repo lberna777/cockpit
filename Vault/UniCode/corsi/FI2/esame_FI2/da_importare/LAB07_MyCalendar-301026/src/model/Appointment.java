@@ -53,7 +53,7 @@ public class Appointment {
 	}
 	
 	public void setDuration(Duration duration) {
-		duration = duration.between(to, from);
+		this.to = from.plus(duration);
 	}
 	
 	
