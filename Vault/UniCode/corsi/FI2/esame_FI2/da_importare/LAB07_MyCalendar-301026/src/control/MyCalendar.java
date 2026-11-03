@@ -2,6 +2,7 @@ package control;
 
 import model.AppointmentCollection;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import model.Appointment;          // servirà subito anche questa, per add e remove
@@ -34,12 +35,12 @@ public class MyCalendar {
 		}
 	}
 	
-	public AppointmentCollection getAppointmentsIn(LocalDateTime start, LocalDateTime finish) {
+	private AppointmentCollection getAppointmentsIn(LocalDateTime start, LocalDateTime finish) {
 	
 	AppointmentCollection coll = new AppointmentCollection();
 	
 	for (int i = 0; i < allAppointments.size(); i++) {
-			if (allAppointments.get(i).getTo().isAfter(start) && allAppointments.get(i).getFrom().isBefore(finish)) {
+			if (isOverlapped(allAppointments.get(i).getFrom(), allAppointments.get(i).getTo(), start, finish)) {
 				coll.add(allAppointments.get(i));
 			}
 		}
@@ -47,8 +48,12 @@ public class MyCalendar {
 	return coll;
 	}
 	
-	public boolean isOverlapped(LocalDateTime start, LocalDateTime finish, LocalDateTime refStart, LocalDateTime refEnd) {
-		return allAppointments.get(i).getTo().isAfter(start) && allAppointments.get(i).getFrom().isBefore(finish);
+	private boolean isOverlapped(LocalDateTime start, LocalDateTime finish, LocalDateTime refStart, LocalDateTime refEnd) {
+		return finish.isAfter(refStart) && start.isBefore(refEnd);
+	}
+	
+	public AppointmentCollection getDayAppointments(LocalDate date) {
+		return getAppointmentsIn(date.atStartOfDay(), date.atStartOfDay().plusDays(1));
 	}
 	
 	
