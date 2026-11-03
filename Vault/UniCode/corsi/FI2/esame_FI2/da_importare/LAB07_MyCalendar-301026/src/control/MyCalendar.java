@@ -1,6 +1,9 @@
 package control;
 
 import model.AppointmentCollection;
+
+import java.time.LocalDateTime;
+
 import model.Appointment;          // servirà subito anche questa, per add e remove
 
 public class MyCalendar {
@@ -22,8 +25,23 @@ public class MyCalendar {
 	
 	public boolean remove (Appointment app) {
 		
-		allAppointments.remove(allAppointments.indexOf(app));
+		int index = allAppointments.indexOf(app);
+		if (index == -1) {
+			return false;
+		} else {
+			allAppointments.remove(index);
+			return true;
+		}
 	}
+	
+	public AppointmentCollection getAppointmentsIn(LocalDateTime start, LocalDateTime finish) {
+		
+	}
+	
+	
+	
+	
+	
 
 	
 }
