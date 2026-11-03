@@ -2,6 +2,7 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Appointment {
 
@@ -55,6 +56,14 @@ public class Appointment {
 	public void setDuration(Duration duration) {
 		this.to = from.plus(duration);
 	}
+
+	public boolean equals(Appointment app) {
+		
+		return (app.description.equals(this.description) && app.from.isEqual(this.from) && app.to.isEqual(this.to));
+			
+	}
+	
+	
 	
 	
 	
