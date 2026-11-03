@@ -8,9 +8,9 @@ public class AppointmentCollection {
 	private Appointment[] innerContainer;
 	private int size;
 	
-	public AppointmentCollection(int dim) {
-		this.size = dim;
-		new AppointmentCollection(this.size);
+	public AppointmentCollection(int capacity) {
+		innerContainer = new Appointment[capacity];
+		size = 0;
 	}
 	
 	public AppointmentCollection() {
