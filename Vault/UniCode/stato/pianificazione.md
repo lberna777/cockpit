@@ -12,5 +12,5 @@ giorno: 2026-11-04
 <!--
 settimana: 2026-10-26
 mese:      il mese pianificato (AAAA-MM)
-giorno: 2026-11-01
+giorno: 2026-11-04
 -->
