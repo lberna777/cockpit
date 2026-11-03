@@ -68,14 +68,14 @@ public class Appointment {
 
 	@Override
 	public String toString() {
-		return "Appointment [description=" + description + ", from=" + from.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY)) 
-		+ ", to=" + to.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY)) + ", duration=" + getDuration() + "]";
+		return "Appointment: " + description + "\nDA: " + from.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY)) 
+		+ "\nA:" + to.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY)) + "\nDURATA: " + getDuration();
 	}
 	
 	
-	public static void main() {
+	public static void main(String[] args) {
 		
-		Appointment app = new Appointment("descrizione", LocalDateTime.of(2026, 10, 7, 10, 15), LocalDateTime.of(2026, 10, 7, 13, 45));
+		Appointment app = new Appointment("descrizione prova uno due tre quattro", LocalDateTime.of(2026, 10, 7, 10, 15), LocalDateTime.of(2026, 10, 7, 13, 45));
 		
 		System.out.println(app);
 	}
