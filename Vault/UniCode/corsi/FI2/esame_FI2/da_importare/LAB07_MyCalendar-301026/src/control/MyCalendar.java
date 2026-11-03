@@ -19,6 +19,10 @@ public class MyCalendar {
 	public AppointmentCollection getAllAppointments() {
 		return allAppointments;
 	}
+	
+	public boolean remove (Appointment app) {
+		return allAppointments.remove(allAppointments.indexOf(app));
+	}
 
 	
 }
