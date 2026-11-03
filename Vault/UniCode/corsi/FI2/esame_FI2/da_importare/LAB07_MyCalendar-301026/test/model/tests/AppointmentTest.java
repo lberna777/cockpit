@@ -66,5 +66,7 @@ public class AppointmentTest {
 		Appointment app2 = new Appointment("Non Compleanno", LocalDateTime.now(), Duration.of(10, ChronoUnit.MINUTES));
 		assertFalse(app1.equals(app2));
 	}
+	
+	
 
 }
