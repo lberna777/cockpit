@@ -20,8 +20,10 @@ public class Appointment {
 		super();
 		this.description = description;
 		this.from = from;
-		this.duration = duration;
+		this.to = from.plus(duration);
 	}
+	
+	
 	
 	
 	
