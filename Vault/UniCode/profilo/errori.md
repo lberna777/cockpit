@@ -276,6 +276,14 @@ indirizzi IP e sottoreti (`RETI`).
   21 piedini contro 20 fili, limite alto sbagliato di uno; corretto a `BA[22..2]` alla segnalazione
   (Lorenzo: refuso). Evidenza: trascrizione del 2026-10-23 («da ffffffffh con primo libero 7fffffffh»;
   «2^21 quindi A[20..0] ← BA[21..2]» → «22...2 ho sbagliato a scrivere»); `stato/giornata.md` 15:44, 18:00–18:01.
+- [2026-11-03] FI2: LAB07 `AppointmentCollection.remove`, **gli stessi scarti del LAB04c un mese dopo**: limite
+  del ciclo provato come `i < size`, `i <= size`, `i <= length`, `i < length`; azzeramento su `[size]` e su
+  `[length]` (sempre fuori dai limiti). `size` e `length` usati come intercambiabili (anche pattern 1). Sbloccato
+  solo dalla versione corretta di Claude con la traccia su `[a|b|c]`; nell'ultima versione restava `[size]` invece
+  di `[size-1]`, con test verdi perché la capacità 10 non arriva mai al caso pieno. Lorenzo, in chiusura: «non mi
+  è chiarissimo lavorare con questi array, specialmente con contenitori annidati e dove si lavora in espansione e
+  restrizione». Evidenza: trascrizione del 2026-11-03 («non mi sto orientando negli array, aiuto»);
+  `stato/giornata.md` della giornata.
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
