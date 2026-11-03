@@ -73,6 +73,13 @@ public class Appointment {
 	}
 	
 	
+	public static void main() {
+		
+		Appointment app = new Appointment("descrizione", LocalDateTime.of(2026, 10, 7, 10, 15), LocalDateTime.of(2026, 10, 7, 13, 45));
+		
+		System.out.println(app);
+	}
+	
 	
 	
 	
