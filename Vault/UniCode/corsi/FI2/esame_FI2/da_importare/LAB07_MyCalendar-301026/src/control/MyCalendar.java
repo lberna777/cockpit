@@ -35,7 +35,16 @@ public class MyCalendar {
 	}
 	
 	public AppointmentCollection getAppointmentsIn(LocalDateTime start, LocalDateTime finish) {
-		
+	
+	AppointmentCollection coll = new AppointmentCollection();
+	
+	for (int i = 0; i < allAppointments.size(); i++) {
+			if (allAppointments.get(i).getTo().isAfter(start) || allAppointments.get(i).getFrom().isBefore(finish)) {
+				coll.add(allAppointments.get(i));
+			}
+		}
+	
+	return coll;
 	}
 	
 	
