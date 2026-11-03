@@ -2,6 +2,7 @@ package control;
 
 import model.AppointmentCollection;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import model.Appointment;          // servirà subito anche questa, per add e remove
@@ -49,6 +50,10 @@ public class MyCalendar {
 	
 	private boolean isOverlapped(LocalDateTime start, LocalDateTime finish, LocalDateTime refStart, LocalDateTime refEnd) {
 		return finish.isAfter(refStart) && start.isBefore(refEnd);
+	}
+	
+	public AppointmentCollection getDayAppointments(LocalDate date) {
+		return getAppointmentsIn(date.atStartOfDay(), date.atStartOfDay().plusDays(1));
 	}
 	
 	
