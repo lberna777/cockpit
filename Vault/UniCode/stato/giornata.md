@@ -9,3 +9,4 @@
 14:15 · FI2 · LAB07 AppointmentTest 6/6 verdi, ma equals confronta description con == (passa solo per stringhe letterali internate): pattern 2, verde ≠ corretto. Da correggere con equals.
 14:19 · FI2 · LAB07 equals corretto da Lorenzo (description.equals, return diretto), hashCode rimosso.
 15:19 · FI2 · LAB07 Appointment finito (6/6 verdi, toString provato con main). Si passa ad AppointmentCollection.
+15:27 · FI2 · LAB07 AppointmentCollection: Lorenzo ha perso il filo sui due costruttori (perché due, cosa fa this(...)); rispiegato da capo con esempio.
