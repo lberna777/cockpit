@@ -12,3 +12,4 @@
 15:27 · FI2 · LAB07 AppointmentCollection: Lorenzo ha perso il filo sui due costruttori (perché due, cosa fa this(...)); rispiegato da capo con esempio.
 16:00 · FI2 · LAB07 remove: tre tentativi con limiti sbagliati, size e length usati come intercambiabili (pattern 1, distinzione collassata: posti occupati vs posti esistenti). Dato il codice corretto con traccia.
 16:04 · FI2 · LAB07 AppointmentCollection 3/3 verdi (remove corretto su [size-1]). Lorenzo dichiara: non chiaro lavorare con gli array, soprattutto contenitori annidati ed espansione/restrizione (registrato in profilo/errori.md, pattern 6). Si passa a MyCalendar.
+16:49 · FI2 · LAB07 MyCalendar: costruttore, add, getAllAppointments, remove (indexOf + -1 → false) scritti. Restano getDay/Month/WeekAppointments, getAppointmentsIn, isOverlapped.
