@@ -44,9 +44,10 @@ public class MyCalendar {
 				coll.add(allAppointments.get(i));
 			}
 		}
-	
-	return coll;
+		return coll;
 	}
+	
+	
 	
 	private boolean isOverlapped(LocalDateTime start, LocalDateTime finish, LocalDateTime refStart, LocalDateTime refEnd) {
 		return finish.isAfter(refStart) && start.isBefore(refEnd);
@@ -57,6 +58,13 @@ public class MyCalendar {
 	}
 	
 	
+	public AppointmentCollection getMonthAppointments(LocalDate date) {
+		
+		LocalDateTime start = date.withDayOfMonth(1).atStartOfDay();
+		LocalDateTime finish = start.plusMonths(1);
+		
+		return getAppointmentsIn(start, finish);
+	}
 	
 	
 	
