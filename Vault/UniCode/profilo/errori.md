@@ -227,6 +227,10 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   chip li spegne. Nella stessa risposta «opposti», vero solo con 2 chip, preso come regola (con 4 chip
   vale «al massimo un CS a 1»). Evidenza: trascrizione del 2026-10-08 («un chip acceso "spegne" GLI
   ALTRI» → «la causa è al contrario»); `corsi/CALC/grezzi/traccia_02p_2026-10-08.md`, Inciampi.
+- [2026-11-03] FI2: LAB07 `add`, fattore di crescita di nuovo come somma (`length + DEFAULT_GROWTH_FACTOR`,
+  10 → 12 invece di 20), **lo stesso errore del `put` del LAB04c** un mese dopo; corretto in `*` alla
+  segnalazione. Evidenza: trascrizione del 2026-11-03, 15:44 (`new AppointmentCollection(this.innerContainer.length
+  + this.DEFAULT_GROWTH_FACTOR)`) → 15:47.
 
 ### 6. Confini di un intervallo
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo ragiona bene sul contenuto
