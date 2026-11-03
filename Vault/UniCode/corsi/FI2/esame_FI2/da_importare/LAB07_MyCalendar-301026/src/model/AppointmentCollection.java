@@ -32,6 +32,18 @@ public class AppointmentCollection {
 	}
 	
 	
+	public Appointment get(int index) {
+		return this.innerContainer[index];
+	}
+	
+	public int indexOf(Appointment app) {
+		for(int i = 0; i < this.size; i++) {
+			if(this.innerContainer[i].equals(app)) {
+				return i;
+			}
+		}
+		return 0;
+	}
 	
 	
 	
