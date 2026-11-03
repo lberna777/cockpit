@@ -35,7 +35,20 @@ public class MyCalendar {
 	}
 	
 	public AppointmentCollection getAppointmentsIn(LocalDateTime start, LocalDateTime finish) {
-		
+	
+	AppointmentCollection coll = new AppointmentCollection();
+	
+	for (int i = 0; i < allAppointments.size(); i++) {
+			if (allAppointments.get(i).getTo().isAfter(start) && allAppointments.get(i).getFrom().isBefore(finish)) {
+				coll.add(allAppointments.get(i));
+			}
+		}
+	
+	return coll;
+	}
+	
+	public boolean isOverlapped(LocalDateTime start, LocalDateTime finish, LocalDateTime refStart, LocalDateTime refEnd) {
+		return allAppointments.get(i).getTo().isAfter(start) && allAppointments.get(i).getFrom().isBefore(finish);
 	}
 	
 	
