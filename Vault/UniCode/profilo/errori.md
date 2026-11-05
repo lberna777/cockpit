@@ -168,6 +168,13 @@ ogni dato dell'enunciato è stato usato o esplicitamente scartato con motivazion
   Nella stessa risposta il CS della RAM scritto `BA30`, tre minuti dopo averlo dato giusto (`BA31`).
   Evidenza: trascrizione del 2026-10-23 («per gli 8mb, BA31* x BA30 e per i 2gb di ram, BA30» → «ma
   abbiamo tenuto le porte fuori dalla simulazione fino a mo. ora devo considerarle?»); `stato/giornata.md` 16:43.
+- [2026-11-05] CALC: lab 02 a freddo (prova 2023-01-17), mappa chiusa senza far quadrare i dati delle porte.
+  OUTPUT_PORT messa a `80000000h`, dentro la RAM (CS identico a `BA31`, si accendono insieme), benché sul foglio
+  avesse scritto che la zona delle porte finisce a `7FFFFFFFh`; porte in input contate 3 invece di 4. Il controllo ④
+  (CS a coppie, «ogni porta sta nella zona delle porte?»), il passo 10 della procedura che aveva chiesto lui stesso
+  a inizio prova, è stato saltato. Causa dichiarata: «avevo finito gli indirizzi "tondi"» (aveva finito le tacche
+  della prima cifra hex, divisibili col bit successivo). Evidenza: trascrizione del 2026-11-05, 11:53–11:54 («cazzo
+  hai ragione, ma in quel caso […] dove l'avrei dovuta mettere»); `stato/giornata.md` 11:52, 12:14.
 
 ### 3. Autenticazione vs. autorizzazione
 Distinzione teoricamente posseduta che scivola in pratica.
