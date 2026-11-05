@@ -21,7 +21,11 @@ public class MyCalendar {
 	}
 	
 	public AppointmentCollection getAllAppointments() {
-		return allAppointments;
+		AppointmentCollection copia = new AppointmentCollection(allAppointments.size());
+		for (int i = 0; i < allAppointments.size(); i++) {
+			copia.add(allAppointments.get(i));
+		}
+		return copia;
 	}
 	
 	public boolean remove (Appointment app) {
