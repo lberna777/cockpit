@@ -17,7 +17,7 @@ verificata — l'esame è scritto con domande, esercizi *e* progetto di un siste
 | 01 | Introduzione: evoluzione tecnologica, organizzazione gerarchica | `01_Introduzione.pdf` | ⬜ |
 | 02p | Fondamenta per il mapping: macchina, chip, numeri (prerequisito di `02`) | `01` pp. 9, 30–36 · `02` pp. 2–13, 34–38 · `00` es. 10 | 🔶 lezione 2026-10-08 (`lezioni/lezione_02p_fondamenta.md`) |
 | 02 | Mapping e decodifica delle memorie | `02_Mapping_e_decodifica.pdf` | 🔶 lezione 2026-10-06 (`lezioni/lezione_02_mapping_decodifica.md`); 23/10 lab guidato su `2023-12-21`; si chiude con `/lab CALC 02` a freddo su `2023-01-17` |
-| 03 | Linguaggio macchina | `03_Linguaggio_macchina.pdf` | ⬜ |
+| 03 | Linguaggio macchina | `03_Linguaggio_macchina.pdf` | 🔶 lezione 2026-11-05 (`lezioni/lezione_03_linguaggio_macchina.md`); si chiude con `/lab CALC 03` |
 | 04 | Interruzioni | `04_Interruzioni.pdf` | ⬜ |
 | 05 | Handshake e gestione dell'I/O | `05_Handshake.pdf` | ⬜ |
 | 06 | **assente dalla fonte** — vedi nota | — | ⚠️ |
