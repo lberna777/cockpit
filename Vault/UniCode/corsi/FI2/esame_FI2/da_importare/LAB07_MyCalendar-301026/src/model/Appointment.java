@@ -24,7 +24,7 @@ public class Appointment {
 		super();
 		this.description = description;
 		this.from = from;
-		this.to = setDuration(duration);
+		setDuration(duration);
 	}
 
 	public String getDescription() {
