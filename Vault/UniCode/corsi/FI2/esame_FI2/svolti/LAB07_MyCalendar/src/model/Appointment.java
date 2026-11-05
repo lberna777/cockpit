@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
-import java.util.Objects;
 
 public class Appointment {
 
@@ -71,19 +70,4 @@ public class Appointment {
 		return "Appointment: " + description + "\nDA: " + from.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY)) 
 		+ "\nA:" + to.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(Locale.ITALY)) + "\nDURATA: " + getDuration();
 	}
-	
-	
-	public static void main(String[] args) {
-		
-		Appointment app = new Appointment("descrizione prova uno due tre quattro", LocalDateTime.of(2026, 10, 7, 10, 15), LocalDateTime.of(2026, 10, 7, 13, 45));
-		
-		System.out.println(app);
-	}
-	
-	
-	
-	
-	
-	
-	
 }
