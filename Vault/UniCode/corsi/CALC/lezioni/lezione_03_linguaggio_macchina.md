@@ -46,6 +46,20 @@ L'indirizzo è sempre *registro (32 bit) + immediato (16 bit) esteso con segno*:
 LW R7,Imm16(R8)     ; R7 ←32 M[R8 + (Imm16_15)^16 ## Imm16_15..0]      [sl. 26]
 ```
 
+**In parole** `[aggiunto il 2026-11-05, su domanda di Lorenzo]`: il registro **tra parentesi**
+dà sempre l'**indirizzo**; quello **a sinistra** è il **dato** (nelle load ci arriva, nelle store
+ne parte). `L` = dalla memoria al registro, `S` = dal registro alla memoria; `W/H/B` = 4/2/1 byte.
+
+| Istruzione | Calcola l'indirizzo | Va in memoria e… | Il dato va… |
+|---|---|---|---|
+| `LW R7,4(R8)` | R8 + 4 | **legge** una word | **in R7** |
+| `LB R7,4(R8)` | R8 + 4 | legge un byte, esteso **con segno** | in R7 |
+| `LBU R7,4(R8)` | R8 + 4 | legge un byte, esteso **con zeri** | in R7 |
+| `SW R7,4(R8)` | R8 + 4 | **scrive** una word | **da R7** alla memoria |
+| `SB R7,4(R8)` | R8 + 4 | scrive un byte (gli 8 bit bassi di R7) | da R7 alla memoria |
+
+Non è «copiare un registro in un altro»: R8 non viene copiato, dice solo *dove* andare.
+
 Per raggiungere un indirizzo fisso come `F0000008h` si mettono i **16 bit alti** in un registro
 con `LHI`, e i **16 bit bassi** nell'offset:
 
