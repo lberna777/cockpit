@@ -121,6 +121,10 @@ Loop:   SUBI   R2,R2,4h       ; R2 = R2 - 4
         SW     R1,0200h(R7)   ; memorizza accumulatore in E0000200h
 ```
 
+⚠️ **Notazione mista nella dispensa** (osservato da Lorenzo il 2026-11-05): `0800` senza `h` è
+comunque esadecimale come `20h` e `0x6000`. All'esame scrivere **sempre `0x`**, come le soluzioni
+ufficiali e il simulatore (sl. 44).
+
 Due idee da portare via: `ADD R1,R0,R0` azzera usando `R0 = 0`; l'indice scende di **4** perché
 le word sono di 4 byte, e lo stesso registro fa da contatore e da offset.
 
