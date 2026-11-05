@@ -7,3 +7,4 @@
 10:45 · CALC · checkpoint confermato al 10/11 (scelta a di Lorenzo): prova 2024-01-19 solo memorie + decisione su quanti esami in S1
 10:47 · CALC · avviato /lab CALC 02 a freddo sulla prova 2023-01-17 (60 min)
 10:59 · CALC · lab 02 a freddo: prima di proseguire chiesta e data la procedura in 10 passi (metodo del prontuario §0b/§1, senza valori); cronometro dalle 10:47
+11:27 · CALC · lab 02 a freddo: bloccato all'ingresso del riquadro ③ («so cosa fare, non come e in che ordine»); dato ordine delle colonne e cosa chiede ciascuna, senza valori
