@@ -23,3 +23,4 @@
 15:38 · CALC · lezione 03 §2: chiesto se LHI «fa quello che fa LB» — distinzione 1 trasversale (due «load» fuse); separate con il caso limite memoria spenta
 15:45 · CALC · lezione 03 §2–3: fusi registro-indirizzo (R1) e registro-dato (R7) — pensava che LB «mettesse gli indirizzi bassi» in R1 e che l'estensione del segno riguardasse l'indirizzo; separati con la tabella riga per riga (pattern trasversale 1)
 15:52 · CALC · lezione 03 §2: offset ≥ 8000h — trovata da Lorenzo, prima di leggerla, la correzione «LHI con la metà alta +1, poi l'offset sottrae»; capito il bit 15 dalla prima cifra hex con la tabella 0–7/8–F
+16:18 · CALC · lezione 03 §4 (ciclo sl. 49–50): credeva che Loop riazzerasse l'accumulatore (non guardava dove sta l'etichetta) e che R2 crescesse («ci sommo sempre qualcosa»: ADD su R1 e indirizzo della LW attribuiti a R2). Chiarito: cambia solo il registro a sinistra
