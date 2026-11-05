@@ -22,3 +22,4 @@
 15:37 · CALC · lezione 03 §2: indirizzamento indiretto capito con i numeri (R8 + 4 → 804h); confusione «LW copia un registro in un altro» corretta (R8 dà l'indirizzo, il dato viene dalla memoria); tabella load/store «indirizzo · azione · dato» aggiunta alla lezione
 15:38 · CALC · lezione 03 §2: chiesto se LHI «fa quello che fa LB» — distinzione 1 trasversale (due «load» fuse); separate con il caso limite memoria spenta
 15:45 · CALC · lezione 03 §2–3: fusi registro-indirizzo (R1) e registro-dato (R7) — pensava che LB «mettesse gli indirizzi bassi» in R1 e che l'estensione del segno riguardasse l'indirizzo; separati con la tabella riga per riga (pattern trasversale 1)
+15:52 · CALC · lezione 03 §2: offset ≥ 8000h — trovata da Lorenzo, prima di leggerla, la correzione «LHI con la metà alta +1, poi l'offset sottrae»; capito il bit 15 dalla prima cifra hex con la tabella 0–7/8–F
