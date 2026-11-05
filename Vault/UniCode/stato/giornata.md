@@ -19,3 +19,4 @@
 14:48 · CALC · lezione 03 creata da 2 fonti (dispensa 03, soluzione 2023-01-17 consegna d); passo «Codice» e regola porte (g) aggiunti al prontuario §1
 15:07 · CALC · lezione 03: non capito il quadro («DLX non era il processore? cosa stiamo guardando? devo imparare dal codice?»): manca il legame hardware ↔ programma; ripartito dal basso con l'analogia cucina/cuoco/ricetta
 15:28 · CALC · lezione 03 §1: capiti registri (celle interne a 32 bit, dato o indirizzo), istruzione = nomi dei registri + immediato 16 bit, destinazione a sinistra (detto «o il contrario»: pattern 5). Frustrato quando ho fatto domande sul §2 non ancora letto: errore mio di ritmo, da qui niente domande in anticipo
+15:37 · CALC · lezione 03 §2: indirizzamento indiretto capito con i numeri (R8 + 4 → 804h); confusione «LW copia un registro in un altro» corretta (R8 dà l'indirizzo, il dato viene dalla memoria); tabella load/store «indirizzo · azione · dato» aggiunta alla lezione
