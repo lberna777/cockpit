@@ -102,7 +102,17 @@ posto; ogni passo cita la lezione che lo ha introdotto.
    (base multipla della taglia). (c) Tabella «nome · range · 4 banchi da taglia/4». (d) Per ogni
    blocco il *chip-select* minimo che lo distingue da **tutti i dispositivi presenti**, porte
    comprese, più `·BEi` per banco. (e) Banco da 2^k byte: `A[k-1..0]` ← `BA[k+1..2]`; banco *i* su
-   `BD[8i+7..8i]`. (f) Verifica la mutua esclusione dei CS a coppie.
+   `BD[8i+7..8i]`. (f) Verifica la mutua esclusione dei CS a coppie. (g) `[2026-11-05]` Ogni porta
+   dentro la zona delle porte, **mai** dentro una memoria; se le tacche della prima cifra hex non
+   bastano, dividine una con il bit successivo (es. `70000000h` / `78000000h`, `BA27`).
+2. **Codice** *(lezione 03)*. (a) Per ogni indirizzo fisso che il codice usa: `LHI Rx,<16 bit
+   alti>`, poi load/store con offset = 16 bit bassi (se ≥ `8000h` sottrae: è esteso con segno).
+   (b) Scegli l'istruzione dal testo: word → `LW`/`SW`; byte o half-word *signed* → `LB`/`LH`;
+   *unsigned* → `LBU`/`LHU`. (c) Usa solo i registri che il testo concede (es. `R20–R25`), `R0`
+   vale sempre 0. (d) Confronti: `Sx` in un registro, poi `BEQZ`/`BNEZ`. (e) Gli indirizzi nel
+   codice sono **gli stessi** della mappa della consegna b): ricontrollali lì. Esempio: handler
+   della 2023-01-17 (`LHI R20,0x6000` · `LW R21,0x0000(R20)` · `LHI R22,0xF000` ·
+   `SW R21,0x0008(R22)` · `RFE`).
 
 ## 2. Notazione del docente
 
