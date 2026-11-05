@@ -247,6 +247,12 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   10 → 12 invece di 20), **lo stesso errore del `put` del LAB04c** un mese dopo; corretto in `*` alla
   segnalazione. Evidenza: trascrizione del 2026-11-03, 15:44 (`new AppointmentCollection(this.innerContainer.length
   + this.DEFAULT_GROWTH_FACTOR)`) → 15:47.
+- [2026-11-05] CALC: lezione 03, verso della destinazione nelle istruzioni DLX. Su `ADDI R9,R8,8`: «immagino
+  aggiunga r9 a r8, o il contrario», con l'esempio `ADDI R1,R2,3` → R1 = R2 + 3 nella tabella appena data da
+  Claude; nel ciclo sl. 49–50 R2 creduto crescente («ci sommo sempre qualcosa»), cioè l'`ADD R1,R1,R3` e la somma
+  d'indirizzo della `LW` attribuite a R2, che invece è solo letto lì e cambia solo nella `SUBI`. Regola fissata:
+  cambia solo il registro a sinistra (tranne nelle store). Evidenza: trascrizione del 2026-11-05, 15:26, 16:18;
+  `stato/giornata.md` 15:28, 16:18.
 
 ### 6. Confini di un intervallo
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo ragiona bene sul contenuto
