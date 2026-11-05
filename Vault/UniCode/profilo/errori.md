@@ -855,6 +855,16 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   (già noto) **e** BEi; cassettiera a 4 colonne, `LW` accende 4 banchi, `LB` uno. Dopo l'esempio del
   banco 0 ha scritto da solo gli altri tre. Evidenza: trascrizione del 2026-10-23; `stato/giornata.md`
   17:46, 17:49; handoff `HANDOFF_CALC-lab02_2026-10-23.md`, «Ancora poco chiaro».
+- [2026-11-05] Lezione 03, ciclo sl. 49–50: `BNEZ R2,Loop` letto come ritorno all'inizio del programma → «loop
+  significa che ricomincia da azzerare l'accumulatore?» → causa: non ha guardato su quale riga sta l'etichetta
+  («non davo peso all'altezza della scritta loop»), e `Loop` preso per una parola del linguaggio invece che per il
+  nome di una riga → correzione: il salto torna alla riga etichettata (la `SUBI`); ciò che sta sopra l'etichetta si
+  esegue una volta sola, e per questo l'azzeramento di R1 sta lì. Evidenza: trascrizione del 2026-11-05, 16:17–16:18;
+  `stato/giornata.md` 16:18.
+- [2026-11-05] Ricorrenza di «indirizzi DLX scritti con 7 cifre» (2026-10-20), sul contenuto di un registro: «dopo
+  ADDI R2,R0,20h, R2 vale 0x0000020h?» (7 cifre; `00000020h`), e nella stessa forma prefisso e suffisso insieme, di
+  nuovo in `0x00002FF3h` → correzione: 8 cifre anche per i valori nei registri, e un solo marcatore, `0x…` oppure
+  `…h`. Evidenza: trascrizione del 2026-11-05, 16:09, 16:26.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
