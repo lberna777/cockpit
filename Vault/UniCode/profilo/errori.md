@@ -721,6 +721,12 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   sicurezza 3; nella sessione perso il filo sui due costruttori (riga sopra). La procedura del 2026-10-21 (campi →
   costruttore → metodi che cambiano lo stato → metodi che lo leggono) non è ancora autonoma. Evidenza: risposta a
   `/chiudi` del 2026-11-03; trascrizione, 15:27; `stato/giornata.md` 15:27, 17:38.
+- [2026-11-05] LAB07 `getAllAppointments`: `AppointmentCollection copia = allAppointments` proposto come copia →
+  causa: una variabile di tipo oggetto contiene il riferimento, quindi l'assegnamento crea un secondo nome (alias)
+  per la stessa collezione, e `copia.remove(0)` cancellerebbe dal calendario → correzione: `new
+  AppointmentCollection(allAppointments.size())` e un ciclo di `add(get(i))`; scritti da lui subito dopo la
+  segnalazione, 14/14 verdi. Evidenza: trascrizione del 2026-11-05, 12:18 («AppointmentCollection copia =
+  allAppointments») → 12:19–12:20; `stato/giornata.md` 12:21.
 
 ### CALC — Calcolatori Elettronici T
 - [2026-10-08] 02p §2: taglia convertita in bit senza l'unità. RAM da 32 KB → «5 piedini perché 32 =
