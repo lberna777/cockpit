@@ -25,3 +25,4 @@
 15:52 · CALC · lezione 03 §2: offset ≥ 8000h — trovata da Lorenzo, prima di leggerla, la correzione «LHI con la metà alta +1, poi l'offset sottrae»; capito il bit 15 dalla prima cifra hex con la tabella 0–7/8–F
 16:18 · CALC · lezione 03 §4 (ciclo sl. 49–50): credeva che Loop riazzerasse l'accumulatore (non guardava dove sta l'etichetta) e che R2 crescesse («ci sommo sempre qualcosa»: ADD su R1 e indirizzo della LW attribuiti a R2). Chiarito: cambia solo il registro a sinistra
 16:24 · CALC · lezione 03 §4: «non mi è chiarissimo» il registro usato come valore e come indirizzo (R2 contatore + offset) e la differenza indirizzo/contenuto della memoria — da riprendere
+16:35 · CALC · lezione 03 letta tutta in chat (§1–5 + nella prova); handler 2023-01-17 riassunto da lui correttamente (confuso solo «indirizzo di ritorno» con destinazione). 03 resta da chiudere con /lab CALC 03 (scadenza 13/11)
