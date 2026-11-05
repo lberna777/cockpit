@@ -12,3 +12,4 @@
 11:52 · CALC · errori di sostanza: OUTPUT_PORT messa a 80000000h dentro la RAM (CS identico a BA31, mutua esclusione violata, controllo ④ saltato); contate 3 porte in input invece di 4
 11:52 · CALC · non fatti: banchi, piedini, RD/WR, righe ·BEi — Lorenzo: «non penso di essere in grado di svolgere questa parte in autonomia». Il 02 NON si chiude; ritenta al checkpoint del 10/11 (2024-01-19, parte memorie)
 12:08 · CALC · guidato dopo la prova: banchi e piedini. Dopo l'esempio sull'EPROM 1 GB (A[27..0] ← BA[29..2]) ha ricavato da solo la regola «+2 per BA1–0» e le righe EPROM 256 MB (A[25..0] ← BA[27..2]) e RAM (A[28..0] ← BA[30..2]), giuste; capito anche come dividere una tacca (bit successivo) per la porta in più
+12:13 · CALC · bus dati (banco i su BD[8i+7..8i], uguale per ogni blocco: chiesto e capito da lui) e RD/WR (EPROM solo MEMRD, RAM entrambi) fatti dopo spiegazione dal basso; tabella delle memorie della 2023-01-17 completa
