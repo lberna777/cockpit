@@ -14,3 +14,4 @@
 12:08 · CALC · guidato dopo la prova: banchi e piedini. Dopo l'esempio sull'EPROM 1 GB (A[27..0] ← BA[29..2]) ha ricavato da solo la regola «+2 per BA1–0» e le righe EPROM 256 MB (A[25..0] ← BA[27..2]) e RAM (A[28..0] ← BA[30..2]), giuste; capito anche come dividere una tacca (bit successivo) per la porta in più
 12:13 · CALC · bus dati (banco i su BD[8i+7..8i], uguale per ogni blocco: chiesto e capito da lui) e RD/WR (EPROM solo MEMRD, RAM entrambi) fatti dopo spiegazione dal basso; tabella delle memorie della 2023-01-17 completa
 12:14 · CALC · giudizio di Lorenzo sulla tabella delle memorie: sicurezza 3–4/5 (era 3/5 il 23/10, 1/5 il 22/10); «sulla prima metà sono ferrato». Pattern trasversale 2 (si ferma al primo indizio): controllo ④ saltato, porte contate 3 invece di 4
+12:21 · FI2 · LAB07 ritocco 13: getAllAppointments restituisce una copia, scritta da Lorenzo (primo tentativo: alias «copia = allAppointments», corretto con new); 14/14 verdi
