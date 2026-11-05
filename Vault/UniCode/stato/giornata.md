@@ -30,3 +30,5 @@
 16:39 · FI2 · /chiudi — LAB07 «molto clean», ritocchi capiti
 16:39 · PIANO · Lorenzo: niente lab CALC 03 a freddo domani («impensabile dopo una sola lezione»): lab guidato
 16:39 · FI2 · prontuario: riga ⚠️ alias vs copia in getAllAppointments (§1)
+16:42 · CALC · revisione errori: 2 nuovi di corso, 3 ricorrenze trasversali (1, 2, 5)
+16:42 · FI2 · revisione errori: 1 nuovo di corso (alias preso per copia), 0 ricorrenze
