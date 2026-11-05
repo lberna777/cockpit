@@ -60,6 +60,21 @@ ne parte). `L` = dalla memoria al registro, `S` = dal registro alla memoria; `W/
 
 Non è «copiare un registro in un altro»: R8 non viene copiato, dice solo *dove* andare.
 
+**Indirizzo o valore?** `[2026-11-05, su domanda di Lorenzo]` Un registro contiene solo 32 bit
+(`00002FF3h` è sia il numero 12275 sia la cella `00002FF3h`): il ruolo lo dà l'istruzione.
+Regola: **tra parentesi = indirizzo, altrimenti = valore**; eccezione i salti a registro.
+
+| Istruzione | Registro come **indirizzo** | Registro come **valore** |
+|---|---|---|
+| `LW/LH/LB/LBU/LHU Ra,Imm(Rb)` | **Rb** (dove leggere) | **Ra** (riceve il dato) |
+| `SW/SH/SB Ra,Imm(Rb)` | **Rb** (dove scrivere) | **Ra** (il dato scritto) |
+| `ADD/SUB/… Ra,Rb,Rc` · `ADDI/ORI/… Ra,Rb,Imm` · `Sx` | — | tutti |
+| `LHI Ra,Imm` | — | Ra (diventa indirizzo solo quando finisce tra parentesi) |
+| `BEQZ/BNEZ Ra,…` | — | Ra (confrontato con 0) |
+| `JR Ra` · `JALR Ra` | **Ra** (indirizzo dell'*istruzione* a cui saltare) | — |
+
+Nel ciclo del §4 lo stesso R2 fa i due ruoli: valore in `SUBI`/`BNEZ`, indirizzo in `LW …(R2)`.
+
 Per raggiungere un indirizzo fisso come `F0000008h` si mettono i **16 bit alti** in un registro
 con `LHI`, e i **16 bit bassi** nell'offset:
 
