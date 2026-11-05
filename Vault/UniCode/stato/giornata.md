@@ -17,3 +17,4 @@
 12:21 · FI2 · LAB07 ritocco 13: getAllAppointments restituisce una copia, scritta da Lorenzo (primo tentativo: alias «copia = allAppointments», corretto con new); 14/14 verdi
 12:28 · FI2 · LAB07 ritocchi finiti: costruttore con durata ora chiama setDuration (scritto da Lorenzo, ordine giusto: from prima), via main e import Objects; 14/14 verdi. Domanda sua: perché i setter nel costruttore — capito: l'oggetto esiste già, il calcolo sta in un posto solo
 14:48 · CALC · lezione 03 creata da 2 fonti (dispensa 03, soluzione 2023-01-17 consegna d); passo «Codice» e regola porte (g) aggiunti al prontuario §1
+15:07 · CALC · lezione 03: non capito il quadro («DLX non era il processore? cosa stiamo guardando? devo imparare dal codice?»): manca il legame hardware ↔ programma; ripartito dal basso con l'analogia cucina/cuoco/ricetta
