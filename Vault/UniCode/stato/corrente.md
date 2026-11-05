@@ -4,7 +4,7 @@
 
 - `CALC` — Calcolatori Elettronici T (6 CFU) · aperto il 2026-10-06 · **iscritto all'appello del 22 dicembre 2026, ore 9:00** (Lorenzo, 20/10) · checkpoint ~10 nov · `02p` ✅ chiusa il 9/10 · 🔶 `02`: lezione finita il 22/10; lab sulla prova 2023-12-21 (memorie) **svolto guidato il 23/10**, confronto con la soluzione senza errori di sostanza, sicurezza 3/5: il 02 si chiude a freddo su un'altra prova. 5/11: `02` a freddo sulla 2023-01-17 **non chiuso** (memorie giuste da solo; OUT dentro la RAM, porte contate 3; banchi/piedini guidati, sicurezza 3–4/5): ritenta al checkpoint del 10/11. 🔶 `03` lezione creata il 5/11. ⚠️ 04–05 ancora da aprire.
   Sezione in fondo.
-- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · ✅ `LAB06` MasterMind **chiuso il 22/10** (34/34 verdi, **guidato**: da rifare a freddo); `calcolaRisposta` pensata da Lorenzo, bug dei minimi trovato da lui con stampe vs tabella. Codice e confronto (12 punti) in `esame_FI2/svolti/LAB06_MasterMind/`. ✅ `LAB07` MyCalendar **chiuso il 3/11** (14/14 verdi, **guidato**: da rifare a freddo). Punti deboli emersi: limiti in `remove` (`size` vs `length`, pattern 6, stessi errori del LAB04c), setter di proprietà calcolata, `||`/`&&` in `isOverlapped`. Codice e confronto (13 punti) in `esame_FI2/svolti/LAB07_MyCalendar/`; ritocchi del confronto ancora da fare (copia in `getAllAppointments`, `main` da togliere). Sicurezza 3/5; poco chiari array (espansione/restrizione), setter di proprietà calcolata, workflow di una classe in autonomia.
+- `FI2` — Fondamenti di Informatica T-2 (12 CFU) · **iscritto all'appello del 13 gennaio 2027, ore 9:00** (Lorenzo, 20/10) · checkpoint ~2 dic · ✅ `LAB06` MasterMind **chiuso il 22/10** (34/34 verdi, **guidato**: da rifare a freddo); `calcolaRisposta` pensata da Lorenzo, bug dei minimi trovato da lui con stampe vs tabella. Codice e confronto (12 punti) in `esame_FI2/svolti/LAB06_MasterMind/`. ✅ `LAB07` MyCalendar **chiuso il 3/11** (14/14 verdi, **guidato**: da rifare a freddo). Punti deboli emersi: limiti in `remove` (`size` vs `length`, pattern 6, stessi errori del LAB04c), setter di proprietà calcolata, `||`/`&&` in `isOverlapped`. Codice e confronto (13 punti) in `esame_FI2/svolti/LAB07_MyCalendar/`; ritocchi fatti il 5/11 (copia in `getAllAppointments` scritta da lui dopo un primo alias, costruttore con `setDuration`, via `main`), 14/14 verdi, «molto clean». Sicurezza 3/5; poco chiari array (espansione/restrizione), setter di proprietà calcolata, workflow di una classe in autonomia.
 
 > Più esami attivi in parallelo dal 2026-10-06 (`piano/piano_laurea.md`, regola 4).
 > `MATAP` ed `ELT` restano in attesa; lo stato di `LAS` è in `corsi/LAS/stato.md`.
@@ -72,7 +72,7 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 d'esame in `corsi/FI2/esame_FI2/`.
 
 0. **Procedura d'esame**: costruita il 21/10 e scritta nel prontuario §2 (obiettivo del 5/10 ✅). Restano da allenare: test propri scelti da lui (passo 7) e debug con stampe (passo 8).
-1. **Punto di ripresa**: `LAB08` «EDLift» (`/lab FI2 LAB08`), con la procedura del prontuario §2 **guidata da Lorenzo**: è lui a dire il passo successivo (UML → test → caso a mano → codice a pezzi), Claude interviene solo se si ferma. Obiettivo dichiarato a `/chiudi` del 3/11: seguire da solo il workflow di una classe dall'inizio alla fine. Prima, 10 minuti sul LAB07: i ritocchi del confronto (`getAllAppointments` con la copia, `main` e import tolti, setter nei costruttori).
+1. **Punto di ripresa**: `LAB08` «EDLift» (`/lab FI2 LAB08`), con la procedura del prontuario §2 **guidata da Lorenzo**: è lui a dire il passo successivo (UML → test → caso a mano → codice a pezzi), Claude interviene solo se si ferma. Obiettivo dichiarato a `/chiudi` del 3/11: seguire da solo il workflow di una classe dall'inizio alla fine. (Ritocchi del LAB07 fatti il 5/11.) `[2026-11-05]` Avvio fissato per venerdì 6/11, da finire entro domenica 8/11.
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
@@ -223,7 +223,15 @@ dell'artefatto; legame banchi–CS–BE a metà, `CS_INPUT` e `RESET_P` non chia
 passi 7 e 9); **piedini, bus dati e interfacciamento per nulla**. Mancano, rispetto alla soluzione:
 passi 8 (piedini, bus dati, schemi pp. 9–12), 9 (porte, pulsante, reti) e 10 (handler).
 
-**Prossimo passo esatto** `[2026-10-23]`: `/lezione CALC 03` «Linguaggio macchina» (24/10),
+**Prossimo passo esatto** `[2026-11-05]`: `/lab CALC 03` **guidato**, non a freddo (decisione di
+Lorenzo: «a freddo dopo una sola lezione è impensabile»). Prima gli esempi di codice della dispensa
+(sl. 46–48: SH/LHU/LH a `0x7FF1`, ciclo che scrive l'array a `E0000800h` e le sue due domande), poi
+il codice di una prova vera già vista (handler di un'altra prova con soluzione), sempre disegnando
+**per ogni registro** cosa contiene e se è usato come valore o come indirizzo: è il punto rimasto
+confuso il 5/11 («registri, spazi di memoria, indirizzi, valori»). Il 02 si ritenta a freddo al
+checkpoint del 10/11 (`2024-01-19`, memorie), con 5 minuti fissi per il riquadro ④.
+
+**Prossimo passo esatto** `[superato 2026-11-05: lezione 03 fatta]` `[2026-10-23]`: `/lezione CALC 03` «Linguaggio macchina» (24/10),
 aprendo con 10 minuti sui piedini in senso fisico (cosa sono, cosa succede filo per filo quando il
 DLX legge un indirizzo: vista «filo per filo» dell'artefatto dell'8/01). La chiusura a freddo del
 02 va sulla prova `2024-01-19` (memorie), oppure si fonde nel checkpoint del ~10 nov, che usa la

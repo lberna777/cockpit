@@ -26,3 +26,7 @@
 16:18 · CALC · lezione 03 §4 (ciclo sl. 49–50): credeva che Loop riazzerasse l'accumulatore (non guardava dove sta l'etichetta) e che R2 crescesse («ci sommo sempre qualcosa»: ADD su R1 e indirizzo della LW attribuiti a R2). Chiarito: cambia solo il registro a sinistra
 16:24 · CALC · lezione 03 §4: «non mi è chiarissimo» il registro usato come valore e come indirizzo (R2 contatore + offset) e la differenza indirizzo/contenuto della memoria — da riprendere
 16:35 · CALC · lezione 03 letta tutta in chat (§1–5 + nella prova); handler 2023-01-17 riassunto da lui correttamente (confuso solo «indirizzo di ritorno» con destinazione). 03 resta da chiudere con /lab CALC 03 (scadenza 13/11)
+16:39 · CALC · /chiudi — giudizio di Lorenzo: «felice dei miglioramenti nella parte pratica»; della 03 «qualcosa ho capito», confonde registri, spazi di memoria, indirizzi e valori. Nessun modulo chiuso oggi (02 non chiuso, 03 solo lezione)
+16:39 · FI2 · /chiudi — LAB07 «molto clean», ritocchi capiti
+16:39 · PIANO · Lorenzo: niente lab CALC 03 a freddo domani («impensabile dopo una sola lezione»): lab guidato
+16:39 · FI2 · prontuario: riga ⚠️ alias vs copia in getAllAppointments (§1)
