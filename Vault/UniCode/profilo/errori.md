@@ -101,6 +101,15 @@ distinzione non è stata capita.
   finestra? e quelli che iniziano prima e finiscono nell intervallo non li prendo?» (letta come «tutto dentro»,
   mentre ogni estremo dell'appuntamento si confronta con l'estremo opposto della ricerca); sbloccato dalla tabella
   dei sei casi. Evidenza: trascrizione del 2026-11-03, 15:29, 17:02; `stato/giornata.md` 17:12.
+- [2026-11-05] CALC: lezione 03, registro, indirizzo e contenuto della memoria fusi in sei punti della stessa
+  sessione. `LW` letta come copia fra registri («dove cercare con un offset un registro da copiare in un altro
+  registro»); `LHI` scambiata per `LB` («non fa quello che fa LB?»), e creduta bisognosa di «0000h agli indirizzi
+  bassi di un altro registro» scritti prima; `LB` pensata come l'istruzione che mette «gli indirizzi bassi» in R1,
+  con l'estensione del segno riferita all'indirizzo invece che al dato in R7; nel ciclo sl. 49–50 R3 creduto
+  riempito «da R2 + 0800h» (l'indirizzo) invece che dalla word che sta lì, e il ciclo fermo quando «R2 punterà a
+  uno spazio di memoria che vale 0» (lo ferma R2 stesso). Separati con le tabelle riga per riga di Claude; Lorenzo a
+  `/chiudi`: «faccio sicuramente confusione tra registri, spazi di memoria, indirizzi, valori». Evidenza:
+  trascrizione del 2026-11-05, 15:36, 15:38, 15:40, 15:45, 16:20, 16:22; `stato/giornata.md` 15:37, 15:38, 15:45, 16:24.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
