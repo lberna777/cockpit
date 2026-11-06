@@ -23,3 +23,4 @@
 16:39 · CALC · 03 sl. 48 (ii): ciclo a 4 scritto da solo — init e SUBI prima della SW giusti; R3 non aggiornato (ADDI R4,R3,4 scrive in R4), R3 che parte dall'inizio e sale invece che dalla fine e scende
 16:42 · CALC · 03 sl. 48 (ii): R3 iniziale E000001C giusto da solo; aggiornamento scritto ADDI R3,R3,3 (verso e passo sbagliati: SUBI R3,R3,4 dopo la SW). Ciclo a 4 completato
 16:44 · CALC · 03 sl. 48 (ii): ADDI R3,R0,0x1C dopo LHI (sovrascrive la base: sorgente R0 invece di R3); aggiornamento di R3 ancora con ADDI (verso in salita)
+16:46 · CALC · 03 sl. 48 (ii): ciclo a 4 istruzioni corretto (contatore e indirizzo all'indietro), dopo due giri di correzioni
