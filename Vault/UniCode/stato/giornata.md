@@ -15,3 +15,4 @@
 15:43 · CALC · 03 sl. 47 giro 2: R3+4 scritto E0000100 (somma esadecimale sbagliata: 4 messo nella cifra delle centinaia); SNEI letto su R3 invece di R2 — registri scambiati
 15:45 · CALC · 03: origine di E0000100 = 4 scritto in binario (100) e letto come esadecimale; seconda volta oggi che mescola cifre binarie ed esadecimali (dopo 0x1111 per FFFF)
 15:53 · CALC · 03 sl. 47: SW del secondo giro giusta da solo (valore 1 a E0000804)
+15:56 · PIANO · CALC prolungato fino a ~16:35 per finire la dispensa 03 (sl. 48–51); handler della prova slitta; LAB08 dalle 16:45
