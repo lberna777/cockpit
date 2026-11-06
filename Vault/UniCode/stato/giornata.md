@@ -19,3 +19,4 @@
 15:59 · CALC · 03 sl. 48: non sa calcolare l'offset del BNEZ — mancava l'idea che le istruzioni stanno in memoria a indirizzi consecutivi di 4 e che il PC è un indirizzo
 16:10 · CALC · 03 sl. 48: 20 decimale convertito in 0x5F (corretto 0x14) — conversione decimale→esadecimale da riprendere
 16:14 · CALC · 03 sl. 48: 0x10000 − 0x14 calcolato in decimale (9986) — terza volta oggi che usa le regole decimali dentro l'esadecimale
+16:34 · CALC · 03 sl. 48 (ii): idea del contatore all'indietro (8→0) per togliere SNEI trovata da solo, con lo spunto a gradini
