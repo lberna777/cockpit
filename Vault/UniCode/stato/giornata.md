@@ -16,3 +16,4 @@
 15:45 · CALC · 03: origine di E0000100 = 4 scritto in binario (100) e letto come esadecimale; seconda volta oggi che mescola cifre binarie ed esadecimali (dopo 0x1111 per FFFF)
 15:53 · CALC · 03 sl. 47: SW del secondo giro giusta da solo (valore 1 a E0000804)
 15:56 · PIANO · CALC prolungato fino a ~16:35 per finire la dispensa 03 (sl. 48–51); handler della prova slitta; LAB08 dalle 16:45
+15:59 · CALC · 03 sl. 48: non sa calcolare l'offset del BNEZ — mancava l'idea che le istruzioni stanno in memoria a indirizzi consecutivi di 4 e che il PC è un indirizzo
