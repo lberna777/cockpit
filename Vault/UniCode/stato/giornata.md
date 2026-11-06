@@ -10,3 +10,4 @@
 14:52 · CALC · 03 sl. 46: SH a 0x7FF1 non allineata riconosciuta da solo, dopo aver chiarito banchi/righe/BE (bus a 32 bit = 4 banchi) e pari/dispari in esadecimale
 15:02 · CALC · 03 sl. 46: LHU/LH su 0x0081 giuste; su 0x8081 LH scritta 0x11118081 (bit a 1 scritti come cifre esadecimali 1 invece di F) — binario e esadecimale mescolati
 15:09 · CALC · 03: chiarito che i ???? sono 16 bit alti = 4 cifre esa da 4 bit ciascuna (1111 = F); regola nuova «domanda in pausa» nel profilo
+15:19 · CALC · 03 sl. 47: ruoli in SW giusti da solo (R2 valore, R3 base); dubbio se l'offset 0800 diventa 00000800 o 08000000 (confusione con LHI)
