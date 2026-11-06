@@ -5,6 +5,10 @@
 > interattivo. Qui si raccoglie il contenuto **verificato sulle fonti** man mano che emerge;
 > l'artefatto si progetta dopo. Ogni voce con la sua fonte.
 
+> **Pubblicato il 2026-11-06**: «Banco DLX», https://claude.ai/artifact/FhDtrX9vgKesNmRLH5TfdC —
+> sorgente in `banco_dlx/banco_dlx.html` (per modificarlo da un'altra chat: Artifact con `url`).
+> Otto esperimenti: LHI+ADDI, SW, SH e MUX, LH/LHU, non allineato, ciclo sl. 47, ciclo a 4, offset del BNEZ.
+
 ## 1. Oggetti fisici da rappresentare
 
 | Oggetto | Cosa è | Fonte |

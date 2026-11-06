@@ -131,3 +131,19 @@ Forme da riprodurre identiche nell'elaborato (espressioni di decodifica, segnali
 Quelle che le soluzioni ufficiali segnalano, con la prova da cui provengono.
 
 - Due driver 3-state sullo stesso filo: mai OE attivi insieme → CS mutuamente esclusivi (dispensa 02 p. 6).
+
+## 4. Linguaggio macchina: regole da tenere sotto mano *(03, sl. 46–48, 6/11)*
+
+| Cosa | Regola | Esempio |
+|---|---|---|
+| Ruolo dei registri in load/store | tra parentesi = **indirizzo base**; prima della virgola = **dato** (sorgente in `S…`, destinazione in `L…`) | `SW R2,0800(R3)`: scrive R2 a R3+0800 |
+| Byte scritti | `SB` 1 · `SH` 2 (16 bit bassi) · `SW` 4 | `SH` con R2 = `00000081` scrive `0081` |
+| Allineamento | indirizzo **multiplo della taglia**: halfword ultima cifra `0 2 4 6 8 A C E`; word `0 4 8 C` | `SH …,0x7FF1(R1)` non allineata (sl. 46) |
+| LHU / LH | alti a 0 / alti = copie del bit 15 | `8081` → `00008081` / `FFFF8081` |
+| Offset e immediati | 16 bit nella metà **bassa**, estesi con segno, sommati; solo `LHI` va nella metà alta | `0800` → `00000800` |
+| Offset di un salto | `destinazione − (PC_salto + 4)`, su 16 bit | BNEZ a `110`, Loop a `100` → −20 = `FFEC` |
+| Negativo su 16 bit | `(FFFF − |n|) + 1`, cifra per cifra senza prestiti | −14h → `FFEB + 1 = FFEC` |
+| Una cifra esa | = **4 bit**: `1111` = `F`, non `1` | 16 bit alti a 1 → `FFFF` |
+| Decimale → esa | quante volte 16 + resto | 20 = 1·16 + 4 → `0x14` |
+| Ciclo senza `SNEI` | contatore che **scende** a 0 e `BNEZ` su di lui; indirizzo che scende insieme | ciclo a 4 istruzioni, sl. 48 (ii) |
+

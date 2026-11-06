@@ -72,7 +72,7 @@ entra solo quando la voce la richiede, e i moduli di teoria non si aprono più c
 d'esame in `corsi/FI2/esame_FI2/`.
 
 0. **Procedura d'esame**: costruita il 21/10 e scritta nel prontuario §2 (obiettivo del 5/10 ✅). Restano da allenare: test propri scelti da lui (passo 7) e debug con stampe (passo 8).
-1. **Punto di ripresa**: `LAB08` «EDLift» (`/lab FI2 LAB08`), con la procedura del prontuario §2 **guidata da Lorenzo**: è lui a dire il passo successivo (UML → test → caso a mano → codice a pezzi), Claude interviene solo se si ferma. Obiettivo dichiarato a `/chiudi` del 3/11: seguire da solo il workflow di una classe dall'inizio alla fine. (Ritocchi del LAB07 fatti il 5/11.) `[2026-11-05]` Avvio fissato per venerdì 6/11, da finire entro domenica 8/11.
+1. **Punto di ripresa**: `LAB08` «EDLift» (`/lab FI2 LAB08`), con la procedura del prontuario §2 **guidata da Lorenzo**: è lui a dire il passo successivo (UML → test → caso a mano → codice a pezzi), Claude interviene solo se si ferma. Obiettivo dichiarato a `/chiudi` del 3/11: seguire da solo il workflow di una classe dall'inizio alla fine. (Ritocchi del LAB07 fatti il 5/11.) `[2026-11-05]` Avvio fissato per venerdì 6/11, da finire entro domenica 8/11. `[2026-11-06]` Non aperto il 6/11 (giornata andata tutta su CALC 03, scelta di Lorenzo): avvio sabato 7/11, fine entro domenica 8/11.
 2. Dopo ogni LAB verde: `confronto_<ID>.md` in `svolti/` e prontuario da `/chiudi` 8a.
 
 Chiuso (§4b della guida, verificato di nuovo il 2026-09-26 e scritto nel prontuario): la slide 34 annota `FE FF` come marcatore *little endian*, ma
@@ -223,7 +223,11 @@ dell'artefatto; legame banchi–CS–BE a metà, `CS_INPUT` e `RESET_P` non chia
 passi 7 e 9); **piedini, bus dati e interfacciamento per nulla**. Mancano, rispetto alla soluzione:
 passi 8 (piedini, bus dati, schemi pp. 9–12), 9 (porte, pulsante, reti) e 10 (handler).
 
-**Prossimo passo esatto** `[2026-11-05]`: `/lab CALC 03` **guidato**, non a freddo (decisione di
+**6/11 — `/lab CALC 03` guidato, sl. 46–48** (non chiude il modulo: guidato). Fatti: SH non allineata a `7FF1`, LHU/LH su `0081` e `8081`, ciclo della sl. 47 giro per giro, offset del `BNEZ` = `0xFFEC`, ciclo a 4 istruzioni (contatore e indirizzi all'indietro) **scritto da Lorenzo** dopo due giri di correzioni. Giudizio di Lorenzo: «molto più chiaro di ieri» funzioni delle istruzioni, come ci si muove, il pensiero dietro i meccanismi; **restano meccanici** i calcoli in esadecimale, i ruoli dei dati dentro un processo, il rispetto rigoroso dell'allineamento (multipli di 2 e 4). Errori della giornata: cifre binarie scritte dentro numeri esadecimali (`0x1111…`, `+0x100` per +4), sottrazione esadecimale fatta in decimale (`9986`), 20 → `0x5F`. Nuovo strumento: artefatto 3D **Banco DLX** (`corsi/CALC/appunti/banco_dlx/`).
+
+**Prossimo passo esatto** `[2026-11-06]`: riscaldamento sull'**esempio 4** della dispensa 03 (sl. 49–50: somma di 8 word da `00000800h` con `LW` e indice che scende, risultato in `E0000200h`): tabella dei ruoli di R1, R2, R3, R7 e indirizzo della prima `LW`; poi l'**handler di una prova con soluzione**, con la tabella registro · contenuto · valore/indirizzo. Prima, 5 minuti di conti in esadecimale (somma e sottrazione con riporto a 16, conversione decimale→esa).
+
+`[superato 2026-11-06: sl. 46–48 fatte]` **Prossimo passo esatto** `[2026-11-05]`: `/lab CALC 03` **guidato**, non a freddo (decisione di
 Lorenzo: «a freddo dopo una sola lezione è impensabile»). Prima gli esempi di codice della dispensa
 (sl. 46–48: SH/LHU/LH a `0x7FF1`, ciclo che scrive l'array a `E0000800h` e le sue due domande), poi
 il codice di una prova vera già vista (handler di un'altra prova con soluzione), sempre disegnando

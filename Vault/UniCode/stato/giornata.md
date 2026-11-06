@@ -25,3 +25,9 @@
 16:44 · CALC · 03 sl. 48 (ii): ADDI R3,R0,0x1C dopo LHI (sovrascrive la base: sorgente R0 invece di R3); aggiornamento di R3 ancora con ADDI (verso in salita)
 16:46 · CALC · 03 sl. 48 (ii): ciclo a 4 istruzioni corretto (contatore e indirizzo all'indietro), dopo due giri di correzioni
 16:47 · CALC · 03: dispensa fatta fino alla sl. 48; esempio 4 (sl. 49–50) rimandato come riscaldamento del prossimo blocco CALC; pausa caffè, LAB08 dalle 17:05
+17:00 · CALC · /chiudi: giudizio di Lorenzo — chiaro funzioni delle istruzioni, come ci si muove, pensiero dietro i meccanismi; meccanici i conti in esa, i ruoli dei dati in un processo, l'allineamento a multipli di 2/4. 03 non chiuso (guidato)
+17:00 · CALC · revisione errori: 5 nuovi (sezione CALC), 1 ricorrenza (pattern 5, verso invertito); candidato trasversale «correzione in due parti applicata a metà» ora su FI2 e CALC
+17:00 · CALC · prontuario: §4 regole di linguaggio macchina (ruoli, taglie, allineamento, LH/LHU, offset dei salti, negativi a 16 bit)
+17:00 · FI2 · LAB08 non aperto oggi (scelta di Lorenzo: finire la dispensa CALC); avvio sabato 7/11
+17:00 · PIANO · pianificato domani 7/11: FI2 LAB08 avvio + CALC esempio 4, blocchi orari nella Plancia
+17:00 · CALC · artefatto «Banco DLX» pubblicato (https://claude.ai/artifact/FhDtrX9vgKesNmRLH5TfdC), sorgente in corsi/CALC/appunti/banco_dlx/

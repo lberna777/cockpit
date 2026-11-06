@@ -253,6 +253,14 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   d'indirizzo della `LW` attribuite a R2, che invece è solo letto lì e cambia solo nella `SUBI`. Regola fissata:
   cambia solo il registro a sinistra (tranne nelle store). Evidenza: trascrizione del 2026-11-05, 15:26, 16:18;
   `stato/giornata.md` 15:28, 16:18.
+- [2026-11-06] CALC: lezione 03 sl. 48 (ii), ciclo a 4 istruzioni, due versi sbagliati il giorno dopo la regola
+  «cambia solo il registro a sinistra». Per portare R3 da `E0000000` a `E000001C` scrive `ADDI R3,R0,0x001C` dopo la
+  `LHI`, come se la destinazione ricevesse l'aggiunta: la sorgente è R0, il risultato `0000001C` e la base `E000`
+  persa. Con il contatore che scende (valori scritti dal 7 allo 0) aggiorna R3 in salita due volte, `ADDI R3,R3,3`
+  («volevo scrivere ADDI R3,R3,4») e poi di nuovo `ADDI R3,R3,4`, benché Claude avesse già detto due volte che gli
+  indirizzi devono scendere (dal 2° giro scriverebbe a `E0000820`, fuori dall'array). Corretto al terzo tentativo
+  (`ADDI R3,R3,0x1C`, `SUBI R3,R3,4`). Evidenza: trascrizione del 2026-11-06, 16:42 («volevo scrivere ADDI
+  R3,R3,4»), 16:44 («LHI R3,0xE000; ADDI R3, R0, 0x001C; … ADDI R3,R3,4»), 16:46; `stato/giornata.md` 16:42, 16:44, 16:46.
 
 ### 6. Confini di un intervallo
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo ragiona bene sul contenuto
@@ -865,6 +873,38 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   ADDI R2,R0,20h, R2 vale 0x0000020h?» (7 cifre; `00000020h`), e nella stessa forma prefisso e suffisso insieme, di
   nuovo in `0x00002FF3h` → correzione: 8 cifre anche per i valori nei registri, e un solo marcatore, `0x…` oppure
   `…h`. Evidenza: trascrizione del 2026-11-05, 16:09, 16:26.
+- [2026-11-06] Lezione 03 sl. 46: `SH` creduta scrivere tutto il registro («scrive tutti i caratteri di R2 credo») →
+  causa: la lettera di larghezza nel nome dell'istruzione (B/H/W) non letta come quantità di byte → correzione: `SB`,
+  `SH`, `SW` scrivono 1, 2, 4 byte, presi dai bit 7..0, 15..0, 31..0 del registro (con R2 = `00000081`, `SH` scrive
+  `0081` in due byte). Evidenza: trascrizione del 2026-11-06, 14:35; `stato/giornata.md` 14:35.
+- [2026-11-06] Lezione 03 sl. 46: allineamento non trasferito dai dispositivi ai dati, poi legato al bus invece che
+  alla taglia del dato. Prima «non penso di essere forzato a fare una cosa del genere per i dati, ma mi dovrò
+  assicurare che gli indirizzi successivi […] siano liberi» (allineamento fuso con lo spazio libero, che è un altro
+  vincolo); poi, vista la memoria del DLX a 4 banchi, «quindi in un dlx devo mettere i dati in indirizzi multipli di 4
+  e non di due»; e «non so distinguere al volo se un numero in esa sia pari o dispari» → causa: la regola del 02
+  «base multipla della taglia» (la stessa della riga del 2026-10-08) non è vista come vincolo dell'hardware (un solo
+  indirizzo di riga per ciclo), quindi non si applica da sola ai dati e si aggancia al numero più vicino (i 4 banchi)
+  → correzione: l'indirizzo è multiplo della taglia del **dato**: byte ovunque, halfword pari (ultima cifra hex
+  `0 2 4 6 8 A C E`), word multiplo di 4 (ultima cifra `0 4 8 C`). Con la regola davanti, «`0x7FF1` dispari, quindi no»
+  giusto. Lorenzo a `/chiudi`: resta da conquistare «il rigoroso rispetto di regole come […] i multipli di 2, o 4».
+  Evidenza: trascrizione del 2026-11-06, 14:43, 14:50, 14:52; `stato/giornata.md` 14:52.
+- [2026-11-06] Lezione 03: cifre binarie scritte dentro un numero esadecimale, due volte nella stessa sessione. `LH`
+  su `8081`: 16 bit alti a 1 scritti `0x11118081` (un `1` per cifra hex, invece di `F` = `1111`); `ADDI R3,R3,4` su
+  `E0000000` dato come `E0000100`, cioè il 4 scritto in binario (`100`) e messo nel numero hex, dove vale 256
+  («pensavo di sommare 4 che in esadecimale fa 00000100») → causa: la cifra hex non è tenuta come gruppo di 4 bit, e
+  il binario viene usato come forma «di macchina» di qualsiasi numero; stessa famiglia di «binario letto senza i
+  pesi» (2026-10-08, 2026-10-09) → correzione: da 0 a 9 una cifra hex è uguale a quella decimale (+4 va sull'ultima
+  cifra); il binario serve solo per i singoli bit, a gruppi di 4, e ogni gruppo diventa una cifra (`1111` = `F`).
+  Evidenza: trascrizione del 2026-11-06, 15:02 («R4 0x11118081»), 15:06, 15:43 («R3 0xE0000100»), 15:45;
+  `stato/giornata.md` 15:02, 15:43, 15:45.
+- [2026-11-06] Ricorrenza di «aritmetica in base 16 assente» (2026-10-09, 2026-10-20, 2026-10-23): offset del `BNEZ`,
+  `0x10000 − 0x14` → «0x9986», sottrazione fatta con le regole decimali (prestito da 10 invece che da 16). Rifatto da
+  solo con `0xFFFF − 0x0014 + 1 = 0xFFEC` dopo lo schema di Claude. Evidenza: trascrizione del 2026-11-06, 16:14, 16:17;
+  `stato/giornata.md` 16:14.
+- [2026-11-06] Lezione 03 sl. 48: 20 decimale convertito in `0x5F` («20 vale 0x0000005F?», `5F` = 95) → causa non
+  accertata: la conversione decimale → esadecimale non ha ancora un procedimento → correzione: quante volte sta il 16,
+  e il resto è l'ultima cifra (20 = 1·16 + 4 = `0x14`); verifica inversa 1·16 + 4 = 20. Evidenza: trascrizione del
+  2026-11-06, 16:10; `stato/giornata.md` 16:10.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
