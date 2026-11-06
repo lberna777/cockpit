@@ -12,3 +12,4 @@
 15:09 · CALC · 03: chiarito che i ???? sono 16 bit alti = 4 cifre esa da 4 bit ciascuna (1111 = F); regola nuova «domanda in pausa» nel profilo
 15:19 · CALC · 03 sl. 47: ruoli in SW giusti da solo (R2 valore, R3 base); dubbio se l'offset 0800 diventa 00000800 o 08000000 (confusione con LHI)
 15:24 · CALC · 03: chiaro sommatore indirizzi vs ADDI (la somma va sul bus, non in un registro); idea di Lorenzo: modello 3D interattivo CPU-bus-memoria, raccolta in corsi/CALC/appunti/modello_3d_raccolta.md
+15:43 · CALC · 03 sl. 47 giro 2: R3+4 scritto E0000100 (somma esadecimale sbagliata: 4 messo nella cifra delle centinaia); SNEI letto su R3 invece di R2 — registri scambiati
