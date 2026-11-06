@@ -20,3 +20,4 @@
 16:10 · CALC · 03 sl. 48: 20 decimale convertito in 0x5F (corretto 0x14) — conversione decimale→esadecimale da riprendere
 16:14 · CALC · 03 sl. 48: 0x10000 − 0x14 calcolato in decimale (9986) — terza volta oggi che usa le regole decimali dentro l'esadecimale
 16:34 · CALC · 03 sl. 48 (ii): idea del contatore all'indietro (8→0) per togliere SNEI trovata da solo, con lo spunto a gradini
+16:39 · CALC · 03 sl. 48 (ii): ciclo a 4 scritto da solo — init e SUBI prima della SW giusti; R3 non aggiornato (ADDI R4,R3,4 scrive in R4), R3 che parte dall'inizio e sale invece che dalla fine e scende
