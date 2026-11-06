@@ -17,3 +17,4 @@
 15:53 · CALC · 03 sl. 47: SW del secondo giro giusta da solo (valore 1 a E0000804)
 15:56 · PIANO · CALC prolungato fino a ~16:35 per finire la dispensa 03 (sl. 48–51); handler della prova slitta; LAB08 dalle 16:45
 15:59 · CALC · 03 sl. 48: non sa calcolare l'offset del BNEZ — mancava l'idea che le istruzioni stanno in memoria a indirizzi consecutivi di 4 e che il PC è un indirizzo
+16:10 · CALC · 03 sl. 48: 20 decimale convertito in 0x5F (corretto 0x14) — conversione decimale→esadecimale da riprendere
