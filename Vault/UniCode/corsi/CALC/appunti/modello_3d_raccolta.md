@@ -47,7 +47,22 @@
 - Allineamento: indirizzo multiplo della dimensione del dato (byte qualsiasi, halfword pari,
   word multiplo di 4).
 
-## 4. Da raccogliere ancora
+## 4. Binario ed esadecimale — dove si parla l'uno, dove l'altro (richiesta di Lorenzo, 6/11)
+
+Il modello deve mostrare **dove si ragiona in binario, dove in esadecimale e dove i due si
+incontrano** (Lorenzo li ha mescolati due volte il 6/11: `0x1111` per `0xFFFF`, `0x100` per `0x4`).
+
+| Zona | Si legge in | Perché |
+|---|---|---|
+| Fili del bus, piedini, BE, bit di segno, singoli bit di un registro | **binario** | ogni filo porta un bit |
+| Codice assembler, immediati, offset, indirizzi, contenuto dei registri come numero | **esadecimale** | notazione compatta del docente (`0x…`, `…h`) |
+| Punto d'incontro: ogni cifra esadecimale ↔ un gruppo di **4 fili** | conversione | `F` = `1111`, `4` = `0100`; 8 cifre = 32 bit |
+
+Da animare: un registro di 32 bit mostrato come 8 cifre esadecimali, ognuna che si «apre» nei suoi
+4 bit; estensione con segno che copia il bit 15 nei 16 bit alti (e il risultato che si richiude in
+`FFFF`); somma `E0000000 + 4` sulla cifra più a destra.
+
+## 5. Da raccogliere ancora
 
 - Tabella completa dei BE per ogni combinazione dimensione × 2 bit bassi dell'indirizzo (bus a 32 bit).
 - Segnali di controllo del ciclo (RD, WR, tempi) — moduli 02/05.
