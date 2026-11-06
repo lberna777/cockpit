@@ -8,3 +8,4 @@
 14:28 · CALC · 03 sl. 46: R2 = 0x81 (dato da scrivere) classificato come indirizzo — confusione valore/indirizzo del 5/11 confermata
 14:35 · CALC · 03 sl. 46: SH pensata come scrittura di tutto il registro (32 bit) invece che dei 16 bassi
 14:52 · CALC · 03 sl. 46: SH a 0x7FF1 non allineata riconosciuta da solo, dopo aver chiarito banchi/righe/BE (bus a 32 bit = 4 banchi) e pari/dispari in esadecimale
+15:02 · CALC · 03 sl. 46: LHU/LH su 0x0081 giuste; su 0x8081 LH scritta 0x11118081 (bit a 1 scritti come cifre esadecimali 1 invece di F) — binario e esadecimale mescolati
