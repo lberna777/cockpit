@@ -60,3 +60,7 @@
 - Per esercizi e prove: bozze complete e pronte da consegnare, con l'elenco preciso degli
   screenshot o degli allegati richiesti.
 - Conciso dove ha già capito, esteso dove ha già fatto domande.
+- `[2026-11-06, regola di Lorenzo]` **Domanda in pausa.** Se a una domanda risponde chiedendo un
+  chiarimento su ciò che c'era prima, la domanda si mette in pausa: si spiega tutto, poi si chiede
+  se ha capito e vuole tornare alla domanda (o spiegazione) sospesa, oppure ha altri dubbi. Quando
+  si riprende, il quesito si ripropone **per intero, con tutti i dati**, mai in forma abbreviata.
