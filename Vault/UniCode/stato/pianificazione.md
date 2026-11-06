@@ -7,7 +7,7 @@
 
 settimana: 2026-11-02
 mese: 2026-11
-giorno: 2026-11-05
+giorno: 2026-11-06
 
 <!--
 settimana: 2026-10-26
