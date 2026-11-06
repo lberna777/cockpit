@@ -14,3 +14,4 @@
 15:24 · CALC · 03: chiaro sommatore indirizzi vs ADDI (la somma va sul bus, non in un registro); idea di Lorenzo: modello 3D interattivo CPU-bus-memoria, raccolta in corsi/CALC/appunti/modello_3d_raccolta.md
 15:43 · CALC · 03 sl. 47 giro 2: R3+4 scritto E0000100 (somma esadecimale sbagliata: 4 messo nella cifra delle centinaia); SNEI letto su R3 invece di R2 — registri scambiati
 15:45 · CALC · 03: origine di E0000100 = 4 scritto in binario (100) e letto come esadecimale; seconda volta oggi che mescola cifre binarie ed esadecimali (dopo 0x1111 per FFFF)
+15:53 · CALC · 03 sl. 47: SW del secondo giro giusta da solo (valore 1 a E0000804)
