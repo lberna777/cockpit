@@ -16,8 +16,7 @@ public class HealthyLift extends Lift {
 	public RequestResult goToFloor(int floor) {
 		checkArrivalFloor(floor);
 		if (getCurrentState() != LiftState.REST ||
-				getCurrentFloor() - floor == 1 || 
-				getCurrentFloor() - floor == -1 ) {
+				Math.abs(getCurrentFloor() - floor) <= 1) {
 			return RequestResult.REJECTED;
 		}
 		
