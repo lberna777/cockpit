@@ -16,3 +16,4 @@
 12:45 · CALC · esempio 4 (03) letto riga per riga da solo dopo la LW: ruoli R1 accumulatore/valore, R3 valore, R7 indirizzo, R2 contatore (anche indice: non visto da solo); confusi accumulatore e contatore, «indirizzi alti» per i bit alti di LHI; capito lo scopo con l'analogia del for in Java
 12:50 · FI2 · guida-lab LAB08 generata (scheda, 60 test, startkit in da_importare/LAB08_EDLift-091126)
 12:50 · CALC · scheda del checkpoint 10/11 generata (lezioni/guida_lab_02_prova_2024-01-19.md, parte memorie, a freddo 60 min)
+14:22 · FI2 · LAB08 avviato seguendo il PDF; domanda di Lorenzo (sl. 3): «accetta in movimento» e «più chiamate» sono la stessa cosa? — separati con due casi limite (stato vs struttura dati); pattern 1 intercettato da lui stesso
