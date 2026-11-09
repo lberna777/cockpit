@@ -10,3 +10,4 @@
 12:21 · CALC · 2^20 = 100000h ok; 2^21 → 100001h (sommato 1 invece di moltiplicare per 2: il resto dell'esponente usato come addendo), corretto
 12:26 · CALC · 2^30 = 40000000h da solo (regola esponente = 4k + r); riscaldamento esa chiuso
 12:34 · CALC · ripasso 2023-01-17 a voce: RAM 80000000h–FFFFFFFFh, EPROM 1280 MB = 500h MB = 50000000h → 0–4FFFFFFFh, da solo; capito perché OUT a 80000000h stava nella RAM
+12:37 · CALC · porte della 2023-01-17 rifatte: 5 porte (4 IN + OUT) a 50/58/60/68/70000000h, dopo correzione (prima 70000001h/02h: BA1–BA0 non arrivano sul bus); errori del 5/11 ripassati
