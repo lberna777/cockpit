@@ -23,9 +23,13 @@ public class HealthyLift extends Lift {
 		
 		if (getCurrentFloor() > floor) {
 			setRequestedFloor(floor + 1);
+			RequestResult.MODIFIED.setFloor(floor+1);
+			RequestResult.MODIFIED.setMsg("modified from " + floor + " to " + getRequestedFloor());
 			return RequestResult.MODIFIED;
 		} else {
 			setRequestedFloor(floor - 1);
+			RequestResult.MODIFIED.setFloor(floor-1);
+			RequestResult.MODIFIED.setMsg("modified from " + floor + " to " + getRequestedFloor());
 			return RequestResult.MODIFIED;
 		}
 	} 
