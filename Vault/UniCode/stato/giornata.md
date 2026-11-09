@@ -8,3 +8,4 @@
 12:11 · CALC · non sa convertire decimale→esa: spiegate le divisioni successive per 16 (esempio 300 = 12Ch), prova su 1000
 12:15 · CALC · 1000 → 000003E8h da solo con le divisioni per 16 (guidato passo passo); ora potenze di 2 in esa
 12:21 · CALC · 2^20 = 100000h ok; 2^21 → 100001h (sommato 1 invece di moltiplicare per 2: il resto dell'esponente usato come addendo), corretto
+12:26 · CALC · 2^30 = 40000000h da solo (regola esponente = 4k + r); riscaldamento esa chiuso
