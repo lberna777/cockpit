@@ -19,12 +19,10 @@ public class BasicLift extends Lift{
 		BasicLift.super.setRequestedFloor(floor);
 		if(this.getCurrentFloor() < this.getRequestedFloor()) {
 			BasicLift.super.setCurrentState(LiftState.UP);
+			return RequestResult.ACCEPTED;
 		} else if (this.getCurrentFloor() > this.getRequestedFloor()) {
 			BasicLift.super.setCurrentState(LiftState.DOWN);
+			return RequestResult.ACCEPTED;
 		} else return RequestResult.REJECTED;
-		
-		this.setCurrentFloor(this.getRequestedFloor());
-		this.setCurrentState(LiftState.REST);
-		
 	}
 }
