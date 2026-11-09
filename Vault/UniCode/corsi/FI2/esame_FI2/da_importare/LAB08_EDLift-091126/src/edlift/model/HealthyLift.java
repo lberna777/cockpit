@@ -14,7 +14,6 @@ public class HealthyLift extends Lift {
 	
 	@Override
 	public RequestResult goToFloor(int floor) {
-		
 		checkArrivalFloor(floor);
 		if (getCurrentState() != LiftState.REST ||
 				getCurrentFloor() - floor == 1 || 
@@ -22,11 +21,11 @@ public class HealthyLift extends Lift {
 			return RequestResult.REJECTED;
 		}
 		
-		if (floor >= 0 && getCurrentFloor() > getRequestedFloor()) {
-			setRequestedFloor(floor - 1);
+		if (getCurrentFloor() > floor) {
+			setRequestedFloor(floor + 1);
 			return RequestResult.MODIFIED;
 		} else {
-			setRequestedFloor(floor + 1);
+			setRequestedFloor(floor - 1);
 			return RequestResult.MODIFIED;
 		}
 	} 
