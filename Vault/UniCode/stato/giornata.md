@@ -22,3 +22,4 @@
 15:35 · FI2 · LAB08 BasicLift: BasicLiftTest 15/15 verdi (lanciati da Claude nel cloud sul codice incollato); ritocchi: togliere BasicLift.super., aggiungere @Override
 16:07 · FI2 · LAB08 HealthyLift: bloccato sul «piano prima» (pensava ai negativi, il punto è la direzione) e ha scambiato MODIFIED per uno stato dell'ascensore (RequestResult vs LiftState: pattern 1)
 16:20 · FI2 · LAB08 HealthyLift: tutti verdi tranne DueChiamate (getFloor = Integer.MIN_VALUE: setFloor non chiamato sulla costante MODIFIED)
+16:20 · FI2 · LAB08 HealthyLift: direzione del piano prima giusta da solo; mancano setFloor/setMsg su MODIFIED (non chiaro cosa sia un enum con stato) e il caso distanza 0 (controlla solo ±1)
