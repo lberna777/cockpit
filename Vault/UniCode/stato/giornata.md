@@ -13,3 +13,4 @@
 12:37 · CALC · porte della 2023-01-17 rifatte: 5 porte (4 IN + OUT) a 50/58/60/68/70000000h, dopo correzione (prima 70000001h/02h: BA1–BA0 non arrivano sul bus); errori del 5/11 ripassati
 12:40 · CALC · esempio 4 (03): LW letta come «scrive R3 in memoria» — verso load/store invertito, di nuovo (pattern 5, già il 5/11); R2 come parte dell'indirizzo ok
 12:42 · CALC · errore mio di ritmo (di nuovo, come il 5/11): domande sul ciclo prima che Lorenzo finisse la lettura riga per riga; ripreso al suo passo
+12:45 · CALC · esempio 4 (03) letto riga per riga da solo dopo la LW: ruoli R1 accumulatore/valore, R3 valore, R7 indirizzo, R2 contatore (anche indice: non visto da solo); confusi accumulatore e contatore, «indirizzi alti» per i bit alti di LHI; capito lo scopo con l'analogia del for in Java
