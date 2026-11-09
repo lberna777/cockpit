@@ -23,3 +23,4 @@
 16:07 · FI2 · LAB08 HealthyLift: bloccato sul «piano prima» (pensava ai negativi, il punto è la direzione) e ha scambiato MODIFIED per uno stato dell'ascensore (RequestResult vs LiftState: pattern 1)
 16:20 · FI2 · LAB08 HealthyLift: tutti verdi tranne DueChiamate (getFloor = Integer.MIN_VALUE: setFloor non chiamato sulla costante MODIFIED)
 16:20 · FI2 · LAB08 HealthyLift: direzione del piano prima giusta da solo; mancano setFloor/setMsg su MODIFIED (non chiaro cosa sia un enum con stato) e il caso distanza 0 (controlla solo ±1)
+16:26 · FI2 · LAB08 HealthyLift 17/17 verdi; resta il caso stesso piano (5→5 dà MODIFIED verso 4, provato da Claude): controllo con abs non applicato — pattern 2, si ferma al verde
