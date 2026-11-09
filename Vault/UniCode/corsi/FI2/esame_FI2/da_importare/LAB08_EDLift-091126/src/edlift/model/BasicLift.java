@@ -6,23 +6,20 @@ public class BasicLift extends Lift{
 		super(minFloor, maxFloor, initialFloor, speed);
 	}
 
+	@Override
 	public String getMode() {
-		return "BASIC LIFT";
+		return "BASIC";
 	}
 	
-	
+	@Override
 	public RequestResult goToFloor(int floor) {
-		if (BasicLift.super.getCurrentState() != LiftState.REST) {
+		
+		checkArrivalFloor(floor);
+		if (getCurrentState() != LiftState.REST) {
 			return RequestResult.REJECTED;
 		}
 		
-		BasicLift.super.setRequestedFloor(floor);
-		if(this.getCurrentFloor() < this.getRequestedFloor()) {
-			BasicLift.super.setCurrentState(LiftState.UP);
-			return RequestResult.ACCEPTED;
-		} else if (this.getCurrentFloor() > this.getRequestedFloor()) {
-			BasicLift.super.setCurrentState(LiftState.DOWN);
-			return RequestResult.ACCEPTED;
-		} else return RequestResult.REJECTED;
-	}
+		setRequestedFloor(floor);
+		return RequestResult.ACCEPTED;
+	} 
 }
