@@ -18,3 +18,4 @@
 12:50 · CALC · scheda del checkpoint 10/11 generata (lezioni/guida_lab_02_prova_2024-01-19.md, parte memorie, a freddo 60 min)
 14:22 · FI2 · LAB08 avviato seguendo il PDF; domanda di Lorenzo (sl. 3): «accetta in movimento» e «più chiamate» sono la stessa cosa? — separati con due casi limite (stato vs struttura dati); pattern 1 intercettato da lui stesso
 14:39 · FI2 · LAB08 sl. 10: chiesto cosa vuol dire classe/metodo astratto — spiegato da 20 sl. 2–8 su Lift (concreto = comune, astratto = varia per tipo)
+15:28 · FI2 · LAB08 BasicLift.goToFloor prima versione: logica di sl. 16 giusta (REST → setRequestedFloor), ma cambiava lo stato UP/DOWN (compito del controller), rifiutava lo stesso piano, mancava checkArrivalFloor
