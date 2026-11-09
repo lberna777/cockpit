@@ -19,3 +19,4 @@
 14:22 · FI2 · LAB08 avviato seguendo il PDF; domanda di Lorenzo (sl. 3): «accetta in movimento» e «più chiamate» sono la stessa cosa? — separati con due casi limite (stato vs struttura dati); pattern 1 intercettato da lui stesso
 14:39 · FI2 · LAB08 sl. 10: chiesto cosa vuol dire classe/metodo astratto — spiegato da 20 sl. 2–8 su Lift (concreto = comune, astratto = varia per tipo)
 15:28 · FI2 · LAB08 BasicLift.goToFloor prima versione: logica di sl. 16 giusta (REST → setRequestedFloor), ma cambiava lo stato UP/DOWN (compito del controller), rifiutava lo stesso piano, mancava checkArrivalFloor
+15:35 · FI2 · LAB08 BasicLift: BasicLiftTest 15/15 verdi (lanciati da Claude nel cloud sul codice incollato); ritocchi: togliere BasicLift.super., aggiungere @Override
