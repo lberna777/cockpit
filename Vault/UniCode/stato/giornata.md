@@ -21,3 +21,4 @@
 15:28 · FI2 · LAB08 BasicLift.goToFloor prima versione: logica di sl. 16 giusta (REST → setRequestedFloor), ma cambiava lo stato UP/DOWN (compito del controller), rifiutava lo stesso piano, mancava checkArrivalFloor
 15:35 · FI2 · LAB08 BasicLift: BasicLiftTest 15/15 verdi (lanciati da Claude nel cloud sul codice incollato); ritocchi: togliere BasicLift.super., aggiungere @Override
 16:07 · FI2 · LAB08 HealthyLift: bloccato sul «piano prima» (pensava ai negativi, il punto è la direzione) e ha scambiato MODIFIED per uno stato dell'ascensore (RequestResult vs LiftState: pattern 1)
+16:20 · FI2 · LAB08 HealthyLift: tutti verdi tranne DueChiamate (getFloor = Integer.MIN_VALUE: setFloor non chiamato sulla costante MODIFIED)
