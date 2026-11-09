@@ -17,13 +17,18 @@ public class HealthyLift extends Lift {
 		
 		checkArrivalFloor(floor);
 		if (getCurrentState() != LiftState.REST ||
-				floor - getCurrentFloor() == 1 || 
-				floor - getCurrentFloor() == -1 ) {
+				getCurrentFloor() - floor == 1 || 
+				getCurrentFloor() - floor == -1 ) {
 			return RequestResult.REJECTED;
 		}
 		
-		setRequestedFloor(floor - 1);
-		return RequestResult.ACCEPTED;
+		if (floor >= 0 && getCurrentFloor() > getRequestedFloor()) {
+			setRequestedFloor(floor - 1);
+			return RequestResult.MODIFIED;
+		} else {
+			setRequestedFloor(floor + 1);
+			return RequestResult.MODIFIED;
+		}
 	} 
 		
 }
