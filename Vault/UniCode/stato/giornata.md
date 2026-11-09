@@ -24,3 +24,4 @@
 16:20 · FI2 · LAB08 HealthyLift: tutti verdi tranne DueChiamate (getFloor = Integer.MIN_VALUE: setFloor non chiamato sulla costante MODIFIED)
 16:20 · FI2 · LAB08 HealthyLift: direzione del piano prima giusta da solo; mancano setFloor/setMsg su MODIFIED (non chiaro cosa sia un enum con stato) e il caso distanza 0 (controlla solo ±1)
 16:26 · FI2 · LAB08 HealthyLift 17/17 verdi; resta il caso stesso piano (5→5 dà MODIFIED verso 4, provato da Claude): controllo con abs non applicato — pattern 2, si ferma al verde
+16:30 · FI2 · LAB08 parte 1 chiusa: BasicLift 15/15, HealthyLift 17/17 (condizione abs prima invertita, «non superiore a 1» letto come > 1; corretta); 32/60, ora parte 2
