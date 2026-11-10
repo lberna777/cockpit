@@ -23,5 +23,20 @@ public class Queue {
 		return true;
 	}
 	
+	public int size() {
+		return booked;
+	}
 	
+	public boolean hasItems() {
+		if (booked != 0) {
+			return true;
+		} else return false;
+	}
+	
+	public int peek() {
+		return bookings[booked];
+	}
+	
+	
+
 }
