@@ -17,7 +17,7 @@ public class MultiFloorLift extends Lift {
 	@Override
 	public String getMode() {
 		// TODO Auto-generated method stub
-		return "MULTIFLOOR";
+		return "MULTI";
 	}
 
 	
@@ -26,7 +26,7 @@ public class MultiFloorLift extends Lift {
 	}
 	
 	public int nextPendingFloor(LiftState state) {
-		return queue.peek();
+		return queue.extract();
 	}
 	
 	@Override
