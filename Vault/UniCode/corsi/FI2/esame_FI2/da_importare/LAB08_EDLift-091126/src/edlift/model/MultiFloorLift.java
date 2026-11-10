@@ -41,6 +41,7 @@ public class MultiFloorLift extends Lift {
 			// se si -> Imposto il piano di destinazione e restituisco ACCEPTED
 		checkArrivalFloor(floor);
 		if (getCurrentState() == LiftState.REST) {
+			setRequestedFloor(floor);
 			return RequestResult.ACCEPTED;
 		} else {
 			
