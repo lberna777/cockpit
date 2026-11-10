@@ -8,6 +8,7 @@ public class Queue {
 	
 	public Queue(int maxBookings) {
 		super();
+		this.bookings = new int[] bookings;
 		this.maxBookings = maxBookings;
 	}
 	
