@@ -94,6 +94,11 @@ tags: [FI2, appunti]
 | intervallo `[inizio, fine)` di un giorno, di un mese, di una settimana (lunedì) | 3.15 | LAB07 |
 | restituire una **copia** di una collezione, non quella interna | 3.15 | LAB07 |
 | metodi di `java.time`: `of`, `plus…`, `with…`, `at…`, `get…`, `is…`, `between` | 3.15 | LAB07 |
+| classe astratta con sottoclassi: costruttore con `super(...)`, metodi astratti da scrivere | 3.16 | LAB08 |
+| metodo «gancio» della superclasse che risponde sempre «no» e la sottoclasse ridefinisce (`hasPendingFloors`) | 3.16 | LAB08 |
+| restituire una costante di enum con messaggio e piano (`REJECTED`, `MODIFIED`) | 3.16 · 1.3 | LAB08 |
+| coda FIFO di interi su array: `insert`, `peek`, `extract`, `hasItems` | 3.16 | LAB08 |
+| `peek` o `extract`? guardare il primo o toglierlo | 3.16 | LAB08 |
 
 ---
 
@@ -190,6 +195,9 @@ Compila, gira, e il risultato è sbagliato. Nessun messaggio.
 | ⚠️ `MyCalendar.remove` di un appuntamento assente cancella il **primo** | `indexOf` restituisce `0` se non trova: 0 è un indice valido | `return -1;` (slide 25 del LAB07) → 3.15 |
 | ⚠️ `main` che non stampa niente, e *Run As* non propone *Java Application* | firma `public static void main()` senza `String[] args`: non è il punto di partenza (lo diventa solo con le *preview* di Java 21) | `public static void main(String[] args)` → 3.7 |
 | ⚠️ la collezione cresce di 2 posti invece di raddoppiare, e si riempie subito | `length + DEFAULT_GROWTH_FACTOR` invece di `*` | `innerContainer.length * DEFAULT_GROWTH_FACTOR` → 3.12 |
+| ⚠️ un ascensore restituisce il messaggio di un **altro** (`REJECTED: Queue's full` dal salutista) | la costante di enum è **un solo oggetto**: `setMsg`/`setFloor` la modificano per tutti, e un `return RequestResult.REJECTED;` senza reimpostarla restituisce i dati dell'ultima chiamata | prima di ogni `return` di una costante con dati, `setMsg(...)` e `setFloor(...)` → 3.16 (LAB08, verificato 10/11) |
+| ⚠️ `nextPendingFloor` restituisce sempre lo stesso piano; il simulatore torna al primo all'infinito | `peek()` guarda il primo **senza toglierlo** | `extract()`: lo restituisce **e** lo toglie → 3.16 (LAB08) |
+| ⚠️ `getRequestedFloor()` è ancora il piano di partenza dopo un `goToFloor` accettato (`expected: <3> but was: <5>`) | il ramo «fermo» restituisce `ACCEPTED` senza `setRequestedFloor(floor)` | impostare il piano **prima** del `return` → 3.16 (LAB08) |
 
 ---
 
@@ -1204,6 +1212,102 @@ tramite of\*, elaborazione tramite plus\*, minus\*, with\*»].
 | `get…` | legge un pezzo | `getDayOfWeek()` (`WEDNESDAY`, `.getValue()` = 3) · `getDayOfMonth()` | tutti |
 | `is…` | confronta | `isBefore` · `isAfter` · `isEqual` | `LocalDate`, `LocalDateTime` |
 | `between` / `to…` | misura | `Duration.between(a, b)` · `toMinutes()` · `toHours()` | `Duration` |
+
+## 3.16 Gerarchia astratta, metodi «gancio», coda FIFO (LAB08)
+
+Fatto in: `esame_FI2/svolti/LAB08_EDLift/` · confronto in `confronto_LAB08.md` (10 punti).
+`Lift` è astratta e data; si scrivono `BasicLift`, `HealthyLift`, `MultiFloorLift` e `util.Queue`.
+
+### Sottoclasse di una classe astratta
+
+```java
+public class MultiFloorLift extends Lift {           // eredita campi e metodi di Lift
+    private Queue queue;                              // composizione: l'ascensore HA una coda
+
+    public MultiFloorLift(int minFloor, int maxFloor, int initialFloor, double speed) {
+        super(minFloor, maxFloor, initialFloor, speed);   // prima riga: costruisce la parte Lift (controlli compresi)
+        queue = new Queue(4);                             // un campo oggetto va creato qui, sennò è null
+    }
+
+    @Override
+    public String getMode() { return "Multi"; }       // metodo astratto: obbligatorio scriverlo
+}
+```
+
+- Finché manca **una** delle sottoclassi nominate da `Lift.of`, non compila niente: si creano
+  prima tutte vuote (costruttore + metodi astratti).
+
+### Metodo «gancio»: la superclasse dice «no», la sottoclasse risponde davvero
+
+`Lift` ha `hasPendingFloors()` → `false` e `nextPendingFloor(state)` → `MIN_VALUE`. **Non li
+chiami tu**: li chiama il `Controller` a ogni tick con l'ascensore fermo. La sottoclasse li
+ridefinisce passando la domanda alla sua coda.
+
+```java
+@Override
+public boolean hasPendingFloors() {
+    return queue.hasItems();                // «ci sono piani in attesa?» = «la coda ha elementi?»
+}
+
+@Override
+public int nextPendingFloor(LiftState state) {
+    return queue.extract();                 // il piano ESCE dalla coda e diventa il requestedFloor
+}
+```
+
+Dove sta un piano: chiamata → **coda**; ascensore fermo e Controller chiede → **esce** e diventa
+`requestedFloor`; in viaggio → non è più in coda. Coda vuota mentre si muove = ultimo incarico.
+
+### Accettare o rifiutare, con la costante dell'enum
+
+```java
+@Override
+public RequestResult goToFloor(int floor) {
+    checkArrivalFloor(floor);                         // fuori range → eccezione, PRIMA di tutto
+    if (getCurrentState() == LiftState.REST) {
+        setRequestedFloor(floor);                     // fermo: si parte subito, la coda non serve
+        return RequestResult.ACCEPTED;
+    }
+    if (queue.insert(floor)) {                        // in movimento: si prenota; false = coda piena
+        return RequestResult.ACCEPTED;
+    }
+    RequestResult result = RequestResult.REJECTED;    // un solo oggetto per tutto il programma
+    result.setMsg("rejected because of too many pending requests");  // reimpostare SEMPRE
+    result.setFloor(Integer.MIN_VALUE);               // nessun piano
+    return result;
+}
+```
+
+### Coda FIFO su array (`edlift.model.util.Queue`)
+
+| Metodo | Restituisce | Domanda |
+|---|---|---|
+| `insert(n)` | `boolean` | riesci a mettere dentro `n`? (`false` se piena) |
+| `size()` | `int` | quanti elementi? |
+| `hasItems()` | `boolean` | almeno uno? |
+| `peek()` | `int` | qual è il primo? **senza toglierlo** (`MIN_VALUE` se vuota) |
+| `extract()` | `int` | dammi il primo **e toglilo** (`MIN_VALUE` se vuota) |
+
+```java
+public boolean insert(int n) {
+    if (booked == bookings.length) return false;   // piena
+    bookings[booked++] = n;                         // booked è anche la prima cella libera
+    return true;
+}
+
+public int extract() {
+    if (booked == 0) return Integer.MIN_VALUE;      // vuota
+    int ret = bookings[0];                          // la testa è SEMPRE la cella 0
+    for (int i = 0; i < booked - 1; i++)            // ricopia tutti indietro di uno
+        bookings[i] = bookings[i + 1];
+    booked--;
+    return ret;
+}
+```
+
+- `peek` legge `bookings[0]`, **non** `bookings[booked]`: quella è la prima cella libera.
+- Il test vuole la classe nel package `edlift.model.util`: la riga `package` va cambiata a mano
+  se il file è nato altrove («Queue cannot be resolved to a type»).
 
 ---
 

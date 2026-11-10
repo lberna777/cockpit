@@ -110,6 +110,12 @@ distinzione non è stata capita.
   uno spazio di memoria che vale 0» (lo ferma R2 stesso). Separati con le tabelle riga per riga di Claude; Lorenzo a
   `/chiudi`: «faccio sicuramente confusione tra registri, spazi di memoria, indirizzi, valori». Evidenza:
   trascrizione del 2026-11-05, 15:36, 15:38, 15:40, 15:45, 16:20, 16:22; `stato/giornata.md` 15:37, 15:38, 15:45, 16:24.
+- [2026-11-10] FI2: LAB08, `peek` ed `extract` fusi in `nextPendingFloor`: «qual è il primo» (resta in coda) usato
+  al posto di «dammi il primo e toglilo», benché la tabella di Claude di mezz'ora prima dicesse che il piano preso
+  dal Controller **esce** dalla coda; 3 failure `expected: <3> but was: <7>`, e alla spiegazione «non ho capito il
+  problema», sbloccato dall'analogia della fila dal salumiere. Stessa coppia già toccata al mattino in `Queue.peek`
+  (riga sotto il pattern 6). Evidenza: trascrizione del 2026-11-10, 19:34 (`return queue.peek();`), 19:45 («non ho
+  capito il problema»).
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
@@ -325,6 +331,9 @@ indirizzi IP e sottoreti (`RETI`).
   è chiarissimo lavorare con questi array, specialmente con contenitori annidati e dove si lavora in espansione e
   restrizione». Evidenza: trascrizione del 2026-11-03 («non mi sto orientando negli array, aiuto»);
   `stato/giornata.md` della giornata.
+- [2026-11-10] FI2: LAB08 `Queue.peek` su `bookings[booked]`, il primo posto libero invece della testa
+  (`bookings[0]`), e coda vuota senza il `Integer.MIN_VALUE` richiesto: QueueTest 0/8. È lo stesso indice di
+  `ultimoTentativo` su `tentativi[numTentativi]` del LAB06 (2026-10-21). Evidenza: `stato/giornata.md` 14:51.
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
@@ -344,6 +353,10 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   **JRE** («il Jqualcosa»). Già registrato sotto `FI2`.
 - [2026-10-09] `CALC` 02p Prova tu 4: «non mi ricordo come si faceva per i piedini», venti minuti
   dopo aver contato gli 11 bit di cella di RAM_2. Già registrato sotto `CALC`.
+- [2026-11-10] FI2: LAB08, per `hasPendingFloors` («ci sono piani in coda?») non ritrova `hasItems`, il metodo di
+  `Queue` che risponde esattamente a quella domanda e che aveva scritto lui poche ore prima («eh non capisco quale
+  metodo di queue usare» → tabella di Claude → «cazzo mi ero scordato»). Evidenza: trascrizione del 2026-11-10,
+  19:18–19:19.
 
 ## Per corso
 
@@ -735,6 +748,39 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   AppointmentCollection(allAppointments.size())` e un ciclo di `add(get(i))`; scritti da lui subito dopo la
   segnalazione, 14/14 verdi. Evidenza: trascrizione del 2026-11-05, 12:18 («AppointmentCollection copia =
   allAppointments») → 12:19–12:20; `stato/giornata.md` 12:21.
+- [2026-11-10] Ricorrenza di «costruttori che non portano l'oggetto in stato valido» (LAB04c 2026-10-02, LAB07
+  2026-11-03): costruttore di `Queue` senza `new`, quindi `bookings` resta `null`, e `new int[]` scritto male; non
+  chiaro come si crea un array nel costruttore. Evidenza: `stato/giornata.md` 12:40.
+- [2026-11-10] LAB08: classe spostata in `edlift/model/util` con la riga `package edlift.model` rimasta → «Queue cannot
+  be resolved to a type» → causa: la riga `package` e la cartella del file non legate (devono coincidere) →
+  correzione: `package edlift.model.util;` e `import edlift.model.util.Queue;` in chi la usa. Evidenza:
+  `stato/giornata.md` 14:51.
+- [2026-11-10] Ricorrenza di «parametro e campo fusi» / variabile locale e campo (`put` del LAB04c, LAB06, LAB07):
+  in `MultiFloorLift` chiama «variabile locale» il campo `bookings` di `Queue`, e crede che un campo oggetto vada
+  creato nel costruttore «perché è `private`» (va creato perché altrimenti è `null`). La confusione l'ha aggravata
+  Claude usando lo stesso nome `bookings` nelle due classi; l'equivoco campo/locale resta suo. Evidenza:
+  `stato/giornata.md` 16:17.
+- [2026-11-10] LAB08 `MultiFloorLift`: `hasPendingFloors` creduto da chiamare dentro `goToFloor` («uso has
+  pendingfloors per aggiungere direttamente il piano?») → causa: non distingue un metodo che si **ridefinisce**
+  perché lo chiami un altro (il `Controller`, a ogni tick) da uno che si chiama; il flusso del piano
+  chiamata → coda → `requestedFloor` non era disegnato prima di scrivere (famiglia di «processi interni alle
+  funzioni», 2026-10-05, 2026-10-21, 2026-11-03) → correzione: partire dal chiamante (`Controller.java:95`); in
+  `MultiFloorLift` `hasPendingFloors` e `nextPendingFloor` sono `@Override` che rispondono guardando la coda.
+  Evidenza: trascrizione del 2026-11-10, 19:16–19:17.
+- [2026-11-10] Ricorrenza di «stato restituito ma non salvato» (`registraMossa` LAB06, 2026-10-21) e decima della
+  risposta a metà nel codice: in `goToFloor` il ramo «ascensore fermo» con il solo `return RequestResult.ACCEPTED`,
+  benché il suo pseudocodice nello stesso metodo dicesse «Imposto il piano di destinazione e restituisco ACCEPTED» e
+  Claude, tre minuti prima, avesse scritto «`setRequestedFloor(floor)` diretto»; 11 failure `expected: <3> but was:
+  <5>`. Diagnosi sua: «pensavo di dover mettere mano solo al risultato della richiesta […] credo di dover gestire anche
+  il riempimento delle queue», mentre l'`insert` c'era già e mancava la riga che cambia l'oggetto. Resta candidato
+  trasversale (nessun altro corso). Evidenza: trascrizione del 2026-11-10, 19:31, 19:34–19:35; corretto alle 19:44.
+- [2026-11-10] Ricorrenza di «forma dell'output ricavata a memoria, non dal test» (2026-10-02, 2026-10-05, 2026-10-21):
+  `getMode()` con `"MULTIFLOOR"` invece di `"MULTI"`, failure di `testGetTipo` («cazzatina»). Evidenza: trascrizione
+  del 2026-11-10, 19:34–19:35.
+- [2026-11-10] Ricorrenza delle ridondanze (LAB02, LAB04b, LAB07): `hasItems` con `if (booked != 0) return true; else
+  return false;` al posto di `return booked != 0;`, `queue.insert(floor) == true`, e in `Queue` il campo `maxBookings`
+  che duplica `bookings.length`. Evidenza: `LAB08_EDLift-091126/src/edlift/model/util/Queue.java`,
+  `model/MultiFloorLift.java`.
 
 ### CALC — Calcolatori Elettronici T
 - [2026-10-08] 02p §2: taglia convertita in bit senza l'unità. RAM da 32 KB → «5 piedini perché 32 =
