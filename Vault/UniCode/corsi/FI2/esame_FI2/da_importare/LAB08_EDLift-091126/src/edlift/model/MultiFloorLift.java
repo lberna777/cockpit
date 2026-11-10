@@ -51,20 +51,8 @@ public class MultiFloorLift extends Lift {
 				RequestResult.REJECTED.setFloor(Integer.MIN_VALUE);
 				RequestResult.REJECTED.setMsg("REJECTED: Queue's full");
 				return RequestResult.REJECTED;
-				
-
-			
-				
 			}
-			
-			
 		}
-		
-		
-		
-		
-		
-		return null;
 	}
 
 	
