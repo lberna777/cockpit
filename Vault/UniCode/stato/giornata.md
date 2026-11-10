@@ -7,3 +7,4 @@
 12:40 · FI2 · LAB08 Queue: costruttore senza new (bookings null) e new int[] scritto male — non chiaro come si inizializza un array nel costruttore, spiegato; insert giusta da lui (booked come indice, piena con booked == length)
 14:51 · FI2 · LAB08 Queue: extract giusta (ciclo booked-1, booked--); «Queue cannot be resolved to a type» = riga package ancora edlift.model; 0/8 per peek su bookings[booked] (primo posto libero vs testa: pattern 1) e coda vuota senza MIN_VALUE
 15:38 · FI2 · LAB08 Queue in edlift.model.util: QueueTest 8/8 verdi (lanciati da Lorenzo); peek/extract con hasItems e MIN_VALUE. 40/60, ora MultiFloorLift
+16:17 · FI2 · LAB08 MultiFloorLift: non chiaro campo vs variabile locale (chiama «variabile locale» il campo bookings di Queue) e perché un campo oggetto va creato nel costruttore (pensava fosse perché private); confusione aggravata da Claude, che ha usato lo stesso nome bookings nelle due classi
