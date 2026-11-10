@@ -1,6 +1,15 @@
 package edlift.model;
+import edlift.model.util.Queue;
 
 public class MultiFloorLift extends Lift {
+
+	
+	
+	
+	public MultiFloorLift(int minFloor, int maxFloor, int initialFloor, double speed) {
+		super(minFloor, maxFloor, initialFloor, speed);
+		// TODO Auto-generated constructor stub
+	}
 
 	@Override
 	public String getMode() {
