@@ -1,4 +1,4 @@
-package edlift.model;
+package edlift.model.util;
 
 public class Queue {
 
