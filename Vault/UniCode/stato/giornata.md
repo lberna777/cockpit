@@ -15,3 +15,4 @@
 20:44 · FI2 · prontuario: §3.16 (gerarchia astratta, metodi gancio, coda FIFO), 3 righe in §1.3, 5 voci nell'indice
 20:46 · FI2 · revisione errori: 4 nuovi, 6 ricorrenze (pattern 1, 6, 7 trasversali; nessun candidato nuovo)
 20:50 · PIANO · pianificato domani (11/11): 3 attività nella Plancia (checkpoint CALC slittato dal 10/11, handler CALC 03, avvio FI2 LAB09) e 7 blocchi in agenda
+21:00 · PIANO · mer–ven Lorenzo lavora 8–14: 11/11 studio dalle 15 (checkpoint CALC, handler 03), LAB09 avvio spostato al 12/11, /lab CALC 03 resta il 13/11
