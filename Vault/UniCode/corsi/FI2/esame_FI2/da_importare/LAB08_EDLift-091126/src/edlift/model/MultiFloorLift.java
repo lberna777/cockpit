@@ -1,4 +1,6 @@
 package edlift.model;
+import com.sun.net.httpserver.Request;
+
 import edlift.model.util.Queue;
 
 public class MultiFloorLift extends Lift {
@@ -18,10 +20,53 @@ public class MultiFloorLift extends Lift {
 		return "MULTIFLOOR";
 	}
 
+	
+	public boolean hasPendingFloors() {
+		return queue.hasItems();
+	}
+	
+	public int nextPendingFloor(LiftState state) {
+		return queue.peek();
+	}
+	
 	@Override
 	public RequestResult goToFloor(int floor) {
-		// TODO Auto-generated method stub
+
+		// fermo? 
+			// se no: tento di inserire la richiesta
+				// se c'e' spazio -> return RequestResult.ACCEPTED
+				
+				// se no -> RequestResult.altro.REJECTED con motivazioni, piano Integer.MIN_VALUE
+		
+			// se si -> Imposto il piano di destinazione e restituisco ACCEPTED
+		checkArrivalFloor(floor);
+		if (getCurrentState() == LiftState.REST) {
+			return RequestResult.ACCEPTED;
+		} else {
+			
+			if(queue.insert(floor) == true) {
+				return RequestResult.ACCEPTED;
+			} else  {
+				
+				RequestResult.REJECTED.setFloor(Integer.MIN_VALUE);
+				RequestResult.REJECTED.setMsg("REJECTED: Queue's full");
+				return RequestResult.REJECTED;
+				
+
+			
+				
+			}
+			
+			
+		}
+		
+		
+		
+		
+		
 		return null;
 	}
 
+	
+	
 }
