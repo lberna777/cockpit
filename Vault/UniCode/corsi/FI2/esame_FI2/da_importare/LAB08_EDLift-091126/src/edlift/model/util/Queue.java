@@ -34,17 +34,20 @@ public class Queue {
 	}
 	
 	public int peek() {
-		return bookings[booked];
+		if (booked > 0) {
+			return bookings[0];
+		}else return Integer.MIN_VALUE;
 	}
 	
 	public int extract() {
-		
-		int ret = bookings[0];
-		for (int i = 0; i < booked-1; i++) {
-			bookings[i] = bookings[i+1];
-		}
-		booked--;
-		return ret;
+		if (booked > 0) {
+			int ret = bookings[0];
+			for (int i = 0; i < booked-1; i++) {
+				bookings[i] = bookings[i+1];
+			}
+			booked--;
+			return ret;
+		} else return Integer.MIN_VALUE;
 	}
 	
 
