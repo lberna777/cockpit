@@ -37,6 +37,14 @@ public class Queue {
 		return bookings[booked];
 	}
 	
+	public int extract() {
+		
+		int ret = bookings[0];
+		for (int i = 0; i < booked; i++) {
+			bookings[i] = bookings[i+1]
+		}
+		
+	}
 	
 
 }
