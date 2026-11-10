@@ -9,10 +9,11 @@ public class Queue {
 	public Queue(int maxBookings) {
 		super();
 		this.maxBookings = maxBookings;
+		this.bookings = new int[maxBookings];
 	}
 	
 	public boolean insert(int n) {
-		
+		if(booked == boo)
 	}
 	
 	
