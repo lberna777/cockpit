@@ -40,10 +40,11 @@ public class Queue {
 	public int extract() {
 		
 		int ret = bookings[0];
-		for (int i = 0; i < booked; i++) {
-			bookings[i] = bookings[i+1]
+		for (int i = 0; i < booked-1; i++) {
+			bookings[i] = bookings[i+1];
 		}
-		
+		booked--;
+		return ret;
 	}
 	
 
