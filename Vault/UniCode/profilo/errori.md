@@ -380,6 +380,10 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   `Queue` che risponde esattamente a quella domanda e che aveva scritto lui poche ore prima («eh non capisco quale
   metodo di queue usare» → tabella di Claude → «cazzo mi ero scordato»). Evidenza: trascrizione del 2026-11-10,
   19:18–19:19.
+- [2026-11-16] CALC: `BEQZ` non ricordato («08 BEQZ non ricordo che fa») nell'handler 2023-12-21, mezz'ora dopo averne
+  usato il meccanismo e calcolato l'offset nell'handler 2023-02-09. Al mattino, nel checkpoint 2024-01-19, il nome
+  **BE0..BE3** (Byte Enable) non ritrovato, benché i CS per banco con i BE li avesse scritti il 2026-10-23. Evidenza:
+  trascrizione del 2026-11-16, 16:00, 16:26; `stato/giornata.md` 12:30, 16:29.
 
 ## Per corso
 
