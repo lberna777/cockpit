@@ -31,3 +31,4 @@
 12:53 · CALC · checkpoint 2024-01-19: BD dei banchi giusti per 0 e 1, sbagliati 2 e 3 (16..24, 25..31), aiuto livello domanda
 12:54 · CALC · checkpoint 2024-01-19: parte memorie completata (mappa, CS, banchi, piedini, OE/WE, BD); confronto con la soluzione rimandato alla chat di pianificazione
 12:57 · CALC · checkpoint 2024-01-19 confrontato: risultato memorie corretto, decodifica di EPROM_8 completa e non semplificata; non a freddo (BE e OE/WE non ricordati, come il 5/11): 02 resta aperto. Confronto in corsi/CALC/prove/confronto_2024-01-19_checkpoint.md
+13:00 · CALC · decisione: resta il primo appello (22/12); metodo nuovo, prova divisa in 9 pezzi da allenare singolarmente e ricomporre (corsi/CALC/pezzi_prova.md); secondo checkpoint su prova intera ~6/12
