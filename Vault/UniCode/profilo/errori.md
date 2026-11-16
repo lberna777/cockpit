@@ -116,6 +116,14 @@ distinzione non è stata capita.
   problema», sbloccato dall'analogia della fila dal salumiere. Stessa coppia già toccata al mattino in `Queue.peek`
   (riga sotto il pattern 6). Evidenza: trascrizione del 2026-11-10, 19:34 (`return queue.peek();`), 19:45 («non ho
   capito il problema»).
+- [2026-11-16] CALC: checkpoint 2024-01-19 e drill pomeridiani, registro, indirizzo e contenuto di nuovo fusi (riga del
+  2026-11-05). Al mattino la dimensione dell'EPROM da 8 MB (`00800000h`) presa per il suo indirizzo d'inizio; nel P3 su
+  2023-02-09 la firma messa sui piedini di indirizzo del banco («i BA della ram BA[31*, 30]»: CS e indirizzi della
+  cella fusi); nell'esempio sl. 49 «si copia R1 in R7» per la `SW R1,0200h(R7)` (scrive in memoria all'indirizzo
+  R7 + 0200h, R7 non cambia); nella 2023-12-21 la `LHI R22,0x8000` descritta come «mette nella parte alta
+  dell'indirizzo contenuto in r22». Nello stesso pomeriggio `LBU` detta lavorare «in valori assoluti» (unsigned e
+  valore assoluto fusi). Evidenza: `stato/giornata.md` 12:03, 15:26; trascrizione del 2026-11-16, 15:26, 15:36, 16:34,
+  16:38.
 
 ### 2. Fermarsi al primo indizio
 Considera risolto un esercizio al primo risultato plausibile, senza verificare che spieghi
