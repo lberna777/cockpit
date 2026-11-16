@@ -926,6 +926,8 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   DLX si scrive su 8 cifre, con gli zeri a sinistra (`04000000h`), prima di sommarlo o sottrarlo; 7
   cifre = errore. Corretto alla segnalazione. Evidenza: trascrizione del 2026-10-20 («512mb sono 8000000
   in esa», «mi viene 4000000h», «6400000h - 1»); `stato/giornata.md` 12:43 («cifre perse»).
+  Ricorrenza [2026-11-16], checkpoint 2024-01-19: 2^23 scritto `800000h`, valore giusto ma senza il riempimento a 8
+  cifre (`00800000h`). Evidenza: `stato/giornata.md` 12:02.
 - [2026-10-23] Lab 02: taglia dell'enunciato contestata a memoria → «il secondo blocco è da 16mb non 8,
   sicuro di avere le info giuste?» (1032 − 1024 = 8 MB = 2^23) → causa non accertata (ipotesi di Claude:
   2^23 preso per 16 M, che è 2^24); il dubbio è stato posto senza rifare la sottrazione sul testo →
