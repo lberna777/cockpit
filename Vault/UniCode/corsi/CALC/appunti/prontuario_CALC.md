@@ -189,3 +189,33 @@ puoi semplificare.**
 | Negativo su 32 bit | come sopra con 8 cifre: `(FFFFFFFF − |n|) + 1` | −10h → `FFFFFFEF + 1 = FFFFFFF0` |
 | Ciclo senza `SNEI` | contatore che **scende** a 0 e `BNEZ` su di lui; indirizzo che scende insieme | ciclo a 4 istruzioni, sl. 48 (ii) |
 
+
+## 4b. Numeri negativi in esadecimale, passo per passo *(16/11, richiesta di Lorenzo)*
+
+> Il DLX scrive i negativi in **complemento a 2** (regola della dispensa 03, sl. 46–48, già in §4).
+> Serve in due punti dell'esame: gli **offset dei salti all'indietro** e gli **indirizzi in cima
+> alla memoria costruiti da R0** (`SUBI R22,R0,0x0010` → `FFFFFFF0h`, prova 2023-12-21).
+
+**Ricetta** per scrivere −n su k cifre (4 per 16 bit, 8 per 32 bit):
+
+| Passo | Cosa fai | Esempio −10h su 32 bit | Esempio −14h su 16 bit |
+|---|---|---|---|
+| 1 | scrivi n con tutte le cifre | `00000010` | `0014` |
+| 2 | ogni cifra d diventa **F − d** (nessun prestito: F − d non va mai sotto zero) | `FFFFFFEF` | `FFEB` |
+| 3 | aggiungi **1** (qui sì, con il riporto) | `FFFFFFF0` | `FFEC` |
+
+**Controllo**: n + (−n) deve dare tutti zeri, con un 1 che esce a sinistra e si perde.
+`00000010 + FFFFFFF0 = 1 00000000` → `00000000` ✅
+
+**Da riconoscere a colpo d'occhio**
+
+| Numero | Che cos'è |
+|---|---|
+| prima cifra `8`–`F` | negativo, se letto con segno |
+| `FFFFFFFF` | −1 |
+| `FFFFFFF0` | −16 (−10h) |
+| `FFEC` (16 bit) | −20 (−14h): offset di un salto 20 byte indietro |
+
+**Perché `SUBI Rx,R0,n` nell'handler**: R0 vale sempre 0, quindi `Rx = 0 − n` è un modo con una sola
+istruzione per ottenere un indirizzo appena sotto `FFFFFFFFh`. La stessa cosa con `LHI` richiederebbe
+due istruzioni.
