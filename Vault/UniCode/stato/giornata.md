@@ -39,3 +39,4 @@
 14:54 · CALC · drill P2 su 2023-02-09 completato: firme delle porte con BA28 giuste; mostrato il metodo del docente (porte a byte adiacenti, separate dai BE)
 15:26 · CALC · drill P3 su 2023-02-09: banchi 4×2^28 giusti; collegamenti sbagliati: firma messa sui piedini di indirizzo (CS e indirizzi fusi, pattern 1), OE/WE invertiti, BD scritti BA8..15 per il banco 2
 15:28 · CALC · drill P3 su 2023-02-09: corretto dopo la spiegazione (BA29..2, MEMRD→OE, MEMWR→WE, banco 2 su BD16..23)
+15:28 · CALC · drill P1–P3 su 2023-02-09 finito: P1 da solo, P2 con due domande (B in binario, asterisco), P3 dopo spiegazione (CS e indirizzi fusi, OE/WE invertiti); EPROM senza WE da solo. Pezzi non ancora allenati: si ripete su 2022-12-23
