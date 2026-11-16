@@ -4,3 +4,4 @@
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
 11:40 · PIANO · pianificati settimana 16–22/11 e giorno 16/11: 8 attività riprogrammate e 5 blocchi nella Plancia
+11:51 · CALC · checkpoint 2024-01-19: aiuto su EPROM 520 MB non potenza di 2 (va spezzata in blocchi), livello domanda
