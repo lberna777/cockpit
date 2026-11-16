@@ -352,6 +352,11 @@ indirizzi IP e sottoreti (`RETI`).
 - [2026-11-10] FI2: LAB08 `Queue.peek` su `bookings[booked]`, il primo posto libero invece della testa
   (`bookings[0]`), e coda vuota senza il `Integer.MIN_VALUE` richiesto: QueueTest 0/8. È lo stesso indice di
   `ultimoTentativo` su `tentativi[numTentativi]` del LAB06 (2026-10-21). Evidenza: `stato/giornata.md` 14:51.
+- [2026-11-16] CALC: checkpoint 2024-01-19, tre estremi nella stessa prova. Fine della RAM: non sapeva dove applicare il
+  −1 (la fine in alto è `FFFFFFFFh` = inizio + dimensione − 1); firma dell'EPROM da 8 MB presa a 8 bit, BA31..BA24,
+  senza BA23 (2^23 = 23 bit di cella, firma da BA31 a BA23: chiusa sulla cifra hex come il `4FFFFFFFh` del 2026-10-20);
+  fili dei dati dei banchi 2 e 3 scritti BD16..24 e BD25..31 (9 e 7 fili invece di 8). Evidenza: `stato/giornata.md`
+  12:13, 12:14, 12:33, 12:53.
 
 ### 7. Il meccanismo c'è, la regola o il nome no
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo esegue o descrive
