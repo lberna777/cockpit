@@ -955,7 +955,7 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   17:46, 17:49; handoff `HANDOFF_CALC-lab02_2026-10-23.md`, «Ancora poco chiaro».
   Ricorrenza [2026-11-16], checkpoint 2024-01-19: banco cercato sui BA invece che sui BE (il DLX non porta fuori
   BA1..BA0), e il nome BE0..BE3 non ricordato; nel confronto «❌ non ricordato». Nel pomeriggio, su 2023-02-09, i CS
-  dei banchi con i BE dati da solo. Evidenza: `stato/giornata.md` 12:30, 14:19 della trascrizione (15:19 locali);
+  dei banchi con i BE dati da solo. Evidenza: `stato/giornata.md` 12:30; trascrizione del 2026-11-16, 15:19;
   `corsi/CALC/prove/confronto_2024-01-19_checkpoint.md`.
 - [2026-11-05] Lezione 03, ciclo sl. 49–50: `BNEZ R2,Loop` letto come ritorno all'inizio del programma → «loop
   significa che ricomincia da azzerare l'accumulatore?» → causa: non ha guardato su quale riga sta l'etichetta
