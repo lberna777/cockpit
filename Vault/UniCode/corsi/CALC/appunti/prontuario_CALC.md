@@ -186,5 +186,6 @@ puoi semplificare.**
 | Negativo su 16 bit | `(FFFF − |n|) + 1`, cifra per cifra senza prestiti | −14h → `FFEB + 1 = FFEC` |
 | Una cifra esa | = **4 bit**: `1111` = `F`, non `1` | 16 bit alti a 1 → `FFFF` |
 | Decimale → esa | quante volte 16 + resto | 20 = 1·16 + 4 → `0x14` |
+| Negativo su 32 bit | come sopra con 8 cifre: `(FFFFFFFF − |n|) + 1` | −10h → `FFFFFFEF + 1 = FFFFFFF0` |
 | Ciclo senza `SNEI` | contatore che **scende** a 0 e `BNEZ` su di lui; indirizzo che scende insieme | ciclo a 4 istruzioni, sl. 48 (ii) |
 
