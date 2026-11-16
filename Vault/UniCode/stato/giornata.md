@@ -19,3 +19,4 @@
 12:30 · CALC · checkpoint 2024-01-19: aiuto sul banco scelto dai BE e non dai BA (il DLX non porta fuori BA1..BA0), livello idea
 12:30 · CALC · checkpoint 2024-01-19: dato il nome BE0..BE3 (Byte Enable), non lo ricordava, livello idea
 12:33 · CALC · checkpoint 2024-01-19: firma EPROM 8 MB presa a 8 bit (BA31..BA24), manca BA23 fisso; aiuto livello domanda
+12:37 · CALC · checkpoint 2024-01-19: confermata la notazione (asterisco = bit a 0, negato), livello idea
