@@ -28,3 +28,4 @@
 12:48 · CALC · checkpoint 2024-01-19: RD/WR dei chip non ricordati (come il 5/11); data l'idea MEMRD/MEMWR, livello idea
 12:49 · CALC · checkpoint 2024-01-19: non capisce la richiesta sui collegamenti RD/WR; riformulata con lo schema del chip (OE/WE), livello idea
 12:50 · CALC · checkpoint 2024-01-19: OE/WE giusti dopo lo schema; domanda sul collegamento dei dati dei banchi al bus BD, livello domanda
+12:53 · CALC · checkpoint 2024-01-19: BD dei banchi giusti per 0 e 1, sbagliati 2 e 3 (16..24, 25..31), aiuto livello domanda
