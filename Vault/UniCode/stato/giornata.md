@@ -24,3 +24,4 @@
 12:44 · CALC · checkpoint 2024-01-19: piedini EPROM 128 MB dati come BA2..BA8 (contati 7 invece di 27), aiuto livello domanda
 12:45 · CALC · checkpoint 2024-01-19: banco da 2 MB preso come 2^20 (dimenticato il 2 di 2 MB), aiuto livello domanda
 12:46 · CALC · checkpoint 2024-01-19: piedini RAM giusti da solo; domanda neutra su collegamenti dei chip ancora mancanti (senza nominare RD/WR), livello domanda
+12:47 · CALC · checkpoint 2024-01-19: non coglie la domanda sui collegamenti; riformulata su lettura/scrittura dei chip (parte del 02, già nella prova del 5/11), livello idea
