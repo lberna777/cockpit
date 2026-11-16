@@ -229,3 +229,86 @@ due istruzioni.
 | confrontato o usato in un conto | «signed compreso tra +1 e +15» (2023-06-15); «valore assoluto del dato» (2021-09-02) | il segno decide il confronto: `81h` = −127 signed, 129 unsigned |
 
 Regola: sottolineare nel testo **signed/unsigned** e **come byte / half-word / word**.
+
+## 4d. Vocabolario delle istruzioni DLX *(16/11, richiesta di Lorenzo)*
+
+> Fonte: dispensa 03, «Elenco istruzioni del DLX (integer)» e slide degli esempi; esempi dalle
+> soluzioni 2023-02-09 e 2023-12-21. ★ = usata negli handler delle prove viste.
+> Lettura delle forme: `Ra` = registro di **destinazione** (o il dato, in load/store), `Rb`, `Rc` =
+> registri **sorgente**, `Imm16` = numero scritto nell'istruzione (16 bit, esteso con segno; senza
+> segno nelle istruzioni con la U). **R0 vale sempre 0** e non può essere destinazione.
+
+### Spostare dati fra memoria e registri
+
+Forma unica: `ISTR Ra,offset(Rb)` → indirizzo = Rb + offset. **L = memoria → Ra**, **S = Ra → memoria**.
+
+| Istruzione | Cosa fa | Bit alti di Ra | Esempio |
+|---|---|---|---|
+| ★ `LBU` | legge **1 byte** | zeri (unsigned) | `LBU R21,0x0000(R20)`: byte a 60000000h → R21 |
+| ★ `LB` | legge **1 byte** | copie del bit 7 (signed) | `LB R21,0x0000(R20)`: per dati *signed* |
+| `LHU` | legge **2 byte** | zeri | `8081` → `00008081` |
+| `LH` | legge **2 byte** | copie del bit 15 | `8081` → `FFFF8081` |
+| `LW` | legge **4 byte** | — (riempie tutto) | `LW R3,0800(R2)` |
+| ★ `SB` | scrive il **byte basso** di Ra | — | `SB R21,0x0000(R22)`: R21 → FFFFFFF0h |
+| `SH` | scrive i **2 byte bassi** di Ra | — | |
+| `SW` | scrive **tutti i 4 byte** di Ra | — | `SW R1,0200h(R7)` |
+
+Allineamento: half-word a indirizzo pari, word a multiplo di 4 (§4).
+
+### Mettere un numero in un registro
+
+| Istruzione | Cosa fa | Esempio |
+|---|---|---|
+| ★ `LHI Ra,Imm16` | Imm16 nella **metà alta**, metà bassa a 0 | `LHI R20,0x8000` → R20 = `80000000h` |
+| ★ `ADDI Ra,R0,n` | Ra = n (piccolo, entro 16 bit) | `ADDI R2,R0,20h` → R2 = 32 |
+| ★ `SUBI Ra,R0,n` | Ra = −n: indirizzo appena sotto `FFFFFFFFh` (§4b) | `SUBI R22,R0,0x0010` → `FFFFFFF0h` |
+
+### Conti
+
+| Istruzione | Cosa fa |
+|---|---|
+| `ADD Ra,Rb,Rc` · `ADDI Ra,Rb,Imm16` | Ra = Rb + Rc · Ra = Rb + Imm16 |
+| `SUB Ra,Rb,Rc` · `SUBI Ra,Rb,Imm16` | Ra = Rb − Rc · Ra = Rb − Imm16 |
+| `ADDU`, `ADDUI`, `SUBU`, `SUBUI` | come sopra, senza segno (immediato esteso con zeri) |
+| `AND`, `ANDI`, `OR`, `ORI`, `XOR`, `XORI` | operazioni bit a bit; `XOR R8,R8,R8` azzera R8 |
+| `SLL`, `SLLI` | sposta i bit a sinistra (× 2 per posizione; entrano zeri) |
+| `SRL`, `SRLI` | sposta a destra, entrano zeri (÷ 2, unsigned) |
+| `SRA`, `SRAI` | sposta a destra, entra il bit di segno (÷ 2, signed) |
+
+### Confronti: `Sx Ra,Rb,Rc` e `SxI Ra,Rb,Imm16`
+
+Ra = **1** se la condizione è vera, **0** se è falsa. x = `LT` (<), `GT` (>), `LE` (≤), `GE` (≥),
+`EQ` (=), `NE` (≠). Esempio: `SNEI R4,R2,8` → R4 = 1 se R2 ≠ 8. Si usano **insieme a un salto**:
+prima il confronto in un registro, poi `BEQZ`/`BNEZ` su quel registro.
+
+### Salti
+
+| Istruzione | Cosa fa | Esempio |
+|---|---|---|
+| ★ `BEQZ Ra,ETICHETTA` | salta se Ra **= 0** (Branch if EQual to Zero), altrimenti riga dopo | `BEQZ R21,PORT_1` |
+| `BNEZ Ra,ETICHETTA` | salta se Ra **≠ 0** | `BNEZ R2,Loop` |
+| `J ETICHETTA` | salta sempre | |
+| `JR Ra` | salta all'indirizzo contenuto in Ra | `JR R31` |
+| `JAL ETICHETTA` / `JALR Ra` | salta e salva in R31 l'indirizzo di ritorno (chiamata di procedura) | |
+
+Offset scritto nell'istruzione = destinazione − (indirizzo del salto + 4) (§4).
+
+### Interrupt
+
+| Istruzione | Cosa fa |
+|---|---|
+| ★ `RFE` | **fine dell'handler**: torna al programma che era stato interrotto. Ogni ramo dell'handler finisce con `RFE` |
+| `MOVS2I Ra,IAR` · `MOVI2S IAR,Ra` | copiano fra un registro normale e IAR, il registro speciale con l'indirizzo di ritorno (modulo 04) |
+
+### Lo scheletro di un handler visto finora (2023-02-09, 2023-12-21)
+
+```
+LHI   Rbase,0x....          ; base delle porte
+LBU   Rx,off_stato(Rbase)   ; chi ha chiamato / quale porta è attiva
+BEQZ  Rx,ALTRO_RAMO
+  ... ramo 1: L dalla porta → registro, S registro → indirizzo del testo
+RFE
+ALTRO_RAMO:
+  ... ramo 2
+RFE
+```
