@@ -34,3 +34,4 @@
 13:00 · CALC · decisione: resta il primo appello (22/12); metodo nuovo, prova divisa in 9 pezzi da allenare singolarmente e ricomporre (corsi/CALC/pezzi_prova.md); secondo checkpoint su prova intera ~6/12
 13:01 · PIANO · metodo a pezzi confermato da Lorenzo: 6 attività CALC nuove e 4 spostate nella Plancia (04 e 05 al 29/11, checkpoint 2 il 6/12)
 14:12 · CALC · scheda P2+P3 (decodifica minima, BE, collegamenti a quattro lati) scritta nel prontuario §3b
+14:37 · CALC · drill P1 su 2023-02-09: mappa dei tre blocchi da 1 GB giusta da solo, porte nella zona libera (80000000h, 90000000h)
