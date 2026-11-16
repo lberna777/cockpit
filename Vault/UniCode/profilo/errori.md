@@ -953,6 +953,10 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   (già noto) **e** BEi; cassettiera a 4 colonne, `LW` accende 4 banchi, `LB` uno. Dopo l'esempio del
   banco 0 ha scritto da solo gli altri tre. Evidenza: trascrizione del 2026-10-23; `stato/giornata.md`
   17:46, 17:49; handoff `HANDOFF_CALC-lab02_2026-10-23.md`, «Ancora poco chiaro».
+  Ricorrenza [2026-11-16], checkpoint 2024-01-19: banco cercato sui BA invece che sui BE (il DLX non porta fuori
+  BA1..BA0), e il nome BE0..BE3 non ricordato; nel confronto «❌ non ricordato». Nel pomeriggio, su 2023-02-09, i CS
+  dei banchi con i BE dati da solo. Evidenza: `stato/giornata.md` 12:30, 14:19 della trascrizione (15:19 locali);
+  `corsi/CALC/prove/confronto_2024-01-19_checkpoint.md`.
 - [2026-11-05] Lezione 03, ciclo sl. 49–50: `BNEZ R2,Loop` letto come ritorno all'inizio del programma → «loop
   significa che ricomincia da azzerare l'accumulatore?» → causa: non ha guardato su quale riga sta l'etichetta
   («non davo peso all'altezza della scritta loop»), e `Loop` preso per una parola del linguaggio invece che per il
