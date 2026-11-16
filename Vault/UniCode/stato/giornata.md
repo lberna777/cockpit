@@ -38,3 +38,4 @@
 14:49 · CALC · drill P2 su 2023-02-09: firme dei tre blocchi giuste da solo (svista C=1101); zona porte: prima BA31*·BA30* (B scritto 1100, asterisco messo su un bit a 1), corretta a BA31·BA30* dopo due domande; BA28 per separare le porte trovato da solo
 14:54 · CALC · drill P2 su 2023-02-09 completato: firme delle porte con BA28 giuste; mostrato il metodo del docente (porte a byte adiacenti, separate dai BE)
 15:26 · CALC · drill P3 su 2023-02-09: banchi 4×2^28 giusti; collegamenti sbagliati: firma messa sui piedini di indirizzo (CS e indirizzi fusi, pattern 1), OE/WE invertiti, BD scritti BA8..15 per il banco 2
+15:28 · CALC · drill P3 su 2023-02-09: corretto dopo la spiegazione (BA29..2, MEMRD→OE, MEMWR→WE, banco 2 su BD16..23)
