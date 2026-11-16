@@ -46,3 +46,4 @@
 16:29 · CALC · P8 handler 2023-12-21: BEQZ non ricordato a 30 min dalla spiegazione; SUBI R22,R0,… letta come se servisse il vecchio R22 (destinazione e sorgenti confuse); aggiunto prontuario §4b sui negativi in esadecimale su richiesta
 16:38 · CALC · P8 handler 2023-12-21 finito (guidato): ramo PORT_1 giusto da solo; LB vs LBU ricordato a metà («valori assoluti»), chiarito con l'esempio 81h; aggiunto prontuario §4c signed/unsigned nei testi
 16:42 · CALC · prontuario: §4d vocabolario delle istruzioni DLX (richiesta di Lorenzo), §4c signed/unsigned, §4b negativi in esadecimale
+16:43 · PIANO · pianificato domani 17/11: 2 attività e 8 blocchi nella Plancia (vocabolario, drill 2022-12-23, handler dal testo, /lab CALC 03)
