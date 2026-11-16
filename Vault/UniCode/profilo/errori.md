@@ -943,6 +943,9 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   contengono la firma, etichettare i bit BA31… sopra, leggere i bit di firma; controllo sulla fine. Dopo
   l'esempio passo per passo, firme di 8 MB e RAM giuste da solo. Evidenza: trascrizione del 2026-10-23;
   `stato/giornata.md` 15:57, 16:10, 16:34.
+  Ricorrenza [2026-11-16], checkpoint 2024-01-19: firma della RAM cercata sulle cifre esadecimali (8..F) invece che
+  sui bit (`BA31`); nel pomeriggio, drill P2 su 2023-02-09, firme dei blocchi giuste da solo. Evidenza:
+  `stato/giornata.md` 12:39, 14:49.
 - [2026-10-23] Lab 02: regola del CS per banco non capita → «non ho capito la regola», «non ho capito
   come dovrei calcolare il cs del singolo banco» davanti a `CS_…_i = CS · BEi` → causa: banco e blocco non
   separati, e il BE non è visto come la scelta del byte dentro la parola (BA1, BA0 sostituiti da
