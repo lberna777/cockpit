@@ -817,6 +817,9 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   esponenti, con K, M, G = 2^10, 2^20, 2^30 (32 KB → 15, 64 MB → 26). Evidenza: trascrizione del
   2026-10-08 («direi 5 piedini perchè 32 = 2^5», «64 quindi 2^6, immagino per 2^4, quindi 10»,
   «volevo dire 7 piedini»); `stato/giornata.md` 11:16, 12:17.
+  Ricorrenza [2026-11-16], checkpoint 2024-01-19, nei due versi: EPROM da 128 MB con piedini BA2..BA8 (7, cioè solo il
+  128 = 2^7 senza M; sono 27), e banco da 2 MB preso come 2^20 (tenuta la M, perso il 2; è 2^21). Evidenza:
+  `stato/giornata.md` 12:44, 12:45.
 - [2026-10-08] 02, Decisione 1: binario letto senza i pesi. `1100` letto come 8 («pensavo che 1100
   fosse 8») e proposto come partenza di un chip da 8 byte in uno spazio da 16 (vale 12, non è multiplo
   di 8, e 12 + 8 esce dallo spazio); alla prova di conversione di `1010`, `0100`, `1110`: «non so
