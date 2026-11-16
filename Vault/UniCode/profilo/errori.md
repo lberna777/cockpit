@@ -275,6 +275,16 @@ bit rate (`TLC`); guadagno e attenuazione in dB (`ELT`, `ELN`); incapsulamento f
   indirizzi devono scendere (dal 2° giro scriverebbe a `E0000820`, fuori dall'array). Corretto al terzo tentativo
   (`ADDI R3,R3,0x1C`, `SUBI R3,R3,4`). Evidenza: trascrizione del 2026-11-06, 16:42 («volevo scrivere ADDI
   R3,R3,4»), 16:44 («LHI R3,0xE000; ADDI R3, R0, 0x001C; … ADDI R3,R3,4»), 16:46; `stato/giornata.md` 16:42, 16:44, 16:46.
+- [2026-11-16] CALC: quattro versi invertiti nella stessa giornata. P3 su 2023-02-09: «in OE MEMWR e in WE MEMRE»
+  (lettura e scrittura scambiate, dopo averli dati giusti al mattino con lo schema). P2: asterisco messo su un bit che
+  vale 1 («8 = 1000 e B = 1100 QUIDNI BA31*»), benché al mattino avesse fatto confermare che l'asterisco è il bit a 0;
+  la firma uscita, `BA31*·BA30*`, era quella già data all'EPROM e non è stata confrontata. Handler 2023-02-09: verso di
+  load e store invertito, `LBU` della 08 letta come scrittura («08 scrivere R21 nell indirizzo di R20») e, dopo aver
+  enunciato da sé la regola («con LBU leggo da memoria e metto in R21, con SB scrivo R21 in memoria»), la `SB` della 14
+  letta come lettura in R21. Handler 2023-12-21: su `SUBI R22,R0,0x0010` «ma che ne so del valore di R22 prima», cioè
+  la destinazione presa per sorgente, la regola «cambia solo il registro a sinistra» del 2026-11-05 non applicata.
+  Evidenza: trascrizione del 2026-11-16, 14:48, 15:26, 15:47, 15:51, 15:55, 16:28; `stato/giornata.md` 12:37, 14:49,
+  15:26, 15:55, 16:29.
 
 ### 6. Confini di un intervallo
 `[promosso a trasversale il 2026-10-09, decisione di Lorenzo]` Lorenzo ragiona bene sul contenuto
