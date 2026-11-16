@@ -860,6 +860,9 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   in hex ogni colonna ha una sola cifra 0…F (12 = C); chi presta scende di 1; verifica inversa
   `C000h + 4000h = 10000h`. Evidenza: trascrizione del 2026-10-09 («quindi viene 12000»);
   `stato/giornata.md` 12:34, 13:12; `appunti/prontuario_CALC.md` §0.
+  Ricorrenza [2026-11-16], riscaldamento prima dell'handler: `0x0100 − 0x0014` → «0x00FC» (è `0x00EC`): il prestito
+  da 16 preso sulla cifra delle unità e non tolto dalla cifra accanto. Evidenza: trascrizione del 2026-11-16, 15:32;
+  `stato/giornata.md` 15:55.
 - [2026-10-09] Ricorrenza di «binario letto senza i pesi» (2026-10-08) e della riga del mattino su 2^14,
   nel pomeriggio: 02p §6, `2000h` e `27FFh` scritti «00100000000000 e 0010100111111111», cioè `2000h`
   con 14 bit invece di 16 e il 7 reso `1001` (vale 9; 7 = `0111`). Le stringhe senza gruppi nascondono
