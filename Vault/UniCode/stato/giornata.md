@@ -17,3 +17,4 @@
 12:27 · CALC · checkpoint 2024-01-19: chiesto ripasso della procedura per la tabella dei CS, livello domanda
 12:29 · CALC · checkpoint 2024-01-19: firma EPROM 512 MB trovata da solo (BA31..BA29 a 0); domanda su banchi e BE, livello domanda
 12:30 · CALC · checkpoint 2024-01-19: aiuto sul banco scelto dai BE e non dai BA (il DLX non porta fuori BA1..BA0), livello idea
+12:30 · CALC · checkpoint 2024-01-19: dato il nome BE0..BE3 (Byte Enable), non lo ricordava, livello idea
