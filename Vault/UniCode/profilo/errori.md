@@ -827,6 +827,9 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   → correzione: sommare i pesi dove c'è un 1; partenza allineata = ultimi K bit a zero. Evidenza:
   trascrizione del 2026-10-08 («no, partirà da 1100», «pensavo che 1100 fosse 8»); traccia 02p,
   Inciampi.
+  Ricorrenza [2026-11-16], drill P2 su 2023-02-09: C scritto `1101` e B scritto `1100` (sono `1100` e `1011`); il
+  secondo ha prodotto una firma sbagliata per la zona delle porte. Evidenza: trascrizione del 2026-11-16, 14:48 («8 =
+  1000 e B = 1100»); `stato/giornata.md` 14:49.
 - [2026-10-08] 02, Decisione 1: allineamento ridotto alle prime due posizioni. Per un dispositivo da 2
   byte «parte da 2 o da 0», ricalcando i due soli valori (0 e 8) appena visti per il chip da 8 → causa:
   la regola «base multipla della taglia» non è stata generalizzata, è stato copiato il numero di
