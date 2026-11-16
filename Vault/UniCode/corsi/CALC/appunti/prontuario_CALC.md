@@ -219,3 +219,13 @@ puoi semplificare.**
 **Perché `SUBI Rx,R0,n` nell'handler**: R0 vale sempre 0, quindi `Rx = 0 − n` è un modo con una sola
 istruzione per ottenere un indirizzo appena sotto `FFFFFFFFh`. La stessa cosa con `LHI` richiederebbe
 due istruzioni.
+
+## 4c. Signed e unsigned nei testi *(16/11, P9)*
+
+| Uso nel testo | Esempio | Conseguenza nel codice |
+|---|---|---|
+| tipo del dato, scritto della stessa larghezza | «byte unsigned … scritto come byte» (2023-02-09) | `LBU`/`LB` secondo il testo; con `SB` dopo, in memoria non cambia nulla |
+| scritto **più largo** di come è letto | «16 bit signed … memorizzati come word» (2021-12-23) | conta: `LH` + `SW` (bit alti = copie del segno); con `LHU` il valore cambia |
+| confrontato o usato in un conto | «signed compreso tra +1 e +15» (2023-06-15); «valore assoluto del dato» (2021-09-02) | il segno decide il confronto: `81h` = −127 signed, 129 unsigned |
+
+Regola: sottolineare nel testo **signed/unsigned** e **come byte / half-word / word**.

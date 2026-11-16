@@ -44,3 +44,4 @@
 15:57 · CALC · P8 handler 2023-02-09: ramo OUTPUT (1C LBU, 20 SB) letto giusto da solo, offset compresi, dopo il chiarimento sul verso L/S
 16:00 · CALC · P8 handler 2023-02-09 finito (guidato): offset del BEQZ = 0xC giusto dopo la spiegazione del perché (PC già a +4)
 16:29 · CALC · P8 handler 2023-12-21: BEQZ non ricordato a 30 min dalla spiegazione; SUBI R22,R0,… letta come se servisse il vecchio R22 (destinazione e sorgenti confuse); aggiunto prontuario §4b sui negativi in esadecimale su richiesta
+16:38 · CALC · P8 handler 2023-12-21 finito (guidato): ramo PORT_1 giusto da solo; LB vs LBU ricordato a metà («valori assoluti»), chiarito con l'esempio 81h; aggiunto prontuario §4c signed/unsigned nei testi
