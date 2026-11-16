@@ -9,3 +9,4 @@
 11:53 · CALC · checkpoint 2024-01-19: aiuto su 2^9 + 2^3 trattata come prodotto (esponenti sommati), livello domanda
 12:02 · CALC · checkpoint 2024-01-19: aiuto su 2^23 in esadecimale a 8 cifre (800000h giusto, mancava il riempimento), livello domanda
 12:03 · CALC · checkpoint 2024-01-19: aiuto su dimensione del blocco confusa con indirizzo di inizio (00800000h), livello domanda
+12:13 · CALC · checkpoint 2024-01-19: aiuto su fine RAM (dove si applica il −1), livello domanda
