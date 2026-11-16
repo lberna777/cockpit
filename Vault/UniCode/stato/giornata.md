@@ -48,3 +48,4 @@
 16:42 · CALC · prontuario: §4d vocabolario delle istruzioni DLX (richiesta di Lorenzo), §4c signed/unsigned, §4b negativi in esadecimale
 16:43 · PIANO · pianificato domani 17/11: 2 attività e 8 blocchi nella Plancia (vocabolario, drill 2022-12-23, handler dal testo, /lab CALC 03)
 16:44 · CALC · revisione errori: 2 nuovi, 18 ricorrenze (pattern trasversali 1, 5, 6, 7 e righe CALC)
+17:01 · CALC · decisione di Lorenzo: «somma di potenze trattata come prodotto» resta errore di corso CALC, non promosso a trasversale
