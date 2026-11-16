@@ -841,6 +841,9 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   invece che col valore del numero binario, che parte da 0 → correzione: la cella *è* il valore dei
   bit bassi, da 0 (`00` … `11` = celle 0 … 3); su `1 01` subito dopo ha risposto «appartamento numero
   1», corretto. Evidenza: trascrizione del 2026-10-08; traccia 02p, Inciampi («si conta da 0»).
+  Ricorrenza [2026-11-16], drill P3 su 2023-02-09: banco 2 collegato a «BD da BA8 a BA15», i fili del banco 1, con BA
+  al posto di BD; Lorenzo: «mi sono scordato anche che i banchi si numerino da zero in su». Evidenza: trascrizione del
+  2026-11-16, 15:26, 15:28; `stato/giornata.md` 15:26.
 - [2026-10-09] Ricorrenza di «taglia convertita in bit senza l'unità» (2026-10-08), il giorno dopo: 02p
   §6, EPROM da 16K → «16 = 2^4», K di nuovo persa; corretto subito in 2^14 alla prima segnalazione
   («lo sottintendevo»). Terza taglia su quattro in due giorni in cui l'unità cade al primo colpo.
