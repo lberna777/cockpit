@@ -21,3 +21,4 @@
 12:33 · CALC · checkpoint 2024-01-19: firma EPROM 8 MB presa a 8 bit (BA31..BA24), manca BA23 fisso; aiuto livello domanda
 12:37 · CALC · checkpoint 2024-01-19: confermata la notazione (asterisco = bit a 0, negato), livello idea
 12:39 · CALC · checkpoint 2024-01-19: firma RAM cercata sulle cifre esadecimali invece che sui bit (8..F), livello domanda
+12:44 · CALC · checkpoint 2024-01-19: piedini EPROM 128 MB dati come BA2..BA8 (contati 7 invece di 27), aiuto livello domanda
