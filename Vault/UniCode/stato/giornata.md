@@ -36,3 +36,4 @@
 14:12 · CALC · scheda P2+P3 (decodifica minima, BE, collegamenti a quattro lati) scritta nel prontuario §3b
 14:37 · CALC · drill P1 su 2023-02-09: mappa dei tre blocchi da 1 GB giusta da solo, porte nella zona libera (80000000h, 90000000h)
 14:49 · CALC · drill P2 su 2023-02-09: firme dei tre blocchi giuste da solo (svista C=1101); zona porte: prima BA31*·BA30* (B scritto 1100, asterisco messo su un bit a 1), corretta a BA31·BA30* dopo due domande; BA28 per separare le porte trovato da solo
+14:54 · CALC · drill P2 su 2023-02-09 completato: firme delle porte con BA28 giuste; mostrato il metodo del docente (porte a byte adiacenti, separate dai BE)
