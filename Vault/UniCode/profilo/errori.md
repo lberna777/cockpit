@@ -999,6 +999,22 @@ componenti (`CALC`, `ELT`); nomi dei protocolli e dei livelli (`RETI`).
   accertata: la conversione decimale → esadecimale non ha ancora un procedimento → correzione: quante volte sta il 16,
   e il resto è l'ultima cifra (20 = 1·16 + 4 = `0x14`); verifica inversa 1·16 + 4 = 20. Evidenza: trascrizione del
   2026-11-06, 16:10; `stato/giornata.md` 16:10.
+  Ricorrenza [2026-11-16]: 44 → esadecimale, «non ricordo le conversioni da decimale a esa», dieci giorni dopo; col
+  procedimento ridato, 100 = `0x64` giusto da solo. Evidenza: trascrizione del 2026-11-16, 15:32, 15:34;
+  `stato/giornata.md` 15:55.
+- [2026-11-16] Checkpoint 2024-01-19: collegamenti di lettura e scrittura dei chip non ricordati, poi invertiti. Al
+  mattino la domanda sui collegamenti non colta due volte, RD/WR non ricordati («come il 5/11»), OE/WE giusti solo dopo
+  lo schema del chip; nel pomeriggio, drill P3 su 2023-02-09, «in OE MEMWR e in WE MEMRE» → causa: OE e WE non legati
+  al loro significato (Output Enable = il chip tira fuori il dato = lettura), quindi l'abbinamento si ricorda a coppie e
+  si scambia → correzione: le iniziali, **R**ead con MEM**RD** → OE, **W**rite con MEM**WR** → WE; l'EPROM non ha WE
+  (questo trovato da solo). Il verso invertito è anche sotto il pattern 5. Evidenza: `stato/giornata.md` 12:46–12:50,
+  15:26; trascrizione del 2026-11-16, 15:26 («in OE MEMWR e in WE MEMRE»); `confronto_2024-01-19_checkpoint.md`, riga OE/WE.
+- [2026-11-16] Checkpoint 2024-01-19: taglia non potenza di 2 non riconosciuta, e somma di potenze trattata come
+  prodotto. EPROM da 520 MB presa come blocco unico (va spezzata in 512 + 8 MB), scritta 2^31 (la taglia della RAM da
+  2 GB), poi 2^9 + 2^3 con gli esponenti sommati come se fosse 2^9 · 2^3 → causa: la regola «gli esponenti si sommano»
+  vale per il prodotto (la taglia = numero × unità), e viene applicata anche a una somma → correzione: prima chiedersi
+  se la taglia è una potenza di 2; se no, scomporla in potenze (520 = 512 + 8) e fare un blocco per pezzo, ciascuno
+  con la sua firma. Evidenza: `stato/giornata.md` 11:51, 11:52, 11:53.
 
 ### Archivio — corsi chiusi
 > Conservati perché i pattern sopravvivono al corso che li ha generati.
