@@ -132,6 +132,47 @@ Quelle che le soluzioni ufficiali segnalano, con la prova da cui provengono.
 
 - Due driver 3-state sullo stesso filo: mai OE attivi insieme → CS mutuamente esclusivi (dispensa 02 p. 6).
 
+## 3b. Pezzi P2 e P3: decodifica e collegamenti, lo schema fisso *(16/11, dopo il checkpoint)*
+
+> Metodo a pezzi: `corsi/CALC/pezzi_prova.md`. Fonte: lezione 02 (dispensa 02 pp. 39–47, 54–69;
+> soluzione 2025-01-08 pp. 2–3, 9–12) e soluzione 2024-01-19 p. 1.
+
+**P2 — Decodifica.** Tre passi, sempre gli stessi.
+
+| Passo | Cosa scrivi | Perché |
+|---|---|---|
+| 1. Firma | i bit **alti** che restano fissi in tutto il blocco, letti **in binario** (non sulle cifre hex) | sono i bit che dicono «sei dentro questo blocco» |
+| 2. Firma **minima** | tieni solo i bit che bastano a separarlo dai dispositivi **presenti** (porte comprese) | all'esame si usa la decodifica semplificata (disp. p. 42): espressione più corta, le repliche cadono in zone libere |
+| 3. · BEi | un CS per banco: `CS_<nome>_i = firma · BEi`, i = 0..3 | il DLX non porta fuori BA1 e BA0: al loro posto emette BE0..BE3, uno per banco (disp. pp. 66, 68) |
+
+Controllo finale: prendi i CS a coppie, non devono poter essere veri insieme (due 3-state sullo
+stesso filo, disp. p. 6).
+
+*Esempio, 2024-01-19*: EPROM_8 `20000000h–207FFFFFh`. Firma completa `BA31*·BA30*·BA29·BA28*·…·BA23*`;
+ma tra `20000000h` e `3FFFFFFFh` non c'è nient'altro, quindi **`BA31*·BA30*·BA29·BE0`** (docente).
+Se una porta stesse a `30000000h` servirebbe anche `BA28*`: **dove metti le porte decide quanto
+puoi semplificare.**
+
+**P3 — Collegamenti di un banco.** Un disegno, sempre uguale: quattro lati.
+
+```
+              ┌───────────────┐
+ CS_X_i  ───→ │ CS            │
+ BA[k+1..2] → │ A[k-1..0]     │   banco da 2^k byte (es. 512 MB = 2^29 → BA[30..2])
+ MEMRD   ───→ │ OE  (leggi)   │
+ MEMWR   ───→ │ WE  (scrivi)  │   solo RAM: la EPROM non ha WE
+              │ D[7..0]       │ ←→ BD[8i+7..8i]   (banco 0: BD7..0 · 1: 15..8 · 2: 23..16 · 3: 31..24)
+              └───────────────┘
+```
+
+| Lato | Regola | Perché | Errore già fatto |
+|---|---|---|---|
+| CS | quello di P2, uno per banco | — | — |
+| Indirizzi | si parte da **BA2**, tanti piedini quanti l'esponente del banco | BA1–BA0 diventano i BE | 128 MB contati come 7 piedini (16/11) |
+| Dimensione del banco | taglia del blocco / 4 | 4 banchi da 8 bit = 32 bit del bus | 2 MB preso come 2^20 (16/11) |
+| OE / WE | MEMRD → OE, MEMWR → WE; EPROM solo OE | il chip deve sapere se leggere o scrivere | non ricordato il 5/11 e il 16/11 |
+| Dati | 8 fili per banco, il banco i su `BD[8i+7..8i]` | 32 / 4 = 8 | 16..24 / 25..31 (16/11) |
+
 ## 4. Linguaggio macchina: regole da tenere sotto mano *(03, sl. 46–48, 6/11)*
 
 | Cosa | Regola | Esempio |
