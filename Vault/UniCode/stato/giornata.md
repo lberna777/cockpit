@@ -1,51 +1,5 @@
-# Giornata 2026-11-16
+# Giornata 2026-11-17
 
 <!-- Claude appende qui, una riga per fatto: HH:MM · CODICE · fatto.
      Marcatori: CHIUSO <cod> <mod> · RIPASSO <cod> <mod> ok|debole -->
 
-11:40 · PIANO · pianificati settimana 16–22/11 e giorno 16/11: 8 attività riprogrammate e 5 blocchi nella Plancia
-11:51 · CALC · checkpoint 2024-01-19: aiuto su EPROM 520 MB non potenza di 2 (va spezzata in blocchi), livello domanda
-11:52 · CALC · checkpoint 2024-01-19: aiuto su 520 MB scritti come 2^31 (è la RAM da 2 GB), livello domanda
-11:53 · CALC · checkpoint 2024-01-19: aiuto su 2^9 + 2^3 trattata come prodotto (esponenti sommati), livello domanda
-12:02 · CALC · checkpoint 2024-01-19: aiuto su 2^23 in esadecimale a 8 cifre (800000h giusto, mancava il riempimento), livello domanda
-12:03 · CALC · checkpoint 2024-01-19: aiuto su dimensione del blocco confusa con indirizzo di inizio (00800000h), livello domanda
-12:13 · CALC · checkpoint 2024-01-19: aiuto su fine RAM (dove si applica il −1), livello domanda
-12:14 · CALC · checkpoint 2024-01-19: aiuto su fine RAM = FFFFFFFFh coincide con inizio+dimensione−1, livello idea
-12:22 · CALC · checkpoint 2024-01-19: aiuto su porta OUT mappata a 80000000h, dentro la RAM (stesso errore del 5/11), livello domanda
-12:23 · CALC · checkpoint 2024-01-19: rettifica alla riga precedente, la OUT a 80000000h era un refuso (l'aveva a 50000000h); aiuto su IN0/IN1 a indirizzi lontani, che non si leggono a 16 bit con un solo accesso, livello domanda
-12:24 · CALC · checkpoint 2024-01-19: la domanda sulle letture a 16 bit da IN0/IN1 era fuori perimetro (porte = moduli 04–05 non aperti); riportato sulla parte memorie, porte lasciate come mappate
-12:27 · CALC · checkpoint 2024-01-19: chiesto ripasso della procedura per la tabella dei CS, livello domanda
-12:29 · CALC · checkpoint 2024-01-19: firma EPROM 512 MB trovata da solo (BA31..BA29 a 0); domanda su banchi e BE, livello domanda
-12:30 · CALC · checkpoint 2024-01-19: aiuto sul banco scelto dai BE e non dai BA (il DLX non porta fuori BA1..BA0), livello idea
-12:30 · CALC · checkpoint 2024-01-19: dato il nome BE0..BE3 (Byte Enable), non lo ricordava, livello idea
-12:33 · CALC · checkpoint 2024-01-19: firma EPROM 8 MB presa a 8 bit (BA31..BA24), manca BA23 fisso; aiuto livello domanda
-12:37 · CALC · checkpoint 2024-01-19: confermata la notazione (asterisco = bit a 0, negato), livello idea
-12:39 · CALC · checkpoint 2024-01-19: firma RAM cercata sulle cifre esadecimali invece che sui bit (8..F), livello domanda
-12:44 · CALC · checkpoint 2024-01-19: piedini EPROM 128 MB dati come BA2..BA8 (contati 7 invece di 27), aiuto livello domanda
-12:45 · CALC · checkpoint 2024-01-19: banco da 2 MB preso come 2^20 (dimenticato il 2 di 2 MB), aiuto livello domanda
-12:46 · CALC · checkpoint 2024-01-19: piedini RAM giusti da solo; domanda neutra su collegamenti dei chip ancora mancanti (senza nominare RD/WR), livello domanda
-12:47 · CALC · checkpoint 2024-01-19: non coglie la domanda sui collegamenti; riformulata su lettura/scrittura dei chip (parte del 02, già nella prova del 5/11), livello idea
-12:48 · CALC · checkpoint 2024-01-19: RD/WR dei chip non ricordati (come il 5/11); data l'idea MEMRD/MEMWR, livello idea
-12:49 · CALC · checkpoint 2024-01-19: non capisce la richiesta sui collegamenti RD/WR; riformulata con lo schema del chip (OE/WE), livello idea
-12:50 · CALC · checkpoint 2024-01-19: OE/WE giusti dopo lo schema; domanda sul collegamento dei dati dei banchi al bus BD, livello domanda
-12:53 · CALC · checkpoint 2024-01-19: BD dei banchi giusti per 0 e 1, sbagliati 2 e 3 (16..24, 25..31), aiuto livello domanda
-12:54 · CALC · checkpoint 2024-01-19: parte memorie completata (mappa, CS, banchi, piedini, OE/WE, BD); confronto con la soluzione rimandato alla chat di pianificazione
-12:57 · CALC · checkpoint 2024-01-19 confrontato: risultato memorie corretto, decodifica di EPROM_8 completa e non semplificata; non a freddo (BE e OE/WE non ricordati, come il 5/11): 02 resta aperto. Confronto in corsi/CALC/prove/confronto_2024-01-19_checkpoint.md
-13:00 · CALC · decisione: resta il primo appello (22/12); metodo nuovo, prova divisa in 9 pezzi da allenare singolarmente e ricomporre (corsi/CALC/pezzi_prova.md); secondo checkpoint su prova intera ~6/12
-13:01 · PIANO · metodo a pezzi confermato da Lorenzo: 6 attività CALC nuove e 4 spostate nella Plancia (04 e 05 al 29/11, checkpoint 2 il 6/12)
-14:12 · CALC · scheda P2+P3 (decodifica minima, BE, collegamenti a quattro lati) scritta nel prontuario §3b
-14:37 · CALC · drill P1 su 2023-02-09: mappa dei tre blocchi da 1 GB giusta da solo, porte nella zona libera (80000000h, 90000000h)
-14:49 · CALC · drill P2 su 2023-02-09: firme dei tre blocchi giuste da solo (svista C=1101); zona porte: prima BA31*·BA30* (B scritto 1100, asterisco messo su un bit a 1), corretta a BA31·BA30* dopo due domande; BA28 per separare le porte trovato da solo
-14:54 · CALC · drill P2 su 2023-02-09 completato: firme delle porte con BA28 giuste; mostrato il metodo del docente (porte a byte adiacenti, separate dai BE)
-15:26 · CALC · drill P3 su 2023-02-09: banchi 4×2^28 giusti; collegamenti sbagliati: firma messa sui piedini di indirizzo (CS e indirizzi fusi, pattern 1), OE/WE invertiti, BD scritti BA8..15 per il banco 2
-15:28 · CALC · drill P3 su 2023-02-09: corretto dopo la spiegazione (BA29..2, MEMRD→OE, MEMWR→WE, banco 2 su BD16..23)
-15:28 · CALC · drill P1–P3 su 2023-02-09 finito: P1 da solo, P2 con due domande (B in binario, asterisco), P3 dopo spiegazione (CS e indirizzi fusi, OE/WE invertiti); EPROM senza WE da solo. Pezzi non ancora allenati: si ripete su 2022-12-23
-15:55 · CALC · P8 handler 2023-02-09 guidato: verso di load/store confuso (LBU della 08 letta come scrittura, SB della 14 come lettura in R21) anche dopo aver enunciato la regola; esadecimale: 0100−0014 = 00FC (prestito non propagato), decimale→esa non ricordato, poi 100 = 0x64 giusto
-15:57 · CALC · P8 handler 2023-02-09: ramo OUTPUT (1C LBU, 20 SB) letto giusto da solo, offset compresi, dopo il chiarimento sul verso L/S
-16:00 · CALC · P8 handler 2023-02-09 finito (guidato): offset del BEQZ = 0xC giusto dopo la spiegazione del perché (PC già a +4)
-16:29 · CALC · P8 handler 2023-12-21: BEQZ non ricordato a 30 min dalla spiegazione; SUBI R22,R0,… letta come se servisse il vecchio R22 (destinazione e sorgenti confuse); aggiunto prontuario §4b sui negativi in esadecimale su richiesta
-16:38 · CALC · P8 handler 2023-12-21 finito (guidato): ramo PORT_1 giusto da solo; LB vs LBU ricordato a metà («valori assoluti»), chiarito con l'esempio 81h; aggiunto prontuario §4c signed/unsigned nei testi
-16:42 · CALC · prontuario: §4d vocabolario delle istruzioni DLX (richiesta di Lorenzo), §4c signed/unsigned, §4b negativi in esadecimale
-16:43 · PIANO · pianificato domani 17/11: 2 attività e 8 blocchi nella Plancia (vocabolario, drill 2022-12-23, handler dal testo, /lab CALC 03)
-16:44 · CALC · revisione errori: 2 nuovi, 18 ricorrenze (pattern trasversali 1, 5, 6, 7 e righe CALC)
-17:01 · CALC · decisione di Lorenzo: «somma di potenze trattata come prodotto» resta errore di corso CALC, non promosso a trasversale
