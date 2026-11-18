@@ -85,3 +85,14 @@ Appendi a `stato/giornata.md`:
 ```
 HH:MM · — · pdf batch: <n> convertiti, <n> falliti.
 ```
+
+---
+
+**Eccezione: PDF grafici** `[2026-11-18]`
+
+I file pensati per essere letti stampati — oggi `corsi/CALC/appunti/prontuario_CALC.md` e
+`cheatsheet_conversioni_CALC.md` — non passano da xelatex ma da `scripts/pdf_grafico.sh <file.md>`
+(pandoc → HTML con `scripts/pdf_grafico/stile.css` → Chromium): riquadri colorati dai callout di
+Obsidian (`> [!regola]`, `[!esempio]`, `[!attenzione]`, `[!perche]`, `[!soluzioni]`), disegni SVG
+in `appunti/img/` (rigenerabili con `img/genera_svg.py`), indice e numerazione delle sezioni.
+Un file è «grafico» se ha `title:` nel frontmatter e callout `[!regola]`: per questi usa lo script.
