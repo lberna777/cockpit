@@ -29,7 +29,7 @@ tags: [CALC, appunti]
 | 2 | `0010` | 6 | `0110` | A (10) | `1010` | E (14) | `1110` |
 | 3 | `0011` | 7 | `0111` | B (11) | `1011` | F (15) | `1111` |
 
-Per ricostruire la tabella senza ricordarla: `A` = 10 … `F` = 15, poi la conversione del §1.4.
+Per ricostruire la tabella senza ricordarla: `A` = 10 … `F` = 15, poi la conversione del §1.3.
 
 > [!esempio] Nei due versi
 > **Da hex a binario**: ogni cifra diventa i suoi 4 bit.

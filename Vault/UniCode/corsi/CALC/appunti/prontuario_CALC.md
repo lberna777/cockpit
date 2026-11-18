@@ -282,7 +282,7 @@ Da rileggere prima di un drill. Gli errori di conto stanno nel cheatsheet, accan
 | P1 | OUT dentro la RAM, porte contate 3 | 5/11 | le porte solo nel buco libero |
 | P2 | `CS_RAM_1` ridotto ad `A13*` confrontando solo le RAM | 9/10 | controllare **tutti** gli altri chip |
 | P2 | decodifica di EPROM_8 completa, non minima | 16/11 | firma minima rispetto alla mappa |
-| P2 | asterisco messo su un bit a 1; B letto sulle cifre hex | 16/11 | firma in **binario**, `*` = bit a 0 |
+| P2 | asterisco messo su un bit a 1; firma non letta in binario | 16/11 | firma in **binario**, `*` = bit a 0 |
 | P2 | BE non ricordati | 5/11, 16/11 | terzo passo fisso: `· BEi` |
 | P3 | firma messa sui piedini (CS e indirizzi fusi) | 16/11 | firma → CS; i bit di mezzo → piedini |
 | P3 | 128 MB contati come 7 piedini; 2 MB preso come 2^20 | 16/11 | taglia → potenza → banco = /4 → k |
