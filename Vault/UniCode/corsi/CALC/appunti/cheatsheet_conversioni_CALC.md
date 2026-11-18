@@ -401,6 +401,7 @@ La fine è fissa, `FFFFFFFFh`; l'**inizio** = `FFFFFFFFh − taglia + 1`.
 8. Quanto vale, con segno, la half-word `FFF4`?
 
 > [!soluzioni]- Soluzioni
+>
 > 1. 256 KB = 2^8 · 2^10 = 2^18 → **18**.
 > 2. `1100 0000 0000 0000`: A15 e A14.
 > 3. 256 MB = `10000000h` → fine **`0FFFFFFFh`**.

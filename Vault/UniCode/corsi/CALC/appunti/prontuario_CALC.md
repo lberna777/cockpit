@@ -47,6 +47,7 @@ Esempio riempito: artefatto «Prova DLX 8 gennaio 2025», sezione «Su carta»
 ![La linea a 16 tacche della prova 2025-01-08: EPROM dal basso, RAM in alto, la porta nel buco.](img/mappa_blocchi.svg)
 
 > [!regola] Lo schema fisso *(lezione 02)*
+>
 > 1. Scomponi ogni taglia in potenze di due (→ conti §2; se non è una potenza, un blocco per ogni 1
 >    del numero in binario).
 > 2. **EPROM dal blocco più grande in su, a partire da 0**; **RAM in alto fino a `FFFFFFFFh`**.
@@ -67,6 +68,7 @@ Esempio riempito: artefatto «Prova DLX 8 gennaio 2025», sezione «Su carta»
 ![Dove va ogni bit dell'indirizzo, per un blocco da 512 MB in 4 banchi da 128 MB. I bit alti (firma) vanno nel CS, quelli di mezzo ai piedini del banco, BA1–BA0 non escono e diventano i BE. Errore del 16/11: firma messa sui piedini.](img/campi_indirizzo.svg)
 
 > [!regola] Lo schema fisso: tre passi, sempre gli stessi
+>
 > | Passo | Cosa scrivi | Perché |
 > |---|---|---|
 > | 1. **Firma** | i bit **alti** fissi su tutto il blocco, letti **in binario** (non sulle cifre hex) | dicono «sei dentro questo blocco» |
@@ -126,6 +128,7 @@ Esempio riempito: artefatto «Prova DLX 8 gennaio 2025», sezione «Su carta»
 ![Il banco: quattro lati sempre uguali. A sinistra entrano CS, indirizzi, OE e WE; a destra gli 8 fili di dati, sulla fetta del bus che spetta a quel banco.](img/banco.svg)
 
 > [!regola] Lo schema fisso: quattro lati
+>
 > | Lato | Regola | Perché |
 > |---|---|---|
 > | **CS** | quello di P2, uno per banco: `CS_X_i = firma · BEi` | — |
@@ -148,6 +151,7 @@ Esempio riempito: artefatto «Prova DLX 8 gennaio 2025», sezione «Su carta»
 ![Lo scheletro dell'handler visto nelle prove 2023-02-09 e 2023-12-21. Ogni ramo finisce con RFE.](img/handler.svg)
 
 > [!regola] Lo schema fisso *(lezione 03)*
+>
 > 1. Per ogni indirizzo fisso che il codice usa: `LHI Rx,<16 bit alti>`, poi load/store con
 >    offset = 16 bit bassi (se l'offset è ≥ `8000h` *sottrae*: è esteso con segno). Per un
 >    indirizzo appena sotto `FFFFFFFFh` basta `SUBI Rx,R0,n` (→ conti §4).
