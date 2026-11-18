@@ -90,10 +90,10 @@ def cifre_bit():
 
 # ---------------------------------------------------------------- 2. il giro dello zero
 def nastro_zero():
-    s = Svg(780, 300)
+    s = Svg(780, 330)
     s.text(20, 28, "Sotto lo zero si ricomincia dal numero più grande", 14, anchor="start", weight=700)
     celle = ["FFFFFFF0", "FFFFFFF1", "…", "FFFFFFFE", "FFFFFFFF", "00000000", "00000001"]
-    x0, cw, y = 20, 102, 150
+    x0, cw, y = 20, 102, 170
     pos = {}
     for i, c in enumerate(celle):
         x = x0 + i * (cw + 4)
@@ -118,11 +118,11 @@ def nastro_zero():
     s.text((z + pos["FFFFFFFF"]) / 2, y - 30, "−1", 13, fill=BLU, weight=700)
     s.path(f"M{z},{y - 6} C{z},{y - 100} {pos['FFFFFFF0']},{y - 100} {pos['FFFFFFF0']},{y - 6}",
            stroke=ARANCIO, sw=2, arrow=True)
-    s.text((z + pos["FFFFFFF0"]) / 2, y - 80, "−10h  (16 passi indietro)", 13.5, fill=ARANCIO, weight=700)
-    s.text((z + pos["FFFFFFF0"]) / 2, y - 62, "SUBI R22,R0,0x0010   →   R22 = FFFFFFF0h", 12.5,
+    s.text((z + pos["FFFFFFF0"]) / 2, y - 118, "−10h  (16 passi indietro)", 13.5, fill=ARANCIO, weight=700)
+    s.text((z + pos["FFFFFFF0"]) / 2, y - 98, "SUBI R22,R0,0x0010   →   R22 = FFFFFFF0h", 12.5,
            fill=TESTO, mono=True)
     # contachilometri
-    yc = 248
+    yc = 270
     s.text(20, yc, "Come il contachilometri a 4 cifre:", 12, anchor="start", fill=TENUE)
     for i, (num, col) in enumerate([("0000", VERDE), ("9999", BLU)]):
         x = 250 + i * 190
@@ -130,8 +130,9 @@ def nastro_zero():
         s.text(x + 48, yc + 1, num, 17, mono=True, fill="#ffffff", weight=700)
     s.line(352, yc - 5, 434, yc - 5, stroke=BLU, arrow=True)
     s.text(393, yc - 12, "−1 km", 11, fill=BLU, weight=600)
-    s.text(552, yc, "in esadecimale la cifra più grande è F, non 9", 12, anchor="start", fill=TENUE)
-    s.text(20, 285, "Quanti passi? Da 00000000 a FFFFFFF0 mancano 10h = 16: il primo passo porta a FFFFFFFF, gli altri 15 scendono fino a F0.",
+    s.text(560, yc - 7, "in esadecimale la cifra", 12, anchor="start", fill=TENUE)
+    s.text(560, yc + 9, "più grande è F, non 9", 12, anchor="start", fill=TENUE)
+    s.text(20, 314, "Quanti passi? Da 00000000 a FFFFFFF0 mancano 10h = 16: il primo passo porta a FFFFFFFF, gli altri 15 scendono fino a F0.",
            11.5, anchor="start", fill=TESTO)
     s.save("nastro_zero.svg")
 
@@ -195,7 +196,7 @@ def mappa_blocchi():
     t = W / 16
     blocchi = [  # (inizio, fine) in sedicesimi
         (0, 4, "EPROM 1 GB", BLU, BLU_C),
-        (4, 6, "EPROM 512 MB", BLU, BLU_C),
+        (4, 6, "512 MB", BLU, BLU_C),
         (6, 6.25, "", BLU, BLU_C),
         (7, 8, "", VIOLA, VIOLA_C),
         (8, 16, "RAM 2 GB", VERDE, VERDE_C),
@@ -207,9 +208,10 @@ def mappa_blocchi():
             s.text(x0 + (a + b) / 2 * t, y + 28, nome, 13, fill=st, weight=700)
     s.text(x0 + 6.6 * t, y + 23, "libero", 11, fill=TENUE)
     s.text(x0 + 6.6 * t, y + 37, "(buco)", 10, fill=TENUE)
-    s.text(x0 + 6.12 * t, y - 26, "EPROM 64 MB", 11, fill=BLU, weight=700)
+    s.text(x0 + 6.12 * t + 4, y - 26, "EPROM 64 MB", 11, fill=BLU, weight=700, anchor="end")
+    s.text(x0 + 5 * t, y + 40, "EPROM", 10, fill=BLU)
     s.line(x0 + 6.12 * t, y - 22, x0 + 6.12 * t, y - 2, stroke=BLU, arrow=True)
-    s.text(x0 + 7.5 * t, y - 26, "porta (tutta 7…)", 11, fill=VIOLA, weight=700)
+    s.text(x0 + 7.5 * t - 4, y - 26, "porta (tutta 7…)", 11, fill=VIOLA, weight=700, anchor="start")
     s.line(x0 + 7.5 * t, y - 22, x0 + 7.5 * t, y - 2, stroke=VIOLA, arrow=True)
     for i in range(17):
         x = x0 + i * t
@@ -228,7 +230,7 @@ def mappa_blocchi():
 
 # ---------------------------------------------------------------- 5. i tre campi dell'indirizzo
 def campi_indirizzo():
-    s = Svg(780, 250)
+    s = Svg(780, 275)
     s.text(20, 26, "Dove va ogni bit di BA: esempio blocco da 512 MB (2^29) in 4 banchi da 128 MB (2^27)",
            13, anchor="start", weight=700)
     x0, W, y, h = 20, 740, 60, 44
@@ -243,7 +245,7 @@ def campi_indirizzo():
             s.text(xa + w / 2, y + 27, nome, 13, fill=st, weight=700)
         s.text(xa + 2, y + h + 15, f"BA{alto}", 10, anchor="start", mono=True, fill=TENUE)
         if alto != basso:
-            s.text(xa + w - 2, y + h + 15, f"BA{basso}", 10, anchor="end", mono=True, fill=TENUE)
+            s.text(xa + w - 2, y + h + 29, f"BA{basso}", 10, anchor="end", mono=True, fill=TENUE)
     # frecce
     yb = 190
     def box(cx, testo1, testo2, st, fi, w=210):
@@ -253,13 +255,13 @@ def campi_indirizzo():
     cx1 = x0 + 1.5 * b
     cx2 = x0 + 16.5 * b
     cx3 = x0 + 31 * b
-    s.line(cx1, y + h + 22, 120, yb - 2, stroke=VIOLA, arrow=True)
+    s.line(cx1, y + h + 34, 120, yb - 2, stroke=VIOLA, arrow=True)
     box(120, "P2 · nel CS", "CS = BA31*·BA30·BA29*·BEi", VIOLA, VIOLA_C, 220)
-    s.line(cx2, y + h + 22, cx2, yb - 2, stroke=BLU, arrow=True)
+    s.line(cx2, y + h + 34, cx2, yb - 2, stroke=BLU, arrow=True)
     box(cx2, "P3 · ai piedini del banco", "A[26..0] ← BA[28..2]", BLU, BLU_C, 230)
-    s.line(cx3, y + h + 22, 650, yb - 2, stroke=ARANCIO, arrow=True)
+    s.line(cx3, y + h + 34, 650, yb - 2, stroke=ARANCIO, arrow=True)
     box(650, "non escono dal DLX", "al loro posto BE0..BE3", ARANCIO, ARANCIO_C, 200)
-    s.text(20, 168, "3 + 27 + 2 = 32 fili: se il conto non torna, un bit è finito nel campo sbagliato.",
+    s.text(20, 264, "3 + 27 + 2 = 32 fili: se il conto non torna, un bit è finito nel campo sbagliato.",
            12, anchor="start", fill=TESTO)
     s.save("campi_indirizzo.svg")
 
@@ -375,7 +377,7 @@ def lb_lbu():
     s.text(80, 92, "byte in memoria", 11, fill=VERDE, weight=600)
     s.text(80, 117, "F0", 18, mono=True, weight=700)
     s.text(80, 150, "1111 0000", 13, mono=True)
-    s.rect(31, 137, 12, 18, fill="none", stroke=ARANCIO, sw=1.8, r=2)
+    s.rect(44, 137, 11, 18, fill="none", stroke=ARANCIO, sw=1.8, r=2)
     s.text(37, 170, "bit 7 = 1", 11, fill=ARANCIO, weight=700)
     s.line(142, 90, 238, 66, stroke=TENUE, arrow=True)
     s.line(142, 112, 238, 150, stroke=TENUE, arrow=True)
