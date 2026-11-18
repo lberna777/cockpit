@@ -67,3 +67,4 @@
 - **2026-11-14** · nessuna attività registrata
 - **2026-11-15** · nessuna attività registrata
 - **2026-11-16** · 46 eventi · ripassi arretrati: 13
+- **2026-11-17** · 1 eventi · ripassi arretrati: 13
