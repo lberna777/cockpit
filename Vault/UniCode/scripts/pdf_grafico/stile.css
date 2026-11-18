@@ -1,0 +1,137 @@
+/* Stile dei PDF grafici di UniCode (prontuari, cheatsheet).
+   A4, Inter per il testo, JetBrains Mono per codice e indirizzi.
+   Colori per funzione: blu = regola, verde = esempio, arancio = attenzione/errore già fatto,
+   viola = perché, grigio = soluzioni. Gli stessi colori nei disegni SVG. */
+
+:root {
+  --testo: #1d2330;
+  --tenue: #5b6475;
+  --linea: #d9dee8;
+  --fondo-tab: #f5f7fb;
+  --blu: #2457c5;   --blu-chiaro: #eaf0fd;
+  --verde: #1f8a5b; --verde-chiaro: #e7f6ee;
+  --arancio: #c46a12; --arancio-chiaro: #fdf1e3;
+  --viola: #6b3fb8; --viola-chiaro: #f1ebfb;
+  --grigio-chiaro: #f2f3f6;
+}
+
+@page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  font-family: "Inter", "Liberation Sans", "DejaVu Sans", sans-serif;
+  font-size: 9.6pt; line-height: 1.5; color: var(--testo);
+  margin: 0; background: #fff;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+/* ---------- copertina ---------- */
+header#title-block-header {
+  border-bottom: 3px solid var(--blu);
+  padding: 0 0 10px 0; margin-bottom: 16px;
+}
+header#title-block-header .title {
+  font-size: 22pt; font-weight: 800; letter-spacing: -0.02em; margin: 0; color: var(--testo);
+}
+header#title-block-header .subtitle {
+  font-size: 11pt; font-weight: 500; color: var(--tenue); margin: 4px 0 0 0;
+}
+header#title-block-header .date { display: none; }
+
+/* ---------- indice ---------- */
+nav#TOC {
+  background: var(--grigio-chiaro); border-radius: 8px; padding: 10px 16px; margin: 0 0 18px 0;
+  columns: 2; column-gap: 24px; font-size: 9pt; break-inside: avoid;
+}
+nav#TOC::before {
+  content: "Indice"; display: block; font-weight: 700; font-size: 8pt; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--tenue); margin-bottom: 4px; column-span: all;
+}
+nav#TOC ul { list-style: none; padding-left: 0; margin: 0; }
+nav#TOC ul ul { padding-left: 14px; font-size: 8.4pt; color: var(--tenue); }
+nav#TOC li { break-inside: avoid; margin: 1px 0; }
+nav#TOC a { color: inherit; text-decoration: none; }
+
+/* ---------- titoli ---------- */
+h1, h2, h3, h4 { line-height: 1.2; break-after: avoid; }
+h1 {
+  font-size: 15pt; font-weight: 800; margin: 26px 0 10px 0; padding: 6px 0 6px 12px;
+  border-left: 6px solid var(--blu); background: linear-gradient(90deg, var(--blu-chiaro), #fff 70%);
+}
+h1.salto, h1.nuova-pagina { break-before: page; margin-top: 0; }
+h2 { font-size: 12pt; font-weight: 700; margin: 18px 0 6px 0; color: var(--blu); }
+h3 { font-size: 10.4pt; font-weight: 700; margin: 14px 0 4px 0; }
+h1 .header-section-number, h2 .header-section-number {
+  color: var(--blu); margin-right: 6px;
+}
+p { margin: 5px 0; }
+strong { font-weight: 700; }
+
+/* ---------- tabelle ---------- */
+table {
+  border-collapse: separate; border-spacing: 0; width: 100%; margin: 8px 0 10px 0;
+  font-size: 8.9pt; break-inside: auto;
+  border: 1px solid var(--linea); border-radius: 6px; overflow: hidden;
+}
+thead th {
+  background: var(--testo); color: #fff; font-weight: 600; text-align: left;
+  padding: 5px 8px; font-size: 8.4pt;
+}
+td { padding: 4px 8px; border-top: 1px solid var(--linea); vertical-align: top; }
+tbody tr:nth-child(even) td { background: var(--fondo-tab); }
+tr { break-inside: avoid; }
+
+/* ---------- codice ---------- */
+code {
+  font-family: "JetBrains Mono", "DejaVu Sans Mono", monospace; font-size: 0.9em;
+  background: var(--grigio-chiaro); padding: 0.5px 4px; border-radius: 3px;
+}
+pre {
+  font-family: "JetBrains Mono", "DejaVu Sans Mono", monospace; font-size: 8.6pt; line-height: 1.45;
+  background: #1f2433; color: #e8ecf5; padding: 9px 12px; border-radius: 6px;
+  break-inside: avoid; white-space: pre; overflow: hidden; margin: 6px 0 10px 0;
+}
+pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+/* evidenziazione di pandoc sul fondo scuro */
+pre .co { color: #8fa1c7; font-style: normal; }
+pre .kw, pre .fu { color: #8cc4ff; }
+pre .dv, pre .bn, pre .fl { color: #ffcf7a; }
+pre .st { color: #9be3a6; }
+
+/* ---------- immagini ---------- */
+figure { margin: 10px 0 12px 0; break-inside: avoid; text-align: center; }
+figure img { max-width: 100%; }
+figcaption {
+  font-size: 8.4pt; color: var(--tenue); margin-top: 4px; text-align: left;
+  border-left: 2px solid var(--linea); padding-left: 8px;
+}
+img { max-width: 100%; }
+
+/* ---------- riquadri (callout di Obsidian) ---------- */
+.callout {
+  border-radius: 7px; padding: 7px 12px 7px 12px; margin: 9px 0;
+  border-left: 5px solid var(--c); background: var(--cf); break-inside: avoid;
+}
+.callout-titolo { font-weight: 700; color: var(--c); margin-bottom: 2px; font-size: 9.4pt; }
+.callout-titolo::before { content: var(--icona); margin-right: 6px; }
+.callout-corpo > :first-child { margin-top: 0; }
+.callout-corpo > :last-child { margin-bottom: 0; }
+.callout table { background: #fff; }
+.callout.regola, .callout.note, .callout.info, .callout.abstract
+  { --c: var(--blu); --cf: var(--blu-chiaro); --icona: "▸"; }
+.callout.esempio, .callout.example, .callout.success
+  { --c: var(--verde); --cf: var(--verde-chiaro); --icona: "✎"; }
+.callout.attenzione, .callout.warning, .callout.danger, .callout.bug
+  { --c: var(--arancio); --cf: var(--arancio-chiaro); --icona: "⚠"; }
+.callout.perche, .callout.question, .callout.tip
+  { --c: var(--viola); --cf: var(--viola-chiaro); --icona: "?"; }
+.callout.soluzioni, .callout.quote
+  { --c: #5b6475; --cf: var(--grigio-chiaro); --icona: "✓"; }
+
+blockquote {
+  margin: 8px 0; padding: 4px 12px; border-left: 3px solid var(--linea); color: var(--tenue);
+}
+hr { border: none; border-top: 1px solid var(--linea); margin: 14px 0; }
+ul, ol { padding-left: 20px; margin: 4px 0; }
+li { margin: 2px 0; }
+a { color: var(--blu); text-decoration: none; }
