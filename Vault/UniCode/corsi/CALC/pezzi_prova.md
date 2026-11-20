@@ -21,6 +21,10 @@
 
 ## Come si allena un pezzo
 
+> `[2026-11-20, decisione di Lorenzo]` **Nei drill Claude non fa domande sue.** Dà il testo della
+> consegna parola per parola; Lorenzo risponde nella forma della soluzione ufficiale; il confronto
+> riga per riga con la soluzione viene alla fine. Le domande inventate allontanano dall'esame.
+
 1. Una scheda di mezza pagina per pezzo, **lo schema fisso** (cosa si scrive sempre uguale) +
    le varianti viste nelle prove. Va nel prontuario (`appunti/prontuario_CALC.md`).
 2. Drill: lo stesso pezzo su 3–4 prove diverse con soluzione, dalle più recenti, solo quel pezzo,
