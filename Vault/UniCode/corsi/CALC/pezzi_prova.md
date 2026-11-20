@@ -40,4 +40,4 @@
 | 23–29/11 | P5, P6 (lezioni 04 e 05), P4 | |
 | 30/11–6/12 | P7, P9; **secondo checkpoint ~6/12 su una prova intera** | FI2 checkpoint il 2/12 |
 | 7–13/12 | ricomposizione: prove intere dalle più recenti | |
-| 14–20/12 | prove di riserva a freddo; 07, 08, 01 solo se servono le domande generali (da verificare) | |
+| 14–20/12 | prove di riserva a freddo; 07, 08, 01: **servono** (sbarramento teorico, 20/11) — calendario da rifare | |

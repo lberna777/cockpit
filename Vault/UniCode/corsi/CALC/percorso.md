@@ -52,6 +52,6 @@ tutti con un unico esercizio di progetto di un sistema DLX. Indice e piano d'uso
 ## Da rilevare all'apertura del corso
 
 - ~~Contenuto e struttura dell'archivio delle prove~~ — rilevato il 2026-10-06, `prove/INDICE.md`.
-- Se le «domande di carattere generale» della scheda esistono ancora: nei testi pubblicati non compaiono.
+- ~~Se le «domande di carattere generale» esistono ancora~~ — sì: **sbarramento teorico prima del progetto** (Lorenzo, 20/11). Formato e soglia da rilevare. Vedi `fonti.md`.
 - Se le dispense coprono l'intero programma della scheda (architetture avanzate, unità di
   controllo sequenziali e pipelined) o se parte del programma poggia sul libro di testo.
