@@ -10,3 +10,4 @@
 12:07 · CALC · inizio drill P1–P3 a freddo sulla 2022-12-23 (EPROM e RAM da 1536 MB, in basso e in alto)
 12:15 · CALC · 2022-12-23 P1: EPROM 1 GB + 512 MB (00000000–3FFFFFFF, 40000000–5FFFFFFF) giusta da solo
 12:20 · CALC · 2022-12-23 P1: RAM in alto (C0000000–FFFFFFFF, A0000000–BFFFFFFF) giusta da solo; aveva chiesto se la RAM fosse 1536 MB (il testo dice «stessa quantità»). P1 a freddo e senza errori: è la seconda prova di fila
+12:22 · CALC · P2: Lorenzo non ricorda come si ricava la firma («cosa devo confrontare»): rispiegato con il confronto in binario fra primo e ultimo indirizzo del blocco (bit uguali = firma) e con il conteggio 2^n
