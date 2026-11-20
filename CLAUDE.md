@@ -18,6 +18,7 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
 | **cockpit** — studio e sistema | **Studio · cockpit** (cartella `Vault/UniCode`) · **Sistema · cockpit** (tutto il resto) | Studio: `Unibo_Diritto_Informatico`, `Unibo_Lab_Sicurezza_Informatica` (esami chiusi), `Unibo_Fondamenti_Di_Informatica_T2`, `Laboratorio_Amministrazione_di_Sistemi` (materiale vecchio: i corsi vivono in `Vault/UniCode/corsi/`), `UniCode` (template pubblico in inglese), `UniCode-personal` (versione italiana di giugno), `diritto-quiz-app` (prodotto dello studio). Sistema: `claudereset`, `Boot_Debian`, `AgenticOS` |
 | **Developing** — lavoro per clienti | **Progetti · Developing** (clienti) · **Portfolio · Developing** (brand, sito, profilo) | `lberna777.github.io` (sito portfolio, GitHub Pages), `lberna777` (README del profilo GitHub), `note-spese` (app delle note spese, pubblica e anonima, GitHub Pages) |
 | **plugin-creator** — plugin audio JUCE (area lavoro) | **Plugin · plugin-creator** | `StereoCompressor`, `NEMO-StereoCompressor`, `FreakFM`, `acidmoog-synth`. I plugin nuovi (C-60, RSU-10, Mikro Bridge, Vocal-Chain-Creator) nascono dentro il padre |
+| **studio** — studio universitario, dal 2026-11-20 (banco di lavoro che prende il posto di UniCode) | **Studio · studio** | — (UniCode in `Vault/UniCode` resta in cockpit come archivio: si consulta, non ci si lavora più) |
 | **carguy** — autonoma | **CarGuy · carguy** | — |
 | **bibiciclo** — autonoma | senza gruppo | — |
 | **Fun** — progetti per divertimento, una repo autonoma per progetto (dal 2026-10-22) | **Fun · <repo>** | `barca-halloween` (gioco a penitenza per la festa di Halloween alla Barca: proiettore + telefoni, hub sul portatile) |
@@ -30,6 +31,10 @@ repo propria solo per non appesantirlo (o perché GitHub lo impone, come per il 
   aprono: la vedono attraverso questa mappa e nella Plancia come `repo/home` (Debian),
   `repo/home-mac` e `repo/home-windows`. Le repo sotto la home con un remote proprio (cockpit,
   `~/Sviluppo/...`) restano indipendenti.
+- **studio** (2026-11-20, decisione di Lorenzo): repo nuova e snella per lo studio. Principio: Lorenzo
+  scrive gli appunti e smonta le prove, Claude controlla e corregge; niente log, ripassi programmati
+  né consolidamento. Le regole stanno nel suo `CLAUDE.md`. La migrazione di CALC e FI2 da UniCode è
+  in corso.
 - **carguy** e **bibiciclo** sono progetti veri nati dai tentativi del sistema che ha preceduto
   Developing: restano autonomi, e Developing li usa come prova di competenza nel portfolio.
 - **Fun** non ha una repo padre: ogni progetto per divertimento ha la sua repo autonoma, con lo
