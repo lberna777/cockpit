@@ -5,10 +5,10 @@ Svolto da Lorenzo a freddo. Bozza compilata con quanto ricavato fin qui; `__` = 
 ```
 Dispositivi di memoria:
 
-EPROM_1GB     00000000h:3FFFFFFFh, 4 banchi da __ MB
-EPROM_512     40000000h:5FFFFFFFh, 4 banchi da __ MB
-RAM_512       A0000000h:BFFFFFFFh, 4 banchi da __ MB
-RAM_1GB       C0000000h:FFFFFFFFh, 4 banchi da __ MB
+EPROM_1GB     00000000h:3FFFFFFFh, 4 banchi da 256 MB
+EPROM_512     40000000h:5FFFFFFFh, 4 banchi da 128 MB
+RAM_512       A0000000h:BFFFFFFFh, 4 banchi da 128 MB
+RAM_1GB       C0000000h:FFFFFFFFh, 4 banchi da 256 MB
 
 Porte:        60000000h  (da progettare: pezzi P4–P6)
 
@@ -28,4 +28,12 @@ CS_RAM_1GB_i   = BA31·BA30·BEi
 
 ## Confronto con la soluzione
 
-Alla fine, riga per riga.
+| Riga | Lorenzo | Soluzione | Esito |
+|---|---|---|---|
+| EPROM_1GB | 00000000–3FFFFFFF, 4×256 MB, `BA31*·BA30*·BEi` | uguale | ✅ |
+| EPROM_512 | 40000000–5FFFFFFF, 4×128 MB, `BA31*·BA30·BA29*·BEi` | uguale | ✅ (dopo correzione di `BA29*`) |
+| RAM_512 | A0000000–BFFFFFFF, `BA31·BA30*·BEi` | `RAM_512_L`, uguale | ✅ |
+| RAM_1GB | C0000000–FFFFFFFF, `BA31·BA30·BEi` | divisa in `RAM_512_H` (E0000000–FFFFFFFF, `BA31·BA30·BA29`) e `RAM_512_M` (C0000000–DFFFFFFF, `BA31·BA30·BA29*`), banchi da 128 MB | ✅ equivalente: la soluzione usa un solo tipo di chip per tutta la RAM |
+| Taglie banchi RAM | 256 e 128 (ultime due righe scambiate) | 128 e 256 | ❌ svista d'ordine: taglia del banco = taglia del blocco / 4 |
+| Porte | 60000000h | 60000000h | ✅ |
+

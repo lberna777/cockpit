@@ -16,3 +16,4 @@
 12:41 · CALC · P3: Lorenzo non ha capito la consegna «quattro lati di un banco»: rispiegato da zero (4 chip da 8 bit per un bus a 32, CS/indirizzi/dati/OE-WE) con il banco 0 della RAM 512 della 2022-12-23 fatto per esempio; a lui il banco 3
 12:43 · CALC · P3 ridimensionato: la soluzione 2022-12-23 riporta per le memorie solo range, banchi (n × taglia) e CS·BEi, nessun piedino/BD/OE-WE; collegamenti disegnati solo per le porte. Da correggere nel prontuario P3 (minimo d'esame vs completamento)
 12:44 · CALC · decisione di metodo (Lorenzo): niente domande di Claude nei drill; si usa solo il testo della consegna, si risponde nella forma della soluzione ufficiale, confronto riga per riga alla fine. Pezzo in corso: memorie della 2022-12-23 (a+b)
+12:47 · CALC · 2022-12-23 memorie: confronto con la soluzione, tutto equivalente; unico errore le taglie dei banchi RAM scambiate (256/128). Pezzo memorie quasi a freddo (1 correzione sulla firma EPROM 512)
