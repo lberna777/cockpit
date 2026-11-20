@@ -13,3 +13,4 @@
 12:22 · CALC · P2: Lorenzo non ricorda come si ricava la firma («cosa devo confrontare»): rispiegato con il confronto in binario fra primo e ultimo indirizzo del blocco (bit uguali = firma) e con il conteggio 2^n
 12:30 · CALC · 2022-12-23 P2 firme complete: 3/4 giuste; EPROM 512 senza BA29* (fermato a 2 bit su 0100/0101, «si ferma al primo indizio»); C scritto 1101 (svista, ininfluente). Regola data: stessa taglia → stesso numero di bit di firma
 12:39 · CALC · 2022-12-23 P2 firma minima: proposto di togliere BA29 a EPROM 512 e RAM 512; giusto per la RAM (come la soluzione), sbagliato per la EPROM (le porte stanno a 60000000h). Regola data: prima si piazzano le porte (P4), poi si semplifica nelle zone vuote davvero
+12:41 · CALC · P3: Lorenzo non ha capito la consegna «quattro lati di un banco»: rispiegato da zero (4 chip da 8 bit per un bus a 32, CS/indirizzi/dati/OE-WE) con il banco 0 della RAM 512 della 2022-12-23 fatto per esempio; a lui il banco 3
