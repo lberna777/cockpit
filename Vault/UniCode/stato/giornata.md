@@ -12,3 +12,4 @@
 12:20 · CALC · 2022-12-23 P1: RAM in alto (C0000000–FFFFFFFF, A0000000–BFFFFFFF) giusta da solo; aveva chiesto se la RAM fosse 1536 MB (il testo dice «stessa quantità»). P1 a freddo e senza errori: è la seconda prova di fila
 12:22 · CALC · P2: Lorenzo non ricorda come si ricava la firma («cosa devo confrontare»): rispiegato con il confronto in binario fra primo e ultimo indirizzo del blocco (bit uguali = firma) e con il conteggio 2^n
 12:30 · CALC · 2022-12-23 P2 firme complete: 3/4 giuste; EPROM 512 senza BA29* (fermato a 2 bit su 0100/0101, «si ferma al primo indizio»); C scritto 1101 (svista, ininfluente). Regola data: stessa taglia → stesso numero di bit di firma
+12:39 · CALC · 2022-12-23 P2 firma minima: proposto di togliere BA29 a EPROM 512 e RAM 512; giusto per la RAM (come la soluzione), sbagliato per la EPROM (le porte stanno a 60000000h). Regola data: prima si piazzano le porte (P4), poi si semplifica nelle zone vuote davvero
