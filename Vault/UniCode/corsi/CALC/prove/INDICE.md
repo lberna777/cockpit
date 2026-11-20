@@ -36,7 +36,10 @@ Varia solo il caso. Gli ingredienti ricorrenti, contati sui 62 testi:
 | contatori / temporizzazione | 8 |
 | porte da abilitare in modo **mutuamente esclusivo**, cicli di trasferimenti alternati | 7 |
 
-> Le «domande di carattere generale» della scheda non compaiono nei testi pubblicati: o sono
+> `[2026-11-20]` **Corretto**: ogni prova ha anche gli esercizi 2 e 3 di teoria, nei testi solo come
+> «Rif. lucidi/lezioni»; sono lo sbarramento teorico. Soluzioni 2020–2022 sul sito di S. Elia (`fonti.md`).
+>
+> ~~Le «domande di carattere generale» della scheda non compaiono nei testi pubblicati: o sono
 > somministrate a parte, o non sono più in uso. **Da verificare** (moduli 01, 07, 08 dipendono
 > da questa risposta per il peso che meritano).
 
